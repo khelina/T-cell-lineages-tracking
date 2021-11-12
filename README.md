@@ -6,4 +6,8 @@ This is my ML project on tracking T cell lineages in microscopic movies. Here is
 4. EXECUTION.py
 5. An example of a training sample for TRACK-4.py
 6. An example of a training sample for SEGMENTOR.py
-7. An example of the result of applying thos algorithm to a test movie.
+7. An example of the result of applying this algorithm to a test movie
+https://www.youtube.com/watch?v=pHPd5FArgYU&ab_channel=HelinaFedorchuk
+
+
+
