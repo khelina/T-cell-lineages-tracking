@@ -13,7 +13,10 @@ This is my ML project on tracking T cell lineages in microscopic movies. Here is
 
 7. An example of the result of applying this algorithm to a test movie
 https://www.youtube.com/watch?v=pHPd5FArgYU&ab_channel=HelinaFedorchuk
-8. Poster presentation at ABACBS-2020 Conference
+8. Poster presentation at ABACBS-2020 Virtual Conference  
+https://www.youtube.com/watch?v=NebOgh1q0kc&ab_channel=HelinaFedorchuk
+
+
 
 
 
