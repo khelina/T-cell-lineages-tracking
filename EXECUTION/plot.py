@@ -40,12 +40,13 @@ def paste_binary(patch,a,b,c,d,intensity):
     destin_image[c:d,a:b]=patch
     return destin_image
 ##########################################
-def plot_frame(texts,cells,clip_centr,k,kk,fluor_images,destinations,coords,names,p):   
+def plot_frame(texts,cells,clip_centr,k,kk,fluor_images,destinations,names,p):   
        destin_black=np.zeros((382+2*Bordersize,382+2*Bordersize),dtype="uint8")
        destin_color_black = cv2.cvtColor(destin_black.copy(),cv2.COLOR_GRAY2RGBA) 
        fluor=fluor_images[k+kk]
        destin_fluor_contours=cv2.copyMakeBorder(fluor.copy(), top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize, borderType= cv2.BORDER_REPLICATE )
        destin_fluor_contours=cv2.cvtColor(destin_fluor_contours,cv2.COLOR_GRAY2RGBA)                   
+       coords=np.zeros((len(cells),2))
        for kkk in range(len(cells)):       
          cv2.imwrite(os.path.join(destinations[2],"output_segmentor_%s_cell_%s.tif") % (k+kk,kkk), cells["cell_%s" % kkk][0])
          cv2.imwrite(os.path.join(destinations[6],"output_refiner_%s_cell_%s.tif") % (k+kk,kkk), cells["cell_%s" % kkk][1])
