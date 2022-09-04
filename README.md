@@ -56,12 +56,12 @@ The EXECUTION folder contains the code for executing  sections of T cell movies 
      •	TRACKED_PLUS_CONTOURS. This is another variant of visualizing the output: segmentation and tracking results are plotted as contours of cells on top of    fluorescent images. Very useful as it clearly gives you the idea of the segmentation quality. Different cells are assigned different colors just like in the previous   case.
       •	SEGMENTEDS_BLACK_AND_WHITE. In this folder, as can be concluded from the name, you will see binary segmentation. It is essentially semantic segmentation unlike in the two previous folders. 
 
-**2 folders** with fluorescent images where tracking results (centroids of cells) are plotted as proxy bounding boxes around the cells. Why 2 folders? To be able visually assess the effect of “tracking-segmentation-correction” approach on tracking results.
+**2 subfolders** with fluorescent images where tracking results (centroids of cells) are plotted as proxy bounding boxes around the cells. Why 2 folders? To be able visually assess the effect of “tracking-segmentation-correction” approach on tracking results.
 
     •	TRACKED. Here are the tracking results before correction.
     •	TRACKED CORRECTED. After correction.
 
-**4 folders** for segmented patches. The purpose is to visually compare the quality of segmentation from Segmentor, Refiner, Ensemble and after postprocessing by Cleaner-1 and Cleaner-2.
+**4 subfolders** for segmented patches. The purpose is to visually compare the quality of segmentation from Segmentor, Refiner, Ensemble and after postprocessing by Cleaner-1 and Cleaner-2.
 
            •	PATCHES FROM SEGMENTOR
            •	PATCHES FROM REFINER
