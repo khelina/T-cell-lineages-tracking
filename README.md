@@ -32,16 +32,16 @@ The EXECUTION folder contains the code for executing  sections of T cell movies 
 Step-1. Download folder EXECUTION from this repository. It contains 4 python files:
 
 
-•	execute-4.py
+            •	execute-4.py
 
 
-•	functions.py
+            •	functions.py
 
 
-•	plot.py
+            •	plot.py
 
 
-•	postprocess.py
+            •	postprocess.py
 
 
 Step-2. Download folder DATA from Dropbox: https://www.dropbox.com/scl/fo/ra8a630gxm1ucnm9x7cg3/h?dl=0&rlkey=oxzo3dyj02kd6zt4nq4mxynnx   which contains 2 subfolders: INPUT-T-CELL-MOVIE (132 MB, 796 frames) and TRAINED MODELS (1.38 GB).
