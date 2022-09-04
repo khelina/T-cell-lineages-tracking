@@ -29,7 +29,7 @@ The EXECUTION folder contains the code for executing  sections of T cell movies 
 
 # 3. HOW TO RUN THE ALGORITHM
 
-**Step-1."" Download folder EXECUTION from this repository. It contains 4 python files:
+**Step-1.** Download folder EXECUTION from this repository. It contains 4 python files:
 
             •	execute-4.py
             •	functions.py
