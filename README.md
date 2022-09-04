@@ -11,13 +11,12 @@ The main innovation of this algorithm is that tracking has been done with 3D CNN
 The flow of the algortihm is shown in the picure below (**Figure-1**):
 ![image](https://user-images.githubusercontent.com/17193930/188294823-f0d75314-a2fa-4fec-bb47-82150116d443.png) 
 
-**Figure-1**
-1. The top row: an input cell movie consisting of images with both fluorescent and bright field channels (the size of each image is 382 x 382 pixels).
+**Figure-1:** 1. The top row: an input cell movie consisting of images with both fluorescent and bright field channels (the size of each image is 382 x 382 pixels).
 2. The first clip of 4 frames (fluorescent channel only) is passed through Tracker-1. As a result, we know the centroids of the cell in every frame of the clip now.
- 3. Patches of size 96 x 96 (both channels this time) with the tracked cells in the centre are cropped out and fed into the Segmentation Ensemble. The outputs are segmented cells which are binary images of the same size 96 x 96. 
+3. Patches of size 96 x 96 (both channels this time) with the tracked cells in the centre are cropped out and fed into the Segmentation Ensemble. The outputs are segmented cells which are binary images of the same size 96 x 96. 
 4. Each segmented patch is passed through the Division Detector. It a division is detected then the switch to Tracker-2 occurs.
 5. Finally, the segmented patches are pasted into empty black images 382 x 382 according to their locations obtained from Tracker-1. As a result, we obtain the first clip of the output movie (the bottom row).
- 6. Go to the next clip and repeat the whole procedure again.
+6. Go to the next clip and repeat the whole procedure again.
  
 
 
