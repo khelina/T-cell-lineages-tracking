@@ -1,4 +1,4 @@
-1. T-cell-tracking-and-segmentation: the main idea and the pipeline
+#1. T-cell-tracking-and-segmentation: the main idea and the pipeline
 This is my ML project on tracking T cell lineages in microscope movies.A 5-minute poster presentation at ABACBS-2020 Virtual Conference outlining the main idea of the algorithm can be viewed here: https://www.youtube.com/watch?v=NebOgh1q0kc&ab_channel=HelinaFedorchuk.
 
 An example of applying this algorithm to a test movie:
@@ -20,14 +20,14 @@ Figure-1:
  
 
 
-2. THE CONTENTS OF THIS REPOSITORY
+#2. THE CONTENTS OF THIS REPOSITORY
 In this repository, you will find 2 folders: EXECUTION and MODELS. 
 
 The EXECUTION folder contains the code for executing  sections of T cell movies containing 4 cells only, without occlusions. The reason why only one section is given is that the files with the weights of the rest of the trackers (Tracker-1, Tracker-2, Tracker-3 and Tracker-5) take up too much memory to be stored somewhere (Tracker-4 weights file is already 1.15 GB).
 
  The MODELS folder includes 3 files which I used for training Tracker-4, Segmentor and Refiner.
 
-3. HOW TO RUN THE ALGORITHM
+#3. HOW TO RUN THE ALGORITHM
 
 Step-1. Download folder EXECUTION from this repository. It contains 4 python files: 
 •	execute-4.py
