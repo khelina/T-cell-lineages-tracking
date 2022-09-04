@@ -48,6 +48,7 @@ The EXECUTION folder contains the code for executing  sections of T cell movies 
         •functions.py: line 8
 
 **Step-5.** Run file execute-4.py.
+
 **Step-6.** Observe the results in folder RESULTS. It containes a number of subfolders where the outputs are given in different forms.
 
 **3 subfolders** are designated for the final results, i.e. segmented and tracked version of the input movie.
