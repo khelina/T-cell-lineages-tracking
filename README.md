@@ -1,4 +1,4 @@
-# 1. T-cell-tracking-and-segmentation: the main idea and the pipeline
+#T-cell-tracking-and-segmentation: the main idea and the pipeline
 This is my ML project on tracking T cell lineages in microscope movies.A 5-minute poster presentation at ABACBS-2020 Virtual Conference outlining the main idea of the algorithm can be viewed here: https://www.youtube.com/watch?v=NebOgh1q0kc&ab_channel=HelinaFedorchuk.
 
 An example of applying this algorithm to a test movie:
@@ -9,8 +9,7 @@ To acieve both segmentation and tracking, a series of deep comnvolutional neaura
 
 The main innovation of this algorithm is that tracking has been done with 3D CNNs where the inputs are short clips of T cell movies rather than separate frames. The second unconventional is that segmentation is done after tracking.So, the trackers were traned on fluorescent images and as a result, after the centroids of the cells are calculated by a tracker, segmentation neural networks take over and segment small patches described above.
 The flow of the algortihm is shown in the picure below:
-
- 
+![image](https://user-images.githubusercontent.com/17193930/188294823-f0d75314-a2fa-4fec-bb47-82150116d443.png) 
 Figure-1:
 1. The top row: an input cell movie consisting of images with both fluorescent and bright field channels (the size of each image is 382 x 382 pixels).
 2. The first clip of 4 frames (fluorescent channel only) is passed through Tracker-1. As a result, we know the centroids of the cell in every frame of the clip now.
@@ -21,14 +20,14 @@ Figure-1:
  
 
 
-2. The contents of this repository
+2. THE CONTENTS OF THIS REPOSITORY
 In this repository, you will find 2 folders: EXECUTION and MODELS. 
 
 The EXECUTION folder contains the code for executing  sections of T cell movies containing 4 cells only, without occlusions. The reason why only one section is given is that the files with the weights of the rest of the trackers (Tracker-1, Tracker-2, Tracker-3 and Tracker-5) take up too much memory to be stored somewhere (Tracker-4 weights file is already 1.15 GB).
 
  The MODELS folder includes 3 files which I used for training Tracker-4, Segmentor and Refiner.
 
-3. How to run the algorithm
+3. HOW TO RUN THE ALGORITHM
 
 Step-1. Download folder EXECUTION from this repository. It contains 4 python files: 
 •	execute-4.py
