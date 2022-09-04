@@ -29,11 +29,21 @@ The EXECUTION folder contains the code for executing  sections of T cell movies 
 
 # 3. HOW TO RUN THE ALGORITHM
 
-Step-1. Download folder EXECUTION from this repository. It contains 4 python files: 
+Step-1. Download folder EXECUTION from this repository. It contains 4 python files:
+
+
 •	execute-4.py
+
+
 •	functions.py
+
+
 •	plot.py
+
+
 •	postprocess.py
+
+
 Step-2. Download folder DATA from Dropbox: https://www.dropbox.com/scl/fo/ra8a630gxm1ucnm9x7cg3/h?dl=0&rlkey=oxzo3dyj02kd6zt4nq4mxynnx   which contains 2 subfolders: INPUT-T-CELL-MOVIE (132 MB, 796 frames) and TRAINED MODELS (1.38 GB).
 Step-3. Place DATA folder inside EXECUTION folder.
 Step-4.  Make sure you adjust paths for folders (essentially, change my name kfedorchuk for your directory ) in the following files:
