@@ -47,19 +47,21 @@ The EXECUTION folder contains the code for executing  sections of T cell movies 
         •	poostprocess.py: line 5
         •	functions.py: line 8
 
-**Step-5**: run file execute-4.py.
-3 folders are designated for the final results, i.e. segmented and tracked version of the input movie.
+**Step-5.** Run file execute-4.py.
+**Step-6.** Observe the results in folder RESULTS. It containes a number of subfolders where the outputs are given in different forms.
+
+**3 subfolders** are designated for the final results, i.e. segmented and tracked version of the input movie.
 
      •	TRACKED_PLUS_SEGMENTED_CARTOON. In this folder, you will get the most beautiful result where each frame is a RGB image and each cell has its own color.
-     •	TRACKED_PLUS_CONTOURS. This is another variant of visualizing the output: segmentation and tracking results are plotted as contours of cells on top of fluorescent images. Very useful as it clearly gives you the idea of the segmentation quality. Different cells are assigned different colors just like in the previous case.
+     •	TRACKED_PLUS_CONTOURS. This is another variant of visualizing the output: segmentation and tracking results are plotted as contours of cells on top of    fluorescent images. Very useful as it clearly gives you the idea of the segmentation quality. Different cells are assigned different colors just like in the previous   case.
       •	SEGMENTEDS_BLACK_AND_WHITE. In this folder, as can be concluded from the name, you will see binary segmentation. It is essentially semantic segmentation unlike in the two previous folders. 
 
-2 folders with fluorescent images where tracking results (centroids of cells) are plotted as proxy bounding boxes around the cells. Why 2 folders? To be able visually assess the effect of “tracking-segmentation-correction” approach on tracking results.
+**2 folders** with fluorescent images where tracking results (centroids of cells) are plotted as proxy bounding boxes around the cells. Why 2 folders? To be able visually assess the effect of “tracking-segmentation-correction” approach on tracking results.
 
     •	TRACKED. Here are the tracking results before correction.
     •	TRACKED CORRECTED. After correction.
 
-4 folders for segmented patches. The purpose is to visually compare the quality of segmentation from Segmentor, Refiner, Ensemble and after postprocessing by Cleaner-1 and Cleaner-2.
+**4 folders** for segmented patches. The purpose is to visually compare the quality of segmentation from Segmentor, Refiner, Ensemble and after postprocessing by Cleaner-1 and Cleaner-2.
 
            •	PATCHES FROM SEGMENTOR
            •	PATCHES FROM REFINER
