@@ -231,7 +231,7 @@ learn_rate=INIT_LR
 
 parallel_model = multi_gpu_model(model, gpus=2)
 parallel_model.compile(optimizer = 'adam', loss = my_loss(weights_tensor), metrics = [IOU])
-history=parallel_model.fit([train_inputs,train_weights], train_labels, validation_data=validation_data, batch_size=Batch, epochs=1,callbacks=callbacks, shuffle=True, verbose=2)
+history=parallel_model.fit([train_inputs,train_weights], train_labels, validation_data=validation_data, batch_size=Batch, epochs=NUM_EPOCHS,callbacks=callbacks, shuffle=True, verbose=2)
 History_of_training.append(history.history)  
 #################### Save modfel, weights and history ############   
 name_history="SEGMENTOR_HISTORY.json"
