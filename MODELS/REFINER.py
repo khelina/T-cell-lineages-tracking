@@ -219,16 +219,15 @@ conv10 = Conv2D(1, 1, activation = 'sigmoid')(conv9)
 model = Model(inputs = [input_image,weights_tensor], outputs = conv10)
 ############################# Train model ##############
 
-NUM_EPOCHS=3
-INIT_LR=0.00005
+NUM_EPOCHS=30
+INIT_LR=0.00009
 callbacks = [LearningRateScheduler(poly_decay)]
-List_of_train_errors=[]
 History_of_training=[]
 learn_rate=INIT_LR
 
 parallel_model = multi_gpu_model(model, gpus=2)
 parallel_model.compile(optimizer = 'adam', loss = my_loss(weights_tensor), metrics = [IOU])
-history=parallel_model.fit([train_inputs,train_weights], train_labels, validation_data=validation_data, batch_size=Batch, epochs=1,callbacks=callbacks, shuffle=True, verbose=2)
+history=parallel_model.fit([train_inputs,train_weights], train_labels, validation_data=validation_data, batch_size=Batch, epochs=NUM_EPOCHS,callbacks=callbacks, shuffle=True, verbose=2)
 History_of_training.append(history.history)
    
 ################################ Save weights, model and history #########
