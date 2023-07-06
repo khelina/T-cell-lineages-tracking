@@ -37,7 +37,7 @@ The EXECUTION folder contains the code for executing  sections of T cell movies 
             •postprocess.py
 
 
-**Step-2.** Download folder DATA from Dropbox:https://www.dropbox.com/scl/fo/40xbc0tpn77kslh1mb6ju/h?rlkey=d1g0wdxu384uix2ik254mitfl&dl=0   which contains 2 subfolders: INPUT-T-CELL-MOVIE (132 MB, 796 frames) and TRAINED MODELS (1.38 GB).
+**Step-2.** Download folder DATA from Dropbox: https://www.dropbox.com/scl/fo/40xbc0tpn77kslh1mb6ju/h?rlkey=d1g0wdxu384uix2ik254mitfl&dl=0   which contains 2 subfolders: INPUT-T-CELL-MOVIE (132 MB, 796 frames) and TRAINED MODELS (1.38 GB).
 
 **Step-3.** Place DATA folder inside EXECUTION folder.
 
