@@ -28,14 +28,14 @@ The folder contains the code for building lineage trees for T-cell movies contai
 ## 3. HOW TO RUN THE ALGORITHM
 
 **Step-1.** You need to install the following:
-Python=3.6.13
-Tensorflow= 1.15.0
-Keras = 2.3.1
-Spyder = 5.0.0
-Opencv = 3.3.1
-Matplotlib = 3.3.4
-Xlsxwriter = 3.0.8
-H5py = 2.10.0
++Python=3.6.13
++Tensorflow= 1.15.0
++Keras = 2.3.1
++Spyder = 5.0.0
++Opencv = 3.3.1
++Matplotlib = 3.3.4
++Xlsxwriter = 3.0.8
++H5py = 2.10.0
 
 
 
