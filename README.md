@@ -48,7 +48,7 @@ The folder contains the code for building lineage trees for T-cell movies contai
 
 
 
-**Step-5.** Observe the results in folder RESULTS. It containes a number of subfolders where the outputs are given in different forms.
+**Step-5.** Follow the instructions in the interface. There can be 2 types of tracking errors during execution: lost cells and ID swappings. To manually correct them, you may use buttons 5a.EDIT IDs and 5b.Edit division. After finishing editing, go back to button 4.Run algorithm. 
 
 **3 subfolders** are designated for the final results, i.e. segmented and tracked version of the input movie.
 
