@@ -39,19 +39,16 @@ The folder contains the code for building lineage trees for T-cell movies contai
 
 
 
-**Step-2.** Download folder DATA from Dropbox: https://www.dropbox.com/scl/fo/40xbc0tpn77kslh1mb6ju/h?rlkey=d1g0wdxu384uix2ik254mitfl&dl=0   which contains 2 subfolders: INPUT-T-CELL-MOVIE (132 MB, 796 frames) and TRAINED MODELS (1.38 GB).
+**Step-2.** Download folders TRAINED MODELS (5 GB) and INPUT MOVIE  from https://zenodo.org/deposit/7747438.
 
-**Step-3.** Place DATA folder inside EXECUTION folder.
+**Step-3.** Place these folders inside the DeepKymoTracker folder.
 
-**Step-4.**  Make sure you adjust paths for folders (essentially, change my name kfedorchuk for your directory ) in the following files:
+**Step-4.** Run file GUI_execute.py. You will see the following interface:
+![image](https://github.com/khelina/T-cell-lineages-tracking/assets/17193930/51a34548-f58e-4abb-9dfc-2a6fd1666121)
 
-        •execute-4.py: lines 7,32,40,70 and 72.
-        •poostprocess.py: line 5
-        •functions.py: line 8
 
-**Step-5.** Run file execute-4.py.
 
-**Step-6.** Observe the results in folder RESULTS. It containes a number of subfolders where the outputs are given in different forms.
+**Step-5.** Observe the results in folder RESULTS. It containes a number of subfolders where the outputs are given in different forms.
 
 **3 subfolders** are designated for the final results, i.e. segmented and tracked version of the input movie.
 
