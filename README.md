@@ -21,20 +21,22 @@ The flow of the algortihm is shown in the picure below (**Figure-1**):
 
 
 ## 2. THE CONTENTS OF THIS REPOSITORY
-In this repository, you will find 2 folders: EXECUTION and MODELS. 
+In this repository, you will find the DeepKymoTracker folder. 
 
-The EXECUTION folder contains the code for executing  sections of T cell movies containing 4 cells only, without occlusions. The reason why only one section is given is that the files with the weights of the rest of the trackers (Tracker-1, Tracker-2, Tracker-3 and Tracker-5) take up too much memory to be stored somewhere (Tracker-4 weights file is already 1.15 GB).
-
- The MODELS folder includes 3 files which I used for training Tracker-4, Segmentor and Refiner.
+The folder contains the code for building lineage trees for T-cell movies containing from 1 to 5 cells in each frame. The main file is GUI_execute.py, and the remaining files contain helper functions.
 
 ## 3. HOW TO RUN THE ALGORITHM
 
-**Step-1.** Download folder EXECUTION from this repository. It contains 4 python files:
+**Step-1.** You need to install the following:
+Python=3.6.13
+Tensorflow= 1.15.0
+Keras = 2.3.1
+Spyder = 5.0.0
+Opencv = 3.3.1
+Matplotlib = 3.3.4
+Xlsxwriter = 3.0.8
+H5py = 2.10.0
 
-            •execute-4.py
-            •functions.py
-            •plot.py
-            •postprocess.py
 
 
 **Step-2.** Download folder DATA from Dropbox: https://www.dropbox.com/scl/fo/40xbc0tpn77kslh1mb6ju/h?rlkey=d1g0wdxu384uix2ik254mitfl&dl=0   which contains 2 subfolders: INPUT-T-CELL-MOVIE (132 MB, 796 frames) and TRAINED MODELS (1.38 GB).
