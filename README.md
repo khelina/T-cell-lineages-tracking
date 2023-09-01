@@ -1,4 +1,4 @@
-# 1. T cell tracking and segmentation: the main idea and the pipeline
+# DeepKymoTracker: A tool for accurate construction of cell lineage trees for highly motile cells
 This is my ML project on tracking T cell lineages in microscope movies.A 5-minute poster presentation at ABACBS-2020 Virtual Conference outlining the main idea of the algorithm can be viewed here: https://www.youtube.com/watch?v=NebOgh1q0kc&ab_channel=HelinaFedorchuk.
 
 An example of applying this algorithm to a test movie:
