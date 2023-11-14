@@ -1,20 +1,20 @@
-# DeepKymoTracker: A tool for accurate construction of cell lineage trees for highly motile cells
-This is my ML project on tracking T cell lineages in microscope movies.A 5-minute poster presentation at ABACBS-2020 Virtual Conference outlining the main idea of the algorithm can be viewed here: https://www.youtube.com/watch?v=NebOgh1q0kc&ab_channel=HelinaFedorchuk.
+# DeepKymoTracker: A tool for the accurate construction of cell lineage trees for highly motile cells
+This is my ML project on tracking T-cell lineages in microscope movies. A 5-minute poster presentation at the ABACBS-2020 Virtual Conference outlining the main idea of the algorithm can be viewed here: https://www.youtube.com/watch?v=NebOgh1q0kc&ab_channel=HelinaFedorchuk.
 
 An example of applying this algorithm to a test movie:
-https://www.youtube.com/watch?v=pHPd5FArgYU&ab_channel=HelinaFedorchuk
+https://youtu.be/9nSulQDEles
 
-The purpose of this algorithm is to segment and track T cells in microscope movies, with the ultimate goal of buidling T cell lineages. Currently, this has been achieved for small pedigrees up to 5 cells, without occlusions and dying cells - the issues which are going to be tackled in the near future.
-To acieve both segmentation and tracking, a series of deep comnvolutional neaural networks have been trained: 5 CNNs for tracking (Tracker-1,..., Tracker-5) each specialising in a fixed number of cells, according to their names,  and 2 U-Net based deep learning models named Segmentor and Refiner for segmenteing small patches with a tracked cell in the centre cut out of each frame after tracking.
+The purpose of this algorithm is to segment and track T cells in microscope movies, with the ultimate goal of building T cell lineages. Currently, this has been achieved for small pedigrees up to 5 cells, without occlusions and dying cells - the issues that are going to be tackled in the near future.
+To achieve both segmentation and tracking, a series of deep convolutional neural networks have been trained: 5 CNNs for tracking (Tracker-1,..., Tracker-5) each specializing in a fixed number of cells, according to their names,  and 2 U-Net-based deep learning models named Segmentor and Refiner for segmenting small patches with a tracked cell in the center cut out of each frame after tracking.
 
-The main innovation of this algorithm is that tracking has been done with 3D CNNs where the inputs are short clips of T cell movies rather than separate frames. The second unconventional is that segmentation is done after tracking.So, the trackers were traned on fluorescent images and as a result, after the centroids of the cells are calculated by a tracker, segmentation neural networks take over and segment small patches described above.
-The flow of the algortihm is shown in the picure below (**Figure-1**):
+The main innovation of this algorithm is that tracking has been done with 3D CNNs where the inputs are short clips of T-cell movies rather than separate frames. The second unconventional is that segmentation is done after tracking. So, the trackers were trained on fluorescent images and as a result, after the centroids of the cells are calculated by a tracker, segmentation neural networks take over and segment small patches described above.
+The flow of the algorithm is shown in the picture below (**Figure-1**):
 ![image](https://user-images.githubusercontent.com/17193930/188294823-f0d75314-a2fa-4fec-bb47-82150116d443.png) 
 
 **Figure-1:** 1. The top row: an input cell movie consisting of images with both fluorescent and bright field channels (the size of each image is 382 x 382 pixels).
 2. The first clip of 4 frames (fluorescent channel only) is passed through Tracker-1. As a result, we know the centroids of the cell in every frame of the clip now.
-3. Patches of size 96 x 96 (both channels this time) with the tracked cells in the centre are cropped out and fed into the Segmentation Ensemble. The outputs are segmented cells which are binary images of the same size 96 x 96. 
-4. Each segmented patch is passed through the Division Detector. It a division is detected then the switch to Tracker-2 occurs.
+3. Patches of size 96 x 96 (both channels this time) with the tracked cells in the center are cropped out and fed into the Segmentation Ensemble. The outputs are segmented cells which are binary images of the same size 96 x 96. 
+4. Each segmented patch is passed through the Division Detector. If a division is detected then the switch to Tracker-2 occurs.
 5. Finally, the segmented patches are pasted into empty black images 382 x 382 according to their locations obtained from Tracker-1. As a result, we obtain the first clip of the output movie (the bottom row).
 6. Go to the next clip and repeat the whole procedure again.
  
@@ -48,7 +48,7 @@ The folder contains the code for building lineage trees for T-cell movies contai
 
 
 
-**Step-5.** Follow the instructions in the interface. There can be 2 types of tracking errors during execution: lost cells and ID swappings. To manually correct them, you may use buttons 5a.EDIT IDs and 5b.Edit division. After finishing editing, go back to button 4.Run algorithm. 
+**Step-5.** Follow the instructions in the interface. There can be 2 types of tracking errors during execution: lost cells and ID swappings. To manually correct them, you may use buttons 5a.EDIT IDs and 5b.Edit division. After finishing editing, go back to button 4. Run algorithm. 
 
 **3 subfolders** are designated for the final results, i.e. segmented and tracked version of the input movie.
 
@@ -61,7 +61,7 @@ The folder contains the code for building lineage trees for T-cell movies contai
     •TRACKED. Here are the tracking results before correction.
     •TRACKED CORRECTED. After correction.
 
-**4 subfolders** for segmented patches. The purpose is to visually compare the quality of segmentation from Segmentor, Refiner, Ensemble and after postprocessing by Cleaner-1 and Cleaner-2.
+**4 subfolders** for segmented patches. The purpose is to visually compare the quality of segmentation from Segmentor, Refiner, Ensemble, and after postprocessing by Cleaner-1 and Cleaner-2.
 
            •PATCHES FROM SEGMENTOR
            •PATCHES FROM REFINER
