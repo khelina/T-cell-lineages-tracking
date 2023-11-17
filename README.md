@@ -44,7 +44,8 @@ The folder contains the code for building lineage trees for T-cell movies contai
 **Step-3.** Place these folders inside the DeepKymoTracker folder.
 
 **Step-4.** Run file GUI_execute.py. You will see the following interface:
-![image](https://github.com/khelina/T-cell-lineages-tracking/assets/17193930/51a34548-f58e-4abb-9dfc-2a6fd1666121)
+![image](https://github.com/khelina/T-cell-lineages-tracking/assets/17193930/c7cdf326-bf65-48c1-b7ff-49d6d7013ab0)
+
 
 
 
@@ -52,10 +53,12 @@ The folder contains the code for building lineage trees for T-cell movies contai
 For this particular movie, you will have to manually correct 2 missed divisions (in Frame 1910 and Frame 1972) and 2 wrong ID assignments due to big jumps (Frame 2017 and Frame 3119).
 
 1. Let us see in more detail how to manually correct  the missed division in Frame 1910. After pushing **4. Display results** and positioning Frame 1910 in the Current Frame window by sliding the sliding bar, push **5b.Edit division**. You are now in editing mode. Click on the mother cell (the green one) in Previous Frame (the green one), then click on both daughter cells ( try to click as close to their centroids as possible!). Finally, push **6a. Save division edits**. You should get the following picture: 
+![image](https://github.com/khelina/T-cell-lineages-tracking/assets/17193930/e8f34a07-f333-4ebc-9784-4338c4d9c5d4)
 
 After that, push **4. Execute**. Note: a division correction can only be done once, i.e. 1 division per frame. 
 
 2. How to correct IDs in Frame 2017. After positioning Frame 2017 in the Current Frame window, push **5a.Edit IDs**. Then, click on the cell to be corrected ( the magenta one, for instance) in Previous Frame window. Now, you have an ID of that cell. After that, click on the desired cell in Current Frame. This will give you the desired position of the magenta cell, so try to click as close to its centroid as possible. Repeat the process for the blue and cyan cells. For safety, you can also do it for the red cell, even though it is not absolutely necessary.  Remember to close the editing mode by pushing **5a. Save ID edits**. You should get the following picture:
+![image](https://github.com/khelina/T-cell-lineages-tracking/assets/17193930/d26c59fb-0a0f-4cc8-aeda-e3d64c4f1832)
 
 After that, push **4. Execute**.
 
