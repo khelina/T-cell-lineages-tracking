@@ -48,20 +48,20 @@ The folder contains the code for building lineage trees for T-cell movies contai
 
 
 
-**Step-5.** Follow the instructions in the interface, it is easy to do that as all buttons are enumerated. You can monitor the progress in the **Current Frame** window. If an error occurs push the button Pause and then Display results. After that, you will be able to correct the error. There can be 2 types of tracking errors during execution: lost cells and ID swappings. To manually correct them, you may use buttons 5a.EDIT IDs and 5b.Edit division. After finishing editing, go back to button 4. Run algorithm.
-For this particular movie, you will have to manually correct 2 missed divisions: in Frame 1910 and Frame 1973. Let us see how to do it in Frame 1910.
+**Step-5.** Follow the prompts in the interface, it is easy to do that as all buttons are enumerated. You need to take steps 1,2,3 ( where the last button is **3. Execute**). You can monitor the progress in the **Current Frame** window. If an error occurs push the button **3a. Pause** and then **4. Display results**. After that, you will be able to correct the error. There can be 2 types of tracking errors during execution: lost cells and ID swappings. To manually correct them, you need to use buttons **5a.EDIT IDs** and **5b.Edit division**. After finishing editing, go back to button **4. Execute**.
+For this particular movie, you will have to manually correct 2 missed divisions (in Frame 1910 and Frame 1972) and 2 wrong ID assignments due to big jumps (Frame 2017 and Frame 3119).
+
+1. Let us see in more detail how to manually correct  the missed division in Frame 1910. After pushing **4. Display results** and positioning Frame 1910 in the Current Frame window by sliding the sliding bar, push **5b.Edit division**. You are now in editing mode. Click on the mother cell (the green one) in Previous Frame (the green one), then click on both daughter cells ( try to click as close to their centroids as possible!). Finally, push **6a. Save division edits**. You should get the following picture: 
+
+After that, push **4. Execute**. Note: a division correction can only be done once, i.e. 1 division per frame. 
+
+2. How to correct IDs in Frame 2017. After positioning Frame 2017 in the Current Frame window, push **5a.Edit IDs**. Then, click on the cell to be corrected ( the magenta one, for instance) in Previous Frame window. Now, you have an ID of that cell. After that, click on the desired cell in Current Frame. This will give you the desired position of the magenta cell, so try to click as close to its centroid as possible. Repeat the process for the blue and cyan cells. For safety, you can also do it for the red cell, even though it is not absolutely necessary.  Remember to close the editing mode by pushing **5a. Save ID edits**. You should get the following picture:
+
+After that, push **4. Execute**.
+
 
 **TRACKED_PLUS_CONTOURS** folder is designated for the final results, i.e. segmented and tracked version of the input movie. Segmentation and tracking results are plotted as contours of cells on top of    fluorescent images which clearly gives you the idea of the segmentation quality. Different cells are assigned different colors 
       
-
-**2 subfolders** with fluorescent images where tracking results (centroids of cells) are plotted as p
-
-**4 subfolders** for segmented patches. The purpose is to visually compare the quality of segmentation from Segmentor, Refiner, Ensemble, and after postprocessing by Cleaner-1 and Cleaner-2.
-
-           •PATCHES FROM SEGMENTOR
-           •PATCHES FROM REFINER
-           •PATCHES FROM ENSEMBLE
-           •CLEANED PATCHES
 
 
 
