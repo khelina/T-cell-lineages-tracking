@@ -44,7 +44,8 @@ The folder contains the code for building lineage trees for T-cell movies contai
 **Step-3.** Place these folders inside the DeepKymoTracker folder.
 
 **Step-4.** Run file GUI_execute.py. You will see the following interface:
-![image](https://github.com/khelina/T-cell-lineages-tracking/assets/17193930/c7cdf326-bf65-48c1-b7ff-49d6d7013ab0)
+![image](https://github.com/khelina/T-cell-lineages-tracking/assets/17193930/de784a17-07b1-4b42-8066-4df4334f9111)
+
 
 
 
