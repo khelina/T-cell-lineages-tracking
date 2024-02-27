@@ -35,7 +35,7 @@ The **DeepKymoTracker** folder contains the code for building lineage trees for 
 + H5py = 2.10.0
 
 
-**Step-2.** Download DeepKymoTracker folder from this repository, then download folders TRAINED MODELS (5 GB) and INPUT_MOVIE_EXAMPLE  from https://zenodo.org/deposit/7747438 and place them inside DeepKymoTracker folder.
+**Step-2.** Download DeepKymoTracker folder from this repository, then download folders TRAINED MODELS.zip (5 GB) and INPUT_MOVIE_EXAMPLE.zip (426 MB)  from https://zenodo.org/deposit/7747438 and place them inside DeepKymoTracker folder.
 
 **Step-3.** Run file GUI_execute.py. You will see the following interface:
 
