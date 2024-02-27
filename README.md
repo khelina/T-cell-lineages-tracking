@@ -66,6 +66,7 @@ After that, push **4. Execute**. **Note:** A division correction can only be don
 
 
 After that, push **4. Execute**.
+
 **d.** The ID correction in Frame 3119 is conducted similarly:
 ![image](https://github.com/khelina/T-cell-lineages-tracking/assets/17193930/60294618-b563-49f0-8c25-181aeea7fd39)
 
