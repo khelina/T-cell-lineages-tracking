@@ -28,26 +28,22 @@ The folder contains the code for building lineage trees for T-cell movies contai
 ## 3. HOW TO RUN THE ALGORITHM
 
 **Step-1.** You need to install the following:
-+ Python=3.6.13
++ Python=3.6.13 (The best way to do it is via Anaconda as it contains all the classical libraries such as numpy, os, etc.)
 + Tensorflow= 1.15.0
 + Keras = 2.3.1
 + OpenCV = 3.3.1
 + H5py = 2.10.0
 
 
+**Step-2.** Download DeepKymoTracker folder from this repository, then download folders TRAINED MODELS (5 GB) and INPUT_MOVIE_EXAMPLE  from https://zenodo.org/deposit/7747438 and place them inside DeepKymoTracker folder.
 
-**Step-2.** Download folders TRAINED MODELS (5 GB) and INPUT MOVIE  from https://zenodo.org/deposit/7747438.
-
-**Step-3.** Place these folders inside the DeepKymoTracker folder.
-
-**Step-4.** Run file GUI_execute.py. You will see the following interface:
+**Step-3.** Run file GUI_execute.py. You will see the following interface:
 
 ![image](https://github.com/khelina/T-cell-lineages-tracking/assets/17193930/d6c00888-c0e3-4de6-a9f8-293c72ef8d74)
 
 
 
-
-**Step-5.** Follow the prompts in the interface, it is easy to do that as all buttons are enumerated. You need to take steps 1,2,3 ( where the last button is **3. Execute**). You can monitor the progress in the **Current Frame** window. If an error occurs push the button **3a. Pause** and then **4. Display results**. After that, you will be able to correct the error. There can be 2 types of tracking errors during execution: lost cells and ID swappings. To manually correct them, you need to use buttons **5a.EDIT IDs** and **5b.Edit division**. After finishing editing, go back to button **4. Execute**.
+**Step-4.** Follow the prompts in the interface, it is easy to do that as all the instructions and the feedback are given in the black window on the top of the screen (yellow font). You need to take steps 1,2,3 ( where the last button is **3. Execute**). You can monitor the progress in the **Current Frame** window. If an error occurs push the button **3a. Pause** and then **4. Display results**. After that, you will be able to correct the error. There can be 2 types of tracking errors during execution: lost cells and ID swappings. To manually correct them, you need to use buttons **5a.EDIT IDs** and **5b.Edit division**. After finishing editing, go back to button **4. Execute**.
 For this particular movie, you will have to manually correct 2 missed divisions (in Frame 1910 and Frame 1972) and 2 wrong ID assignments due to big jumps (Frame 2017 and Frame 3119).
 
 1. Let us see in more detail how to manually correct  the missed division in Frame 1910. After pushing **4. Display results** and positioning Frame 1910 in the Current Frame window by sliding the sliding bar, push **5b.Edit division**. You are now in editing mode. Click on the mother cell (the green one) in Previous Frame (the green one), then click on both daughter cells ( try to click as close to their centroids as possible!). Finally, push **6a. Save division edits**. You should get the following picture:
