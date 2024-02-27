@@ -41,7 +41,8 @@ The folder contains the code for building lineage trees for T-cell movies contai
 **Step-3.** Place these folders inside the DeepKymoTracker folder.
 
 **Step-4.** Run file GUI_execute.py. You will see the following interface:
-![image](https://github.com/khelina/T-cell-lineages-tracking/assets/17193930/158daa3a-dbca-4159-937b-5bddfb8adc06)
+![image](https://github.com/khelina/T-cell-lineages-tracking/assets/17193930/332b8fd6-0bce-4172-ba98-d3f13bc43fa8)
+
 
 
 **Step-5.** Follow the prompts in the interface, it is easy to do that as all buttons are enumerated. You need to take steps 1,2,3 ( where the last button is **3. Execute**). You can monitor the progress in the **Current Frame** window. If an error occurs push the button **3a. Pause** and then **4. Display results**. After that, you will be able to correct the error. There can be 2 types of tracking errors during execution: lost cells and ID swappings. To manually correct them, you need to use buttons **5a.EDIT IDs** and **5b.Edit division**. After finishing editing, go back to button **4. Execute**.
