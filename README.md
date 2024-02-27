@@ -60,15 +60,19 @@ After that, push **4. Execute**. Note: a division correction can only be done on
  
 
 3. How to correct IDs in Frame 2017. After positioning Frame 2017 in the Current Frame window, push **5. Start editing IDs**. Then, click on the cell to be corrected ( the magenta one, for instance) in Previous Frame window. Now, you have an ID of that cell. After that, click on the desired cell in the Current Frame. This will give you the desired position of the magenta cell, so try to click as close to its centroid as possible. Repeat the process for the blue and cyan cells. For safety, you can also do it for the red cell, even though it is not absolutely necessary.  Remember to close the editing mode by pushing **5a. Save ID edits**. You should get the following picture:
-![image](https://github.com/khelina/T-cell-lineages-tracking/assets/17193930/d26c59fb-0a0f-4cc8-aeda-e3d64c4f1832)
+
+ ![image](https://github.com/khelina/T-cell-lineages-tracking/assets/17193930/6c607765-9401-4f31-bbf5-0697cc1aeb7b)
+
+
 
 After that, push **4. Execute**.
 4. The ID correction in Frame 3119 is conducted similarly:
 ![image](https://github.com/khelina/T-cell-lineages-tracking/assets/17193930/60294618-b563-49f0-8c25-181aeea7fd39)
 
 
-5. 
-**TRACKED_PLUS_CONTOURS** folder is designated for the final results, i.e. segmented and tracked version of the input movie. Segmentation and tracking results are plotted as contours of cells on top of    fluorescent images which clearly gives you the idea of the segmentation quality. Different cells are assigned different colors 
+5. Finally, push button **7. Create final movie**. This movie will be saved inside OUTPUT_INPUT_MOVIE_EXAMPLE as avi. file. Also, several folders and files with different output information will be created inside that folder.
+6. Note that in this example, we corrected manually only the most obvious tracking errors, we did not  
+
       
 
 
