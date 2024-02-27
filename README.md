@@ -48,30 +48,30 @@ You can monitor the progress in the **Current Frame**. If an error occurs push t
 
 For this particular movie, you will have to manually correct 2 missed divisions (in Frame 1910 and Frame 1973) and 2 wrong ID assignments due to big jumps (Frame 2017 and Frame 3119).
 
-1. Let us see in more detail how to manually correct  the missed division in Frame 1910. After pushing **4. Display results** and fixing Frame 1910 in the Current Frame window by sliding the sliding bar, push **6. Start editing division**. You are now in the editing mode. Click on the mother cell (the green one) in the Previous Frame, then click on both daughter cells ( try to click as close to their centroids as possible!). Finally, push **6a. Save division edits**. You should get the following picture:
+**a.** Let us see in more detail how to manually correct  the missed division in Frame 1910. After pushing **4. Display results** and fixing Frame 1910 in the Current Frame window by sliding the sliding bar, push **6. Start editing division**. You are now in the editing mode. Click on the mother cell (the green one) in the Previous Frame, then click on both daughter cells ( try to click as close to their centroids as possible!). Finally, push **6a. Save division edits**. You should get the following picture:
  
 ![image](https://github.com/khelina/T-cell-lineages-tracking/assets/17193930/e2bb433f-be2d-4d3a-8cf4-61277f760a62)
 
 
-After that, push **4. Execute**. Note: a division correction can only be done once, i.e. 1 division per frame.
+After that, push **4. Execute**. **Note:** A division correction can only be done once, i.e. 1 division per frame.
 
-2. Similarly, you edit another missed division in Frame 1973. That is what it looks like as a result:
+**b.** Similarly, you edit another missed division in Frame 1973. That is what it looks like as a result:
+   
    ![image](https://github.com/khelina/T-cell-lineages-tracking/assets/17193930/84252667-a5cf-4630-92ad-adf1e9968d33)
  
 
-3. How to correct IDs in Frame 2017. After positioning Frame 2017 in the Current Frame window, push **5. Start editing IDs**. Then, click on the cell to be corrected ( the magenta one, for instance) in Previous Frame window. Now, you have an ID of that cell. After that, click on the desired cell in the Current Frame. This will give you the desired position of the magenta cell, so try to click as close to its centroid as possible. Repeat the process for the blue and cyan cells. For safety, you can also do it for the red cell, even though it is not absolutely necessary.  Remember to close the editing mode by pushing **5a. Save ID edits**. You should get the following picture:
+**c.** How to correct IDs in Frame 2017. After positioning Frame 2017 in the Current Frame window, push **5. Start editing IDs**. Then, click on the cell to be corrected ( the magenta one, for instance) in the Previous Frame window. Now, you have an ID of that cell. After that, click on the desired cell in the Current Frame. This will give you the desired position of the magenta cell, so try to click as close to its centroid as possible. Repeat the process for the blue and cyan cells. For safety, you can also do it for the red cell, even though it is not absolutely necessary.  Remember to close the editing mode by pushing **5a. Save ID edits**. You should get the following picture:
 
  ![image](https://github.com/khelina/T-cell-lineages-tracking/assets/17193930/6c607765-9401-4f31-bbf5-0697cc1aeb7b)
 
 
-
 After that, push **4. Execute**.
-4. The ID correction in Frame 3119 is conducted similarly:
+**d.** The ID correction in Frame 3119 is conducted similarly:
 ![image](https://github.com/khelina/T-cell-lineages-tracking/assets/17193930/60294618-b563-49f0-8c25-181aeea7fd39)
 
+**Step-5.** Finally, push button **7. Create final movie**. This movie will be saved inside OUTPUT_INPUT_MOVIE_EXAMPLE as avi. file. Also, several folders and files with different output information will be created inside that folder.
 
-5. Finally, push button **7. Create final movie**. This movie will be saved inside OUTPUT_INPUT_MOVIE_EXAMPLE as avi. file. Also, several folders and files with different output information will be created inside that folder.
-6. **Note:** In this example, we corrected manually only the most obvious tracking errors, we did not bother about the ones occurring during cell occlusions. If you wish you are welcome to correct them as well using **6. Start editing division**.  
+**Note:** In this example, we corrected manually only the most obvious tracking errors, we did not bother about the ones occurring during cell occlusions. If you wish you are welcome to correct them as well using **6. Start editing division**.  
 
       
 
