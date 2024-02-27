@@ -21,9 +21,9 @@ The flow of the algorithm is shown in the picture below (**Figure-1**):
 
 
 ## 2. THE CONTENTS OF THIS REPOSITORY
-In this repository, you will find the DeepKymoTracker folder. 
-
-The folder contains the code for building lineage trees for T-cell movies containing from 1 to 5 cells in each frame. The main file is GUI_execute.py, and the remaining files contain helper functions.
+In this repository, you will find 2 folders: DeepKymoTracker and MODELS. 
+In the **MODEL**S folder, you will find the Python code that was used for training deep learning models utilized in DeepKymoTracker and samples of training data for each neural network. 
+The **DeepKymoTracker** folder contains the code for building lineage trees for T-cell movies containing from 1 to 5 cells in each frame. The main file is GUI_execute.py, and the remaining files contain helper functions.
 
 ## 3. HOW TO RUN THE ALGORITHM
 
