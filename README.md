@@ -43,22 +43,31 @@ The folder contains the code for building lineage trees for T-cell movies contai
 
 
 
-**Step-4.** Follow the prompts in the interface, it is easy to do that as all the instructions and the feedback are given in the black window on the top of the screen (yellow font). You need to take steps 1,2,3 ( where the last button is **3. Execute**). You can monitor the progress in the **Current Frame** window. If an error occurs push the button **3a. Pause** and then **4. Display results**. After that, you will be able to correct the error. There can be 2 types of tracking errors during execution: lost cells and ID swappings. To manually correct them, you need to use buttons **5a.EDIT IDs** and **5b.Edit division**. After finishing editing, go back to button **4. Execute**.
-For this particular movie, you will have to manually correct 2 missed divisions (in Frame 1910 and Frame 1972) and 2 wrong ID assignments due to big jumps (Frame 2017 and Frame 3119).
+**Step-4.** Follow the prompts (flashing buttons) in the interface, it is easy to do that as all the instructions and the feedback are given in the black window on the top of the screen (yellow font). When answering the question "2. How many cells are there in Frame 1?" you can choose any option, they both work for this particular movie (the difference being in the case of "1 cell" the position of the cell will be calculated automatically whereas for the "More than 1 cell" option you will have to assign that position manually in the popup window).
+You can monitor the progress in the **Current Frame**. If an error occurs push the button **3a. Pause** and then **4. Display results**. After that, you will be able to correct the error. There can be 2 types of tracking errors during execution: ID swappings and missed divisions. To manually correct them, you need to use buttons **5. Start editing IDs** or **6. Start editing division**. After pushing one of these buttons, more detailed instructions for editing will appear in the black window just below them. Read them carefully and follow the prompts. 
 
-1. Let us see in more detail how to manually correct  the missed division in Frame 1910. After pushing **4. Display results** and positioning Frame 1910 in the Current Frame window by sliding the sliding bar, push **5b.Edit division**. You are now in editing mode. Click on the mother cell (the green one) in Previous Frame (the green one), then click on both daughter cells ( try to click as close to their centroids as possible!). Finally, push **6a. Save division edits**. You should get the following picture:
+For this particular movie, you will have to manually correct 2 missed divisions (in Frame 1910 and Frame 1973) and 2 wrong ID assignments due to big jumps (Frame 2017 and Frame 3119).
+
+1. Let us see in more detail how to manually correct  the missed division in Frame 1910. After pushing **4. Display results** and fixing Frame 1910 in the Current Frame window by sliding the sliding bar, push **6. Start editing division**. You are now in the editing mode. Click on the mother cell (the green one) in the Previous Frame, then click on both daughter cells ( try to click as close to their centroids as possible!). Finally, push **6a. Save division edits**. You should get the following picture:
  
 ![image](https://github.com/khelina/T-cell-lineages-tracking/assets/17193930/e2bb433f-be2d-4d3a-8cf4-61277f760a62)
 
 
-After that, push **4. Execute**. Note: a division correction can only be done once, i.e. 1 division per frame. 
+After that, push **4. Execute**. Note: a division correction can only be done once, i.e. 1 division per frame.
 
-2. How to correct IDs in Frame 2017. After positioning Frame 2017 in the Current Frame window, push **5a.Edit IDs**. Then, click on the cell to be corrected ( the magenta one, for instance) in Previous Frame window. Now, you have an ID of that cell. After that, click on the desired cell in Current Frame. This will give you the desired position of the magenta cell, so try to click as close to its centroid as possible. Repeat the process for the blue and cyan cells. For safety, you can also do it for the red cell, even though it is not absolutely necessary.  Remember to close the editing mode by pushing **5a. Save ID edits**. You should get the following picture:
+2. Similarly, you edit another missed division in Frame 1973. That is what it looks like as a result:
+   ![image](https://github.com/khelina/T-cell-lineages-tracking/assets/17193930/84252667-a5cf-4630-92ad-adf1e9968d33)
+ 
+
+3. How to correct IDs in Frame 2017. After positioning Frame 2017 in the Current Frame window, push **5. Start editing IDs**. Then, click on the cell to be corrected ( the magenta one, for instance) in Previous Frame window. Now, you have an ID of that cell. After that, click on the desired cell in the Current Frame. This will give you the desired position of the magenta cell, so try to click as close to its centroid as possible. Repeat the process for the blue and cyan cells. For safety, you can also do it for the red cell, even though it is not absolutely necessary.  Remember to close the editing mode by pushing **5a. Save ID edits**. You should get the following picture:
 ![image](https://github.com/khelina/T-cell-lineages-tracking/assets/17193930/d26c59fb-0a0f-4cc8-aeda-e3d64c4f1832)
 
 After that, push **4. Execute**.
+4. The ID correction in Frame 3119 is conducted similarly:
+![image](https://github.com/khelina/T-cell-lineages-tracking/assets/17193930/60294618-b563-49f0-8c25-181aeea7fd39)
 
 
+5. 
 **TRACKED_PLUS_CONTOURS** folder is designated for the final results, i.e. segmented and tracked version of the input movie. Segmentation and tracking results are plotted as contours of cells on top of    fluorescent images which clearly gives you the idea of the segmentation quality. Different cells are assigned different colors 
       
 
