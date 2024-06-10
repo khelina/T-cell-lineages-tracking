@@ -35,7 +35,8 @@ The **DeepKymoTracker** folder contains the code for building lineage trees for 
 + H5py = 2.10.0
 
 
-**Step-2.** Download DeepKymoTracker folder from this repository, then download folders TRAINED MODELS.zip (5 GB) and INPUT_MOVIE_EXAMPLE.zip (426 MB)  from https://doi.org/10.5281/zenodo.10720117, unzip them and place both unzipped folders inside DeepKymoTracker folder. If you would like to use the full version of DeepKymoTracker, download models from https://zenodo.org/records/11540886?token=eyJhbGciOiJIUzUxMiJ9.eyJpZCI6IjViZTI2ZTJlLWQ1YjItNGQ0Mi05MDU1LTVhMzFlOGUwZDg0ZiIsImRhdGEiOnt9LCJyYW5kb20iOiIyZjhlYjY1OTNhNmNlNDg0ZGRkMmE1MWQ0NzdlY2M1MyJ9.-W9uEoTsIxg2NqFYkxPawWd4-F7gjrem9aBEKLXTmHZl0dEBcEKN_QFjj3gKSdhEbm1fm2Ldez0Nf4Jt-0Ilhg.
+**Step-2.** Download DeepKymoTracker folder from this repository, then download folders TRAINED MODELS.zip (5 GB) and INPUT_MOVIE_EXAMPLE.zip (426 MB)  from https://doi.org/10.5281/zenodo.10720117, unzip them and place both unzipped folders inside DeepKymoTracker folder. If you would like to use the full version of DeepKymoTracker, download TRAINED MODELS.zip (1.7 GB) from  https://zenodo.org/records/11540886?token=eyJhbGciOiJIUzUxMiJ9.eyJpZCI6IjViZTI2ZTJlLWQ1YjItNGQ0Mi05MDU1LTVhMzFlOGUwZDg0ZiIsImRhdGEiOnt9LCJyYW5kb20iOiIyZjhlYjY1OTNhNmNlNDg0ZGRkMmE1MWQ0NzdlY2M1MyJ9.-W9uEoTsIxg2NqFYkxPawWd4-F7gjrem9aBEKLXTmHZl0dEBcEKN_QFjj3gKSdhEbm1fm2Ldez0Nf4Jt-0Ilhg 
+.
 
 **Step-3.** Run file GUI_execute.py. You will see the following interface:
 
