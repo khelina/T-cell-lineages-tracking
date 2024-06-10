@@ -21,9 +21,11 @@ The flow of the algorithm is shown in the picture below (**Figure-1**):
 
 
 ## 2. THE CONTENTS OF THIS REPOSITORY
-In this repository, you will find 2 folders: DeepKymoTracker and MODELS. 
+In this repository, you will find 3 folders: DeepKymoTracker (full version), DeepKymoTracker, which is a short version,  and MODELS. 
 In the **MODEL**S folder, you will find the Python code that was used for training deep learning models utilized in DeepKymoTracker and samples of training data for each neural network. 
-The **DeepKymoTracker** folder contains the code for building lineage trees for T-cell movies containing from 1 to 5 cells in each frame. The main file is GUI_execute.py, and the remaining files contain helper functions.
+The **DeepKymoTracker** folder contains the code for building lineage trees for T-cell movies containing from 1 to 5 cells in each frame. The purpose of creating this short version was to demonstrate how the specialized trackers described in the paper (Tracker-1, ..., Tracker-5) work. To start tracking, run GUI_execute.py. The remaining files contain helper functions.
+The **DeepKymoTracker (full version)** folder contains the code for the bigger version of the software which consists of 5 pages (windows): Pages 1-2 are designed for formatting and preparing movies for processing, Page 3 is for automatic tracking and manual correction of tracking errors (it coincides with the shorter version of the algorithm described above), Page 4 is for manual correction of segmentation errors, Page 5 is for visualization of the results (such as the cells areas, circularities, etc.). The main file is GUI_final.py, and the remaining files contain helper functions. The full version of DeepKymoTracker is capable of tracking any number of cells as it uses Tracker-1-general, CNN described in the paper.
+
 
 ## 3. HOW TO RUN THE ALGORITHM
 
