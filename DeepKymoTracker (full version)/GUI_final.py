@@ -22,7 +22,8 @@ import pickle
 from threading import Thread
 from functools import partial
 import copy
-#import tifffile as tiff
+import tifffile as tiff
+#import imagecodecs
 #############################################################################
 win= tk.Tk()
 win.geometry('1530x2000')
@@ -181,22 +182,22 @@ def create_movie_for_display(value):
     photo_br=turn_image_into_tkinter(br, 382)     
     canvas_bright_p2.create_image(0,0, anchor=NW, image=photo_br)
     global frame_slider    
-    frame_slider=Scale(frame6,from_=1,to=len(fluor_images),orient=HORIZONTAL,troughcolor="#513B1C",bg=label_color,font=all_font,activebackground="red",label="Frame "+str(1), command=slide, length=150, showvalue=0)
+    frame_slider=Scale(frame6_page2,from_=1,to=len(fluor_images),orient=HORIZONTAL,troughcolor="#513B1C",bg=label_color,font=all_font,activebackground="red",label="Frame "+str(1), command=slide_p2, length=150, showvalue=0)
     frame_slider.grid(row=2, column=0)
     frame_slider.set(13)
     ######################## 
-def slide(value):
+def slide_p2(value):
     canvas_bright_p2.delete("all")
     canvas_fluor_p2.delete("all")
     image_number=int(value)    
     frame_slider.config(label="Frame "+str(value))       
     br_image=bright_images[image_number-1]    
     global br_final  
-    br_final=turn_image_into_tkinter(br_image)     
+    br_final=turn_image_into_tkinter(br_image, 382)     
     canvas_bright_p2.create_image(0,0, anchor=NW, image=br_final)
     fl_image=fluor_images[image_number-1]     
     global fl_final
-    fl_final=turn_image_into_tkinter(fl_image)       
+    fl_final=turn_image_into_tkinter(fl_image, 382)       
     canvas_fluor_p2.create_image(0,0, anchor=NW, image=fl_final)
 #############################################
 def explore_folder():# check which movies are inside the folder and create menu with their names
@@ -238,8 +239,530 @@ button_save_movie.grid(row=0,column=0, padx=20)
 ###############################################################################
 page3=pages[2]
 
+frame1_page3 = tk.Frame(master=page3, width=1528, height=50, bg=bg_color)
+frame1_page3.grid(row=0, column=0,rowspan = 1, columnspan = 4,sticky = W+E+N+S)
+
+frame2_page3 = tk.Frame(master=page3, width=382, height=30, bg=bg_color)
+frame2_page3.grid(row=1,column=0,rowspan = 1, columnspan = 1,sticky = W+E+N+S)
+
+frame3_page3 = tk.Frame(master=page3, width=382, height=30, bg=bg_color)
+frame3_page3.grid(row=1, column=1,rowspan = 1, columnspan = 1,sticky = W+E+N+S)
+
+frame4_page3 = tk.Frame(master=page3, width=382, height=30, bg=bg_color)
+frame4_page3.grid(row=1, column=2,rowspan = 1, columnspan = 1,sticky = W+E+N+S)
+
+frame6_page3 = tk.Frame(master=page3, width=382, height=382, bg=bg_color)
+frame6_page3.grid(row=2,column=0,rowspan = 1, columnspan = 1,sticky = W+E+N+S)
+
+frame7_page3 = tk.Frame(master=page3, width=382, height=382, bg=bg_color)
+frame7_page3.grid(row=2, column=1,rowspan = 1, columnspan = 1,sticky = W+E+N+S)
+
+frame8_page3 = tk.Frame(master=page3, width=382, height=382, bg=bg_color)
+frame8_page3.grid(row=2, column=2,rowspan = 1, columnspan = 1,sticky = W+E+N+S)
+
+frame14_page3 = tk.Frame(master=page3, width=250, height=382, bg=bg_color)
+frame14_page3.grid(row=2, column=3,rowspan = 1, columnspan = 1,sticky = W+E+N+S)
+
+frame10_page3 = tk.Frame(master=page3, width=382, height=100, bg=bg_color)
+frame10_page3.grid(row=3, column=0,rowspan = 1, columnspan = 1,sticky = W+E+N+S)
+
+frame11_page3 = tk.Frame(master=page3, width=300, height=100, bg=bg_color)
+frame11_page3.grid(row=3, column=1,rowspan = 1, columnspan = 1,sticky = W+E+N+S)
+
+frame12_page3 = tk.Frame(master=page3, width=300+382*2, height=100, bg=bg_color)
+frame12_page3.grid(row=3, column=2,rowspan = 1, columnspan = 2,sticky = W+E+N+S)
+
+frame13_page3 = tk.Frame(master=page3, width=300+382*2, height=100, bg=bg_color)
+frame13_page3.grid(row=4, column=0,rowspan = 1, columnspan = 4,sticky = W+E+N+S)
+############################################
+global canvas_left, canvas_mid, canvas_right
+canvas_left = Canvas(frame6_page3, bg=bg_color, height=382, width=382)
+canvas_left.pack(anchor='nw', fill='both', expand=True)
+canvas_mid = Canvas(frame7_page3, bg=bg_color, height=382, width=382)
+canvas_mid.pack(anchor='nw', fill='both', expand=True)
+canvas_right = Canvas(frame8_page3, bg=bg_color, height=382, width=382)
+canvas_right.pack(anchor='nw', fill='both', expand=True)
+###################################################
+l_title=tk.Label(frame1_page3,text= "STEP-2: CUT WELL", bg="yellow", fg="red", font=("Times", "24"))
+l_title.grid(row=0, column=1,padx=2)
+l_finish = tk.Label(frame1_page3, justify=tk.LEFT, text=" This window allows you to cut out a well of interest out of initial cell movie. \n\nTo choose raw movie , press Button 1."
+                    "\nThen, navigate to your raw movie, open it and click on ANY BRIGHT field image" ,fg="yellow",bg="black", font='TkDefaultFont 10 bold', width=120, height=4)
+l_finish.grid(row=1, column=0,columnspan=4, sticky=W, pady=10)
+############################################################
+global low_thr,upp_thr 
+low_thr, upp_thr=IntVar(), IntVar()
+low_thr.set(0)
+#im=np.zeros((382,382))
+
+global cols, rows, cx, cy, length, M, imm
+cols,rows,cx,cy, length,M, imm =382,382,0,0,1,np.zeros((2,3)),np.zeros((382,382))
+
+global coords_1, my_path,intensities,bright_names,iik
+coords_1,my_path,intensities,bright_names=[],'',[], []
+
+iik=canvas_mid.create_oval(100-1,100+1,100+1,100+1,outline = "black",fill = "black",width = 2)
+##############################################
+"""
+global  flashers
+flashers ={}
+"""
+global start_flash, stop_flash, turn_image_into_tkinter, load_image_names,cut_all
+from interface_functions import start_flash, stop_flash, turn_image_into_tkinter, cut_well_from_image
+from preprocess import load_image_names
+##################################################
+def select_one_bright():    
+    global my_path, my_destin, bright_names_sorted,fluor_names_sorted 
+    my_path=filedialog.askopenfilename()
+    movie_dir=os.path.dirname(my_path)
+    bright_names_sorted,fluor_names_sorted =load_image_names(movie_dir)
+        
+    my_destin_1=os.getcwd() 
+    my_destin=os.path.join(my_destin_1,"INPUT_MOVIE "+os.path.basename(movie_dir))
+    l_input.config(text="Source :         "+movie_dir+",    "+str(len(bright_names_sorted))+" frames\nDestination :  "+my_destin)
+    if not os.path.exists(my_destin):
+      os.mkdir(my_destin)
+     
+    global photo_first# the same image in PIL (for display)
+    global first_bright# the image in opencv (as array, can measure intensities)
+    first_bright=cv2.imread(my_path,0)# 0 is very important!!!!
+    photo_first=turn_image_into_tkinter(first_bright, 382)
+    
+    canvas_left.create_image(0,0, anchor=NW, image=photo_first)
+    l_finish.config(text="Now, click on the dark border of the well(s) 2-3 times to measure intensities.\nThen click Button 2."
+                    "\nThe thresholded image will appear in the window to the right.")
+    stop_flash("select", page3, flashers)  
+    button_select.config(bg=button_color)
+    canvas_left.bind("<Button-1>", draw_circle_p3)
+####################################################
+button_select=tk.Button(frame1_page3 ,text="1. Go to raw movie",bg='#9ACD32', font='TkDefaultFont 10 bold' ,activebackground="red", command=select_one_bright)
+button_select.grid(row=3,column=0)
+start_flash([button_select],"select", page3, flashers)
+
+l_input=tk.Label(frame1_page3,justify=tk.LEFT, text="Source :         \nDestination :  ", fg=result_color, bg="black", font=all_font)
+l_input.grid(row=3, column=1, pady=10)
+
+button_threshold=tk.Button(frame2_page3,text="2. Apply initial threshold",bg=button_color,activebackground="red", font=all_font, command=lambda: apply_thresh())
+button_threshold.grid(row=0, column=0,padx=10,pady=20)
+global  seeds
+seeds=[]
+
+#########################################################
+def draw_circle_p3(event):# draw red circles on borders to measure intensities
+    global coords_1
+    global intensities
+    canvas_left.create_oval(event.x-1,event.y-1,event.x+1,event.y+1,outline = "red",fill = "red",width = 2)
+    coords_1.append([event.x, event.y])  
+    intensity=first_bright[int(event.y*imm.shape[1]/382),int(event.x*imm.shape[0]/382)]
+    intensities.append(intensity)
+    if len(coords_1)==2:
+        start_flash([button_threshold], "thresh",page3,flashers)   
+###################################################################
+def low_thresh(value):      
+    low=float(value)
+    high=upp_thr.get()
+    global thresh
+    ret,thresh = cv2.threshold(first_bright,low,high,cv2.THRESH_BINARY_INV)# here you can adjust threshold (it is now from 130 to 255)   
+    thresh[thresh!=0]=255
+    lower.config(label="Threshold = "+str(value))
+    global thr_image
+    thr_image=turn_image_into_tkinter(thresh, 382)    
+    canvas_mid.create_image(0,0, anchor=NW, image=thr_image)    
+######################## respond to upper_thresh slider and thresh image accordingly 
+def upper_thresh(value):
+    high=float(value)
+    low=low_thr.get()
+    global thresh_1
+    ret,thresh_1 = cv2.threshold(first_bright,low,high,cv2.THRESH_BINARY_INV)# here you can adjust threshold (it is now from 130 to 255)   
+    thresh_1[thresh_1!=0]=255
+    upper.config(label="Upper threshold = "+str(value))
+    global thr_image_1
+    thr_image_1=turn_image_into_tkinter(thresh_1, 382)   
+    canvas_mid.create_image(0,0, anchor=NW, image=thr_image_1)
+##################### respond to button Apply thresh (this is initial thresholding, before using  thersh sliders)
+def apply_thresh():
+    global lower, upper
+    lower.config(variable=low_thr,label="Threshold = "+str(low_thr.get()))
+    #lower=Scale(frame3_page3, from_=0,to=255,orient=HORIZONTAL,variable=low_thr,length=150,bg=label_color,	
+    #showvalue=0,troughcolor="#513B1C",label="Threshold = "+str(low_thr.get()), command=low_thresh,
+    #activebackground="red", font=all_font)
+    #lower.grid(row=0, column=0,padx=10,pady=5)
+    #######################    
+    upper=Scale(frame3_page3, from_=0,to=255,orient=HORIZONTAL,variable=upp_thr,troughcolor="#513B1C",label="Upper threshold = "+str(upp_thr.get()),command=upper_thresh,
+    showvalue=0,activebackground="red", bg=label_color, length=150, font=all_font)
+    #upper.grid(row=0, column=1,padx=10,pady=5)
+    #############################
+    canvas_left.delete("all")
+    canvas_mid.delete("all")
+    canvas_right.delete("all")
+    canvas_left.create_image(0,0, anchor=NW, image=photo_first)
+    global low
+    global high
+    low=min(intensities)
+    high=max(intensities)
+    global thresh
+    ret,thresh = cv2.threshold(first_bright,low,high,cv2.THRESH_BINARY_INV)# here you can adjust threshold (it is now from 130 to 255)   
+    thresh[thresh!=0]=255
+    global thr_image
+    thr_image=turn_image_into_tkinter(thresh, 382)    
+    canvas_mid.create_image(0,0, anchor=NW, image=thr_image)
+    lower.set(low)
+    upper.set(high)
+    l_finish.configure(text="The borders of wells should become SOLID white line, WITHOUT INTERRUPTIONS."
+                       "\nImprove thresholded image if necessary\nby sliding the bar below to change threshold."
+                       "\nFinally, click on the well of interest.")
+    stop_flash("thresh", page3, flashers)
+    #start_flash([button_display],"display", page3, flashers)
+    button_threshold.config(bg=button_color)
+    start_flash([lower,upper], "slide_thresh",page3,flashers) 
+    canvas_mid.bind("<Button-1>", choose_well)
+##########################
+
+################################# 
+def choose_well(event):# click on the well of interest, get green circle and red rectangle  
+    global iik
+    canvas_mid.delete(iik)
+    global seed, seeds    
+    i=canvas_mid.create_oval(event.x-1,event.y-1,event.x+1,event.y+1,outline = "green",fill = "green",width = 5)
+    seed=(int(event.x*thresh.shape[1]/382), int(event.y*thresh.shape[0]/382))
+    seeds.append(seed)
+    print("seed=", seed)
+    print("len(seeds)=", len(seeds))
+    if len(seeds)==1:
+         print("started display flash")
+         start_flash([button_display],"display", page3, flashers)
+    im_thr=thresh.copy()
+    mask=None
+    fill_image=cv2.floodFill(im_thr, mask, seed, 255,flags=8)# here you define the centre of the well (there are 4 in total)
+    fill_image = thresh | im_thr
+    fill_image-=thresh   
+    closing = cv2.morphologyEx(fill_image, cv2.MORPH_CLOSE, (5,5))    
+    _,contours, hierarchy = cv2.findContours(closing,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE) 
+    print("len(contours)=", len(contours))
+    cnt=contours[0]
+    
+    global box,first_x0  
+    rect = cv2.minAreaRect(cnt)      
+    box = cv2.boxPoints(rect)     
+    box = np.int0(np.round(box))      
+    first_x0=box[0][0]
+    
+      
+    global closing_2
+    closing_1=cv2.cvtColor(closing,cv2.COLOR_GRAY2RGB)
+    cv2.drawContours(closing_1,[box],0,(0,0,255),5)# draw red rect around detected well 
+    closing_2=turn_image_into_tkinter(closing_1, 382)   
+    canvas_right.create_image(0,0, anchor=NW, image=closing_2)    
+    ######## here it draws red rect in fluorescent image of canvas_left
+    im_copy=first_bright.copy()# 
+    global photo_im_red,angle,rows,cols,M
+    im_red=cv2.cvtColor(im_copy,cv2.COLOR_GRAY2RGB)
+    cv2.drawContours(im_red,[box],0,(0,0,255),5)    
+    photo_im_red=turn_image_into_tkinter(im_red, 382)   
+    canvas_left.create_image(0,0, anchor=NW, image=photo_im_red)
+    angle=rect[2]+90.
+   
+    rows,cols = first_bright.shape 
+    M = cv2.getRotationMatrix2D((int(round(cols/2)),int(round(rows/2))),angle,1)   
+    l_finish.configure(text="Check that the well has been detected correctly: a red frame should appear around the well.\nIf it is not correct go back to sliding bar."
+                       "\nFinally, push Button 3 to check the result.")    
+############################################
+
+######################################################
+def cut_first_well():# cut well in the first image and display it in canvas_mid
+ l_finish.configure(text="It is important to manually correct shift. Push Button 4a and drag the image with mouse to eliminate the shift."
+                       "\nFinally, push Button 3 to check the result.")     
+ global canvas_mid 
+ canvas_mid.delete("all")
+ global  well_size
+ #################### draw temp image (binary) to rotate it and find rect_new
+ print("first box=", box)
+ temp=np.zeros(first_bright.shape, np.uint8)
+ cv2.drawContours(temp,[box],0,255,-1)
+ dst = cv2.warpAffine(temp,M,(cols,rows))
+ #cv2.imwrite(r"C:\Users\kfedorchuk\Desktop\dst.tif", dst)
+####################  4. calculate its borders   
+ _,contours_new, hierarchy = cv2.findContours(dst,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+ cnt_new=contours_new[0]
+ rect_new = cv2.minAreaRect(cnt_new)             
+ box_final = cv2.boxPoints(rect_new)    
+ box_final = np.int0(np.round(box_final))
+ #print("first box_final=", box_final)
+ xs=[box_final[k][0] for k in range(4)]
+ ys=[box_final[k][1] for k in range(4)]
+ global x_min_first, y_min_first
+ x_min_first, x_max=min(xs), max(xs)
+ y_min_first, y_max=min(ys), max(ys)
+ #print(" first x_min_first, y_min_first=", x_min_first," , ", y_min_first)
+#############################################  
+ well_size=382
+####### 5. apply 
+ global rot_bright
+ rot_bright = cv2.warpAffine(first_bright,M,(cols,rows))
+ global cut_bright
+ cut_bright=rot_bright[y_min_first:y_min_first+well_size, x_min_first:x_min_first+well_size]
+ #cut_bright = cv2.rotate(cut_bright_init, cv2.ROTATE_90_COUNTERCLOCKWISE)
+ ##############################################
+ global final_1
+ final_1=turn_image_into_tkinter(cut_bright, 382) 
+ canvas_mid.create_image(0,0, anchor=NW, image=final_1)
+ seeds=[]
+ upper.config(bg=label_color)
+ lower.config(bg=label_color)
+ global delta_x, delta_y
+ delta_x, delta_y=0,0
+######################################################
+
+######################################################
+def edit_first_frame_shift():
+    canvas_mid.unbind("<Button-1>")
+    canvas_mid.bind('<B1-Motion>', move)
+    canvas_mid.bind("<ButtonRelease>", cut_and_save_first)
+       
+    canvas_mid.delete("all")  
+    global x_img,y_img, points, x_last,y_last,dx,dy, x0,y0, br_image
+    x0,y0=x_min_first, y_min_first
+    #print("x0=", x0)
+    #print("y0", y0)
+    x_img,y_img, x_last,y_last,dx,dy=  0,0,x0,y0,0,0
+    points=[]
+    global new_name
+    head, tail=os.path.split(my_path)
+    new_name=os.path.join(my_destin,tail)
+    br_image= rot_bright
+    global image1,imageFinal
+    
+    original_size=br_image.shape[0]
+    image1=turn_image_into_tkinter(br_image, original_size)      
+    imageFinal = canvas_mid.create_image(-x_min_first, -y_min_first, image = image1,anchor='nw')
+    #canvas_right.create_image(-x_min-Margin, -y_min-Margin, image = image1,anchor='nw') 
+###########################################################
+def cut_and_save_first(event):
+    global points, br_image, new_name, x0,y0, x_last, y_last, delta_x,delta_y
+    points=[]
+    
+    #print("x_Last=", x_last)
+    #print("y_last=", y_last)
+    delta_x, delta_y=x_last-x0,y_last-y0
+    patch=br_image[y_last:y_last+382, x_last:x_last+382]
+    #patch=br_image[-y_last+y0+Margin:-y_last+382+y0+Margin, -x_last+x0+Margin:-x_last+382+x0+Margin]
+    #print("patch.shape=", patch.shape)       
+    cv2.imwrite(new_name, patch)
+    global corrected_patch
+    corrected_patch=turn_image_into_tkinter(patch, 382)      
+    #imageFinal = canvas_right.create_image(x_img, y_img, image = image1,anchor='nw')
+    canvas_mid.delete("all")
+    canvas_mid.create_image(0,0, image = corrected_patch,anchor='nw')
+
+############################################## command=lambda:threading.Thread(target=cut_and_save_fluor).start()
+button_fluor=tk.Button(frame14_page3,text="7. Apply to all fluorescent",bg=button_color,activebackground="red",font=all_font, command=lambda: Thread(target=cut_fluor_wells).start())
+button_fluor.grid(row=0, column=0,padx=10,pady=2)
+
+l_fluor=Label(frame11_page3,text="      ", font=all_font,bg=bg_color, fg=result_color)
+l_fluor.grid(row=5,column=0,padx=2)
+################################  Frame 13
+
+#################################
+global new_fl_names
+new_fl_names= None
+#################################
+   
+def cut_bright_wells():
+  #print("seed=", seed)
+  #bright_names_sorted,fluor_names_sorted =load_image_names(source)
+  global rotation_matrices,new_br_names, rotated_images, boxes, final_boxes
+  rotation_matrices, new_br_names, rotated_images=[],[],[]
+  boxes, final_boxes=[],[]
+  for k in range(len(bright_names_sorted)):
+    #print("frame_number=", k+1)
+    bright_name=bright_names_sorted[k]
+    bright_image=cv2.imread(bright_name,-1)  
+    final_bright,M,x_min, x_max,y_min, y_max, rows, cols, rot_indicator, rot_bright=cut_well_from_image(bright_image,seed,well_size,first_x0, delta_x, delta_y)
+    rotation_matrices.append((M,x_min, x_max,y_min, y_max, rows, cols, rot_indicator))
+    rotated_images.append(rot_bright) 
+    final_bright_squeezed=cv2.resize(final_bright, (382,382), interpolation = cv2.INTER_AREA)
+    #final_fluor_squeezed=cv2.resize(final_fluor, (382,382), interpolation = cv2.INTER_AREA)
+    head, tail=os.path.split(bright_name)
+    #new_name=os.path.join(destin_folder,tail)
+    new_br_name=os.path.join(my_destin,tail)
+    new_br_names.append(new_br_name)    
+    #print("new_name=", new_name)
+    cv2.imwrite(new_br_name, final_bright_squeezed)
+    if k==0:
+        global first_tk
+        first=final_bright_squeezed
+        first_tk=turn_image_into_tkinter(first, 382)
+  global frame_slider    
+  frame_slider=Scale(frame12_page3,from_=1,to=len(bright_names_sorted),orient=HORIZONTAL,troughcolor="#513B1C",bg=label_color,font=all_font,activebackground="red",label="Frame "+str(1), command=slide, length=150, showvalue=0)
+  frame_slider.grid(row=2, column=0)
+  frame_slider.set(1)
+
+  #frame_slider.grid_remove()
+  #seeds=[]
+  upper.config(bg=label_color)
+  lower.config(bg=label_color)
+  l_bright.config(text="Bright images processed, total = " + str(len(new_br_names))+" frames")     
+  l_finish.config(text="Scroll through frames to ensure that the well fits completely into each frame.\nIf it does not go back to increase Margin."
+                 "\nOtherwise, push Button 5 to apply to ALL FLUORESCENT images")  
+ 
+  start_flash([button_fluor],"fluor", page3, flashers)
+  button_bright.config(bg=button_color)
+  canvas_right.delete("all")
+  canvas_right.create_image(0,0, anchor=NW, image=first_tk)      
+     
+##################################
+    
+def cut_fluor_wells():
+
+ stop_flash("fluor", page3, flashers)
+ button_fluor.config(bg="red")
+ progressbar_fluor = ttk.Progressbar(frame11_page3, orient='horizontal',mode='determinate',length=280)
+ progressbar_fluor.grid(row=0, column=0,padx=10)
+ l_fluor.config(bg="black")
+  
+ canvas_mid.delete("all")
+ #############################
+ global rotation_matrices,new_fl_names, first_tk_fl
+ 
+ new_fl_names=[]
+ for k in range(len(fluor_names_sorted)):
+    fluor_name=fluor_names_sorted[k]
+    fluor_image=cv2.imread(fluor_name,-1)
+    info=rotation_matrices[k] 
+    M,x_min, x_max,y_min, y_max, rows, cols, rot_indicator=info[0], info[1],info[2],info[3],info[4], info[5], info[6], info[7]    
+    rot_fluor = cv2.warpAffine(fluor_image,M,(cols,rows))
+    #width, height=x_max-x_min,y_max-y_min
+    #side=max(width,height)
+    side=382
+    cut_fluor=rot_fluor[y_min:y_min+side,x_min:x_min+side]
+    #cut_fluor = cv2.rotate(cut_fluor_init, cv2.ROTATE_90_COUNTERCLOCKWISE)
+    if rot_indicator=="yes":
+        final_fluor = cv2.rotate(cut_fluor, cv2.ROTATE_90_COUNTERCLOCKWISE)
+    else:
+        final_fluor=cut_fluor
+    #final_fluor=rot_fluor[y_min-Margin:y_max+1+Margin,x_min-Margin:x_max+1+Margin]          
+    final_fluor_squeezed=cv2.resize(final_fluor, (382,382), interpolation = cv2.INTER_AREA)
+    head, tail=os.path.split(fluor_name)
+    new_fl_name=os.path.join(my_destin,tail)
+    new_fl_names.append(new_fl_name)   
+    cv2.imwrite(new_fl_name, final_fluor_squeezed) 
+    if k==0:       
+        first_fl=final_fluor_squeezed
+        first_tk_fl=turn_image_into_tkinter(first_fl, 382)
+ canvas_mid.create_image(0,0, anchor=NW, image=first_tk_fl)
+ frame_slider.set(1)               
+ l_finish.config(text="Finished!\nThe input movie has been created and stored in folder\n "+str(my_destin)+
+                 "\nNow, you are ready to proceed to STEP 3 of the pipeline.")
+ l_fluor.config(text="Fluor images processed, total = " + str(len(new_fl_names))+" frames")
+ stop_flash("fluor", page3, flashers)
+ button_fluor.config(bg=button_color)    
+###################################################
+
+##################################################
+button_bright=tk.Button(frame4_page3,text="5. Apply to all bright",bg=button_color,activebackground="red",font=all_font, justify=LEFT,command=lambda:[Thread(target=cut_bright_wells).start(),stop_flash("bright", page3, flashers)])
+button_bright.grid(row=0, column=0,padx=10)
+
+l_bright=Label(frame12_page3,text="      ", font=all_font,bg=bg_color, fg=result_color)
+l_bright.grid(row=1,column=0,padx=2) 
+##############################################
+######################### scroll through all bright images
+def slide(value):
+    canvas_right.delete("all")
+    image_number=int(value)    
+    frame_slider.config(label="Frame "+str(value))       
+    br_image=cv2.imread(new_br_names[image_number-1])
+    global br_final  
+    br_final=turn_image_into_tkinter(br_image, 382)     
+    canvas_right.create_image(0,0, anchor=NW, image=br_final)
+    if new_fl_names:
+      fl_image=cv2.imread(new_fl_names[image_number-1])
+      global fl_final
+      fl_final=turn_image_into_tkinter(fl_image, 382)       
+      canvas_mid.create_image(0,0, anchor=NW, image=fl_final)
+######################################################################
+def move(event):
+    global x_img,y_img, points, x_last,y_last,dx,dy, imageFinal
+    x, y = event.x, event.y   
+    points.append([x,y])       
+    if len(points)>1:
+         dx, dy=x-x_img,y-y_img
+         canvas_right.move(imageFinal, dx,dy)
+         canvas_right.update()
+         x_last-=dx
+         y_last-=dy                
+    x_img = x
+    y_img = y
+#####################  move image inside canvas_right with mouse ( correct shift in one particular frame)
+
+   
+################### save edits to current frame by releasing the mouse 
+def cut_and_save(event):
+    global points, br_image, new_name, x0,y0, x_last, y_last
+    points=[]
+    
+    print("x_Last=", x_last)
+    print("y_last=", y_last)
+    patch=br_image[y_last:y_last+382, x_last:x_last+382]
+    #patch=br_image[-y_last+y0+Margin:-y_last+382+y0+Margin, -x_last+x0+Margin:-x_last+382+x0+Margin]
+    print("patch.shape=", patch.shape)       
+    cv2.imwrite(new_name, patch)
+    global corrected_patch
+    corrected_patch=turn_image_into_tkinter(patch, 382)      
+    #imageFinal = canvas_right.create_image(x_img, y_img, image = image1,anchor='nw')
+    canvas_right.delete("all")
+    canvas_right.create_image(0,0, image = corrected_patch,anchor='nw')
+    
+##################### activate editing frame shift for current frame in canvas_right
+def edit_frame_shift():
+    canvas_right.unbind_all("<Button-1>")  
+    canvas_right.bind('<B1-Motion>', move)
+    canvas_right.bind("<ButtonRelease>", cut_and_save)
+    frame_number=frame_slider.get()
+    print("frame_number=", frame_number)
+    item=rotation_matrices[frame_number-1]
+    x_min, x_max,y_min, y_max=item[1],item[2],item[3],item[4]
+    
+    canvas_right.delete("all")
+  
+    global x_img,y_img, points, x_last,y_last,dx,dy, rotated_images, x0,y0, br_image
+    x0,y0=x_min, y_min
+    #x0, y0=int(round((x_max+x_min)/2)),int(round((y_max+y_min)/2))
+    print("x0=", x0)
+    print("y0", y0)
+    x_img,y_img, x_last,y_last,dx,dy=  0,0,x0,y0,0,0
+    points=[]
+    
+    br_image= rotated_images[frame_number-1]
+    global image1, new_name, imageFinal
+    new_name=new_br_names[frame_number-1]
+    original_size=br_image.shape[0]
+    image1=turn_image_into_tkinter(br_image, original_size)      
+    imageFinal = canvas_right.create_image(-x_min, -y_min, image = image1,anchor='nw')
+    #canvas_right.create_image(-x_min-Margin, -y_min-Margin, image = image1,anchor='nw')
+#################################################################    
+####################################
+lower=Scale(frame3_page3, from_=0,to=255,orient=HORIZONTAL,variable=low_thr,length=150,bg=label_color,	
+    showvalue=0,troughcolor="#513B1C",label="Threshold = "+str(None), command=low_thresh,
+    activebackground="red", font=all_font)
+lower.grid(row=0, column=0,padx=10,pady=5)
+#######################################################
+button_display=tk.Button(frame3_page3,text="3. Cut well",bg=button_color,activebackground="red",font=all_font, command=lambda:[cut_first_well(), start_flash([button_bright],"bright", page3, flashers), stop_flash("slide_thresh",page3,flashers) ])
+button_display.grid(row=1, column=0,padx=10) 
+
+button_first_shift_edit=tk.Button(frame3_page3,text="4. Edit well shift in Frame 1",bg=button_color,activebackground="red",font=all_font, command=edit_first_frame_shift)
+#button_first_shift_edit.grid(row=1, column=0,padx=10,pady=(100,10))
+button_first_shift_edit.grid(row=2, column=0,padx=10,pady=5)
+
+#canvas_left.bind("<Button-1>", draw_circle)
+#canvas_mid.bind("<Button-1>", choose_well)
+####################################################################
+button_shift_edit=tk.Button(frame4_page3,text="6. Edit well shift in current frame",bg=button_color,activebackground="red",font=all_font, command=edit_frame_shift)
+button_shift_edit.grid(row=2, column=0,padx=10,pady=(10,10))
 
 
+##############################################################
+
+
+"""
 frame1_page3 = tk.Frame(master=page3, width=1528, height=50, bg=bg_color)
 frame1_page3.grid(row=0, column=0,rowspan = 1, columnspan = 4,sticky = W+E+N+S)
 
@@ -611,7 +1134,7 @@ canvas_mid.bind("<Button-1>", draw_seed)
 ###########################################################
 button_shift_edit=tk.Button(frame14_page3,text="4a. Edit well shift in this frame",bg=button_color,activebackground="red",font=all_font, command=edit_frame_shift)
 button_shift_edit.grid(row=0, column=0,padx=10,pady=(100,10))
-
+"""
 
 ###########################################################################
 ############################   PAGE 4 : EXECUTE AND CORRECT TRACKING ##############################
