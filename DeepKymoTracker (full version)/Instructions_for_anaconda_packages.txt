@@ -1,0 +1,24 @@
+INSTALL ANANCONDA ENVIRONMENT, SEQUENCES TO GIVE TO THE ANACONDA PROMPT:
+
+conda create -n py36 python=3.6.13
+ 
+conda activate py36
+
+conda install tensorflow-gpu=1.14.0
+
+conda install keras=2.3.1
+
+conda install opencv=3.3.1
+
+conda install H5py=2.10.0
+
+conda install xlsxwriter=3.0.3
+
+conda install tifffile=2020.10.1
+
+conda install pillow (any version is fine)
+
+conda install matplotlib (any version is fine)
+
+pip install imagecodecs
+
