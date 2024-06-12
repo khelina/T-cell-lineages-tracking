@@ -475,28 +475,29 @@ def segment_and_clean(dict_of_divisions,cells,count,coords,text,segmentor, refin
    final_list= find_frame_intensities_sorted(real_cells, parallel_image, coords, frame_size)
    #print("len(final_list)=",len(final_list))   
    final_list, final_centroids, number_of_splits=split_with_final_list(final_list, coords,frame_number, out_folders, frame_size) 
-   mask=create_mask(final_list)
-   cv2.imwrite("C:\\Users\\kfedorchuk\\Desktop\\masks\\frame_%s.tif" % (frame_number), mask*50)                    
+   mask_old=create_mask(final_list)
+   cv2.imwrite("C:\\Users\\kfedorchuk\\Desktop\\masks\\frame_%s.tif" % (frame_number), mask_old*50)                    
    ######## create cells={} - dictionary for each cell in a farme   
    cells={}
    empty_fluor_base=cv2.copyMakeBorder(empty_fluor, top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize, borderType= cv2.BORDER_CONSTANT, value = np.mean(empty_fluor))
    empty_bright_base=cv2.copyMakeBorder(empty_bright, top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize, borderType= cv2.BORDER_CONSTANT, value = np.mean(empty_bright))       
    for kkk in range(len(final_list)):
        item=final_list[kkk]
+       a_old,b_old,c_old,d_old=item[1], item[2],item[3], item[4]
        number=item[5][0]#internal cell number
        big_patch=item[0]
        big_patch_border=cv2.copyMakeBorder(big_patch, top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize, borderType= cv2.BORDER_CONSTANT, value = 0)
-       ensemble_output= big_patch_border[c:d,a:b]  
+       ensemble_output_old= big_patch_border[c_old:d_old,a_old:b_old]  
        #########################################
       
        #dilation = cv2.dilate(big_patch,kernel,iterations = 2)
        x0,y0=final_centroids[number][0], final_centroids[number][1]       
-       a,b,c,d=item[1], item[2],item[3], item[4]
+       
        centroid=[x0,y0]
        ###################################################
        
        
-       segmented_frame, refined_output,a,b,c,d, mask=refine_segmentation(segmentor, refiner,empty_fluor,empty_bright,centroid,cell_radius, frame_size, p_size, centroid,mask,number)
+       segmented_frame, refined_output,a,b,c,d, mask=refine_segmentation(segmentor, refiner,empty_fluor,empty_bright,centroid,cell_radius, frame_size, p_size, centroid,mask_old,number)
        if not np.any(refined_output)==True:# if all zeros in ensemble_output
          """
          dilated_output, mask=dilate_cell(ensemble_output,a,b,c,d,mask, number,frame_size)
@@ -504,7 +505,9 @@ def segment_and_clean(dict_of_divisions,cells,count,coords,text,segmentor, refin
          cv2.imwrite("C:\\Users\\kfedorchuk\\Desktop\\mask.tif",mask)
          ensemble_output=dilated_output
          """
-         ensemble_output=ensemble_output
+         ensemble_output=ensemble_output_old
+         a,b,c,d= a_old,b_old,c_old,d_old
+         mask=mask_old
        else:
          ensemble_output=refined_output
        ###############################################################
