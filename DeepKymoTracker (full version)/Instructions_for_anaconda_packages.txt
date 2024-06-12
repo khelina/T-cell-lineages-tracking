@@ -1,6 +1,8 @@
 INSTALL ANANCONDA ENVIRONMENT, SEQUENCES TO GIVE TO THE ANACONDA PROMPT:
 
 conda create -n py36 python=3.6.13
+
+Proceed ([y]/n)? y
  
 conda activate py36
 

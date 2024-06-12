@@ -221,8 +221,7 @@ def calculate_cell_parametres(segmented_patch,a,b,c,d, frame_size):
         M["m00"]=0.001
     cX = np.round(M["m10"] / M["m00"],2)
     cY = np.round(M["m01"] / M["m00"],2)     
-    #cX = int(M["m10"] / M["m00"])
-    #cY = int(M["m01"] / M["m00"])   
+     
     return cX,cY,area,perimeter,circularity
 ############################################
 def segment_manual_patch(segmentor, refiner,empty_fluor,empty_bright,centroid,coord, cell_radius, frame_size, p_size,marker,final_mask,cell_number):# segments frame and creates dictionary of cells         
