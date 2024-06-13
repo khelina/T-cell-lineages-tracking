@@ -876,21 +876,23 @@ def load_models(software_folder):
     from extract_lineage_for_Lorenzo import create_lineage_for_Lorenzo
 
     from keras.optimizers import Adam
-    global models
+    global models, directory
     
     directory = os.path.join(software_folder, "TRAINED MODELS")
-    model_names = ["Tracker-1", "Tracker-2", "Tracker-3","Tracker-4","Tracker-5","Tracker-6",
-                   "Segmentor", "Refiner"]
+    model_names = ["Tracker-6","Segmentor", "Refiner"]
+    #model_names = ["Tracker-1", "Tracker-2", "Tracker-3","Tracker-4","Tracker-5","Tracker-6",
+                   #"Segmentor", "Refiner"]
     models = []
     for name in model_names:
                 
         full_name = os.path.join(directory, name)
+        print("full_name=", full_name)
         json_file = open(full_name + "-model.json", "r")
         model_read = json_file.read()
         json_file.close()        
         models.append((model_read, full_name)) 
-    global trackers,segmentor,refiner  
-    trackers, segmentor, refiner=create_models(models) 
+    global tracker,segmentor,refiner  
+    tracker, segmentor, refiner=create_models(models) 
     feedback_label.configure(text="Loading input movie ...")    
 ###########
 input_info_label = tk.Label(frame1_page4, text=my_dir, bg="brown")
@@ -969,17 +971,27 @@ label_min_cells.grid(row=3, column=0, padx=2)
 global manual_popup_centroids, coords_very_first # coords_very_first is necessary for plotting lineage later
 manual_popup_centroids, coords_very_first= [],[]
 ################################
-def begin_with_one_cell():
+def begin_with_one_cell():# after pushing button "1 cell"
     stop_flash("radio", page4, flashers)
     feedback_label.configure(text="Calculating position of cell in Frame 1 ...")
     R1.configure(bg="red")
     R2.configure(bg=button_color)
     global coords, coords_very_first
     
-    model=trackers[0]
-    coords = predict_first_frame(fluor_images_compressed, model)  
-    coords_very_first= coords.tolist()
+           
+    full_name = os.path.join(directory, "Tracker-1")
+    print("full_name=", full_name)
+    json_file = open(full_name + "-model.json", "r")
+    model_read = json_file.read()
+    json_file.close()        
         
+    tracker_1 = model_from_json(model_read)
+    tracker_1.load_weights(full_name + "-weights.h5")   
+    tracker_1.compile(Adam(lr=0.003), loss='mse',metrics=['mae'])
+       
+    coords = predict_first_frame(fluor_images_compressed, tracker_1)  
+    coords_very_first= coords.tolist()
+    print("coords=", coords)    
     global colours, template_names, prev_frame
     colours, template_names = create_color_dictionary(
         max_number_of_cells, coords.shape[0])# 10 =maximum number of cells
@@ -987,16 +999,8 @@ def begin_with_one_cell():
     xs=create_dictionary_of_xs( template_names, coords_very_first, num_frames)
   
     global text
-    text = template_names[:coords.shape[0]]  
-    prev_frame = np.zeros((frame_size, frame_size), dtype="float64")
-    for i in range(coords.shape[0]):
-        one_circle = np.zeros((frame_size, frame_size), dtype="uint8")
-        one_circle = cv2.circle(
-            one_circle, (int(coords[i][0]), int(coords[i][1])), 10, i+1, -1)
-        one_circle = one_circle.astype('float64')
-        prev_frame += one_circle
-        page4.update()
-      
+    text = template_names[:coords.shape[0]]
+    
     R2.configure(bg=button_color, fg="black")
     R1.configure(bg="black", fg="#00FFFF")
     
@@ -1067,18 +1071,16 @@ def close_popup_canvas():
       flag="manual centroids"
       edit_id_indicator.set("yes")
       coords = np.zeros((N_cells, 2))
+      print("xs=", xs)
+      print("template_names=", template_names)
+      print("text=", text)
+      print("xs=", xs)
       
       #prev_frame = np.zeros((frame_size, frame_size), dtype="float64")
      
       for i in range(N_cells):
         coords[i] = manual_popup_centroids[i]
-        """
-        one_circle = np.zeros((frame_size, frame_size), dtype="uint8")
-        one_circle = cv2.circle(
-            one_circle, (int(manual_popup_centroids[i][0]), int(manual_popup_centroids[i][1])), 10, i+1, -1)
-        one_circle = one_circle.astype('float64')
-        prev_frame += one_circle
-       """
+        
       print("coords=", coords)
       R2.configure(text =str(len(coords))+ " cells" ,background="black", fg="#00FFFF")
       feedback_label.config(text="The positions of cells in Frame 1 has been saved.\n\nTo start execution, press Button 3.")
@@ -1106,14 +1108,14 @@ zero_image = ImageTk.PhotoImage(zero_image)
 global lineage_images, output_images
 lineage_images, output_images, lineage_images_cv2=[], [zero_image],[] 
 ############################################################
-def clear_memory_of_models(trackers, segmentor, refiner):     
+def clear_memory_of_models(tracker, segmentor, refiner):     
      keras.backend.clear_session()    
      if segmentor:       
         del segmentor     
      if refiner:
          del refiner        
-     if trackers:      
-          del trackers    
+     if tracker:      
+          del tracker    
      tf.reset_default_graph() 
 ###########################################
 def cut_lineage(start_frame): # after manual editing
@@ -1177,7 +1179,7 @@ def execute():
     if pedigree:
         del pedigree
     
-    global variable_stop, start_frame, trackers, segmentor, refiner# this variable allows to stop the loop (controlled by Stop button)     
+    global variable_stop, start_frame, tracker, segmentor, refiner# this variable allows to stop the loop (controlled by Stop button)     
     global coords, prev_frame,  count, text, cells, old_number_of_cells, edit_id_indicator    
     N_cells = coords.shape[0]
     division_indicator=0
@@ -1185,8 +1187,8 @@ def execute():
     n =num_frames  
     k = start_frame-1  # the first frame of clip     
     kk = 0  # the number of frame within clip   
-    clear_memory_of_models(trackers, segmentor, refiner)
-    trackers, segmentor, refiner=create_models(models)   
+    clear_memory_of_models(tracker, segmentor, refiner)
+    tracker, segmentor, refiner=create_models(models)   
     feedback_label.config(text="Execution is about to begin ...")
     start_flash([button_pause],"pause", page4, flashers)
     progressbar.grid(row=1, column=0, padx=20)
@@ -1198,7 +1200,7 @@ def execute():
          fluor_images,fluor_images_compressed,bright_images,fluor_names,bright_names =load_clip(k,full_core_fluor_name,full_core_bright_name,n_digits, num_frames, first_frame_number)
        
         clip_centr = predict_tracking_general(
-                coords, fluor_images, fluor_images_compressed, fluor_names, k, out_folders[0], trackers,n, cell_radius, frame_size)
+                coords, fluor_images, fluor_images_compressed, fluor_names, k, out_folders[0], tracker,n, cell_radius, frame_size)
         print("TRACKING PREDICTED FOR CLIP BEGINNING WITH FRAME  ", k+1)
         print("clip_centr=", clip_centr) 
        

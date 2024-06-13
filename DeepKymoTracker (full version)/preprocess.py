@@ -67,42 +67,22 @@ def create_output_folders(outpath):
    return subfolders
 ############# upload only one tracker at a time (to save memory)
 def create_models(models):    
-    segmentor = model_from_json(models[6][0])
-    segmentor.load_weights(models[6][1] + "-weights.h5")   
+    segmentor = model_from_json(models[1][0])
+    segmentor.load_weights(models[1][1] + "-weights.h5")   
     segmentor.compile(Adam(lr=0.003), loss='mse',metrics=['mae'])
-    refiner = model_from_json(models[7][0])
-    refiner.load_weights(models[7][1] + "-weights.h5")   
-    refiner.compile(Adam(lr=0.003), loss='mse',metrics=['mae'])
-  
-    trackers=[]
+    print("segmentor is ready")
     
-    trackers_template=[0, None, None, None, None,5]
-    """
-    if N_cells==1:
-        trackers_template=[0, None, None, None, None]
-    elif N_cells==2:
-        trackers_template=[None, 1, None, None, None]       
-    elif N_cells==3:
-      trackers_template=[None, None, 2, None, None]
-    elif N_cells==4:
-      trackers_template=[None, None, None, 3, None]
-    else:
-        trackers_template=[None, None, None, None, 4]  
-    """   
-    for i in range(6):# 5 is the number of trackers available
-         item=trackers_template[i]
-         if item!=None:                  
-            model_track_read=models[i]
-            print("i=", i)
-            print("len(model_track_read)=", len(model_track_read))
-            model_track = model_from_json(model_track_read[0])
-            model_track.load_weights(model_track_read[1] + "-weights.h5")   
-            model_track.compile(Adam(lr=0.003), loss='mse',metrics=['mae'])
-            print("Tracker-%s is created" %(i+1))
-         else:
-             model_track=None
-         trackers.append(model_track)
-    return trackers, segmentor, refiner
+    refiner = model_from_json(models[2][0])
+    refiner.load_weights(models[2][1] + "-weights.h5")   
+    refiner.compile(Adam(lr=0.003), loss='mse',metrics=['mae'])   
+    print("refiner is ready")
+    
+    tracker = model_from_json(models[0][0])
+    tracker.load_weights(models[0][1] + "-weights.h5")   
+    tracker.compile(Adam(lr=0.003), loss='mse',metrics=['mae'])
+    print("tracker is ready")
+         
+    return tracker, segmentor, refiner
 ############################################################
 def characters(x): # in most cases it is [-13:-9] (for names like t0001_ch02.tif)
     return(x[-14:-9])# if it is t00001_ch02.tif it should be changed to [-14:-9]
