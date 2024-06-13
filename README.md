@@ -29,7 +29,7 @@ The **DeepKymoTracker (full version)** folder contains the code for the bigger v
 
 ## 3. HOW TO RUN THE ALGORITHM
 
-**Step-1.** You need to install the following:
+**STEP-1.** You need to install the following:
 + Python=3.6.13 
 + Tensorflow= 1.14.0
 + Keras = 2.3.1
@@ -46,7 +46,7 @@ The **DeepKymoTracker (full version)** folder contains the code for the bigger v
 The best way to do it is via Anaconda. For your convenience, the list of conda commands is given in file **Instructions_for_anaconda_packages.txt** (you can find it inside each folder).
 
 
-**StEP-2.** There are 2 versions of DeepKymoTracker in this repository:
+**STEP-2.** There are 2 versions of DeepKymoTracker in this repository:
 1. The short version (**DeepKymoTracker** folder) which is created for illustration purposes for the paper .
 It demopnstrates how Tracker-1, ... Tracker-5, described in the paper, allow to track movies with up to 5 T cells. The interface consists of only one window where you can see the progress of tracking and manually segment trackeing errors if necessary. To run this version, you need to download folders TRAINED MODELS.zip (5 GB) and INPUT_MOVIE_EXAMPLE.zip (426 MB)  from https://doi.org/10.5281/zenodo.10720117, unzip them and place both unzipped folders inside **DeepKymoTracker** folder.
 2. If you would like to use the full multi-page version of DeepKymoTracker,you need to download **DeepKymoTracker (full version)** from this repository, then  download TRAINED MODELS.zip (1.7 GB) from https://doi.org/10.5281/zenodo.11540886 and  INPUT_MOVIE_EXAMPLE.zip (426 MB) from https://doi.org/10.5281/zenodo.10720117, unzip them and place both unzipped folders inside **DeepKymoTracker (full version)** folder.
