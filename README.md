@@ -54,13 +54,13 @@ It demopnstrates how Tracker-1, ... Tracker-5, described in the paper, allow to 
 The instructions below are written for the short vesrion of DeepKymoTracker.  
 
 
-**Step-3.** Run file GUI_execute.py. You will see the following interface:
+**StEP-3.** Run file GUI_execute.py. You will see the following interface:
 
 ![image](https://github.com/khelina/T-cell-lineages-tracking/assets/17193930/d6c00888-c0e3-4de6-a9f8-293c72ef8d74)
 
 
 
-**Step-4.** Follow the prompts (flashing buttons) in the interface, it is easy to do that as all the instructions and the feedback are given in the black window on the top of the screen (yellow font). When answering the question "2. How many cells are there in Frame 1?" you can choose any option, they both work for this particular movie (the difference being in the case of "1 cell" the position of the cell will be calculated automatically whereas for the "More than 1 cell" option you will have to assign that position manually in the popup window).
+**StEP-4.** Follow the prompts (flashing buttons) in the interface, it is easy to do that as all the instructions and the feedback are given in the black window on the top of the screen (yellow font). When answering the question "2. How many cells are there in Frame 1?" you can choose any option, they both work for this particular movie (the difference being in the case of "1 cell" the position of the cell will be calculated automatically whereas for the "More than 1 cell" option you will have to assign that position manually in the popup window).
 You can monitor the progress in the **Current Frame**. If an error occurs push the button **3a. Pause** and then **4. Display results**. After that, you will be able to correct the error. There can be 2 types of tracking errors during execution: ID swappings and missed divisions. To manually correct them, you need to use buttons **5. Start editing IDs** or **6. Start editing division**. After pushing one of these buttons, more detailed instructions for editing will appear in the black window just below them. Read them carefully and follow the prompts. 
 
 For this particular movie, you will have to manually correct 2 missed divisions (in Frame 1910 and Frame 1973) and 2 wrong ID assignments due to big jumps (Frame 2017 and Frame 3119).
@@ -87,7 +87,7 @@ After that, push **4. Execute**.
 **d.** The ID correction in Frame 3119 is conducted similarly:
 ![image](https://github.com/khelina/T-cell-lineages-tracking/assets/17193930/60294618-b563-49f0-8c25-181aeea7fd39)
 
-**Step-5.** Finally, push button **7. Create final movie**. This movie will be saved inside OUTPUT_INPUT_MOVIE_EXAMPLE as avi. file. Also, several folders and files with different output information will be created inside that folder.
+**StEP-5.** Finally, push button **7. Create final movie**. This movie will be saved inside OUTPUT_INPUT_MOVIE_EXAMPLE as avi. file. Also, several folders and files with different output information will be created inside that folder.
 
 **Note:** In this example, we corrected manually only the most obvious tracking errors, we did not bother about the ones occurring during cell occlusions. If you wish you are welcome to correct them as well using **6. Start editing division**.  
 
