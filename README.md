@@ -37,14 +37,13 @@ The **DeepKymoTracker (full version)** folder contains the code for the bigger v
 + H5py = 2.10.0
 + xlsxwriter=3.0.3
 +tifffile=2020.10.1
-pillow (any version is fine)
-matplotlib (any version is fine)
-imagecodecs
++pillow (any version is fine)
++matplotlib (any version is fine)
++imagecodecs
 
 
- 
 
-+ The best way to do it is via Anaconda. For your convenience, the list of conda commands is given in file **Instructions_for_anaconda_packages.txt** (you can find it inside each folder).
+The best way to do it is via Anaconda. For your convenience, the list of conda commands is given in file **Instructions_for_anaconda_packages.txt** (you can find it inside each folder).
 
 
 **Step-2.** There are 2 versions of DeepKymoTracker in this repository:
