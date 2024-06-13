@@ -37,7 +37,10 @@ The **DeepKymoTracker (full version)** folder contains the code for the bigger v
 + H5py = 2.10.0
 
 
-**Step-2.** Download DeepKymoTracker folder from this repository, then download folders TRAINED MODELS.zip (5 GB) and INPUT_MOVIE_EXAMPLE.zip (426 MB)  from https://doi.org/10.5281/zenodo.10720117, unzip them and place both unzipped folders inside DeepKymoTracker folder. If you would like to use the full version of DeepKymoTracker, download TRAINED MODELS.zip (1.7 GB) from https://doi.org/10.5281/zenodo.11540886. 
+**Step-2.** There are 2 varsions of DeepKymoTracker in this repository: 1. The short version (**DeepKymoTracker** folder) which is created for illustration purposes for the paper. It demopnstrates how Tracker-1, ... Tracker-5, described in the paper, allow to track movies with up to 5 T cells. The interface consisit of only 1 window where you can see the progress of tracking and manually segment trackeing errors if necessary. To run this version, you need to download folders TRAINED MODELS.zip (5 GB) and INPUT_MOVIE_EXAMPLE.zip (426 MB)  from https://doi.org/10.5281/zenodo.10720117, unzip them and place both unzipped folders inside **DeepKymoTracker** folder. 
+2. If you would like to use the full multi-page version of DeepKymoTracker,you need to download **DeepKymoTracker (full version)** from this repository, then  download TRAINED MODELS.zip (1.7 GB) from https://doi.org/10.5281/zenodo.11540886 and  INPUT_MOVIE_EXAMPLE.zip (426 MB)
+from https://doi.org/10.5281/zenodo.10720117, unzip them and place both unzipped folders inside **DeepKymoTracker (full version)** folder.
+The instructions below are written for the short vesrion of DeepKymoTracker. The described window corresponds to Step-3 of the full version. The full version also allows you to manually correct segmentation errors (see Step-4). 
 
 
 **Step-3.** Run file GUI_execute.py. You will see the following interface:
