@@ -21,9 +21,9 @@ The flow of the algorithm is shown in the picture below (**Figure-1**):
 
 
 ## 2. THE CONTENTS OF THIS REPOSITORY
-In this repository, you will find 3 folders: DeepKymoTracker (full version), DeepKymoTracker, which is a short version,  and MODELS. 
-In the **MODEL**S folder, you will find the Python code that was used for training deep learning models utilized in DeepKymoTracker and samples of training data for each neural network. 
-The **DeepKymoTracker** folder contains the code for building lineage trees for T-cell movies containing from 1 to 5 cells in each frame. The purpose of creating this short version was to demonstrate how the specialized trackers described in the paper (Tracker-1, ..., Tracker-5) work. To start tracking, run GUI_execute.py. The remaining files contain helper functions.
+In this repository, you will find 3 folders: **DeepKymoTracker (full version)**, **DeepKymoTracker**, which is a short version,  and **MODELS**. 
+In the **MODELS** folder, you will find the Python code that was used for training deep learning models utilized in DeepKymoTracker and samples of training data for each neural network. 
+The **DeepKymoTracker** folder contains the code for building lineage trees for T-cell movies containing from 1 to 5 cells in each frame. The purpose of creating this short version was to demonstrate how the specialized trackers described in the paper https://www.biorxiv.org/content/10.1101/2024.02.28.582654v1 (Tracker-1, ..., Tracker-5) work. To start tracking, run GUI_execute.py. The remaining files contain helper functions.
 The **DeepKymoTracker (full version)** folder contains the code for the bigger version of the software which consists of 5 pages (windows): Pages 1-2 are designed for formatting and preparing movies for processing, Page 3 is for automatic tracking and manual correction of tracking errors (it coincides with the shorter version of the algorithm described above), Page 4 is for manual correction of segmentation errors, Page 5 is for visualization of the results (such as the cells areas, circularities, etc.). The main file is GUI_final.py, and the remaining files contain helper functions. The full version of DeepKymoTracker is capable of tracking any number of cells as it uses Tracker-1-general, CNN described in the paper.
 
 
@@ -39,9 +39,10 @@ The **DeepKymoTracker (full version)** folder contains the code for the bigger v
 
 **Step-2.** There are 2 versions of DeepKymoTracker in this repository:
 1. The short version (**DeepKymoTracker** folder) which is created for illustration purposes for the paper .
-It demopnstrates how Tracker-1, ... Tracker-5, described in the paper https://www.biorxiv.org/content/10.1101/2024.02.28.582654v1, allow to track movies with up to 5 T cells. The interface consists of only one window where you can see the progress of tracking and manually segment trackeing errors if necessary. To run this version, you need to download folders TRAINED MODELS.zip (5 GB) and INPUT_MOVIE_EXAMPLE.zip (426 MB)  from https://doi.org/10.5281/zenodo.10720117, unzip them and place both unzipped folders inside **DeepKymoTracker** folder.
+It demopnstrates how Tracker-1, ... Tracker-5, described in the paper, allow to track movies with up to 5 T cells. The interface consists of only one window where you can see the progress of tracking and manually segment trackeing errors if necessary. To run this version, you need to download folders TRAINED MODELS.zip (5 GB) and INPUT_MOVIE_EXAMPLE.zip (426 MB)  from https://doi.org/10.5281/zenodo.10720117, unzip them and place both unzipped folders inside **DeepKymoTracker** folder.
 2. If you would like to use the full multi-page version of DeepKymoTracker,you need to download **DeepKymoTracker (full version)** from this repository, then  download TRAINED MODELS.zip (1.7 GB) from https://doi.org/10.5281/zenodo.11540886 and  INPUT_MOVIE_EXAMPLE.zip (426 MB) from https://doi.org/10.5281/zenodo.10720117, unzip them and place both unzipped folders inside **DeepKymoTracker (full version)** folder.
-The instructions below are written for the short vesrion of DeepKymoTracker. The described window corresponds to STEP-3 of the full version. The full version also allows you to manually correct segmentation errors (see STEP-4). 
+   
+The instructions below are written for the short vesrion of DeepKymoTracker.  
 
 
 **Step-3.** Run file GUI_execute.py. You will see the following interface:
