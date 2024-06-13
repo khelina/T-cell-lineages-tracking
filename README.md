@@ -30,11 +30,21 @@ The **DeepKymoTracker (full version)** folder contains the code for the bigger v
 ## 3. HOW TO RUN THE ALGORITHM
 
 **Step-1.** You need to install the following:
-+ Python=3.6.13 (The best way to do it is via Anaconda as it contains all the classical libraries such as numpy, os, etc.)
-+ Tensorflow= 1.15.0
++ Python=3.6.13 
++ Tensorflow= 1.14.0
 + Keras = 2.3.1
 + OpenCV = 3.3.1
 + H5py = 2.10.0
++ xlsxwriter=3.0.3
++tifffile=2020.10.1
+pillow (any version is fine)
+matplotlib (any version is fine)
+imagecodecs
+
+
+ 
+
++ The best way to do it is via Anaconda. For your convenience, the list of conda commands is given in file **Instructions_for_anaconda_packages.txt** (you can find it inside each folder).
 
 
 **Step-2.** There are 2 versions of DeepKymoTracker in this repository:
