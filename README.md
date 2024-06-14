@@ -31,7 +31,7 @@ The **DeepKymoTracker (full version)** folder contains the code for the bigger v
 
 **STEP-1.** You need to install the following:
 + Python=3.6.13 
-+ Tensorflow= 1.14.0
++ Tensorflow= 1.15.0 (or Tensorfow-gpu=1.14.0 if you have GPUs on your machine)
 + Keras = 2.3.1
 + OpenCV = 3.3.1
 + H5py = 2.10.0
