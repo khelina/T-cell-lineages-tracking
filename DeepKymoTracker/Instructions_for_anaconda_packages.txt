@@ -6,6 +6,12 @@ Proceed ([y]/n)? y
  
 conda activate py36
 
+if there are no GPUS on your machine:
+
+conda install tensorflow=1.15.0
+
+If you have GPUs:
+
 conda install tensorflow-gpu=1.14.0
 
 conda install keras=2.3.1
