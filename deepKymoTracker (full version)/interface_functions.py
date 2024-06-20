@@ -97,14 +97,33 @@ def show_3_canvases(canvas_previous,canvas_current,canvas_lineage,output_images,
     canvas_lineage.create_image(
         0, 0, anchor=NW, image=photo_image_lin)
 #######################################################
-def cut_well_from_image(im_bright,seed,well_size, first_x0,delta_x, delta_y):
+def calculate_angle(rect):
+    box = cv2.boxPoints(rect)     
+    box = np.int0(np.round(box))
+    x0,y0,x1,y1,x3,y3=box[0][0],box[0][1],box[1][0],box[1][1],box[3][0],box[3][1]
+    angle_1, angle_2=abs(y3-y0)/abs(x3-x0),abs(y1-y0)/abs(x1-x0)
+
+    if angle_1>angle_2:        
+       #first_x0=first_box[0][0]
+       angle=rect[2]+90.
+    else:
+       #first_x0=first_box[0][0] 
+       angle=rect[2]
+    return angle, box
+################################################
+def cut_well_from_image(im_bright,seed,well_size, first_x0,delta_x, delta_y, first_rect):
  mask=None
  rot_indicator="no"# shows if you need to rotate final image or not
  ww=[]
  hh=[]
  low =np.min(im_bright)
  high =np.max(im_bright)
- rect=[0,1,2]   
+ #####
+ rect=first_rect      
+ #box = cv2.boxPoints(rect)     
+ #box = np.int0(np.round(box))      
+ 
+ ########   
  for i in range(low,high+1,1):
    ret,thresh = cv2.threshold(im_bright,low+i,high,cv2.THRESH_BINARY_INV)# here you can adjust threshold (it is now from 130 to 255)   
    thresh[thresh!=0]=255 
@@ -115,32 +134,18 @@ def cut_well_from_image(im_bright,seed,well_size, first_x0,delta_x, delta_y):
    fill_image-=thresh   
    closing = cv2.morphologyEx(fill_image, cv2.MORPH_CLOSE, (5,5))    
    _,contours, hierarchy = cv2.findContours(closing,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)     
-   
+   print("len(contours) in cut_well_from_image=", len(contours))
    if len(contours)==1:       
        cnt=contours[0]
-       rect = cv2.minAreaRect(cnt)             
-       box = cv2.boxPoints(rect)    
-       box = np.int0(np.round(box))
-       w,h=rect[1][0],rect[1][1]
-       ww.append(w)
-       hh.append(h)
-       #print("w=",w)
-       #print("h=",w)
-       #thr_name=os.path.join(destin_folder,"thresh_%s_width_%s.tif" % (i,w))
-       #cv2.imwrite(thr_name, thresh)
-       #if 520000<=area<=545000:
+       rect_temp = cv2.minAreaRect(cnt)             
+       box_temp = cv2.boxPoints(rect_temp)    
+       box_temp = np.int0(np.round(box_temp))
+       w,h=rect_temp[1][0],rect_temp[1][1]       
        if (well_size-40<=w<=well_size+40 and well_size-40<=h<=well_size+40) :
-          rect = cv2.minAreaRect(cnt)             
-          box = cv2.boxPoints(rect)    
-          box = np.int0(np.round(box))
-          #thr_name=os.path.join(destin_folder,"thresh_%s.tif" % i)
-          #cv2.imwrite(thr_name, thresh)
+          rect = rect_temp        
           break
-      
-   #else:
-         #continue
- angle=rect[2]
- angle=90.+angle   
+       
+ angle, box=calculate_angle(rect)   
  rows,cols = im_bright.shape 
  M = cv2.getRotationMatrix2D((int(round(cols/2)),int(round(rows/2))),angle,1)
 ######3 3  rotate  it horisontal 
@@ -153,19 +158,19 @@ def cut_well_from_image(im_bright,seed,well_size, first_x0,delta_x, delta_y):
  rect_new = cv2.minAreaRect(cnt_new)             
  box_final = cv2.boxPoints(rect_new)    
  box_final = np.int0(np.round(box_final))
-
+ print("box_final=", box_final)
  xs=[box_final[k][0] for k in range(4)]
  ys=[box_final[k][1] for k in range(4)]
- index_y_min=ys.index(min(ys)) 
- x_min, y_min=xs[index_y_min],ys[index_y_min]
- x_max, y_max=max(xs), max(ys)
+ #index=ys.index(min(ys))
+ global x_min, y_min
  
- #x_min, x_max=min(xs), max(xs)
- #y_min, y_max=min(ys), max(ys)
+ x_min, y_min=min(xs),min(ys)
+ print(" x_min after, y_min after=", x_min," , ", y_min)
+ #x_min, y_min=box_final[1][0],box_final[1][1] 
  x_min+=delta_x
  y_min+=delta_y
 
- print(" x_min, y_min=", x_min," , ", y_min)
+ print(" x_min after, y_min after=", x_min," , ", y_min)
 ############################################# 
  #width=x_max-x_min
  #height=y_max-y_min
@@ -176,8 +181,9 @@ def cut_well_from_image(im_bright,seed,well_size, first_x0,delta_x, delta_y):
  rot_bright = cv2.warpAffine(im_bright,M,(cols,rows))
  #rot_bright = cv2.rotate(rot_bright_init, cv2.ROTATE_90_COUNTERCLOCKWISE)
  cut_bright_init=rot_bright[y_min:y_min+side,x_min:x_min+side]
+ final_bright=cut_bright_init
  #cut_bright = cv2.rotate(cut_bright_init, cv2.ROTATE_90_COUNTERCLOCKWISE)
-
+ """
  current_x0=box[0][0]
  if abs(current_x0-first_x0)>=well_size-40:
     print("rotation problem detected")
@@ -191,8 +197,8 @@ def cut_well_from_image(im_bright,seed,well_size, first_x0,delta_x, delta_y):
   
  #final_name=os.path.join(destin_folder,"final_%s_width_%s.tif" % (i,w))
  #cv2.imwrite(final_name, final)
-
- return final_bright,M,x_min, x_max,y_min, y_max, rows, cols, rot_indicator, rot_bright
+ """
+ return final_bright,M,x_min,y_min, rows, cols, rot_indicator, rot_bright
 ##################################################################
 
 #################################################################
