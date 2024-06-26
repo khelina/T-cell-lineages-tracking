@@ -134,7 +134,7 @@ def cut_well_from_image(im_bright,seed,well_size, first_x0,delta_x, delta_y, fir
    fill_image-=thresh   
    closing = cv2.morphologyEx(fill_image, cv2.MORPH_CLOSE, (5,5))    
    _,contours, hierarchy = cv2.findContours(closing,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)     
-   print("len(contours) in cut_well_from_image=", len(contours))
+   #print("len(contours) in cut_well_from_image=", len(contours))
    if len(contours)==1:       
        cnt=contours[0]
        rect_temp = cv2.minAreaRect(cnt)             
@@ -158,19 +158,19 @@ def cut_well_from_image(im_bright,seed,well_size, first_x0,delta_x, delta_y, fir
  rect_new = cv2.minAreaRect(cnt_new)             
  box_final = cv2.boxPoints(rect_new)    
  box_final = np.int0(np.round(box_final))
- print("box_final=", box_final)
+ #print("box_final=", box_final)
  xs=[box_final[k][0] for k in range(4)]
  ys=[box_final[k][1] for k in range(4)]
  #index=ys.index(min(ys))
  global x_min, y_min
  
  x_min, y_min=min(xs),min(ys)
- print(" x_min after, y_min after=", x_min," , ", y_min)
+ #print(" x_min after, y_min after=", x_min," , ", y_min)
  #x_min, y_min=box_final[1][0],box_final[1][1] 
  x_min+=delta_x
  y_min+=delta_y
 
- print(" x_min after, y_min after=", x_min," , ", y_min)
+ #print(" x_min after, y_min after=", x_min," , ", y_min)
 ############################################# 
  #width=x_max-x_min
  #height=y_max-y_min

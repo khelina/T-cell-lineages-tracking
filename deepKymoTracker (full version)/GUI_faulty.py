@@ -294,8 +294,8 @@ low_thr, upp_thr=IntVar(), IntVar()
 low_thr.set(0)
 #im=np.zeros((382,382))
 
-global cols, rows, cx, cy, length, M, well
-cols,rows,cx,cy, length,M, well =382,382,0,0,1,np.zeros((2,3)),np.zeros((382,382))
+global cols, rows, cx, cy, length, M, imm
+cols,rows,cx,cy, length,M, imm =382,382,0,0,1,np.zeros((2,3)),np.zeros((382,382))
 
 global coords_1, my_path,intensities,bright_names,iik
 coords_1,my_path,intensities,bright_names=[],'',[], []
@@ -307,16 +307,14 @@ global  flashers
 flashers ={}
 """
 global start_flash, stop_flash, turn_image_into_tkinter, load_image_names,cut_all
-from interface_functions import start_flash, stop_flash, turn_image_into_tkinter, cut_well_from_image, calculate_angle
-from preprocess import load_image_names, extract_file_name,extract_red_frame_numbers
+from interface_functions import start_flash, stop_flash, turn_image_into_tkinter, cut_well_from_image
+from preprocess import load_image_names
 ##################################################
 def select_one_bright():    
-    global my_path, my_destin, bright_names_sorted,fluor_names_sorted, red_names_sorted,first_number 
+    global my_path, my_destin, bright_names_sorted,fluor_names_sorted 
     my_path=filedialog.askopenfilename()
-    full_core_name, n_digits, first_number=extract_file_name(my_path)
-    
     movie_dir=os.path.dirname(my_path)
-    bright_names_sorted,fluor_names_sorted, red_names_sorted =load_image_names(movie_dir)
+    bright_names_sorted,fluor_names_sorted =load_image_names(movie_dir)
         
     my_destin_1=os.getcwd() 
     my_destin=os.path.join(my_destin_1,"INPUT_MOVIE "+os.path.basename(movie_dir))
@@ -327,7 +325,6 @@ def select_one_bright():
     global photo_first# the same image in PIL (for display)
     global first_bright# the image in opencv (as array, can measure intensities)
     first_bright=cv2.imread(my_path,0)# 0 is very important!!!!
-    
     photo_first=turn_image_into_tkinter(first_bright, 382)
     
     canvas_left.create_image(0,0, anchor=NW, image=photo_first)
@@ -355,7 +352,7 @@ def draw_circle_p3(event):# draw red circles on borders to measure intensities
     global intensities
     canvas_left.create_oval(event.x-1,event.y-1,event.x+1,event.y+1,outline = "red",fill = "red",width = 2)
     coords_1.append([event.x, event.y])  
-    intensity=first_bright[int(event.y*well.shape[1]/382),int(event.x*well.shape[0]/382)]
+    intensity=first_bright[int(event.y*imm.shape[1]/382),int(event.x*imm.shape[0]/382)]
     intensities.append(intensity)
     if len(coords_1)==2:
         start_flash([button_threshold], "thresh",page3,flashers)   
@@ -425,7 +422,7 @@ def choose_well(event):# click on the well of interest, get green circle and red
     global iik
     canvas_mid.delete(iik)
     global seed, seeds    
-    iik=canvas_mid.create_oval(event.x-1,event.y-1,event.x+1,event.y+1,outline = "green",fill = "green",width = 5)
+    i=canvas_mid.create_oval(event.x-1,event.y-1,event.x+1,event.y+1,outline = "green",fill = "green",width = 5)
     seed=(int(event.x*thresh.shape[1]/382), int(event.y*thresh.shape[0]/382))
     seeds.append(seed)
     print("seed=", seed)
@@ -443,28 +440,29 @@ def choose_well(event):# click on the well of interest, get green circle and red
     print("len(contours)=", len(contours))
     cnt=contours[0]
     
-    global first_rect,first_x0, first_box, angle  
-    first_rect = cv2.minAreaRect(cnt)
-    angle, first_box=calculate_angle(first_rect)
+    global box,first_x0  
+    rect = cv2.minAreaRect(cnt)      
+    box = cv2.boxPoints(rect)     
+    box = np.int0(np.round(box))      
+    first_x0=box[0][0]
     
-    first_x0=first_box[0][0]
-   
+      
     global closing_2
     closing_1=cv2.cvtColor(closing,cv2.COLOR_GRAY2RGB)
-    cv2.drawContours(closing_1,[first_box],0,(0,0,255),5)# draw red rect around detected well 
+    cv2.drawContours(closing_1,[box],0,(0,0,255),5)# draw red rect around detected well 
     closing_2=turn_image_into_tkinter(closing_1, 382)   
     canvas_right.create_image(0,0, anchor=NW, image=closing_2)    
     ######## here it draws red rect in fluorescent image of canvas_left
     im_copy=first_bright.copy()# 
-    global photo_im_red,rows,cols,M_first
+    global photo_im_red,angle,rows,cols,M
     im_red=cv2.cvtColor(im_copy,cv2.COLOR_GRAY2RGB)
-    cv2.drawContours(im_red,[first_box],0,(0,0,255),5)    
+    cv2.drawContours(im_red,[box],0,(0,0,255),5)    
     photo_im_red=turn_image_into_tkinter(im_red, 382)   
     canvas_left.create_image(0,0, anchor=NW, image=photo_im_red)
-    #angle=first_rect[2]
-    #angle=first_rect[2]+90.
+    angle=rect[2]+90.
+   
     rows,cols = first_bright.shape 
-    M_first = cv2.getRotationMatrix2D((int(round(cols/2)),int(round(rows/2))),angle,1)   
+    M = cv2.getRotationMatrix2D((int(round(cols/2)),int(round(rows/2))),angle,1)   
     l_finish.configure(text="Check that the well has been detected correctly: a red frame should appear around the well.\nIf it is not correct go back to sliding bar."
                        "\nFinally, push Button 3 to check the result.")    
 ############################################
@@ -476,34 +474,35 @@ def cut_first_well():# cut well in the first image and display it in canvas_mid
  global canvas_mid 
  canvas_mid.delete("all")
  global  well_size
- well_size=382
  #################### draw temp image (binary) to rotate it and find rect_new
- print("first box=", first_box)
+ print("first box=", box)
  temp=np.zeros(first_bright.shape, np.uint8)
- cv2.drawContours(temp,[first_box],0,255,-1)
- dst = cv2.warpAffine(temp,M_first,(cols,rows))
+ cv2.drawContours(temp,[box],0,255,-1)
+ dst = cv2.warpAffine(temp,M,(cols,rows))
  #cv2.imwrite(r"C:\Users\kfedorchuk\Desktop\dst.tif", dst)
 ####################  4. calculate its borders   
  _,contours_new, hierarchy = cv2.findContours(dst,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
  cnt_new=contours_new[0]
  rect_new = cv2.minAreaRect(cnt_new)             
- box_final = cv2.boxPoints(rect_new)# horisontal well    
+ box_final = cv2.boxPoints(rect_new)    
  box_final = np.int0(np.round(box_final))
  print("first box_final=", box_final)
  xs=[box_final[k][0] for k in range(4)]
  ys=[box_final[k][1] for k in range(4)]
- #index=ys.index(min(ys))
+ index=ys.index(min(ys))
  global x_min_first, y_min_first
- x_min_first, y_min_first=min(xs),min(ys)
- print("x_min_first=", x_min_first)
- #x_min_first=xs[index]
- #y_min_first=ys[index]
-
+ x_min_first=xs[index]
+ y_min_first=ys[index]
  
+ #x_min_first, x_max=min(xs), max(xs)
+ #y_min_first, y_max=min(ys), max(ys)
  print(" first x_min_first, y_min_first=", x_min_first," , ", y_min_first)
-
+#############################################  
+ global well_size
+ well_size=382
+####### 5. apply 
  global rot_bright
- rot_bright = cv2.warpAffine(first_bright,M_first,(cols,rows))
+ rot_bright = cv2.warpAffine(first_bright,M,(cols,rows))
  global cut_bright
  cut_bright=rot_bright[y_min_first:y_min_first+well_size, x_min_first:x_min_first+well_size]
  #cut_bright = cv2.rotate(cut_bright_init, cv2.ROTATE_90_COUNTERCLOCKWISE)
@@ -517,37 +516,9 @@ def cut_first_well():# cut well in the first image and display it in canvas_mid
  global delta_x, delta_y
  delta_x, delta_y=0,0
 ######################################################
-def edit_first_frame_shift():
-    canvas_mid.unbind("<Button-1>")
-    canvas_mid.bind('<B1-Motion>', move)
-    canvas_mid.bind("<ButtonRelease>", cut_and_save_first)
-       
-    canvas_mid.delete("all")  
-    global x_img,y_img, points, x_last,y_last,dx,dy, x0,y0, br_image
-    x0,y0=x_min_first, y_min_first
-    #print("x0=", x0)
-    #print("y0", y0)
-    x_img,y_img, x_last,y_last,dx,dy=  0,0,x0,y0,0,0
-    points=[]
-    global new_name
-    head, tail=os.path.split(my_path)
-    new_name=os.path.join(my_destin,tail)
-    #############
-    bright_name=bright_names_sorted[first_number]
-    bright_image=cv2.imread(bright_name,-1)  
-    final_bright,M,x_min,y_min, rows, cols, rot_indicator, rot_bright=cut_well_from_image(bright_image,seed,well_size,first_x0, delta_x, delta_y, first_rect)
-    br_image=rot_bright
-    ####################
-    #br_image= rot_bright
-    global image1,imageFinal
-    
-    original_size=br_image.shape[0]
-    image1=turn_image_into_tkinter(br_image, original_size)
- 
-    imageFinal = canvas_mid.create_image(-x_min_first, -y_min_first, image = image1,anchor='nw')
-    #canvas_right.create_image(-x_min-Margin, -y_min-Margin, image = image1,anchor='nw') 
+
 ######################################################
-def edit_first_frame_shift_correct():
+def edit_first_frame_shift():
     canvas_mid.unbind("<Button-1>")
     canvas_mid.bind('<B1-Motion>', move)
     canvas_mid.bind("<ButtonRelease>", cut_and_save_first)
@@ -601,21 +572,17 @@ new_fl_names= None
 #################################
    
 def cut_bright_wells():
-  
   #print("seed=", seed)
   #bright_names_sorted,fluor_names_sorted =load_image_names(source)
   global rotation_matrices,new_br_names, rotated_images, boxes, final_boxes
   rotation_matrices, new_br_names, rotated_images=[],[],[]
   boxes, final_boxes=[],[]
-  #for k in range(1681):
   for k in range(len(bright_names_sorted)):
     print("frame_number=", k+1)
     bright_name=bright_names_sorted[k]
     bright_image=cv2.imread(bright_name,-1)  
-    final_bright,M,x_min,y_min, rows, cols, rot_indicator, rot_bright=cut_well_from_image(bright_image,seed,well_size,first_x0, delta_x, delta_y, first_rect)
-    rotation_matrices.append((M,x_min,y_min, rows, cols, rot_indicator))
-    #check=(M,x_min, x_max,y_min, y_max, rows, cols, rot_indicator)
-    #print("check=", check)
+    final_bright,M,x_min, x_max,y_min, y_max, rows, cols, rot_indicator, rot_bright=cut_well_from_image(bright_image,seed,well_size,first_x0, delta_x, delta_y)
+    rotation_matrices.append((M,x_min, x_max,y_min, y_max, rows, cols, rot_indicator))
     rotated_images.append(rot_bright) 
     final_bright_squeezed=cv2.resize(final_bright, (382,382), interpolation = cv2.INTER_AREA)
     #final_fluor_squeezed=cv2.resize(final_fluor, (382,382), interpolation = cv2.INTER_AREA)
@@ -659,49 +626,31 @@ def cut_fluor_wells():
   
  canvas_mid.delete("all")
  #############################
-
- list_of_red_frame_numbers =extract_red_frame_numbers(red_names_sorted)
- print("list_of_red_frame_numbers=", list_of_red_frame_numbers)
-
-     
- global rotation_matrices,new_fl_names,new_red_names, first_tk_fl
+ global rotation_matrices,new_fl_names, first_tk_fl
  
- new_fl_names = []
+ new_fl_names=[]
  for k in range(len(fluor_names_sorted)):
     print("fluorescent frame number = ", k+1)
+    fluor_name=fluor_names_sorted[k]
+    fluor_image=cv2.imread(fluor_name,-1)
     info=rotation_matrices[k] 
-    M,x_min,y_min,rows, cols, rot_indicator=info[0], info[1],info[2],info[3],info[4], info[5]    
-    
-    fluor_name=fluor_names_sorted[k]   
-    fluor_image=cv2.imread(fluor_name,-1)        
-    rot_fluor = cv2.warpAffine(fluor_image,M,(cols,rows))    
+    M,x_min, x_max,y_min, y_max, rows, cols, rot_indicator=info[0], info[1],info[2],info[3],info[4], info[5], info[6], info[7]    
+    rot_fluor = cv2.warpAffine(fluor_image,M,(cols,rows))
+    #width, height=x_max-x_min,y_max-y_min
+    #side=max(width,height)
     side=382
     cut_fluor=rot_fluor[y_min:y_min+side,x_min:x_min+side]
+    #cut_fluor = cv2.rotate(cut_fluor_init, cv2.ROTATE_90_COUNTERCLOCKWISE)
     if rot_indicator=="yes":
         final_fluor = cv2.rotate(cut_fluor, cv2.ROTATE_90_COUNTERCLOCKWISE)
     else:
         final_fluor=cut_fluor
+    #final_fluor=rot_fluor[y_min-Margin:y_max+1+Margin,x_min-Margin:x_max+1+Margin]          
     final_fluor_squeezed=cv2.resize(final_fluor, (382,382), interpolation = cv2.INTER_AREA)
     head, tail=os.path.split(fluor_name)
     new_fl_name=os.path.join(my_destin,tail)
     new_fl_names.append(new_fl_name)   
-    cv2.imwrite(new_fl_name, final_fluor_squeezed)
-    ###############################
-    if k in list_of_red_frame_numbers:
-      index=list_of_red_frame_numbers.index(k)
-      red_name=red_names_sorted[index]
-      red_image=cv2.imread(red_name,-1)
-      rot_red = cv2.warpAffine(red_image,M,(cols,rows))
-      cut_red=rot_red[y_min:y_min+side,x_min:x_min+side]    
-      if rot_indicator=="yes":       
-        final_red = cv2.rotate(cut_red, cv2.ROTATE_90_COUNTERCLOCKWISE)
-      else:      
-        final_red=cut_red
-      final_red_squeezed=cv2.resize(final_red, (382,382), interpolation = cv2.INTER_AREA)
-      head, tail=os.path.split(red_name)
-      new_red_name=os.path.join(my_destin,tail)
-      #new_red_names.append(new_red_name)   
-      cv2.imwrite(new_red_name, final_red_squeezed) 
+    cv2.imwrite(new_fl_name, final_fluor_squeezed) 
     if k==0:       
         first_fl=final_fluor_squeezed
         first_tk_fl=turn_image_into_tkinter(first_fl, 382)
@@ -711,8 +660,7 @@ def cut_fluor_wells():
                  "\nNow, you are ready to proceed to STEP 3 of the pipeline.")
  l_fluor.config(text="Fluor images processed, total = " + str(len(new_fl_names))+" frames")
  stop_flash("fluor", page3, flashers)
- button_fluor.config(bg=button_color) 
- print("list_of_red_frame_numbers=", list_of_red_frame_numbers)   
+ button_fluor.config(bg=button_color)    
 ###################################################
 
 ##################################################
@@ -750,30 +698,10 @@ def move(event):# drag image with mouse
     x_img = x
     y_img = y
 #####################  move image inside canvas_right with mouse ( correct shift in one particular frame)
-def cut_and_save(event):
-    global points, br_image, new_name, x0,y0, x_last, y_last
-    points=[]
-    
-    print("x_Last=", x_last)
-    print("y_last=", y_last)
-    patch=br_image[y_last:y_last+well_size, x_last:x_last+well_size]
-    new_x_min, new_y_min=x_last,y_last
-    current_frame_number=frame_slider.get()
-    item=rotation_matrices[current_frame_number-1]
-    M,x_min,y_min,row,cols, rotation_indicator=item[0],item[1],item[2],item[3],item[4], item[5]
-    new_item=(M, x_last,y_last,rows,cols, rotation_indicator)
-    rotation_matrices[current_frame_number-1]=new_item
-    print("patch.shape=", patch.shape)       
-    cv2.imwrite(new_name, patch)
-    global corrected_patch
-    corrected_patch=turn_image_into_tkinter(patch, 382)      
-    #imageFinal = canvas_right.create_image(x_img, y_img, image = image1,anchor='nw')
-    canvas_right.delete("all")
-    canvas_right.create_image(0,0, image = corrected_patch,anchor='nw')
-    
+
    
 ################### save edits to current frame by releasing the mouse 
-def cut_and_save_old(event):
+def cut_and_save(event):
     global points, br_image, new_name, x0,y0, x_last, y_last
     points=[]
     
@@ -797,7 +725,7 @@ def edit_frame_shift():
     frame_number=frame_slider.get()
     print("frame_number=", frame_number)
     item=rotation_matrices[frame_number-1]
-    x_min,y_min=item[1],item[2]
+    x_min, x_max,y_min, y_max=item[1],item[2],item[3],item[4]
     
     canvas_right.delete("all")
   
@@ -812,7 +740,6 @@ def edit_frame_shift():
     br_image= rotated_images[frame_number-1]
     global image1, new_name, imageFinal
     new_name=new_br_names[frame_number-1]
-    print("new_name=", new_name)
     original_size=br_image.shape[0]
     image1=turn_image_into_tkinter(br_image, original_size)      
     imageFinal = canvas_right.create_image(-x_min, -y_min, image = image1,anchor='nw')
@@ -1006,19 +933,14 @@ def choose_folder():
             feedback_label.configure(text="Loading input movie ...")                      
             full_name_fluor = os.path.join(my_dir, filename)
             all_names_fluor.append(full_name_fluor)
-        if filename.endswith("ch02.tif"):
+        else:
             full_name_bright = os.path.join(my_dir, filename)
             all_names_bright.append(full_name_bright)
     global num_frames, full_core_fluor_name, n_digits, first_frame_number, full_core_bright_name
     num_frames=len(all_names_fluor)
-    #full_core_fluor_name, n_digits, first_frame_number= extract_file_name(full_name_fluor)
-    #num_frames=first_frame_number
     full_core_fluor_name, n_digits, first_frame_number= extract_file_name(all_names_fluor[0])    
     input_info_label.config(text= "Input movie:"+ "\n"+str(my_dir)+"\nNumber of frames: "+str(num_frames), fg="#00FFFF", bg="black")
-   
     del all_names_fluor
-    
-    #full_core_bright_name, n_digits, first_frame_number= extract_file_name(full_name_bright)
     full_core_bright_name, n_digits, first_frame_number= extract_file_name(all_names_bright[0])
     print("n_digits=", n_digits)
     del all_names_bright
@@ -1244,21 +1166,11 @@ def create_big_monitor_popup():
     sub4_mon.grid(row=1, column=0, rowspan=1, columnspan=1, sticky=W+E+N+S)
     
 #####################################
-#global view_slider
-#view_slider=None
-#global view_slider, num_frames
-#view_slider = Scale(frame9_page4, from_=1, to=num_frames, orient=HORIZONTAL, troughcolor="green", command=slide_frames, length=370)      
-#view_slider.grid(row=0, column=0, pady=5)
-#view_slider.grid_forget()
 import time
 ########################################################
 def execute():
- #if view_slider:
-      #view_slider.destroy()
  start_time=time.time()
  try:
-    
-    
     canvas_previous.delete("all")
     canvas_current.delete("all")
     canvas_lineage.delete("all")
@@ -1296,18 +1208,10 @@ def execute():
         clip_centr = predict_tracking_general(
                 coords, fluor_images, fluor_images_compressed, fluor_names, k, out_folders[0], tracker,n, cell_radius, frame_size)
         print("TRACKING PREDICTED FOR CLIP BEGINNING WITH FRAME  ", k+1)
-        print("clip_centr=", clip_centr)
-        ##########
+        print("clip_centr=", clip_centr) 
        
         
-        
-        ##########
-        
         for kk in range(len(clip_centr)):# it is actually 4 (number of frames in clip)
-            debug=0
-            if output_images:
-                debug=len(output_images)
-            print("Len(output_images)=",debug)
             print("FRAME NUMBER = ", k+kk+1)# segmenting all the 4 frames in the clip
             progressbar["value"]=((k+kk+1)/num_frames)*100
             time.sleep(0.02)
