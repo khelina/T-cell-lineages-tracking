@@ -90,6 +90,7 @@ def recalculate_centre(segmented_image,old_coords, frame_size):
      black_border=cv2.copyMakeBorder(black, top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize, borderType= cv2.BORDER_REPLICATE )
      a,b,c,d=int(round(x0))+Bordersize-48,int(round(x0))+Bordersize+48,int(round(y0))+Bordersize-48,int(round(y0))+Bordersize+48  
      black_border[c:d, a:b]=segmented_image
+     black_border_copy=black_border.copy()
      black_again=black_border[Bordersize:frame_size+Bordersize,Bordersize:frame_size+Bordersize]
      im2, contours, hierarchy = cv2.findContours(black_again,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)     
      c=contours[0]	
@@ -98,8 +99,11 @@ def recalculate_centre(segmented_image,old_coords, frame_size):
      cY = int(M["m01"] / M["m00"])
      area=np.round(cv2.contourArea(c),2)
      perimeter=np.round(cv2.arcLength(c,True),2)
-     circularity=np.round(4*math.pi*area/perimeter**2,2) 
-     return cX,cY, area,perimeter,circularity
+     circularity=np.round(4*math.pi*area/perimeter**2,2)
+     new_a,new_b,new_c,new_d =int(round(cX))+Bordersize-48,int(round(cX))+Bordersize+48,int(round(cY))+Bordersize-48,int(round(cY))+Bordersize+48
+     
+     new_patch=black_border_copy[new_c:new_d,new_a:new_b]     
+     return cX,cY, area,perimeter,circularity, new_a,new_b,new_c,new_d, new_patch 
 #################################################
 def process_figure_8(im1,centre, frame_size):#separates figure into 2 cells and patches
     if im1.shape==(96,96,3):
@@ -110,10 +114,12 @@ def process_figure_8(im1,centre, frame_size):#separates figure into 2 cells and 
     print("len(contours) inside process_figure_8=", len(contours))
     for kkk  in range(len(contours)):	
         img=np.zeros((96,96),dtype="uint8")
-        cv2.drawContours(img, contours, kkk, 255, -1)        
-        separated_cells.append(img)       
-        cX,cY, area,perimeter,circularity=recalculate_centre(img,(centre[0],centre[1]),frame_size)
-        parameters.append(([cX,cY], area,perimeter,circularity))    
+        cv2.drawContours(img, contours, kkk, 255, -1)
+                
+             
+        cX,cY, area,perimeter,circularity, new_a,new_b,new_c,new_d, new_patch =recalculate_centre(img,(centre[0],centre[1]),frame_size)
+        separated_cells.append(new_patch) 
+        parameters.append(([cX,cY], area,perimeter,circularity, new_a,new_b,new_c,new_d ))    
     return separated_cells,parameters
 #########################################################
 
@@ -159,7 +165,16 @@ def update_dictionary_after_division(cut_patch,cells,text,count,indicator,coords
               
               cells["cell_%s" % kkk][18]=parameters[0][1]#area 
               cells["cell_%s" % kkk][19]=parameters[0][2]#perimeter 
-              cells["cell_%s" % kkk][20]=parameters[0][3]#circularity 
+              cells["cell_%s" % kkk][20]=parameters[0][3]#circularity
+              
+              cells["cell_%s" % kkk][7]=parameters[0][4]#a 
+              cells["cell_%s" % kkk][8]=parameters[0][5]#b 
+              cells["cell_%s" % kkk][9]=parameters[0][6]#c
+              cells["cell_%s" % kkk][10]=parameters[0][7]#d
+              
+              
+              
+              
               print("color-1", colors[text[kkk]])
                        
               cellscopy=copy.deepcopy(cells)                               
@@ -181,7 +196,12 @@ def update_dictionary_after_division(cut_patch,cells,text,count,indicator,coords
               print("cwntroids-2=",  cells["cell_%s" % kkk][6])
               cells["cell_%s" % N_cells][18]=parameters[1][1]#area 
               cells["cell_%s" % N_cells][19]=parameters[1][2]#perimeter 
-              cells["cell_%s" % N_cells][20]=parameters[1][3]#circularity 
+              cells["cell_%s" % N_cells][20]=parameters[1][3]#circularity
+              
+              cells["cell_%s" % N_cells][7]=parameters[1][4]#a 
+              cells["cell_%s" % N_cells][8]=parameters[1][5]#b 
+              cells["cell_%s" % N_cells][9]=parameters[1][6]#c
+              cells["cell_%s" % N_cells][10]=parameters[1][7]#d
               cv2.imwrite("C:\\Users\\kfedorchuk\\Desktop\separated_2.tif",  cells["cell_%s" % (N_cells)][3]) 
               coords=np.concatenate((coords,np.array([cells["cell_%s" % (N_cells)][6][0],cells["cell_%s" % (N_cells)][6][1]]).reshape((1,2))) )             
               count[kkk]=0 

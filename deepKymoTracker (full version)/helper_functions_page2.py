@@ -32,6 +32,9 @@ def load_and_process_page2(path,number_of_frames,progressbar,frame, movie_name):
   fluor_names=[]
   bright_images=[]
   bright_names=[]
+  red_images=[]
+  red_names=[]
+  
   i=0
   for filename in sorted_aphanumeric(os.listdir(path)):
    if "thumb" not in filename and filename.endswith(".TIF"):
@@ -54,7 +57,7 @@ def load_and_process_page2(path,number_of_frames,progressbar,frame, movie_name):
           #new_name+="_ch02.tif"             
           #cv2.imwrite(new_name, a)
           bright_images.append(c)
-        elif ("_w2FITC_" in filename) or ("_w3Multi-EM600_" in filename):
+        elif ("_w2FITC_" in filename) or ("_w3Multi600_" in filename):
           fluor_names.append(filename)
           old_name=os.path.join(path,filename)
           #print("fluor_file_name=", filename)
@@ -64,10 +67,20 @@ def load_and_process_page2(path,number_of_frames,progressbar,frame, movie_name):
           b=process_tif(b)
           #cv2.imwrite(new_name, a)
           fluor_images.append(b)
+        elif ("_w3TRITC_" in filename):
+          red_names.append(filename)
+          old_name=os.path.join(path,filename)
+          #print("fluor_file_name=", filename)
+          b = tiff.imread(old_name)
+          #new_name =os.path.join(destination, filename[:-4])              
+          #new_name+="_ch00.tif"
+          b=process_tif(b)
+          #cv2.imwrite(new_name, a)
+          red_images.append(b)
        
   #page2.update_idletasks()
   #threading.current_thread().return_value = [fluor_images,bright_images]    
-  return fluor_images,bright_images, fluor_names, bright_names
+  return fluor_images,bright_images,red_images, fluor_names, bright_names, red_names
 ############################################################
 def extract_movie_name(name):# name is a filename
   fluor, bright,s,t="FITC", "BF", "_s","_t"
@@ -80,7 +93,7 @@ def extract_movie_name(name):# name is a filename
   movie_name =name[index_s+1:index_t]  
   return movie_name, core
 ###########################################
-def save_images_page2(movie_name,l_feedback,bright_names,fluor_names, bright_images, fluor_images):       
+def save_images_page2(movie_name,l_feedback,bright_names,fluor_names, red_names,bright_images, fluor_images, red_images):       
     software_folder =os. getcwd() 
     destination=os.path.join(software_folder, movie_name)
     print("destination=", destination)
@@ -97,5 +110,10 @@ def save_images_page2(movie_name,l_feedback,bright_names,fluor_names, bright_ima
           filename=fluor_names[k]
           new_name =os.path.join(destination, filename[:-4])
           new_name+="_ch00.tif"             
-          cv2.imwrite(new_name, fluor_images[k])          
+          cv2.imwrite(new_name, fluor_images[k])
+    for k in range(len(red_names)):
+          filename=red_names[k]
+          new_name =os.path.join(destination, filename[:-4])
+          new_name+="_ch01.tif"             
+          cv2.imwrite(new_name, red_images[k])            
     l_feedback.configure(text="Saved images ", fg="#00FFFF", bg="black") 

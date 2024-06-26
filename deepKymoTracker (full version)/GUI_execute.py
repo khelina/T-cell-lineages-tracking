@@ -170,8 +170,8 @@ def create_movie_for_display(value):
         if exact_name==movie_name:
            number_of_frames+=1
     
-    global fluor_images, bright_images,fluor_names, bright_names
-    fluor_images, bright_images,fluor_names, bright_names=load_and_process_page2(path,number_of_frames,progressbar_page2,frame3_page2, movie_name)
+    global fluor_images, bright_images,red_images,fluor_names, bright_names, red_names
+    fluor_images, bright_images,red_images,fluor_names, bright_names, red_names=load_and_process_page2(path,number_of_frames,progressbar_page2,frame3_page2, movie_name)
         
     global photo_fl, photo_br# the same image in PIL (for display)
     global fl,br# the image in opencv (as array, can measure intensities)
@@ -231,7 +231,7 @@ l_feedback.grid(row=0, column=0, padx=250)
 button_choose_folder=tk.Button(frame3_page2,text="1. Choose folder with movies",bg='#9ACD32',activebackground="red",font='TkDefaultFont 10 bold' , command=lambda: explore_folder())
 button_choose_folder.grid(row=0,column=0)
 
-button_save_movie=tk.Button(frame7_page2,text="2. Save processed movie",bg='#9ACD32',activebackground="red",font=all_font , command=lambda: save_images_page2(movie_name,l_feedback,bright_names,fluor_names, bright_images, fluor_images))
+button_save_movie=tk.Button(frame7_page2,text="2. Save processed movie",bg='#9ACD32',activebackground="red",font=all_font , command=lambda: save_images_page2(movie_name,l_feedback,bright_names,fluor_names,red_names, bright_images, fluor_images, red_images))
 button_save_movie.grid(row=0,column=0, padx=20)
 
 ###########################################################################
