@@ -7,7 +7,8 @@ import itertools
 import pickle
 import copy
 from plot import paste_benchmark_patch
-######################################################## 
+########################################################
+
 Bordersize=100
 ################## Apply Tracker-1  to predict centroids in Frame 1 with 1 cell only
 def predict_first_frame(first_clip_compressed, model):
@@ -15,8 +16,8 @@ def predict_first_frame(first_clip_compressed, model):
      VIDEO=np.zeros((100,100,4))    
      for ii in range(4):     
         frame0=first_clip_compressed[ii]
-        frame=frame0/255.
-        #frame=(frame0-np.mean(frame0))/np.std(frame0)
+        #frame=frame0/255.
+        frame=(frame0-np.mean(frame0))/np.std(frame0)
         VIDEO[:,:,ii]=frame               
      test_samples[0,:,:,:]=VIDEO
      test_samples=test_samples.reshape((1,100,100,4,1))   
@@ -72,7 +73,70 @@ def rename_file(destin,infile):
  newest=base+".tif" 
  return newest
 ###################################################
-def predict_tracking_general(coords,fluor_images,fluor_images_compressed,fluor_names,k,destination,trackers,n, cell_radius, frame_size): 
+###################################################
+def predict_tracking_general(coords,fluor_images,fluor_images_compressed,fluor_names,k,destination,trackers,n, cell_radius, frame_size):
+ 
+  N_cells=coords.shape[0]
+  print("n_cells=", N_cells)
+  print("coords=", coords)
+  print("n=",n)
+  print("k=",k)
+  
+  # if clip length is too short replicate necessary number of frames
+  remaining=4
+  if n-k<4:
+       #print("n-k=", n-k)
+       additional=4-(n-k)
+       remaining=4-additional
+       im=fluor_images_compressed[n-k-1]# was n-1
+       for pp in range (additional):
+           fluor_images_compressed.append(im) 
+           
+  clip_centr=[np.zeros((N_cells,2)) for ii in range(4)]
+  print("clip_centr=", clip_centr)
+  print("clip_centr[0][0]=", clip_centr[0][0])
+  tracker=trackers[N_cells-1]
+  centroids=predict_tracking(coords,fluor_images,fluor_images_compressed,fluor_names,k,destination,tracker,n, cell_radius, frame_size)
+  print("centroids=", centroids)
+  print("centroids[0][0]=", centroids[0][0])
+  clip_centr=centroids
+  """
+  for kk in range(4):
+       for ii in range(N_cells):         
+              for kkk in range(2):
+                 clip_centr[kk][ii+kkk]=centroids[kk][kkk]
+  """
+  clip_centr=clip_centr[:(remaining)]
+  print("len(clip_centr) inside predict tracking general=",len(clip_centr))
+  return clip_centr
+######################################################
+def predict_tracking(coords,fluor_images,fluor_images_compressed,fluor_names,k,destination,tracker,n, cell_radius, frame_size):
+     
+   VIDEO=np.zeros((100,100,5))   
+   seed_empty = np.zeros((382,382), np.uint8)
+   markers=draw_exact_pixel_markers(seed_empty,coords, cell_radius)    
+   seed_frame = cv2.resize(markers, (100, 100), interpolation = cv2.INTER_LANCZOS4)                      
+   seed_normalised=(seed_frame-np.mean(seed_frame))/np.std(seed_frame)
+   VIDEO[:,:,0]=seed_normalised  
+   for ii in range(4):     
+       frame_fl=fluor_images_compressed[0+ii]    
+       frame=(frame_fl-np.mean(frame_fl))/np.std(frame_fl)
+       VIDEO[:,:,ii+1]=frame
+
+
+   test_samples=np.zeros((1,100,100,5))             
+   test_samples[0,:,:,:]=VIDEO
+   test_samples=test_samples.reshape((1,100,100,5,1))
+   n_cells=coords.shape[0]
+   if n_cells==1:
+       test_samples=test_samples[:,:,:,1:,:]
+   prediction=tracker.predict(test_samples,batch_size=1,verbose=0)
+   clip_centr=[(prediction[ii]*382.0).reshape((n_cells,2)) for ii in range(4)]
+   
+   return clip_centr
+#######################
+##################################
+def predict_tracking_general_old(coords,fluor_images,fluor_images_compressed,fluor_names,k,destination,tracker,n, cell_radius, frame_size): 
   N_cells=coords.shape[0]  
   # if clip length is too short replicate necessary number of frames
   remaining=4
@@ -85,17 +149,17 @@ def predict_tracking_general(coords,fluor_images,fluor_images_compressed,fluor_n
   clip_centr=[np.zeros((N_cells,2)) for ii in range(4)]# this is the format
   
    
-  tracker_6=trackers[5]
+  #tracker_6=trackers[5]
   for ii in range(0,N_cells, 1):    
           cds=coords[ii:ii+1]
-          centroids=predict_tracking(cds,fluor_images,fluor_images_compressed,fluor_names,k,destination,tracker_6,n, cell_radius, frame_size)    
+          centroids=predict_tracking(cds,fluor_images,fluor_images_compressed,fluor_names,k,destination,tracker,n, cell_radius, frame_size)    
           for kk in range(4):          
              for kkk in range(1):# was 2
                 clip_centr[kk][ii+kkk]=centroids[kk][kkk]
   clip_centr=clip_centr[:(remaining)]  
   return clip_centr
 ######################################################
-def predict_tracking(coords,fluor_images,fluor_images_compressed,fluor_names,k,destination,tracker,n, cell_radius, frame_size):
+def predict_tracking_old(coords,fluor_images,fluor_images_compressed,fluor_names,k,destination,tracker,n, cell_radius, frame_size):
    VIDEO=np.zeros((100,100,5))
    print("frame_size=", frame_size)
    seed_empty=np.zeros((frame_size,frame_size), np.uint8)    
@@ -156,19 +220,7 @@ def force_manual_IDs(clip_centr,coords,kk, cell_radius):# corrects tracking erro
            clip_centr[kk]=frame   
     return clip_centr
 ######################################################
-def force_manual_IDs_old(clip_centr,coords,kk, cell_radius):# corrects tracking errors in frame kk
-    if kk==0:
-        clip_centr[kk]=coords
-    else:
-       distances=[]
-       frame=clip_centr[kk]
-       for i in range(len(coords)):       
-          dist=math.sqrt((frame[i][0]-coords[i][0])**2+(frame[i][1]-coords[i][1])**2)
-          if dist>=cell_radius:
-           frame[i]=coords[i]
-           clip_centr[kk]=frame
-   
-    return clip_centr
+
 #########################################
 def refiner_predict(output_segm,fluor,bright,refiner):# output_segm is binary 0,255 image, not normalized
     frame=np.zeros((96,96,3))
@@ -212,7 +264,9 @@ def calculate_cell_parametres(segmented_patch,a,b,c,d, frame_size):
     image_with_one_cell_border[c:d, a:b] = segmented_patch
     final_image=image_with_one_cell_border[Bordersize:frame_size+Bordersize,Bordersize:frame_size+Bordersize] 
     im2, contours, hierarchy = cv2.findContours(final_image,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
-    cell=contours[0]                          
+    cell=contours[0]
+    bounding_box= cv2.boundingRect(cell)
+                              
     area=np.round(cv2.contourArea(cell),2)
     perimeter=np.round(cv2.arcLength(cell,True),2)
     circularity=np.round(4*math.pi*area/perimeter**2,2)     
@@ -221,13 +275,12 @@ def calculate_cell_parametres(segmented_patch,a,b,c,d, frame_size):
         M["m00"]=0.001
     cX = np.round(M["m10"] / M["m00"],2)
     cY = np.round(M["m01"] / M["m00"],2)     
-    #cX = int(M["m10"] / M["m00"])
-    #cY = int(M["m01"] / M["m00"])   
-    return cX,cY,area,perimeter,circularity
+     
+    return cX,cY,area,perimeter,circularity, bounding_box
 ############################################
 def segment_manual_patch(segmentor, refiner,empty_fluor,empty_bright,centroid,coord, cell_radius, frame_size, p_size,marker,final_mask,cell_number):# segments frame and creates dictionary of cells         
          #p_size=48 # this is  half of patch size (usually 96x96)
-         value_1 = float(np.mean(empty_fluor))
+         #value_1 = float(np.mean(empty_fluor))
          
          empty_fluor_base=cv2.copyMakeBorder(empty_fluor, top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize, borderType= cv2.BORDER_CONSTANT, value = float(np.min(empty_fluor)))
          empty_bright_base=cv2.copyMakeBorder(empty_bright, top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize, borderType= cv2.BORDER_CONSTANT, value = float(np.mean(empty_bright)))
@@ -309,6 +362,28 @@ def refine_segmentation(segmentor, refiner,empty_fluor,empty_bright,centroid,cel
       return segmented_frame, segmented_patch,a,b,c,d, final_mask
           
 #############
+def check_marker(segmented_patch,marker, frame_size, a,b,c,d):
+    x0,y0=int(round(marker[0])), int(round(marker[1]))
+    if segmented_patch.dtype!='uint8':
+         segmented_patch = segmented_patch.astype('uint8')
+    im2, contours, hierarchy = cv2.findContours(segmented_patch,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
+    counter=0
+    for cnt in contours:# choose contour which contains (x0,y0)
+         big=np.zeros((frame_size+Bordersize*2,frame_size+Bordersize*2),dtype="uint8")
+         one=np.zeros((segmented_patch.shape),dtype="uint8")
+         one=cv2.drawContours(one,[cnt],0,255, -1)
+         big[c:d,a:b]=one
+         test_image=big[Bordersize:frame_size+Bordersize,Bordersize:frame_size+Bordersize]
+         if test_image[y0,x0]==255:
+             cleaned_patch=one
+             counter+=1
+             break
+    if counter==0:# replace segmented cell with small circle if none contains (x0,y0)
+        image_with_circle_border=np.zeros((frame_size+Bordersize*2,frame_size+Bordersize*2),dtype="uint8")        
+        cv2.circle(image_with_circle_border, (x0+Bordersize,y0+Bordersize), 3, cell_number+1, -1)
+        cleaned_patch= image_with_circle_border[c:d,a:b]
+    return cleaned_patch
+#####################
 def clean_manual_patch(output_raw,marker,a,b,c,d,frame_size, final_mask,cell_number):# leave only the contour which contains marker when correcting 
 # segmentation manually; otherwise, output empty patch
     x0,y0=int(round(marker[0])), int(round(marker[1]))
@@ -347,12 +422,46 @@ def clean_manual_patch(output_raw,marker,a,b,c,d,frame_size, final_mask,cell_num
           cleaned_patch=np.zeros((output_raw.shape),dtype="uint8")
           print("there is a problem!!!!")
     return cleaned_patch, final_mask      
+#############################
+def clean_manual_patch_old(output_raw,marker,a,b,c,d,frame_size, final_mask,cell_number):# leave only the contour which contains marker when correcting 
+   
+    cleaned_patch=check_marker(output_raw,marker, frame_size, a,b,c,d)
+    mask_with_one_cell=paste_benchmark_patch(cleaned_patch,a,b,c,d,cell_number, frame_size)
+    final_mask_copy=copy.deepcopy(final_mask)
+    final_mask_copy[final_mask_copy==cell_number+1]=0# delete previous contour of cell
+    final_mask_copy+=mask_with_one_cell# insert current contour of cell
+    test_1, test_2=np.zeros(final_mask.shape),np.zeros(final_mask.shape)
+    test_1[final_mask_copy==cell_number+1]=1
+    test_2[mask_with_one_cell==cell_number+1]=1
+    final_mask=final_mask_copy
+          
+    if np.all(test_1==test_2)==True:
+          print("no problem")
+          final_mask=final_mask_copy
+    else:
+          print("there is a problem!!!!!")
+          x0,y0=int(round(marker[0])), int(round(marker[1]))
+          """
+          image_with_circle_border=np.zeros((frame_size+Bordersize*2,frame_size+Bordersize*2),dtype="uint8")        
+          cv2.circle(image_with_circle_border, (x0+Bordersize,y0+Bordersize), 2, cell_number+1, -1)
+          cleaned_patch= image_with_circle_border[c:d,a:b]
+          mask_with_one_cell=paste_benchmark_patch(cleaned_patch,a,b,c,d,cell_number, frame_size)
+          final_mask_copy=copy.deepcopy(final_mask)
+          final_mask_copy[final_mask_copy==cell_number+1]=0# delete previous contour of cell
+          final_mask_copy+=mask_with_one_cell# insert current contour of cell
+          cleaned_patch=np.zeros((output_raw.shape),dtype="uint8")
+          cv2.circle(cleaned_patch, (x0,y0), 2, cell_number+1, -1)
+          #final_mask=final_mask_copy
+          final_mask=final_mask_copy
+          """
+    
+    return cleaned_patch, final_mask      
 ########################################
 
 #############################
 def segment_patch(segmentor, refiner,empty_fluor,empty_bright,centroid,coord, cell_radius, frame_size, p_size, flag):# segments frame and creates dictionary of cells         
          #p_size=48 # this is  half of patch size (usually 96x96)
-         value_1 = float(np.mean(empty_fluor))
+         #value_1 = float(np.mean(empty_fluor))
          
          empty_fluor_base=cv2.copyMakeBorder(empty_fluor, top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize, borderType= cv2.BORDER_CONSTANT, value = float(np.min(empty_fluor)))
          empty_bright_base=cv2.copyMakeBorder(empty_bright, top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize, borderType= cv2.BORDER_CONSTANT, value = float(np.mean(empty_bright)))
@@ -408,6 +517,13 @@ def segment_patch(segmentor, refiner,empty_fluor,empty_bright,centroid,coord, ce
                break         
          ensemble_output=cv2.resize(ensemble_output, shape, interpolation = cv2.INTER_AREA)
          ensemble_output[ensemble_output!=0]=255
+         ##########
+         im2, contours, hierarchy = cv2.findContours(ensemble_output,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
+         if len(contours)!=0:
+             area=cv2.contourArea(contours[0])
+             print("area=", area)
+         cv2.imwrite("C:\\Users\\asacco\\OneDrive - Swinburne University\\Desktop\\before\\segmented_output_before.tif", ensemble_output) 
+         ##########
          if not np.any(ensemble_output)==True:#if the output patch is black                     
              art_output=np.zeros((frame_size,frame_size),dtype="uint8")
              circle_base=cv2.copyMakeBorder(art_output, top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize, borderType= cv2.BORDER_CONSTANT, value=0. )                
@@ -416,20 +532,24 @@ def segment_patch(segmentor, refiner,empty_fluor,empty_bright,centroid,coord, ce
              a,b,c,d=int(round(x0))+Bordersize-2*p_size,int(round(x0))+Bordersize+ 2*p_size,int(round(y0))+Bordersize-2*p_size,int(round(y0))+Bordersize+2*p_size           
              ensemble_output = circle_base[c:d, a:b]        
          #cleaned_output=clean_patch(ensemble_output, "first cleaning")
+         cv2.imwrite("C:\\Users\\asacco\\OneDrive - Swinburne University\\Desktop\\segmented_output_after.tif", ensemble_output)
+         
          cleaned_output=clean_patch(ensemble_output, flag)
+         
+         cv2.imwrite("C:\\Users\\asacco\\OneDrive - Swinburne University\\Desktop\\segmented_output_clean.tif", cleaned_output)
          return cleaned_output,a,b,c,d  
 ################ Segment all cells in current frame  
-def segment_and_clean(dict_of_divisions,cells,count,coords,text,segmentor, refiner,empty_fluor,empty_bright,centroids,frame_number, manual_id_indicator,mother_number, out_folders, cell_radius, frame_size, colours, p_size, flag):
+def segment_and_clean(dict_of_divisions,cells,count,coords,text,segmentor, refiner,empty_fluor,empty_bright,centroids,frame_number, edit_id_indicator,mother_number, out_folders, cell_radius, frame_size, colours, p_size, flag):
    kernel= np.ones((3,3),np.uint8)
    #p_size=48 
    segmented_outputs=[]# list of all segmented patches (with 1 or2 contours) in frame     
    for p in range(len(centroids)):# Step-1: segment based on tracking results
       centroid=centroids[p]
       coord=coords[p]
-      # ensemble_output= patch with the 1st biggest and the 2nd bigest contours
+      # ensemble_output= patch with the 1st biggest contour
       ensemble_output,a,b,c,d= segment_patch(segmentor, refiner,empty_fluor,empty_bright,centroid,coord, cell_radius, frame_size, p_size, flag)     
       segmented_outputs.append([ensemble_output,a,b,c,d,p])
-      cv2.imwrite("C:\\Users\\kfedorchuk\\Desktop\\segmented_outputs\\output_%s_frame_%s.tif" % (p, frame_number), ensemble_output)                    
+      cv2.imwrite("C:\\Users\\asacco\\OneDrive - Swinburne University\\Desktop\\segmented_outputs\\output_%s_frame_%s.tif" % (p, frame_number), ensemble_output)                    
    # put all segmented patches in one (382,382) frame  init_seg 
    init_seg= np.zeros((frame_size+2*Bordersize,frame_size+2*Bordersize),dtype="float64")
    parallel_image= np.zeros((frame_size+2*Bordersize,frame_size+2*Bordersize),dtype="float64")                       
@@ -448,7 +568,7 @@ def segment_and_clean(dict_of_divisions,cells,count,coords,text,segmentor, refin
       cell_parallel[c:d,a:b]=(image_template*2**patch[5])/1000000 # the powers of 2 for each cell     
       init_seg+=cell
       parallel_image+=cell_parallel
-   cv2.imwrite("C:\\Users\\kfedorchuk\\Desktop\\init_seg\\frame_%s.tif" % (frame_number), parallel_image*10000000)                 
+   cv2.imwrite("C:\\Users\\kfedorchuk\\OneDrive - Swinburne University\\Desktop\\init_seg\\frame_%s.tif" % (frame_number), parallel_image*10000000)                 
  #################### Step-2:try to improve segmentation of too small cells
    init_seg=init_seg[Bordersize:Bordersize+frame_size,Bordersize:Bordersize+frame_size]
    parallel_image=parallel_image[Bordersize:Bordersize+frame_size,Bordersize:Bordersize+frame_size]   
@@ -467,16 +587,18 @@ def segment_and_clean(dict_of_divisions,cells,count,coords,text,segmentor, refin
          a_n,b_n,c_n,d_n=int(round(cX))+Bordersize-p_size,int(round(cX))+Bordersize+p_size,int(round(cY))+Bordersize-p_size,int(round(cY))+Bordersize+p_size      
          real_cells.append([real_binary_contour,cX,cY,a_n,b_n,c_n,d_n,ii])                  
    #print("len(real_cells)=",len(real_cells))
-   if manual_id_indicator=="yes":
+   """
+   if edit_id_indicator=="yes":
        template=coords
    else:
        template=centroids
-   
+   """
    final_list= find_frame_intensities_sorted(real_cells, parallel_image, coords, frame_size)
-   #print("len(final_list)=",len(final_list))   
-   final_list, final_centroids, number_of_splits=split_with_final_list(final_list, coords,frame_number, out_folders, frame_size) 
+   print("len(final_list)=",len(final_list))   
+   final_list, final_centroids, number_of_splits=split_with_final_list(final_list, coords,frame_number, out_folders, frame_size)
+   print("len(final_list)=",len(final_list)) 
    mask_old=create_mask(final_list)
-   cv2.imwrite("C:\\Users\\kfedorchuk\\Desktop\\masks\\frame_%s.tif" % (frame_number), mask_old*50)                    
+   cv2.imwrite("C:\\Users\\asacco\\Desktop\\masks\\frame_%s.tif" % (frame_number), mask_old*50)                    
    ######## create cells={} - dictionary for each cell in a farme   
    cells={}
    empty_fluor_base=cv2.copyMakeBorder(empty_fluor, top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize, borderType= cv2.BORDER_CONSTANT, value = np.mean(empty_fluor))
@@ -499,12 +621,7 @@ def segment_and_clean(dict_of_divisions,cells,count,coords,text,segmentor, refin
        
        segmented_frame, refined_output,a,b,c,d, mask=refine_segmentation(segmentor, refiner,empty_fluor,empty_bright,centroid,cell_radius, frame_size, p_size, centroid,mask_old,number)
        if not np.any(refined_output)==True:# if all zeros in ensemble_output
-         """
-         dilated_output, mask=dilate_cell(ensemble_output,a,b,c,d,mask, number,frame_size)
-         cv2.imwrite("C:\\Users\\kfedorchuk\\Desktop\\dilated_output.tif", dilated_output)
-         cv2.imwrite("C:\\Users\\kfedorchuk\\Desktop\\mask.tif",mask)
-         ensemble_output=dilated_output
-         """
+         
          ensemble_output=ensemble_output_old
          a,b,c,d= a_old,b_old,c_old,d_old
          mask=mask_old
@@ -515,13 +632,13 @@ def segment_and_clean(dict_of_divisions,cells,count,coords,text,segmentor, refin
        #ensemble_output= dilation[c:d,a:b]    
        ensemble_output = ensemble_output.astype('uint8')
        #########
-       cX,cY,area,perimeter,circularity= calculate_cell_parametres(ensemble_output,a,b,c,d, frame_size)
+       cX,cY,area,perimeter,circularity, bounding_box= calculate_cell_parametres(ensemble_output,a,b,c,d, frame_size)
        ###########       
        txt=text[number]
        colour=colours[txt]
        division_indicator="no division"       
        sum_clean=ensemble_output 
-       cells["cell_%s" % number]=[[],[],[],sum_clean,empty_fluor_base,empty_bright_base,[cX,cY],a,b,c,d,txt, frame_number, mask, coords, colour, division_indicator, number, area,perimeter,circularity]                                                                                    
+       cells["cell_%s" % number]=[[],[],bounding_box,sum_clean,empty_fluor_base,empty_bright_base,[cX,cY],a,b,c,d,txt, frame_number, mask, coords, colour, division_indicator, number, area,perimeter,circularity]                                                                                    
    coords=final_centroids
    print("coords=", coords)
    print("coords.shape=", coords.shape)
@@ -588,10 +705,19 @@ def split_with_final_list(final_list, coords, frame_number, out_folders, frame_s
                     cX, cY=coords[k,:]#was k-1
                     markers.append([cX,cY])                                             
                 markers=check_markers(curr_one_contour_item[0], markers)           
-                watersheded=seeded_watershed_final(curr_one_contour_item[0],markers)
-                n=check_watershed(watersheded,number, frame_size)              
-                if n!=number:# if watershed fails go to brute force                    
-                     watersheded=brute_force_separation(curr_one_contour_item[0], number, frame_size)                                                
+                watersheded_first=seeded_watershed_final(curr_one_contour_item[0],markers)
+                n=check_watershed(watersheded_first,number, frame_size)              
+                if n!=number:# if watershed fails go to brute force
+                     watersheded_second=seeded_watershed_final(watersheded_first,markers)
+                     m=check_watershed(watersheded_second,number, frame_size)
+                     if m!=number:
+                        brute_forced=brute_force_separation(curr_one_contour_item[0], number, frame_size)
+                        watersheded=watersheded_second
+                     else:
+                        watersheded=watersheded_second
+                else:
+                 watersheded=watersheded_first
+                                                
                 separated_centroids=np.zeros((number,2))
                 markers_array=np.zeros((number,2))                            
                 for i in range(number):                  
@@ -794,8 +920,10 @@ def check_watershed(watersheded,number, frame_size):
   kernel = np.ones((3, 3),dtype="float64")
   for i in range(number):
     base=np.zeros(((frame_size,frame_size)),dtype="float64")
-    base[watersheded==(i+1)]=255                        
-    base = cv2.erode(base, kernel)
+    base[watersheded==(i+1)]=255
+    base = cv2.morphologyEx(base, cv2.MORPH_OPEN, 
+                           kernel, iterations=1)                         
+    #base = cv2.erode(base, kernel)
     img+=base 
   img=img.astype(np.uint8)                        
   im2, contours, hierarchy = cv2.findContours(img,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)           
@@ -935,25 +1063,31 @@ def clean_patch(output_raw,flag):
          output_raw = output_raw.astype('uint8')
          
          
-  im2_uneroded, contours_uneroded, hierarchy_uneroded = cv2.findContours(output_raw,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
-  #print("len(contours) in the patch before erosion=", len(contours_uneroded))      
+  im2_uneroded, contours, hierarchy_uneroded = cv2.findContours(output_raw,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
+  print("len(contours) in the patch =", len(contours))
+  """      
   kernel= np.ones((3,3),np.uint8)
   output = cv2.erode(output_raw,kernel,iterations = 2)
   #output = cv2.morphologyEx(output_raw,cv2.MORPH_OPEN,kernel, iterations = 1)
     
   im2, contours, hierarchy = cv2.findContours(output,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
-  if len(contours)<len(contours_uneroded):
+  if len(contours)!=len(contours_uneroded):
       output=output_raw
       contours=contours_uneroded
-  #print("len(contours) in the eroded patch=", len(contours)) 
-
-                  
+  print("len(contours) in the eroded patch=", len(contours)) 
+  """
+  output=output_raw                
   if len(contours)==1:
       if flag=="second cleaning":
            cleaned_patches=[output]
            return cleaned_patches
       else:
-          cleaned_patch=output
+          area=cv2.contourArea(contours[0])
+          print("AREA=", area)
+          if area<100:
+            cleaned_patch=output_raw
+          else:
+            cleaned_patch=output
           return cleaned_patch
   else:    
      areas=[]   

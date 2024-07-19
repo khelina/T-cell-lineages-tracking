@@ -130,7 +130,7 @@ def load_models(software_folder):
     global models
     
     directory = os.path.join(software_folder, "TRAINED MODELS")
-    model_names = ["Tracker-1", "Tracker-2", "Tracker-3","Tracker-4","Tracker-5","Tracker-6",
+    model_names = ["Tracker-1", "Tracker-2", "Tracker-3","Tracker-4","Tracker-5",
                    "Segmentor", "Refiner"]
     models = []
     for name in model_names:        
@@ -165,7 +165,31 @@ def choose_folder():
         os.mkdir(outpath)
     out_folders = create_output_folders(outpath)    
     ######## calcilate number of frames, core name in file names
-    ######## and n_digits in numbering files in input movie 
+    ######## and n_digits in numbering files in input movie
+    all_names_fluor=[]
+    all_names_bright=[]
+    for filename in os.listdir(my_dir):   
+        if filename.endswith("ch00.tif"):
+            feedback_label.configure(text="Loading input movie ...")                      
+            full_name_fluor = os.path.join(my_dir, filename)
+            all_names_fluor.append(full_name_fluor)
+        if filename.endswith("ch02.tif"):
+            full_name_bright = os.path.join(my_dir, filename)
+            all_names_bright.append(full_name_bright)
+    global num_frames, full_core_fluor_name, n_digits, first_frame_number, full_core_bright_name
+    num_frames=len(all_names_fluor)
+    #full_core_fluor_name, n_digits, first_frame_number= extract_file_name(full_name_fluor)
+    #num_frames=first_frame_number
+    full_core_fluor_name, n_digits, first_frame_number= extract_file_name(all_names_fluor[0])    
+    input_info_label.config(text= "Input movie:"+ "\n"+str(my_dir)+"\nNumber of frames: "+str(num_frames), fg="#00FFFF", bg="black")
+   
+    del all_names_fluor
+    
+    #full_core_bright_name, n_digits, first_frame_number= extract_file_name(full_name_bright)
+    full_core_bright_name, n_digits, first_frame_number= extract_file_name(all_names_bright[0])
+    print("n_digits=", n_digits)
+    del all_names_bright
+    """
     names=[]
     for filename in os.listdir(my_dir):   
         if filename.endswith("ch00.tif"):
@@ -177,10 +201,10 @@ def choose_folder():
     full_core_name, n_digits, first_frame_number= extract_file_name(names[0])    
     input_info_label.config(text= "Input movie:"+ "\n"+str(my_dir)+"\nNumber of frames: "+str(num_frames), fg="#00FFFF", bg="black")
     del names
-   
+   """
     ########### load the first clip         
     global fluor_images,fluor_images_compressed,bright_images,fluor_names,bright_names                 
-    fluor_images,fluor_images_compressed,bright_images,fluor_names,bright_names =load_clip(0,full_core_name,n_digits, num_frames, first_frame_number)
+    fluor_images,fluor_images_compressed,bright_images,fluor_names,bright_names =load_clip(0,full_core_fluor_name,full_core_bright_name,n_digits, num_frames, first_frame_number)
     global  frame_size, previous_lineage_image     
     frame_size=fluor_images[0].shape[0] 
     if num_frames<=382:
@@ -200,11 +224,12 @@ label_min_cells = tk.Label(
     frame1, text="2. How many cells are there in Frame-1 ?",font='TkDefaultFont 10 bold', bg=label_color)
 label_min_cells.grid(row=3, column=0, padx=2)
 ########################################
-global cell_radius, window_size, max_number_of_cells
+
+global cell_radius, window_size, max_number_of_cells, p_size
 cell_radius=20 
 window_size=382
 max_number_of_cells=5  
-
+p_size=48
 global manual_popup_centroids, coords_very_first # coords_very_first is necessary for plotting lineage later
 manual_popup_centroids, coords_very_first= [],[]
 ################################
@@ -334,8 +359,8 @@ trackers, segmentor, refiner= None, None, None
 
 zero_image = Image.new('RGB', (window_size, window_size))
 zero_image = ImageTk.PhotoImage(zero_image)
-global lineage_images, output_images
-lineage_images, output_images, lineage_images_cv2=[], [zero_image],[] 
+global lineage_images, output_images, flag
+lineage_images, output_images, lineage_images_cv2, flag=[], [zero_image],[], " " 
 ############################################################
 def clear_memory_of_models(trackers, segmentor, refiner):     
      keras.backend.clear_session()    
@@ -345,7 +370,32 @@ def clear_memory_of_models(trackers, segmentor, refiner):
          del refiner        
      if trackers:      
           del trackers    
-     tf.reset_default_graph() 
+     tf.reset_default_graph()
+     from keras.backend.tensorflow_backend import set_session
+     from keras.backend.tensorflow_backend import clear_session
+     from keras.backend.tensorflow_backend import get_session
+     import tensorflow
+
+     # Reset Keras Session
+     def reset_keras():
+       sess = get_session()
+       clear_session()
+       sess.close()
+       sess = get_session()
+
+       try:
+        del classifier # this is from global space - change this as you need
+       except:
+        pass
+
+       print(gc.collect()) # if it's done something you should see a number being outputted
+
+    # use the same config as you used to create the session
+       config = tensorflow.ConfigProto()
+       config.gpu_options.per_process_gpu_memory_fraction = 1
+       config.gpu_options.visible_device_list = "0"
+       set_session(tensorflow.Session(config=config))
+     reset_keras()
 ###########################################
 def cut_lineage(start_frame): # after manual editing
     lineage_per_frame=extract_lineage(outpath)
@@ -387,6 +437,7 @@ def execute():
     k = start_frame-1  # the first frame of clip     
     kk = 0  # the number of frame within clip   
     clear_memory_of_models(trackers, segmentor, refiner)
+    print("CLEARED")
     trackers, segmentor, refiner=create_models(N_cells, models)   
     feedback_label.config(text="Execution is about to begin ...")
     start_flash([button_pause],"pause", page4, flashers)
@@ -396,10 +447,11 @@ def execute():
         global fluor_images, fluor_images_compressed,bright_images, fluor_names, bright_names
         if k>0:
          del fluor_images, fluor_images_compressed,bright_images, fluor_names, bright_names 
-         fluor_images,fluor_images_compressed,bright_images,fluor_names,bright_names =load_clip(k,full_core_name,n_digits, num_frames, first_frame_number)
+         fluor_images,fluor_images_compressed,bright_images,fluor_names,bright_names =load_clip(k,full_core_fluor_name,full_core_bright_name,n_digits, num_frames, first_frame_number)
        
         clip_centr = predict_tracking_general(
                 coords, fluor_images, fluor_images_compressed, fluor_names, k, out_folders[0], trackers,n, cell_radius, frame_size)
+        
         print("TRACKING PREDICTED FOR CLIP BEGINNING WITH FRAME  ", k+1)     
         for kk in range(len(clip_centr)):# it is actually 4 (number of frames in clip)
             print("FRAME NUMBER = ", k+kk+1)# segmenting all the 4 frames in the clip
@@ -413,7 +465,7 @@ def execute():
             empty_fluor = fluor_images[kk]         
             empty_bright = bright_images[kk]            
             count, cells, coords,  text, number_of_splits = segment_and_clean(
-                dict_of_divisions, cells, count, coords, prev_frame,text, segmentor, refiner, empty_fluor, empty_bright, tracked_centroids, k+kk, edit_id_indicator, mother_number, out_folders, cell_radius, frame_size, colours)
+                dict_of_divisions, cells, count, coords,text, segmentor, refiner, empty_fluor, empty_bright, tracked_centroids, k+kk, edit_id_indicator, mother_number, out_folders, cell_radius, frame_size, colours,p_size,"first cleaning")
             #splits.append(number_of_splits)           
             print("cell names after segmentation=", list(cells.keys()))           
             ################## Division Detector,look for figure 8 shape          
