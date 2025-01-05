@@ -10,7 +10,7 @@ Bordersize=100
 def update_color_dictionary(colour_dictionary,new_cell_names,base_colours, colour_counter):    
     for k in range(len(new_cell_names)):
         colour_counter+=1
-        print("count=", colour_counter)
+        #print("count=", colour_counter)
         cell_name =new_cell_names[k]
         if colour_counter <len(base_colours):
             colour_dictionary[cell_name]=base_colours[colour_counter-1]
@@ -49,7 +49,10 @@ def create_first_color_dictionary(max_number_of_cells, init_number_of_cells, num
         [0,140,255,255],#orange
         [255,255,0,255],#aqua
         [147,20,255,255],#deep pink
-        [238,238,0,255]]#cyan  
+        [239,238,0,255],#cyan
+        [240,238,0,255],#cyan 1
+        [0,255,254,255],#yellow 10
+        [0,255,128,255]]#spring green 11
     
   n= int(math.log(max_number_of_cells,2)) +1
     
@@ -88,7 +91,7 @@ def create_first_dictionary_of_xs(new_naive_names,num_frames,max_number_of_cells
       daughters =daughters+[a,b]
     temp_list =daughters   
     all_cell_names=all_cell_names+temp_list
-  print("all_cell_names=", all_cell_names)
+  #print("all_cell_names=", all_cell_names)
   #######################################    
     
   numbers =[len(item) for item in all_cell_names]
@@ -235,13 +238,18 @@ def paste_patch(destin_image,patch,a,b,c,d,color,alpha, frame_size):
     patch=patch.astype(np.uint8)          
     mask=patch.copy()  
     patch=cv2.cvtColor(patch, cv2.COLOR_GRAY2RGBA) 
-    patch[mask==255]=color   
+    patch[mask==255]=color 
+
     alpha_patch = patch[:, :, 3]/255.0
     alpha_patch[mask==255]=alpha
     alpha_patch[mask!=255]=0.0
     alpha_dest = 1.0 - alpha_patch    
     for k in range(0, 3):
        destin_image_border[c:d, a:b, k] = (alpha_patch * patch[:, :, k] +alpha_dest * destin_image_border[c:d, a:b, k])
+    ######### this rectangle is for debugging
+    #a_old,b_old,c_old,d_old=olds[kkk][0],olds[kkk][1],olds[kkk][2],olds[kkk][3]
+    #destin_image_border = cv2.rectangle(destin_image_border, (b_old,d_old), (a_old,c_old), color[:-1], 1)
+    ##############################################
     destin_image_cropped=destin_image_border[Bordersize:frame_size+Bordersize,Bordersize:frame_size+Bordersize]
     return destin_image_cropped
 ##########################################################################
@@ -254,7 +262,7 @@ def paste_benchmark_patch(patch,a,b,c,d,cell_number, frame_size):
     final_image=image_with_one_cell_border[Bordersize:frame_size+Bordersize,Bordersize:frame_size+Bordersize]     
     return final_image
 #######################################################
-def plot_frame(cells,clip_centr,k,kk,fluor_images,fluor_names,out_folders,coords, coords_old, bright_images, bright_names, frame_size, n_digits, first_frame_number, contrast_value, current_lineage_image):      
+def plot_frame(cells,clip_centr,k,kk,fluor_images,fluor_names,out_folders,coords, coords_old, bright_images, bright_names, frame_size, n_digits, first_frame_number, contrast_value, current_lineage_image, p_size):      
        destin_mask=np.zeros((frame_size,frame_size),dtype="uint16")       
        destin_fluor=fluor_images[kk]
        bright_name=bright_names[kk]
@@ -290,7 +298,12 @@ def plot_frame(cells,clip_centr,k,kk,fluor_images,fluor_names,out_folders,coords
          collour=cells["cell_%s" % kkk][15]
          destin_bright=paste_patch(destin_bright,patch_with_contours,a,b,c,d,collour,1.0, frame_size)        
          destin_fluor=paste_patch(destin_fluor,patch_with_contours,a,b,c,d,collour,1.0, frame_size)
-        
+         centroid=cells["cell_%s" % kkk][6]
+         print("centroid=", centroid)
+         start_point, end_point=(int(centroid[0]-p_size), int(centroid[1]-p_size)), (int(centroid[0]+p_size), int(centroid[1]+p_size))
+         print("start_point, end_point=", start_point, end_point)
+         #destin_fluor = cv2.rectangle(destin_fluor, start_point, end_point, collour[:-1], 1)
+         #destin_fluor = cv2.rectangle(destin_fluor, (b,d), (a,c), collour[:-1], 1)
          one_cell_mask =paste_benchmark_patch(output_patch,a,b,c,d,kkk, frame_size)
          destin_mask+= one_cell_mask
          xx,yy=cells["cell_%s" % kkk][6][0],cells["cell_%s" % kkk][6][1]
@@ -303,7 +316,7 @@ def plot_frame(cells,clip_centr,k,kk,fluor_images,fluor_names,out_folders,coords
          #cv2.putText(destin_bright,texxt,(int(xx)-10,int(yy)+5),cv2.FONT_HERSHEY_PLAIN,1,collour,1)         
                   
          coords[kkk,0],coords[kkk,1]=xx, yy
-              
+       print("check_fluor_destin   ",rename_file(out_folders[3],fluor_names[kk]))       
        cv2.imwrite(rename_file(out_folders[3],fluor_names[kk]),destin_fluor)# plot destin_fluor to RESULT FLUOR folder
        
        cv2.imwrite(rename_file(out_folders[9],bright_names[kk]),destin_bright)#plot destin_bright to RESULT BRIGHT folder

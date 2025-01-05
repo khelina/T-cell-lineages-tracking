@@ -147,7 +147,7 @@ def backup_track(clip_centr,coords,kk, cell_radius):# corrects tracking errors i
          clip_centr[kk]=frame
     return clip_centr
 #################################################
-def force_manual_IDs(clip_centr,coords,kk, cell_radius):# corrects tracking errors in frame kk
+def force_manual_IDs(clip_centr,coords,kk):# corrects tracking errors in frame kk
     if kk==0:
         clip_centr[kk]=coords
     else:
@@ -320,7 +320,7 @@ def check_marker(segmented_patch,marker, frame_size, a,b,c,d):
         cv2.circle(image_with_circle_border, (x0+Bordersize,y0+Bordersize), 3, cell_number+1, -1)
         cleaned_patch= image_with_circle_border[c:d,a:b]
     return cleaned_patch
-#####################
+#####################This function is used in manual segmentation correction and in def refine_segmentation
 def clean_manual_patch(output_raw,marker,a,b,c,d,frame_size, final_mask,cell_number):# leave only the contour which contains marker when correcting 
 # segmentation manually; otherwise, output empty patch
     x0,y0=int(round(marker[0])), int(round(marker[1]))
@@ -396,7 +396,7 @@ def clean_manual_patch_old(output_raw,marker,a,b,c,d,frame_size, final_mask,cell
 ########################################
 
 #############################
-def segment_patch(segmentor, refiner,empty_fluor,empty_bright,centroid,coord, cell_radius, frame_size, p_size, flag):# segments frame and creates dictionary of cells         
+def segment_patch(segmentor, refiner,empty_fluor,empty_bright,centroid,coord, cell_radius, frame_size, p_size, flag,frame_number,p):# segments frame and creates dictionary of cells         
          #p_size=48 # this is  half of patch size (usually 96x96)
          #value_1 = float(np.mean(empty_fluor))
          
@@ -417,7 +417,8 @@ def segment_patch(segmentor, refiner,empty_fluor,empty_bright,centroid,coord, ce
           seed_patch_border=seed_patch_base.copy()
           base=np.stack((empty_fluor_border,empty_bright_border,seed_patch_border),axis=2)       
           patch = base[c:d, a:b,:]          
-          shape=(patch.shape[0],patch.shape[1])         
+          shape=(patch.shape[0],patch.shape[1])
+          print("PATCH SHAPE=", shape)
           patch_input=cv2.resize(patch, (96,96), interpolation = cv2.INTER_AREA)
           seed_patch=patch_input[:,:,2]
           seed_patch = seed_patch.astype('uint8')
@@ -459,21 +460,24 @@ def segment_patch(segmentor, refiner,empty_fluor,empty_bright,centroid,coord, ce
          if len(contours)!=0:
              area=cv2.contourArea(contours[0])
              print("area=", area)
-         cv2.imwrite("C:\\Users\\asacco\\OneDrive - Swinburne University\\Desktop\\before\\segmented_output_before.tif", ensemble_output) 
+         cv2.imwrite("C:\\Desktop\\before\\segmented_output_before.tif", ensemble_output) 
          ##########
          if not np.any(ensemble_output)==True:#if the output patch is black                     
              art_output=np.zeros((frame_size,frame_size),dtype="uint8")
              circle_base=cv2.copyMakeBorder(art_output, top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize, borderType= cv2.BORDER_CONSTANT, value=0. )                
              circle_centre=(int(round(x0))+Bordersize,int(round(y0))+Bordersize)
              cv2.circle(circle_base, circle_centre, 3, 255, -1)                 
-             a,b,c,d=int(round(x0))+Bordersize-2*p_size,int(round(x0))+Bordersize+ 2*p_size,int(round(y0))+Bordersize-2*p_size,int(round(y0))+Bordersize+2*p_size           
+             a,b,c,d=int(round(x0))+Bordersize-p_size,int(round(x0))+Bordersize+ p_size,int(round(y0))+Bordersize-p_size,int(round(y0))+Bordersize+p_size           
              ensemble_output = circle_base[c:d, a:b]        
          #cleaned_output=clean_patch(ensemble_output, "first cleaning")
-         cv2.imwrite("C:\\Users\\asacco\\OneDrive - Swinburne University\\Desktop\\segmented_output_after.tif", ensemble_output)
-         
-         cleaned_output=clean_patch(ensemble_output, flag)
-         
-         cv2.imwrite("C:\\Users\\asacco\\OneDrive - Swinburne University\\Desktop\\segmented_output_clean.tif", cleaned_output)
+         #cv2.imwrite("C:\\Users\\Desktop\\segmented_output_after.tif", ensemble_output)
+         cv2.imwrite(r"C:\Users\helina\Desktop\segmented_outputs_before_clean\output_%s_frame_%s.tif" % (p, frame_number+1), ensemble_output)
+         x_coord_patch, y_coord_patch=x00-x0+p_size,y00-y0+p_size
+         print("x00,y00,x0,y0",x00,y00,x0,y0)
+         print("x_coord_patch, y_coord_patch",x_coord_patch, y_coord_patch)
+         cleaned_output=clean_patch(ensemble_output, flag, x_coord_patch, y_coord_patch)
+         cv2.imwrite(r"C:\Users\helina\Desktop\segmented_outputs_after_clean\output_%s_frame_%s.tif" % (p, frame_number+1), cleaned_output) 
+         #cv2.imwrite("C:\\Users\\asacco\\OneDrive - Swinburne University\\Desktop\\segmented_output_clean.tif", cleaned_output)
          return cleaned_output,a,b,c,d  
 ################ Segment all cells in current frame  
 def segment_and_clean(dict_of_divisions,cells,count,coords,text,segmentor, refiner,empty_fluor,empty_bright,centroids,frame_number, edit_id_indicator,mother_number, out_folders, cell_radius, frame_size, colours, p_size, flag):
@@ -484,9 +488,11 @@ def segment_and_clean(dict_of_divisions,cells,count,coords,text,segmentor, refin
       centroid=centroids[p]
       coord=coords[p]
       # ensemble_output= patch with the 1st biggest contour
-      ensemble_output,a,b,c,d= segment_patch(segmentor, refiner,empty_fluor,empty_bright,centroid,coord, cell_radius, frame_size, p_size, flag)     
+      ensemble_output,a,b,c,d= segment_patch(segmentor, refiner,empty_fluor,empty_bright,centroid,coord, cell_radius, frame_size, p_size, flag, frame_number,p)
+      print("centroid,coord inside segment_and_clean=", centroids,coord)
       segmented_outputs.append([ensemble_output,a,b,c,d,p])
-      cv2.imwrite("C:\\Users\\helina\\Desktop\\segmented_outputs\\output_%s_frame_%s.tif" % (p, frame_number), ensemble_output)                    
+      #r"C:\Users\helina\Desktop\segmented_outputs\output_%s_frame_%s.tif"
+                   
    # put all segmented patches in one (382,382) frame  init_seg 
    init_seg= np.zeros((frame_size+2*Bordersize,frame_size+2*Bordersize),dtype="float64")
    parallel_image= np.zeros((frame_size+2*Bordersize,frame_size+2*Bordersize),dtype="float64")                       
@@ -532,10 +538,11 @@ def segment_and_clean(dict_of_divisions,cells,count,coords,text,segmentor, refin
    print("len(final_list)=",len(final_list))   
    final_list, final_centroids, number_of_splits=split_with_final_list(final_list, coords,frame_number, out_folders, frame_size)
    print("len(final_list)=",len(final_list)) 
-   mask_old=create_mask(final_list)# mask_ols is frame where all cells are split and assigned a unique intensity, no occlusions 
+   mask_old=create_mask(final_list)# mask_old is frame where all cells are split and assigned a unique intensity, no occlusions 
    cv2.imwrite("C:\\Users\\helina\\Desktop\\masks_old\\frame_%s.tif" % (frame_number), mask_old*50)                    
    ######## create cells={} - dictionary for each cell in a farme   
    cells={}
+   olds=[]
    empty_fluor_base=cv2.copyMakeBorder(empty_fluor, top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize, borderType= cv2.BORDER_CONSTANT, value = np.mean(empty_fluor))
    empty_bright_base=cv2.copyMakeBorder(empty_bright, top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize, borderType= cv2.BORDER_CONSTANT, value = np.mean(empty_bright))       
    for kkk in range(len(final_list)):
@@ -552,11 +559,11 @@ def segment_and_clean(dict_of_divisions,cells,count,coords,text,segmentor, refin
        
        centroid=[x0,y0]
        ###################################################
-       
+       olds.append([a_old,b_old,c_old,d_old])
        
        segmented_frame, refined_output,a,b,c,d, mask=refine_segmentation(segmentor, refiner,empty_fluor,empty_bright,centroid,cell_radius, frame_size, p_size, centroid,mask_old,number)
        cv2.imwrite("C:\\Users\\helina\\Desktop\\masks_refined\\frame_%s.tif" % (frame_number), mask*50)              
-       if not np.any(refined_output)==True:# if all zeros in ensemble_output
+       if not np.any(refined_output)==True:
          
          ensemble_output=ensemble_output_old
          a,b,c,d= a_old,b_old,c_old,d_old
@@ -580,7 +587,7 @@ def segment_and_clean(dict_of_divisions,cells,count,coords,text,segmentor, refin
    print("coords.shape=", coords.shape)
    cv2.imwrite("C:\\Users\\kfedorchuk\\Desktop\\new_masks\\frame_%s.tif" % (frame_number), mask*50)                   
        
-   return count,cells, coords, text, number_of_splits
+   return count,cells, coords, text, olds
 #######################################################
 def dilate_cell(ensemble_output,a,b,c,d,mask, cell_number,frame_size):
    print("cell_number=", cell_number)
@@ -658,7 +665,7 @@ def split_with_final_list(final_list, coords, frame_number, out_folders, frame_s
                 for i in range(number):                  
                    base=np.zeros(((frame_size,frame_size)),dtype="float64")
                    base[watersheded==(i+1)]=255                  
-                   bases=clean_patch(base, "second cleaning")
+                   bases=clean_patch(base, "second cleaning",0,0)
                    base=bases[0]
                    base1=base.copy()
                    base1=base1.astype("uint8")
@@ -753,8 +760,12 @@ def dist(A,B):# find distance between points A and B
     d=math.sqrt((A[0]-B[0])**2+(A[1]-B[1])**2)
     return d
  ################################
+import itertools
+
+#################################### 
 # create intensitiy dictionary for n_cells.
-# These intensities are powers of 2 divided by 1000000. 
+# These intensities are powers of 2 divided by 1000000.
+# for instance: for n_cells=2, int_dictionary={'1e-06': [0], '2e-06': [1], '3e-06': [0, 1]} 
 def create_int_dictionary(n_cells):    
      cell_ids =[ii for ii in range(n_cells)]
      all_combinations =[]
@@ -772,8 +783,11 @@ def create_int_dictionary(n_cells):
      #print("int_dictionary=", int_dictionary)
      return int_dictionary  
 ###############################################
+n_cells=2
+int_dictionary =create_int_dictionary(n_cells)
+###############################################
 # real_cells is all contours detected in a frame (0, 255)
-# parallel_image is the same frame but with contours with assigned intensities
+# parallel_frame (image) is the same frame but with contours with assigned intensities
 # This function finds all contours and intensities in parallel_frame and  
 def find_frame_intensities_sorted(real_cells, parallel_frame, coords, frame_size):
     n_cells=coords.shape[0]
@@ -1000,10 +1014,32 @@ def clean_patch_old(output,flag):
           cv2.drawContours(cleaned_patch, [contours_separated[iii]] , 0, 255, -1)        
         return cleaned_patch# output is one patch with 2 boggest contours in it  
 ################################
- 
+def find_all_distances_to_center(im):# finds all centroids of contours present in image im   
+    distances=[]
+    if im.dtype!='uint8':
+         im = im.astype('uint8')
+    im2, contours, hierarchy = cv2.findContours(im,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+    for c in contours:                            
+      M = cv2.moments(c) 
+      if M["m00"]==0.:
+        M["m00"]=0.001
+      cX = int(M["m10"] / M["m00"])
+      cY = int(M["m01"] / M["m00"])
+      centroids_list.append([cX,cY])
+    return distances 
+###############################
+def find_distance_to_centre(cnt, centre):
+    #centre=(int(round(im.shape[1]/2)),int(round(im.shape[0]/2)))
+    M = cv2.moments(cnt) 
+    if M["m00"]==0.:
+        M["m00"]=0.001
+    cX = int(M["m10"] / M["m00"])
+    cY = int(M["m01"] / M["m00"])
+    distance= (cX-centre[0])**2+(cY-centre[1])**2
+    return distance
 ###############################
 
-def clean_patch(output_raw,flag):
+def clean_patch(output_raw,flag, x_coord_patch, y_coord_patch):
   
   if output_raw.dtype!='uint8':
          output_raw = output_raw.astype('uint8')
@@ -1027,7 +1063,7 @@ def clean_patch(output_raw,flag):
       if flag=="second cleaning":
            cleaned_patches=[output]
            return cleaned_patches
-      else:
+      else:# do nothing
           area=cv2.contourArea(contours[0])
           print("AREA=", area)
           if area<100:
@@ -1035,19 +1071,25 @@ def clean_patch(output_raw,flag):
           else:
             cleaned_patch=output
           return cleaned_patch
-  else:    
-     areas=[]   
+  else:# if there are more than 1 contour in patch after segmentation, choose the one closesst to the center of the patch
+     #centre=(int(round(output_raw.shape[1]/2)),int(round(output_raw.shape[0]/2)))
+     centre= (x_coord_patch, y_coord_patch)
+     print("centre=", centre)
+     areas=[]
+     distances=[]
      contours_separated=[]    
      for cnt in contours:
          one=np.zeros((output.shape),dtype="uint8")
          one=cv2.drawContours(one,[cnt],0,255, -1)              
-         area=cv2.contourArea(cnt)             
+         area=cv2.contourArea(cnt)
+         distance= find_distance_to_centre(cnt, centre)
+         distances.append(distance)            
          areas.append(area)      
          contours_separated.append(cnt)        
-     w=list(zip(areas,contours_separated))
-     ww=sorted(w,key=lambda student:student[0], reverse=True)
+     w=list(zip(distances,contours_separated))
+     ww=sorted(w,key=lambda student:student[0])
      ress = list(zip(*ww))
-     areas =list(ress[0])     
+     distances =list(ress[0])     
      contours_separated=list(ress[1])    
      if flag=="second cleaning":
        cleaned_patches=[]# first patch has 1 biggest cell, 2nd - 2 biggest cells
@@ -1057,13 +1099,14 @@ def clean_patch(output_raw,flag):
             cv2.drawContours(cleaned_patch, [contours_separated[iii]] , 0, 255, -1)
             cleaned_patches.append(cleaned_patch)
        return cleaned_patches# output is a list of 2 pathces with 2 separate biggest contours in each
-     else:
+     else:# first cleaning
         cleaned_patch=np.zeros((output.shape),dtype="uint8")
-        n_contours=2
+        n_contours=1
         if areas[1]<100:
             n_contours=1
         for iii in range(n_contours):# leaves 2 biggest cells in a patch for Mohammed movies
-          cv2.drawContours(cleaned_patch, [contours_separated[iii]] , 0, 255, -1)        
+          cv2.drawContours(cleaned_patch, [contours_separated[iii]] , 0, 255, -1)
+        
         return cleaned_patch# output is one patch with 2 boggest contours in it
 #####################################################################
 def extract_lineage(outpath):

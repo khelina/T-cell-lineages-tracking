@@ -25,9 +25,26 @@ def process_tif(tif_image): # add stacks of tiff image together
     
     return final
 ##########################################
-
-
-
+def display_image_p2(slide_frame_number, channel_names_dictionary, channel_code,n_digits,canvas_size_p2):
+    channel_keys=list(channel_names_dictionary.keys())
+    if slide_frame_number in channel_keys:
+        old_name=channel_names_dictionary[slide_frame_number][0]
+        new_name=create_new_name(old_name,channel_code,n_digits)
+        image_for_display=channel_names_dictionary[slide_frame_number][1]        
+    else:
+         image_for_display=np.zeros((canvas_size_p2, canvas_size_p2,3), dtype=np.uint8)
+         cv2.putText(image_for_display,"NO IMAGE",((canvas_size_p2-200)//2,canvas_size_p2//2),cv2.FONT_HERSHEY_PLAIN,3.0,(238,238,0),2) 
+         old_name= "No image available"
+         new_name="               " 
+    return  image_for_display, old_name, new_name
+##########################
+def create_new_name(old_name,channel_code,n_digits):
+    name =os.path.splitext(old_name)[0]
+    index_t =name.find("_t")    
+    old_number =name[index_t+2:]
+    new_number =str(old_number).zfill(n_digits)    
+    new_name =name[:index_t+2]+new_number+"_"+channel_code+".tif" 
+    return new_name
 ############################################################
 def extract_movie_name(name):# name is a filename
   fluor, bright,s,t="FITC", "BF", "_s","_t"
@@ -40,6 +57,16 @@ def extract_movie_name(name):# name is a filename
   movie_name =name[index_s+1:index_t]  
   return movie_name, core
 ###########################################
+def create_name_dictionary(filenames, images):# available frame names (some might be missing)
+  name_dictionary={}
+  for i in range(len(filenames)):
+     filename=filenames[i]
+     image=images[i]
+     index_t=filename.find("_t")
+     internal_number=filename[index_t+2:-4]
+     name_dictionary[internal_number]=(filename, image)
+  return  name_dictionary  
+########################################
 def save_images_page2(movie_name,feedback_var_p2,bright_names,fluor_names, red_names,bright_images, fluor_images, red_images, instruct_var_p2):       
     software_folder =os. getcwd() 
     destination=os.path.join(software_folder, movie_name)
