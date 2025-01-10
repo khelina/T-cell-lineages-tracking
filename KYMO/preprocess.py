@@ -5,8 +5,14 @@ import os
 import re
 import cv2
 from PIL import Image
-import numpy as np    
+import numpy as np
+import re    
 ##############################################################
+def removeLeadingZeros(string):   
+        regex = "^0+(?!$)"    
+        cleaned_string = re.sub(regex, "", string) 
+        return cleaned_string    
+##################################################
 def extract_red_frame_numbers(red_frame_names):
     list_of_frame_numbers =[]
     for i in range(len(red_frame_names)):

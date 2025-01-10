@@ -351,7 +351,7 @@ def create_movie_for_display(value):
     movies_menu.config(bg="black", fg="cyan")   
     instruct_var_p2.set("All frames have been processed.\nNow, you can scroll through them by using slider.\n\nAfter you are finished, press Button 3 to save the processed movie.")      
 ###############################
-def slide_p2(value):
+def slide_p2(value):# display image even when it is missing (in this case it is black)
     print("value=", value)
     canvas_bright_p2.delete("all")
     canvas_fluor_p2.delete("all")
@@ -1093,6 +1093,8 @@ global show_3_canvases
 from interface_functions import show_3_canvases
 
 #####################################
+global fluor_images, fluor_images_compressed,bright_images, fluor_names, br_names
+fluor_images, fluor_images_compressed,bright_images, fluor_names, br_names=None,None,None, None, None  
 global  lineage_per_frame_p4,start_frame,dict_of_divisions,  cells
 lineage_per_frame_p4,start_frame,dict_of_divisions, cells = None,1, {},{}
 global  count, pedigree, flag
@@ -1121,9 +1123,10 @@ def load_helper_functions():
         create_previous_frame, plot_frame, create_first_color_dictionary,\
         create_pedigree, create_output_movie, load_weights, extract_lineage,create_dictionary_of_xs,\
         create_lineage_image_one_frame, extract_file_name, load_clip, update_lineage,force_manual_IDs,create_lineage_for_Lorenzo,sorted_aphanumeric,update_color_dictionary,update_naive_names_list,update_xs,\
-        load_full_raw_movie,create_models,extract_output_images
+        load_full_raw_movie,create_models,extract_output_images,create_name_dictionary_p4,display_image_p4,removeLeadingZeros
 
-    from preprocess import create_output_folders, load_weights, extract_file_name,load_clip,load_full_raw_movie,create_models
+    from preprocess import create_output_folders, load_weights, extract_file_name,load_clip,load_full_raw_movie,create_models,removeLeadingZeros
+    
 
     from division_detector import (detect_division,
                                    update_dictionary_after_division, check_division_frame_number)
@@ -1135,7 +1138,7 @@ def load_helper_functions():
     from postprocess import create_pedigree,  create_output_movie, create_dictionary_of_xs, create_lineage_image_one_frame,sorted_aphanumeric
     from keras.models import model_from_json
     from extract_lineage_for_Lorenzo import create_lineage_for_Lorenzo
-    from interface_functions import extract_output_images
+    from interface_functions import extract_output_images,create_name_dictionary_p4,display_image_p4
     from keras.optimizers import Adam
 ###########################################    
 global models, models_directory,tracker,segmentor,refiner
@@ -1168,6 +1171,9 @@ def initiate_tracking_page():
             feedback_label.configure(text="Loading input movie ...")                      
             full_name_fluor = os.path.join(my_dir, filename)
             all_names_fluor.append(full_name_fluor)
+     global full_core_fluor_name, n_digits, first_frame_number
+     full_core_fluor_name, n_digits, first_frame_number= extract_file_name(all_names_fluor[0])
+     #full_core_bright_name, n_digits, first_frame_number= extract_file_name(all_names_bright[0])
      #print("all_names_fluor=", all_names_fluor)
      init_image=cv2.imread(all_names_fluor[0],0)
      last_image=cv2.imread(all_names_fluor[-1 ],0)
@@ -1217,7 +1223,7 @@ def initiate_tracking_page():
                      #button_retrieve = Button(popup_partly_tracked, text="Retrieve unfinished movie",
                      #bg=button_color,font='TkDefaultFont 10 bold', command=lambda:[threading.Thread(target=retrieve_unfinished_movie).start(), update_flash([]), feedback_label.configure(text="Loading unfinished movie ..."),popup_partly_tracked.destroy() ])
                      button_retrieve = Button(popup_partly_tracked, text="Retrieve unfinished movie",
-                     bg=button_color,font='TkDefaultFont 10 bold', command=lambda:[retrieve_unfinished_movie(), update_flash([]), feedback_label.configure(text="Loading unfinished movie ..."),popup_partly_tracked.destroy(),  load_models() ])
+                     bg=button_color,font='TkDefaultFont 10 bold', command=lambda:[retrieve_unfinished_movie(), update_flash([]), feedback_label.configure(text="Loading unfinished movie ..."),popup_partly_tracked.destroy() ])
                      button_retrieve.pack()
                      
                      #button_close = Button(popup_partly_tracked, text=" Close",font='TkDefaultFont 10 bold', bg=button_color, command=popup_partly_tracked.destroy())
@@ -1231,7 +1237,7 @@ def initiate_tracking_page():
                     
                      global out_folders,output_images,lineage_images
                      out_folders = create_output_folders(outpath)
-                     output_images,lineage_images=extract_output_images(out_folders[3],out_folders[5])
+                     output_images,lineage_images=extract_output_images(out_folders[3],out_folders[5], window_size)
                     
                      global popup_fully_tracked    
                      popup_fully_tracked = tk.Toplevel(master=page4, bg="blue")
@@ -1303,10 +1309,10 @@ def prepare_for_first_go():
     canvas_right_pop = Canvas(frame4, bg="green", height=canvas_size_p4, width=canvas_size_p4)
     canvas_right_pop.pack(anchor='nw', fill='both', expand=True)
     
-    l_bright=tk.Label(frame5,text= "Bright ", bg="black", fg="cyan", font=("Times", "12")).pack()
-    l_fluor=tk.Label(frame6,text= "Fluor ", bg="black", fg="cyan", font=("Times", "12")).pack()
-    l_red=tk.Label(frame7,text= "Red ", bg="black", fg="cyan", font=("Times", "12")).pack()
-    
+    l_bright=tk.Label(frame5,text= "Bright ", bg="black", fg="cyan", font=("Times", "12"))
+    l_fluor=tk.Label(frame6,text= "Fluor ", bg="black", fg="cyan", font=("Times", "12"))
+    l_red=tk.Label(frame7,text= "Red ", bg="black", fg="cyan", font=("Times", "12"))
+    l_bright.pack(),l_fluor.pack(),l_red.pack()
     global  button_contrast,button_cell_radius,  button_assign_positions,  pop_slider 
     button_contrast = Button(frame5, text="2a. Enhance image contrast",font='TkDefaultFont 10 bold', bg=button_color, command=create_contrast_popup)
     button_contrast.pack()
@@ -1325,34 +1331,80 @@ def prepare_for_first_go():
     all_names_fluor, all_names_bright,all_names_red=load_full_raw_movie(my_dir)
     print("len(all_names_fluor)=", len(all_names_fluor))
     print("len(all_names_bright)=", len(all_names_bright))
+    print("len(all_names_red)=", len(all_names_red))
+    #####################
+    
+    #######################
+    global  bright_dictionary,red_dictionary,fluor_dictionary
+    red_dictionary=create_name_dictionary_p4(all_names_red)
+    bright_dictionary=create_name_dictionary_p4(all_names_bright)
+    fluor_dictionary=create_name_dictionary_p4(all_names_fluor)
+    print("fluor_dictionary=", fluor_dictionary)
+    
+    ##########################
+    """
+    import re
+    def removeLeadingZeros(string):   
+        regex = "^0+(?!$)"    
+        string = re.sub(regex, "", string) 
+        print(string)
+    removeLeadingZeros("002")
+    """
+    ############################
     global slide_frames_pop    
     def slide_frames_pop(value): 
        image_number = int(value)
+       image_number_zfill=str(value).zfill(n_digits)
        print("image_number=", image_number)
-       show_3_channels(canvas_left_pop,canvas_mid_pop,canvas_right_pop, all_names_fluor,all_names_bright,all_names_red,canvas_size_p4,image_number)
-     
+       print("image_number_zfill=", image_number_zfill)
+       #show_3_channels(canvas_left_pop,canvas_mid_pop,canvas_right_pop, all_names_fluor,all_names_bright,all_names_red,canvas_size_p4,image_number)
+       
+       canvas_left_pop.delete("all")
+       canvas_mid_pop.delete("all")
+       canvas_right_pop.delete("all")
+       image_number=int(value)    
+       #frame_slider.config(label="Frame "+str(value))
+       ###########################################
+       global br_tk,fl_tk,red_tk        
+       br_tk, br_name=display_image_p4(image_number_zfill, bright_dictionary,"ch02", canvas_size_p4)              
+       canvas_left_pop.create_image(0,0, anchor=NW, image=br_tk)
+       l_bright.config(text= "Bright \n"+br_name)
+       #br_name_p2.set("Original name:   "+old_br_name+"\nNew name:   "+new_br_name)    
+       ################################    
+       fl_tk, fl_name=display_image_p4(image_number_zfill, fluor_dictionary,"ch00", canvas_size_p4)     
+             
+       canvas_mid_pop.create_image(0,0, anchor=NW, image=fl_tk)
+       l_fluor.config(text= "Fluor \n"+fl_name)
+       #fl_name_p2.set("Original name:   "+old_fl_name+"\nNew name:   "+new_fl_name)    
+       ###############################################
+       red_tk, red_name=display_image_p4(image_number_zfill, red_dictionary,"ch01",canvas_size_p4)          
+           
+       canvas_right_pop.create_image(0,0, anchor=NW, image=red_tk)
+       l_red.config(text= "Red \n"+red_name)                   
+       #red_name_p2.set("Original name:   "+old_red_name+"\nNew name:  
+       ################################# 
     
-    pop_slider = Scale(frame6, from_=1, to=len(all_names_fluor), orient=HORIZONTAL, troughcolor="green", command=slide_frames_pop, length=370)      
+    pop_slider = Scale(frame6, from_=first_frame_number, to=first_frame_number+len(all_names_fluor)-1, orient=HORIZONTAL, troughcolor="green", command=slide_frames_pop, length=370)      
     pop_slider.pack()
-    
-    slide_frames_pop(1)
+    view_slider.config(from_=first_frame_number, to=first_frame_number+len(all_names_fluor)-1)      
+    slide_frames_pop(first_frame_number)
     instruct_label = tk.Label(frame8, text=" Welcome to STEP 3 of the pipeline! \n\nTo choose input movie you want to track, press Button 1. ",fg="yellow",bg="black", font='TkDefaultFont 10 bold', width=120, height=4)
     instruct_label.grid(row=1, column=0,columnspan=4, sticky=W)
     
     button_close = Button(frame9, text=" Close",font='TkDefaultFont 10 bold', bg=button_color, command=close_popup_canvas)
     button_close.pack()
     ###########################################   
-    global full_core_fluor_name, n_digits, first_frame_number, full_core_bright_name, out_folders
+    global  full_core_bright_name, out_folders
     
     view_slider.config(to=num_frames)       
-    full_core_fluor_name, n_digits, first_frame_number= extract_file_name(all_names_fluor[0])    
+    
     input_info_label.config(text= "INPUT MOVIE:"+ "\n"+str(my_dir)+"\nNUMBER OF FRAMES: "+str(num_frames), fg="#00FFFF", bg="black")    
     out_folders = create_output_folders(outpath)    
-    full_core_bright_name, n_digits, first_frame_number= extract_file_name(all_names_bright[0])
+    full_core_bright_name, _, _= extract_file_name(all_names_bright[0])
     print("n_digits=", n_digits)   
     ########### load the first clip         
-    global fluor_images,fluor_images_compressed,bright_images,fluor_names,bright_names                 
-    fluor_images,fluor_images_compressed,bright_images,fluor_names,bright_names =load_clip(0,full_core_fluor_name,full_core_bright_name,n_digits, num_frames, first_frame_number)
+    #global fluor_images,fluor_images_compressed,bright_images,fluor_names,bright_names                 
+    #fluor_images,fluor_images_compressed,bright_images,fluor_names,bright_names =load_clip(0,full_core_fluor_name,full_core_bright_name,n_digits, num_frames, first_frame_number)
     global   previous_lineage_image, lineage_image_size     
     #frame_size=fluor_images[0].shape[0]
     cell_info_label.config(text= "FRAME SIZE:"+str(frame_size)+"x"+str(frame_size), fg="#00FFFF", bg="black")
@@ -1410,7 +1462,7 @@ def retrieve_unfinished_movie():
     previous_lineage_image=cv2.imread(os.path.join(outpath,"still_lineage.tif"), -1)
     lineage_image_size=previous_lineage_image.shape[0]
     #####################################
-    global lineage_images_cv2,lineage_images
+    global output_images,lineage_images
     
     ################## output_images
     print("outpath=", outpath)
@@ -1418,14 +1470,14 @@ def retrieve_unfinished_movie():
     lineage_path=os.path.join(outpath,out_folders[5])
     print("fluor_path=", fluor_path)
     
-    extract_output_images(out_folders[3],out_folders[5])                
+    output_images,lineage_images=extract_output_images(out_folders[3],out_folders[5],window_size)                
     display_first_frame()
        
     input_info_label.config(text= "INPUT MOVIE:"+ "\n"+str(my_dir)+"\nNUMBER OF FRAMES: "+str(num_frames), fg="#00FFFF", bg="black")    
     ########### load the first clip        
-    global fluor_images,fluor_images_compressed,bright_images,fluor_names,bright_names                 
-    fluor_images,fluor_images_compressed,bright_images,fluor_names,bright_names =load_clip(start_frame-1,full_core_fluor_name,full_core_bright_name,n_digits, num_frames, first_frame_number)
-    print("fluor_names=", fluor_names)
+    #global fluor_images,fluor_images_compressed,bright_images,fluor_names,bright_names                 
+    #fluor_images,fluor_images_compressed,bright_images,fluor_names,bright_names =load_clip(start_frame-1,full_core_fluor_name,full_core_bright_name,n_digits, num_frames, first_frame_number)
+    #print("fluor_names=", fluor_names)
     
     cell_info_label.config(text= "FRAME SIZE:"+str(frame_size)+"x"+str(frame_size), fg="#00FFFF", bg="black")
      
@@ -1724,6 +1776,18 @@ def cut_lineage(start_frame): # after manual editing
                os.remove(full_name)
 
 ###########################################################
+def clear_memory_of_previous_clip(fluor_images, fluor_images_compressed,bright_images, fluor_names, br_names ):
+ if fluor_images:
+     del fluor_images
+ if fluor_images_compressed:
+     del fluor_images_compressed
+ if bright_images:
+     del bright_images
+ if fluor_names:
+     del fluor_names
+ if br_names:
+     del br_names     
+#############################################
 
 import time
 ########################################################
@@ -1731,6 +1795,7 @@ def execute():
  #if view_slider:
       #view_slider.destroy()
  start_time=time.time()
+ view_slider.config(to=first_frame_number+len(all_names_fluor)-1)      
  try:
     cell_radius=true_cell_radius.get()
     global start_frame
@@ -1768,11 +1833,16 @@ def execute():
     #n=26
     #print("out_folders inside execute=",out_folders)
     while k < n:
+        
+        global fluor_images, fluor_images_compressed,bright_images, fluor_names, br_names
+        clear_memory_of_previous_clip(fluor_images, fluor_images_compressed,bright_images, fluor_names, br_names)
+        fluor_images,fluor_images_compressed,bright_images,fluor_names,br_names =load_clip(k,full_core_fluor_name,full_core_bright_name,n_digits, num_frames, first_frame_number)
+        """ 
         global fluor_images, fluor_images_compressed,bright_images, fluor_names, bright_names
         if k>0:
          del fluor_images, fluor_images_compressed,bright_images, fluor_names, bright_names 
          fluor_images,fluor_images_compressed,bright_images,fluor_names,bright_names =load_clip(k,full_core_fluor_name,full_core_bright_name,n_digits, num_frames, first_frame_number)
-        
+        """
         clip_centr = predict_tracking_general(
                 coords, fluor_images, fluor_images_compressed, fluor_names, k, out_folders[0], tracker,n, cell_radius, frame_size)
         print("TRACKING PREDICTED FOR CLIP BEGINNING WITH FRAME  ", k+1)
@@ -1787,7 +1857,7 @@ def execute():
             debug=0
             if output_images:
                 debug=len(output_images)
-            view_slider.set(k+kk)
+            view_slider.set(k+kk+1)
             
             print("Len(output_images)=",debug)
             print("FRAME NUMBER = ", k+kk+1)# segmenting all the 4 frames in the clip
@@ -1861,7 +1931,7 @@ def execute():
             print("current_lineage_image.shape =", current_lineage_image.shape)
             print("fluor_names inside exeute=", fluor_names)
             coords, destin_fluor = plot_frame(cells, clip_centr, k, kk,
-                                fluor_images, fluor_names, out_folders, coords, coords, bright_images, bright_names, frame_size , n_digits, first_frame_number, contrast_value, current_lineage_image,patch_size)          
+                                fluor_images, fluor_names, out_folders, coords, coords, bright_images, br_names, frame_size , n_digits, first_frame_number, contrast_value, current_lineage_image,patch_size)          
             
             previous_lineage_image=current_lineage_image# need it for the next lineage image                      
             image_seg=destin_fluor
@@ -1929,7 +1999,8 @@ button_pause.grid(row=0, column=2, padx=10, pady=20)
 #############################
 
 def slide_frames(value):
-    image_number = int(value)    
+    image_number = int(value)
+    label_current.configure(text="Current frame: " +str(value), fg="black")     
     show_3_canvases(canvas_previous,canvas_current,canvas_lineage,output_images,lineage_images,image_number)
 ##############################################
 global view_slider
@@ -2068,7 +2139,7 @@ def stop_editing_IDs():
     canvas_lineage.delete('all')
     update_flash([button_execute])
     #stop_flash("save_id", page4, flashers)
-    view_slider.grid_remove()
+    #view_slider.grid_remove()
     label_current.configure( text="Current frame", fg="black" )
     button_save_id.configure(background = '#9ACD32')  
     #button_save_division.configure(background = '#9ACD32')
@@ -2166,7 +2237,7 @@ def stop_editing_division():
     canvas_previous.delete('all')
     canvas_current.delete('all')    
     canvas_lineage.delete('all')
-    view_slider.grid_remove()
+    #view_slider.grid_remove()
     label_current.configure( text="Current frame", fg="black" )
     update_flash([button_execute])
     #stop_flash("save_division", page4, flashers)
@@ -2239,7 +2310,7 @@ def save_added_cell():
     canvas_previous.delete('all')
     canvas_current.delete('all')    
     canvas_lineage.delete('all')
-    view_slider.grid_remove()
+    #view_slider.grid_remove()
 
     print("colour_counter=",colour_counter)
     print("colour_dictionary=",colour_dictionary)
@@ -2281,7 +2352,7 @@ def save_removed_cell():
     canvas_previous.delete('all')
     canvas_current.delete('all')    
     canvas_lineage.delete('all')
-    view_slider.grid_remove()
+    #view_slider.grid_remove()
 ##########################################
 def magnify_current_frame():
 

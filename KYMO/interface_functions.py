@@ -56,8 +56,9 @@ def display_both_channels(filled_fluor,filled_bright,canvas_fluor,canvas_bright,
       canvas_bright.create_image(0, 0, anchor=NW, image=photo_bright)
       return canvas_bright,canvas_fluor, photo_fluor, photo_bright
 ###############################################################
-def extract_output_images(fluor_path,lineage_path):# extract fluor and linage images for display
+def extract_output_images(fluor_path,lineage_path, window_size):# extract fluor and linage images for display
     #global output_images,lineage_images
+    output_images, lineage_images=[],[]
     for filename in sorted_aphanumeric(os.listdir(fluor_path)):
         #print("filename=", filename)
         #print("fl_image_path=",os.path.join(fluor_path,filename) )
@@ -66,7 +67,7 @@ def extract_output_images(fluor_path,lineage_path):# extract fluor and linage im
         output_images.append(photo_fluor_tracked)
     for filename in sorted_aphanumeric(os.listdir(lineage_path)):
         lineage_cv2=cv2.imread(os.path.join(lineage_path,filename), -1)
-        lineage_images_cv2.append(lineage_cv2)
+    
         photo_lineage=turn_image_into_tkinter(lineage_cv2, window_size)     
         lineage_images.append(photo_lineage)
     return output_images,lineage_images
@@ -117,6 +118,30 @@ def show_3_canvases(canvas_previous,canvas_current,canvas_lineage,output_images,
     canvas_lineage.create_image(
         0, 0, anchor=NW, image=photo_image_lin)
 #######################################################
+def create_name_dictionary_p4(filenames):# available frame names (some might be missing)
+  name_dictionary={}
+  for i in range(len(filenames)):
+     filename=filenames[i]    
+     index_t=filename.find("_t")
+     internal_number=filename[index_t+2:-9]
+     name_dictionary[internal_number]=filename
+  return  name_dictionary 
+####################################
+def display_image_p4(slide_frame_number, channel_names_dictionary, channel_code,canvas_size_p4):
+    channel_keys=list(channel_names_dictionary.keys())
+    if slide_frame_number in channel_keys:
+        file_name=channel_names_dictionary[slide_frame_number]
+        name_for_display=os.path.basename(file_name)
+        image=cv2.imread(file_name,0)
+       
+    else:
+         image=np.zeros((canvas_size_p4, canvas_size_p4,3), dtype=np.uint8)
+         cv2.putText(image,"NO IMAGE",((canvas_size_p4-200)//2,canvas_size_p4//2),cv2.FONT_HERSHEY_PLAIN,3.0,(238,238,0),2) 
+         #name= "No image available"
+         name_for_display="               "
+    image_for_display=turn_image_into_tkinter(image, canvas_size_p4)         
+    return  image_for_display, name_for_display
+###############################################
 def calculate_angle(rect):
     box = cv2.boxPoints(rect)     
     box = np.int0(np.round(box))

@@ -24,7 +24,9 @@ def process_tif(tif_image): # add stacks of tiff image together
     final=np.uint8(normalised)
     
     return final
-##########################################
+################### if frame is absent show black image
+
+##############################
 def display_image_p2(slide_frame_number, channel_names_dictionary, channel_code,n_digits,canvas_size_p2):
     channel_keys=list(channel_names_dictionary.keys())
     if slide_frame_number in channel_keys:

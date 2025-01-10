@@ -287,7 +287,7 @@ def segment_one_cell_at_a_time(segmentor, refiner,empty_fluor,empty_bright,centr
       segmented_frame=segmented_frame[Bordersize:Bordersize+frame_size,Bordersize:Bordersize+frame_size]   
       segmented_frame = segmented_frame.astype(np.uint8)                       
       return segmented_frame, segmented_patch,a,b,c,d, final_mask
-#############
+############# Apply segmentor to a segmented cell once again 
 def refine_segmentation(segmentor, refiner,empty_fluor,empty_bright,centroid,cell_radius, frame_size, p_size, marker,final_mask,cell_number):        
       coord=centroid
       marker=centroid
@@ -340,7 +340,56 @@ def clean_manual_patch(output_raw,marker,a,b,c,d,frame_size, final_mask,cell_num
              counter+=1
              break
     if counter==0:
+        #cleaned_patch=np.zeros((output_raw.shape),dtype="uint8")
+        cleaned_patch=cut_cell_from_mask(final_mask,cell_number,a,b,c,d)
+    # check that this contour does not intersect with neighbouring cells.
+    # If it is the case, output empty patch
+    print("counter=", counter)
+    if counter!=0:
+      mask_with_one_cell=paste_benchmark_patch(cleaned_patch,a,b,c,d,cell_number, frame_size)
+      final_mask_copy=copy.deepcopy(final_mask)
+      final_mask_copy[final_mask_copy==cell_number+1]=0# delete previous contour of cell
+      final_mask_copy+=mask_with_one_cell# insert current contour of cell
+      test_1, test_2=np.zeros(final_mask.shape),np.zeros(final_mask.shape)
+      test_1[final_mask_copy==cell_number+1]=1
+      test_2[mask_with_one_cell==cell_number+1]=1      
+      if np.all(test_1==test_2)==True:
+          print("no problem")
+          final_mask=final_mask_copy
+      else:
+          #cleaned_patch=np.zeros((output_raw.shape),dtype="uint8")
+          cleaned_patch=cut_cell_from_mask(final_mask,cell_number)
+          print("there is a problem!!!!")
+    return cleaned_patch, final_mask      
+############################# Clean refined segmentation if necessary
+def cut_cell_from_mask(final_mask,cell_number,a,b,c,d):
+      binary_mask=np.zeros((final_mask.shape),dtype="uint8")
+      binary_mask[final_mask==cell_number+1]=255
+      binary_mask_border=cv2.copyMakeBorder(binary_mask, top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize, borderType=cv2.BORDER_CONSTANT, value = 0.0 )
+      output=binary_mask_border[c:d,a:b]
+      return output
+##############################
+def clean_manual_patch_old(output_raw,marker,a,b,c,d,frame_size, final_mask,cell_number):# leave only the contour which contains marker when correcting 
+# segmentation manually; otherwise, output empty patch
+    x0,y0=int(round(marker[0])), int(round(marker[1]))
+    if output_raw.dtype!='uint8':
+         output_raw = output_raw.astype('uint8')
+    im2, contours, hierarchy = cv2.findContours(output_raw,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
+    counter=0
+    for cnt in contours:
+         big=np.zeros((frame_size+Bordersize*2,frame_size+Bordersize*2),dtype="uint8")
+         one=np.zeros((output_raw.shape),dtype="uint8")
+         one=cv2.drawContours(one,[cnt],0,255, -1)
+         big[c:d,a:b]=one
+         test_image=big[Bordersize:frame_size+Bordersize,Bordersize:frame_size+Bordersize]
+         cv2.imwrite(r"C:\Users\kfedorchuk\Desktop\test_image.tif", test_image)
+         if test_image[y0,x0]==255:
+             cleaned_patch=one
+             counter+=1
+             break
+    if counter==0:
         cleaned_patch=np.zeros((output_raw.shape),dtype="uint8")
+        
     # check that this contour does not intersect with neighbouring cells.
     # If it is the case, output empty patch
     print("counter=", counter)
@@ -358,9 +407,9 @@ def clean_manual_patch(output_raw,marker,a,b,c,d,frame_size, final_mask,cell_num
       else:
           cleaned_patch=np.zeros((output_raw.shape),dtype="uint8")
           print("there is a problem!!!!")
-    return cleaned_patch, final_mask      
-#############################
-def clean_manual_patch_old(output_raw,marker,a,b,c,d,frame_size, final_mask,cell_number):# leave only the contour which contains marker when correcting 
+    return cleaned_patch, final_mask 
+###########################
+def clean_manual_patch_oldest(output_raw,marker,a,b,c,d,frame_size, final_mask,cell_number):# leave only the contour which contains marker when correcting 
    
     cleaned_patch=check_marker(output_raw,marker, frame_size, a,b,c,d)
     mask_with_one_cell=paste_benchmark_patch(cleaned_patch,a,b,c,d,cell_number, frame_size)
@@ -783,8 +832,7 @@ def create_int_dictionary(n_cells):
      #print("int_dictionary=", int_dictionary)
      return int_dictionary  
 ###############################################
-n_cells=2
-int_dictionary =create_int_dictionary(n_cells)
+
 ###############################################
 # real_cells is all contours detected in a frame (0, 255)
 # parallel_frame (image) is the same frame but with contours with assigned intensities
