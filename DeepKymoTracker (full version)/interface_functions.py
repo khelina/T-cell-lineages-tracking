@@ -10,7 +10,21 @@ import re
 #from tkinter import ttk
 #from tkinter import *
 from tkinter import NW
+from threading import Thread
 #####################################
+class CustomThread(Thread):
+    def _init_(self,group=None,target=None,name=None,args=(), kwargs={},Verbose=None):
+        Thread._init_(self,group,name,args,kwargs)
+        self._return=None
+        
+    def run(self):
+        if self._target is not None:
+            self._return=self._target(*self._args,**self._kwargs)
+            
+    def join(self):
+        Thread.join(self)
+        return self._return
+######################################
 def sorted_aphanumeric(data):
     convert = lambda text: int(text) if text.isdigit() else text.lower()
     alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
@@ -42,39 +56,46 @@ def display_both_channels(filled_fluor,filled_bright,canvas_fluor,canvas_bright,
       canvas_bright.create_image(0, 0, anchor=NW, image=photo_bright)
       return canvas_bright,canvas_fluor, photo_fluor, photo_bright
 ###############################################################
-def start_flash(buttons,idd, frame, flashers):
-    colors_combinations, buttons,flashers_names= prepare_for_flash(buttons,idd)
-    flash(colors_combinations, buttons,flashers_names, frame, flashers)
-#####################################################        
-def prepare_for_flash(buttons,idd):   
-    flashers_names =[]
-    for i in range(len(buttons)):
-        button_name = str(buttons[i])
-        flasher_name ="flasher%s_" % (i+1) + idd
-        flashers_names.append(flasher_name)         
-    flasher_name ="flasher%s_" % (len(buttons)+1) + idd
-    flashers_names.append(flasher_name)      
-    colors =['#9ACD32' for k in range(len(buttons)+1)]    
-    colors_combinations =[]
-    for iii in range(len(colors)):
-        colors_copy =copy.deepcopy(colors)
-        old =colors_copy
-        old[iii]="red"
-        colors_combinations.append(old)      
-    return colors_combinations, buttons,flashers_names
+def extract_output_images(fluor_path,lineage_path, window_size, output_images):# extract fluor and linage images for display
+    #global output_images,lineage_images
+    lineage_images=[]
+    for filename in sorted_aphanumeric(os.listdir(fluor_path)):
+        #print("filename=", filename)
+        #print("fl_image_path=",os.path.join(fluor_path,filename) )
+        fluor_tracked=cv2.imread(os.path.join(fluor_path,filename), -1)
+        photo_fluor_tracked=turn_image_into_tkinter(fluor_tracked, window_size)     
+        output_images.append(photo_fluor_tracked)
+    for filename in sorted_aphanumeric(os.listdir(lineage_path)):
+        lineage_cv2=cv2.imread(os.path.join(lineage_path,filename), -1)
+    
+        photo_lineage=turn_image_into_tkinter(lineage_cv2, window_size)     
+        lineage_images.append(photo_lineage)
+    return output_images,lineage_images
 ##################################################    
-def flash(colors_combinations, buttons,flashers_names, frame, flashers):  
+def flash(colors_combinations, buttons,flashers_names, win, flashers):  
   for k in range(len(colors_combinations)):        
           for kk in range(len(buttons)):                        
-             flashers[flashers_names[kk]]  = frame.after(300*k, lambda k=k, kk=kk:buttons[kk].configure(background = colors_combinations[k][kk])) 
-  flashers[flashers_names[kk+1]] = frame.after(300*(k+1), lambda:flash(colors_combinations, buttons,flashers_names, frame, flashers))      
+             flashers[flashers_names[kk]]  = win.after(300*k, lambda k=k, kk=kk:buttons[kk].configure(background = colors_combinations[k][kk])) 
+  flashers[flashers_names[kk+1]] = win.after(300*(k+1), lambda:flash(colors_combinations, buttons,flashers_names, win, flashers))
+  return flashers      
 ###############################
-global stop_flash   
-def stop_flash(idd, frame, flashers):
-    for key in flashers.keys():
-        if key[9:]==idd:
-            frame.after_cancel(flashers[key])
-           # page4.after_cancel(fl_1)
+def show_3_channels(canvas_left,canvas_mid,canvas_right,left_names,mid_names,right_names,window_size,image_number):
+    canvas_left.delete('all')
+    canvas_mid.delete('all')    
+    canvas_right.delete('all')
+    
+    left_cv_image=cv2.imread(left_names[image_number-1],0)
+    mid_cv_image=cv2.imread(mid_names[image_number-1],0)
+    right_cv_image=cv2.imread(right_names[image_number-1],0)
+    global left_tk_image,mid_tk_image,right_tk_image
+    left_tk_image=turn_image_into_tkinter(left_cv_image, window_size)
+    mid_tk_image=turn_image_into_tkinter(mid_cv_image, window_size)
+    right_tk_image=turn_image_into_tkinter(right_cv_image, window_size)
+    
+    canvas_left.create_image(0, 0, anchor=NW, image= left_tk_image) 
+    canvas_mid.create_image(0, 0, anchor=NW, image= mid_tk_image)
+    canvas_right.create_image(0, 0, anchor=NW, image= right_tk_image)
+    
 ###############################################
 def show_2_canvases(canvas_bright,canvas_fluor,photo_filled_brights,photo_filled_fluors,image_number, window_size):
     canvas_bright.delete('all')
@@ -89,14 +110,38 @@ def show_3_canvases(canvas_previous,canvas_current,canvas_lineage,output_images,
     canvas_previous.delete('all')
     canvas_current.delete('all')    
     canvas_lineage.delete('all')
-    #print("len(output_images)=",len(output_images)) 
-    #print("len(lineage_images)=",len(lineage_images))   
+    print("len(output_images)=",len(output_images)) 
+    print("image_number=",image_number)   
     canvas_current.create_image(0, 0, anchor=NW, image=output_images[image_number])
     canvas_previous.create_image(0, 0, anchor=NW, image=output_images[image_number-1])
     photo_image_lin=lineage_images[image_number-1]   
     canvas_lineage.create_image(
         0, 0, anchor=NW, image=photo_image_lin)
 #######################################################
+def create_name_dictionary_p4(filenames):# available frame names (some might be missing)
+  name_dictionary={}
+  for i in range(len(filenames)):
+     filename=filenames[i]    
+     index_t=filename.find("_t")
+     internal_number=filename[index_t+2:-9]
+     name_dictionary[internal_number]=filename
+  return  name_dictionary 
+####################################
+def display_image_p4(slide_frame_number, channel_names_dictionary, channel_code,canvas_size_p4):
+    channel_keys=list(channel_names_dictionary.keys())
+    if slide_frame_number in channel_keys:
+        file_name=channel_names_dictionary[slide_frame_number]
+        name_for_display=os.path.basename(file_name)
+        image=cv2.imread(file_name,0)
+       
+    else:
+         image=np.zeros((canvas_size_p4, canvas_size_p4,3), dtype=np.uint8)
+         cv2.putText(image,"NO IMAGE",((canvas_size_p4-200)//2,canvas_size_p4//2),cv2.FONT_HERSHEY_PLAIN,3.0,(238,238,0),2) 
+         #name= "No image available"
+         name_for_display="               "
+    image_for_display=turn_image_into_tkinter(image, canvas_size_p4)         
+    return  image_for_display, name_for_display
+###############################################
 def calculate_angle(rect):
     box = cv2.boxPoints(rect)     
     box = np.int0(np.round(box))
@@ -111,6 +156,7 @@ def calculate_angle(rect):
        angle=rect[2]
     return angle, box
 ################################################
+
 def cut_well_from_image(im_bright,seed,well_size, first_x0,delta_x, delta_y, first_rect):
  mask=None
  rot_indicator="no"# shows if you need to rotate final image or not
@@ -165,25 +211,26 @@ def cut_well_from_image(im_bright,seed,well_size, first_x0,delta_x, delta_y, fir
  global x_min, y_min
  
  x_min, y_min=min(xs),min(ys)
- #print(" x_min after, y_min after=", x_min," , ", y_min)
+ print(" x_min before, y_min before=", x_min," , ", y_min)
+ print("delta_x, delta_y=",delta_x, delta_y)
  #x_min, y_min=box_final[1][0],box_final[1][1] 
- x_min+=delta_x
- y_min+=delta_y
-
+ x_min=x_min+delta_x
+ y_min=y_min+delta_y
+ print(" x_min after, y_min after=", x_min," , ", y_min)
  #print(" x_min after, y_min after=", x_min," , ", y_min)
 ############################################# 
  #width=x_max-x_min
  #height=y_max-y_min
  #side=max(width,height)
- side=well_size
+ #side=well_size
  
 ####### 5. apply 
  rot_bright = cv2.warpAffine(im_bright,M,(cols,rows))
  #rot_bright = cv2.rotate(rot_bright_init, cv2.ROTATE_90_COUNTERCLOCKWISE)
- cut_bright_init=rot_bright[y_min:y_min+side,x_min:x_min+side]
+ cut_bright_init=rot_bright[y_min:y_min+well_size,x_min:x_min+well_size]
  final_bright=cut_bright_init
  #cut_bright = cv2.rotate(cut_bright_init, cv2.ROTATE_90_COUNTERCLOCKWISE)
- """
+ 
  current_x0=box[0][0]
  if abs(current_x0-first_x0)>=well_size-40:
     print("rotation problem detected")
@@ -197,11 +244,10 @@ def cut_well_from_image(im_bright,seed,well_size, first_x0,delta_x, delta_y, fir
   
  #final_name=os.path.join(destin_folder,"final_%s_width_%s.tif" % (i,w))
  #cv2.imwrite(final_name, final)
- """
+ 
  return final_bright,M,x_min,y_min, rows, cols, rot_indicator, rot_bright
 ##################################################################
-
-#################################################################
+############### this is for Step 1
 def cut_all(file_names,progressbar,tk_frame,label,M, cols,rows,Margin, x_min,x_max,y_min,y_max, destin, window_size):
   new_names=[]
   rotated_images=[]

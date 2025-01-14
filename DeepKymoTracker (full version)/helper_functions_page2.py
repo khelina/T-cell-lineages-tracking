@@ -24,63 +24,29 @@ def process_tif(tif_image): # add stacks of tiff image together
     final=np.uint8(normalised)
     
     return final
-###########################################
-def load_and_process_page2(path,number_of_frames,progressbar,frame, movie_name):
-  print("entering new function")
-  global fluor_images,bright_images
-  fluor_images=[]
-  fluor_names=[]
-  bright_images=[]
-  bright_names=[]
-  red_images=[]
-  red_names=[]
-  
-  i=0
-  for filename in sorted_aphanumeric(os.listdir(path)):
-   if "thumb" not in filename and filename.endswith(".TIF"):
-     index_s,index_t=filename.find("_s"),filename.find("_t")
-     exact_name =filename[index_s+1:index_t]     
-     if exact_name==movie_name:
-        i+=1
-        print("i=", i)
-        progressbar["value"]=(i+1)/(number_of_frames)*100
-        time.sleep(0.02)
-        frame.update_idletasks()
-        #print("FILE NAME= ", filename)
-        if "_w1BF_" in filename:
-          bright_names.append(filename)
-          old_name=os.path.join(path,filename)
-          #print("bright_file_name=", filename)
-          a = tiff.imread(old_name)
-          c=process_tif(a)
-          #new_name =os.path.join(destination, filename[:-4])
-          #new_name+="_ch02.tif"             
-          #cv2.imwrite(new_name, a)
-          bright_images.append(c)
-        elif ("_w2FITC_" in filename) or ("_w3Multi600_" in filename):
-          fluor_names.append(filename)
-          old_name=os.path.join(path,filename)
-          #print("fluor_file_name=", filename)
-          b = tiff.imread(old_name)
-          #new_name =os.path.join(destination, filename[:-4])              
-          #new_name+="_ch00.tif"
-          b=process_tif(b)
-          #cv2.imwrite(new_name, a)
-          fluor_images.append(b)
-        elif ("_w3TRITC_" in filename):
-          red_names.append(filename)
-          old_name=os.path.join(path,filename)
-          #print("fluor_file_name=", filename)
-          b = tiff.imread(old_name)
-          #new_name =os.path.join(destination, filename[:-4])              
-          #new_name+="_ch00.tif"
-          b=process_tif(b)
-          #cv2.imwrite(new_name, a)
-          red_images.append(b)
-       
-  #page2.update_idletasks()
-  #threading.current_thread().return_value = [fluor_images,bright_images]    
-  return fluor_images,bright_images,red_images, fluor_names, bright_names, red_names
+################### if frame is absent show black image
+
+##############################
+def display_image_p2(slide_frame_number, channel_names_dictionary, channel_code,n_digits,canvas_size_p2):
+    channel_keys=list(channel_names_dictionary.keys())
+    if slide_frame_number in channel_keys:
+        old_name=channel_names_dictionary[slide_frame_number][0]
+        new_name=create_new_name(old_name,channel_code,n_digits)
+        image_for_display=channel_names_dictionary[slide_frame_number][1]        
+    else:
+         image_for_display=np.zeros((canvas_size_p2, canvas_size_p2,3), dtype=np.uint8)
+         cv2.putText(image_for_display,"NO IMAGE",((canvas_size_p2-200)//2,canvas_size_p2//2),cv2.FONT_HERSHEY_PLAIN,3.0,(238,238,0),2) 
+         old_name= "No image available"
+         new_name="               " 
+    return  image_for_display, old_name, new_name
+##########################
+def create_new_name(old_name,channel_code,n_digits):
+    name =os.path.splitext(old_name)[0]
+    index_t =name.find("_t")    
+    old_number =name[index_t+2:]
+    new_number =str(old_number).zfill(n_digits)    
+    new_name =name[:index_t+2]+new_number+"_"+channel_code+".tif" 
+    return new_name
 ############################################################
 def extract_movie_name(name):# name is a filename
   fluor, bright,s,t="FITC", "BF", "_s","_t"
@@ -93,27 +59,60 @@ def extract_movie_name(name):# name is a filename
   movie_name =name[index_s+1:index_t]  
   return movie_name, core
 ###########################################
-def save_images_page2(movie_name,l_feedback,bright_names,fluor_names, red_names,bright_images, fluor_images, red_images):       
+def create_name_dictionary(filenames, images):# available frame names (some might be missing)
+  name_dictionary={}
+  for i in range(len(filenames)):
+     filename=filenames[i]
+     image=images[i]
+     index_t=filename.find("_t")
+     internal_number=filename[index_t+2:-4]
+     name_dictionary[internal_number]=(filename, image)
+  return  name_dictionary  
+########################################
+def save_images_page2(movie_name,feedback_var_p2,bright_names,fluor_names, red_names,bright_images, fluor_images, red_images, instruct_var_p2):       
     software_folder =os. getcwd() 
     destination=os.path.join(software_folder, movie_name)
     print("destination=", destination)
+    n_digits=calculate_n_digits_in_name(fluor_names[-1])
+    
     if not os.path.exists(destination):  
             os.makedirs(destination)
             print("The new directory is created!", destination)
-            
-    for i in range(len(bright_names)):
-           filename=bright_names[i]
-           new_name =os.path.join(destination, filename[:-4])
-           new_name+="_ch02.tif"             
-           cv2.imwrite(new_name, bright_images[i])
-    for k in range(len(fluor_names)):
-          filename=fluor_names[k]
-          new_name =os.path.join(destination, filename[:-4])
-          new_name+="_ch00.tif"             
-          cv2.imwrite(new_name, fluor_images[k])
-    for k in range(len(red_names)):
-          filename=red_names[k]
-          new_name =os.path.join(destination, filename[:-4])
-          new_name+="_ch01.tif"             
-          cv2.imwrite(new_name, red_images[k])            
-    l_feedback.configure(text="Saved images ", fg="#00FFFF", bg="black") 
+    if len(bright_names)!=0:       
+           zfill_file_name("ch02",bright_names,bright_images, n_digits, destination)
+    else:
+           print("no bright channel discovered")
+    if len(fluor_names)!=0:
+           zfill_file_name("ch00",fluor_names,fluor_images, n_digits, destination)
+    else:
+           print("no fluor channel discovered")
+    if len(red_names)!=0:
+          zfill_file_name("ch01",red_names,red_images, n_digits, destination)
+    else:
+           print("no red channel discovered")
+    
+    feedback_var_p2.set(feedback_var_p2.get()+"\nProcessed movie saved as  "+destination)
+    instruct_var_p2.set("Movie has been saved.\n\n Now you can either go to the next page or exit.")
+    print("Finished saving channels")
+##########################################
+def calculate_n_digits_in_name(base_image_name):    
+    #base =os.path.basename(last_fluor_name)
+    name =os.path.splitext(base_image_name)[0]
+    index_t =name.find("_t")
+    n_digits = len(name)-index_t-2
+    return n_digits
+###################################
+
+
+def zfill_file_name(channel_name,list_of_base_image_names,list_of_images, n_digits, destination):
+    for i in range(len(list_of_base_image_names)):
+        base_image_name=list_of_base_image_names[i]
+        name =os.path.splitext(base_image_name)[0]
+        index_t =name.find("_t")    
+        old_number =name[index_t+2:]
+        new_number =str(old_number).zfill(n_digits)
+        new_base_name =name[:index_t+2]+new_number
+        new_full_name =os.path.join(destination, new_base_name)
+        new_full_name=new_full_name+"_"+channel_name+".tif"             
+        cv2.imwrite(new_full_name, list_of_images[i])
+####################################################

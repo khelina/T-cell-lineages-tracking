@@ -161,7 +161,45 @@ def update_lineage_after_manual_segm_correction(mask, filled_fluor,filled_bright
        frame_dictionary["cell_%s" % cell_ID][19]=new_perimeter
        frame_dictionary["cell_%s" % cell_ID][20]=new_circularity
        
+###########################################
+"""
+def begin_with_one_cell():# after pushing button "1 cell"
+    stop_flash("radio", page4, flashers)
+    feedback_label.configure(text="Calculating position of cell in Frame 1 ...")
+    R1.configure(bg="red")
+    R2.configure(bg=button_color)
+    global coords, coords_very_first
+    
+           
+    full_name = os.path.join(directory, "Tracker-1")
+    print("full_name=", full_name)
+    json_file = open(full_name + "-model.json", "r")
+    model_read = json_file.read()
+    json_file.close()        
+        
+    tracker_1 = model_from_json(model_read)
+    tracker_1.load_weights(full_name + "-weights.h5")   
+    tracker_1.compile(Adam(lr=0.003), loss='mse',metrics=['mae'])
        
+    coords = predict_first_frame(fluor_images_compressed, tracker_1)  
+    coords_very_first= coords.tolist()
+    print("coords=", coords)    
+    global colours, template_names, prev_frame
+    colours, template_names = create_color_dictionary(
+        max_number_of_cells, coords.shape[0])# 10 =maximum number of cells
+    global xs
+    xs=create_dictionary_of_xs( template_names, coords_very_first, num_frames)
+  
+    global text
+    text = template_names[:coords.shape[0]]
+    
+    R2.configure(bg=button_color, fg="black")
+    R1.configure(bg="black", fg="#00FFFF")
+    
+    start_flash([button_execute], "exec", page4, flashers)
+    feedback_label.config(text="The centroids of the cell in Frame 1 has been calculated.\n\nTo start execution, press Button 3.")    
+####################################   
+"""       
        
        
        

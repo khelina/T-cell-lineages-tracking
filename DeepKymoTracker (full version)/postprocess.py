@@ -13,6 +13,10 @@ from copy import deepcopy
 Bordersize=100
 from functions import extract_lineage
 ##############################################################
+## This function creates lineage_per_cell (out of lineage_per_frame) 
+## It is executed  only after the movie has been tracked (button Create Output Movie)
+## Lineage_per_cell will be used in the next steps
+## Also, it is a better way of representing results
 def create_pedigree(lineage_per_frame,outpath,frame_size):
   a=[(lineage_per_frame[i].keys(),i) for i in range(len(lineage_per_frame))] 
   names=[]
@@ -56,41 +60,50 @@ def create_pedigree(lineage_per_frame,outpath,frame_size):
          pickle.dump(pedigree, f)  
   return pedigree
 ####################################################################
-def create_dictionary_of_xs( template, coords_very_first, num_frames):    
+####### xs contains x-coordinates for each cell (for plotting dynamic lineage)
+# It is created based on cell names in Frame 1 (see function def_Close_popup)
+# template = new_cell_names (naive) in Frame 1
+def create_dictionary_of_xs( template, coords_very_first, num_frames,max_number_of_cells):    
   first_text=template[:len(coords_very_first)]  
   numbers =[len(item) for item in template]
-  max_number =max(numbers)
-  if len(coords_very_first)==1:
+  #max_number =max(numbers)
+  if len(coords_very_first)==1:# if there is only one cell in Frame 1
     xs ={"1":int(num_frames/2)}
-  else:
+  else:# of there are >1 cells in Frame 1 
     xs={}
     for i  in range(len(first_text)):
         xs[first_text[i]]=int((num_frames/(len(first_text)+1))*(i+1))
-  for k in range(len(template)):
+  for k in range(len(template)):# creates x-coordinates for all possible daughters
+                                # based on max_number_of_cells in the movie
        cell_name =template[k]        
        kk=len(cell_name)
-       if kk<max_number:
+       if kk<max_number_of_cells:
          item_1=xs[cell_name]-num_frames/(2**(kk+1))
          item_2=xs[cell_name]+num_frames/(2**(kk+1))            
          xs[cell_name+"0"]=int(item_1)
          xs[cell_name+"1"]=int(item_2)              
   return xs
 #################################################
-def create_lineage_image_one_frame(out_folders,cells, previous_lineage_image, xs, frame):
- temp_path=out_folders[5]#  "LINEAGE_IMAGES",was [5]
+
+#######################################
+# This function creates current_lineage_image to be plotted for each frame during execution
+# It is based on dictionary of xs (gives x-coordinate) and frame (which frame number, i.e. y-coordinate)
+def create_lineage_image_one_frame(cells, previous_lineage_image, xs, frame):
+ print("previous_lineage_image.shape ENTER CREATE_LIN)IMAGE=",previous_lineage_image.shape)
+ 
  ###### prepare points for lineage images ######
- rrad=10# radius of plotted point in lineage image
+ point_radius=10# radius of plotted point in lineage image
  size=previous_lineage_image.shape[0]
- points=[]# points for plotting animated lineage
+ points=[]# points (x,y) for plotting animated lineage (for current frame only: the previous points are in previous_lineage_image)
  keys=cells.keys()
  for key in keys:
-   item=cells[key]   
+   item=cells[key]# cells means that linage_per_frame_p4 is used for extraxting info about cells in this frame   
    cell_name=item[11]
    x=xs[cell_name]
    y = item[12]# y=frame_number
    colour=item[15][:-1]   
-   if size <=382:    
-       rrad=1      
+   if size <=382:# for very short movies (otherwise the lines in current_linage_image will be too thick)    
+       point_radius=1      
    points.append(((x,y),colour)) 
    # more points for the  case of division (horizontal lines drawing)  
    if item[16]=="daughter-1":
@@ -101,14 +114,17 @@ def create_lineage_image_one_frame(out_folders,cells, previous_lineage_image, xs
           start=cell_name[:-1]                   
           more_points=[((xx,y),colour) for xx in range(xs[start],xs[start+"1"],1)]    
           points+=more_points        
-   ######### create lineage image at last                    
+ ######### create lineage image at last                    
  for p in range(len(points)):
-      cv2.circle(previous_lineage_image, points[p][0], rrad, points[p][1], -1)
- current_lineage_image= previous_lineage_image      
- dest =os.path.join(temp_path,"tree_%s.tif" % (frame))
- cv2.imwrite(dest, current_lineage_image) 
- still_lineage=current_lineage_image
- cv2.imwrite(os.path.join( os.path.dirname(temp_path),"still_lineage.tif"), still_lineage)
+      cv2.circle(previous_lineage_image, points[p][0], point_radius, points[p][1], -1)
+ current_lineage_image= previous_lineage_image
+
+     
+ #dest =os.path.join(temp_path,"tree_%s.tif" % (frame))
+ #cv2.imwrite(dest, current_lineage_image) 
+ #still_lineage=current_lineage_image
+ #cv2.imwrite(os.path.join( os.path.dirname(temp_path),"still_lineage.tif"), still_lineage)
+ 
  return current_lineage_image    
 ##########################################
 def sorted_aphanumeric(data):
@@ -118,13 +134,12 @@ def sorted_aphanumeric(data):
 #################################################
 def load_files(folder_dir):# load linegae images and segmented images to create final movie
  images=[]
- for filename in sorted_aphanumeric(os.listdir(folder_dir)):
-      if filename.endswith(".tif"):
+ if filename.endswith(".tif"):
         full_name=os.path.join(folder_dir, filename)      
         image=cv2.imread(full_name,1)
         images.append(image)       
  return images
-############ prepare images for movie
+############ prepare images for output_movie
 def create_output_movie(outpath,frame_size):
  print("Creating images for movie and saving in TEMPORARY_FOR_MOVIE folder")
  images_out_path=os.path.join(outpath,"IMAGES_FOR_FINAL_MOVIE")
