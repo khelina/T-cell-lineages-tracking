@@ -88,7 +88,7 @@ def create_dictionary_of_xs( template, coords_very_first, num_frames,max_number_
 #######################################
 # This function creates current_lineage_image to be plotted for each frame during execution
 # It is based on dictionary of xs (gives x-coordinate) and frame (which frame number, i.e. y-coordinate)
-def create_lineage_image_one_frame(cells, previous_lineage_image, xs, frame):
+def create_lineage_image_one_frame(cells, previous_lineage_image, xs, frame, first_frame_number):
  print("previous_lineage_image.shape ENTER CREATE_LIN)IMAGE=",previous_lineage_image.shape)
  
  ###### prepare points for lineage images ######
@@ -101,18 +101,19 @@ def create_lineage_image_one_frame(cells, previous_lineage_image, xs, frame):
    cell_name=item[11]
    x=xs[cell_name]
    y = item[12]# y=frame_number
+   y_internal=y-first_frame_number
    colour=item[15][:-1]   
    if size <=382:# for very short movies (otherwise the lines in current_linage_image will be too thick)    
        point_radius=1      
-   points.append(((x,y),colour)) 
+   points.append(((x,y_internal),colour)) 
    # more points for the  case of division (horizontal lines drawing)  
    if item[16]=="daughter-1":
           start=cell_name[:-1]                
-          more_points=[((xx,y),colour) for xx in range(xs[start+"0"],xs[start],1)]    
+          more_points=[((xx,y_internal),colour) for xx in range(xs[start+"0"],xs[start],1)]    
           points+=more_points 
    if item[16]=="daughter-2":      
           start=cell_name[:-1]                   
-          more_points=[((xx,y),colour) for xx in range(xs[start],xs[start+"1"],1)]    
+          more_points=[((xx,y_internal),colour) for xx in range(xs[start],xs[start+"1"],1)]    
           points+=more_points        
  ######### create lineage image at last                    
  for p in range(len(points)):

@@ -56,21 +56,23 @@ def display_both_channels(filled_fluor,filled_bright,canvas_fluor,canvas_bright,
       canvas_bright.create_image(0, 0, anchor=NW, image=photo_bright)
       return canvas_bright,canvas_fluor, photo_fluor, photo_bright
 ###############################################################
-def extract_output_images(fluor_path,lineage_path, window_size, output_images):# extract fluor and linage images for display
+def extract_output_images(output_fluor_path,lineage_path, window_size, output_images, output_names):# extract fluor and linage images for display
     #global output_images,lineage_images
-    lineage_images=[]
-    for filename in sorted_aphanumeric(os.listdir(fluor_path)):
-        #print("filename=", filename)
-        #print("fl_image_path=",os.path.join(fluor_path,filename) )
-        fluor_tracked=cv2.imread(os.path.join(fluor_path,filename), -1)
+    lineage_images, lineage_images_cv2=[],[]
+    for filename in sorted_aphanumeric(os.listdir(output_fluor_path)):
+        #output_name=os.path.join(fluor_path,filename)
+        output_name=filename
+        full_output_name=os.path.join(output_fluor_path,output_name)
+        output_names.append(output_name)
+        fluor_tracked=cv2.imread(full_output_name, -1)
         photo_fluor_tracked=turn_image_into_tkinter(fluor_tracked, window_size)     
         output_images.append(photo_fluor_tracked)
     for filename in sorted_aphanumeric(os.listdir(lineage_path)):
         lineage_cv2=cv2.imread(os.path.join(lineage_path,filename), -1)
-    
+        lineage_images_cv2.append(lineage_cv2)
         photo_lineage=turn_image_into_tkinter(lineage_cv2, window_size)     
         lineage_images.append(photo_lineage)
-    return output_images,lineage_images
+    return output_images,lineage_images, output_names, lineage_images_cv2
 ##################################################    
 def flash(colors_combinations, buttons,flashers_names, win, flashers):  
   for k in range(len(colors_combinations)):        
@@ -83,6 +85,7 @@ def show_3_channels(canvas_left,canvas_mid,canvas_right,left_names,mid_names,rig
     canvas_left.delete('all')
     canvas_mid.delete('all')    
     canvas_right.delete('all')
+  
     
     left_cv_image=cv2.imread(left_names[image_number-1],0)
     mid_cv_image=cv2.imread(mid_names[image_number-1],0)
@@ -106,16 +109,19 @@ def show_2_canvases(canvas_bright,canvas_fluor,photo_filled_brights,photo_filled
     
 #################################################
 
-def show_3_canvases(canvas_previous,canvas_current,canvas_lineage,output_images,lineage_images,image_number):
-    canvas_previous.delete('all')
-    canvas_current.delete('all')    
-    canvas_lineage.delete('all')
-    print("len(output_images)=",len(output_images)) 
-    print("image_number=",image_number)   
-    canvas_current.create_image(0, 0, anchor=NW, image=output_images[image_number])
-    canvas_previous.create_image(0, 0, anchor=NW, image=output_images[image_number-1])
-    photo_image_lin=lineage_images[image_number-1]   
-    canvas_lineage.create_image(
+def show_3_canvases(canvas_previous,canvas_current,canvas_lineage,output_images,lineage_images,image_number, first_frame_number):
+  canvas_previous.delete('all')
+  canvas_current.delete('all')    
+  canvas_lineage.delete('all')
+  print("len(output_images)=",len(output_images)) 
+  print("image_number inside 3 canvases=",image_number)
+  internal_image_number=image_number-first_frame_number+1
+  print("internal_image_number=",internal_image_number)
+  if internal_image_number<len(output_images):   
+   canvas_current.create_image(0, 0, anchor=NW, image=output_images[internal_image_number])
+   canvas_previous.create_image(0, 0, anchor=NW, image=output_images[internal_image_number-1])
+   photo_image_lin=lineage_images[internal_image_number-1]   
+   canvas_lineage.create_image(
         0, 0, anchor=NW, image=photo_image_lin)
 #######################################################
 def create_name_dictionary_p4(filenames):# available frame names (some might be missing)

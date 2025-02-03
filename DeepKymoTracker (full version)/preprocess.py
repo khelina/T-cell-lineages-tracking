@@ -44,39 +44,25 @@ def extract_file_name(full_image_name):
   first_frame_in_name=int(first)
   return full_core_name, n_digits, first_frame_in_name
 ###################################################
-
-################################################
-def load_clip(k,full_core_fluor_name,full_core_bright_name,n_digits, num_frames, first_frame_number): 
+def load_clip(first_number_in_clip,full_core_fluor_name,full_core_bright_name,n_digits, num_frames, first_frame_number): 
   fluor_names, bright_names =[],[]   
-  fluor_images,fluor_images_compressed,bright_images=[],[],[]
-  print("n_digits=", n_digits)  
-  for kk in range(4):
-   if k+kk<num_frames:
-    fluor_name=full_core_fluor_name+str(k+kk+first_frame_number).zfill(n_digits)+"_ch00.tif"
-    #fluor_name=full_core_fluor_name+str(k+1+kk+first_frame_number).zfill(n_digits)+"_ch00.tif"
-    fluor_names.append(fluor_name)
-    #raw = cv2.imread(fluor_name, -1)
-    ##########
+  fluor_images,fluor_images_compressed,bright_images=[],[],[]  
+  last_frame_number=num_frames+first_frame_number-1  
+  for kk in range(4):  
+   if first_number_in_clip+kk <= last_frame_number:
+    fluor_name=full_core_fluor_name+str(first_number_in_clip+kk).zfill(n_digits)+"_ch00.tif"   
+    fluor_names.append(fluor_name)    
     fl_pillow = Image.open(fluor_name)
-    raw = np.array(fl_pillow, dtype=np.uint8)
-    ###########
+    raw = np.array(fl_pillow, dtype=np.uint8)  
     fluor_images.append(raw)
     raw2 = raw.copy()
-    fluor_compressed = cv2.resize(raw2, (100, 100), interpolation=cv2.INTER_AREA)
-    fluor_images_compressed.append(fluor_compressed)
-    
-    bright_name=full_core_bright_name+str(k+kk+first_frame_number).zfill(n_digits)+"_ch02.tif"
+    fluor_compressed = cv2.resize(raw2, (100, 100), interpolation=cv2.INTER_AREA)   
+    fluor_images_compressed.append(fluor_compressed)    
+    bright_name=full_core_bright_name+str(first_number_in_clip+kk).zfill(n_digits)+"_ch02.tif"
     bright_names.append(bright_name)
     br_pillow = Image.open(bright_name)
-    bright = np.array(br_pillow, dtype=np.uint8)
-    #bright= cv2.imread(bright_name, -1) # was 0   
-    bright_images.append(bright)
-    #print("bright_name=",bright_name)
-  print("fluor_names=",fluor_names)
-  print("len(fluor_images_compressed)=",len(fluor_images_compressed))
-  print("bright_names=",bright_names)
-  print("len(bright_images)=",len(bright_images))
-  print("len(fluor_images)=",len(fluor_images))
+    bright = np.array(br_pillow, dtype=np.uint8)   
+    bright_images.append(bright)  
   return  fluor_images,fluor_images_compressed,bright_images,fluor_names,bright_names    
 ############################################
 def create_output_folders(outpath):
@@ -115,18 +101,15 @@ def load_weights(models):
     segmentor = model_from_json(models[1][0])
     segmentor.load_weights(models[1][1] + "-weights.h5")   
     segmentor.compile(Adam(lr=0.003), loss='mse',metrics=['mae'])
-    print("segmentor is ready")
-    
+    print("segmentor is ready")    
     refiner = model_from_json(models[2][0])
     refiner.load_weights(models[2][1] + "-weights.h5")   
     refiner.compile(Adam(lr=0.003), loss='mse',metrics=['mae'])   
-    print("refiner is ready")
-    
+    print("refiner is ready")    
     tracker = model_from_json(models[0][0])
     tracker.load_weights(models[0][1] + "-weights.h5")   
     tracker.compile(Adam(lr=0.003), loss='mse',metrics=['mae'])
-    print("tracker is ready")
-         
+    print("tracker is ready")         
     return tracker, segmentor, refiner
 ############################################################
 def characters(x): # in most cases it is [-13:-9] (for names like t0001_ch02.tif)
