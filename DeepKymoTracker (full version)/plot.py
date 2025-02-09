@@ -78,12 +78,55 @@ def create_first_color_dictionary(max_number_of_cells, init_number_of_cells, num
   
   return colour_dictionary, new_naive_names, base_colours, colour_counter, unused_naive_names, xs
 #######################################
-def create_first_dictionary_of_xs(new_naive_names,num_frames,max_number_of_cells):
-  n= int(math.log(max_number_of_cells,2)) +1
+
+
+################################
+import math
+#######################
+new_naive_names=["a","b"]
+num_frames=100
+observed_max_number_of_cells=7
+xs=create_first_dictionary_of_xs(new_naive_names,num_frames,observed_max_number_of_cells)
+print("xs=", xs)
+##########################
+
+#############################
+def create_first_dictionary_of_xs(new_naive_names,num_frames,observed_max_number_of_cells):
+  #n= int(math.log(max_number_of_cells,2)) +1
+  #n=max_number_of_cells-len(new_naive_names)
+  ### this is for one cell
+  m=len(new_naive_names)
+  kk=-2# kk=max number of potential divisions
+  while True:
+    kk+=1
+    if (2**(kk-1))*m<observed_max_number_of_cells<=(2**kk)*m:
+        number_of_potential_divisions=kk
+        break
+  print("number_of_potential_divisions=", number_of_potential_divisions)
+  ## n = final max number of potential divisions
+  
+  potential_max_number_of_cells=(2**kk)*m
+  max_number_of_cells_in_one_unit=2**kk
+  print("potential_max_number_of_cells=", potential_max_number_of_cells)
+  #print("actual_max_number_of_cells=", actual_max_number_of_cells)
+  number_of_deltas_in_one_unit=(2**kk-1)*2
+  print("number_of_deltas_in_one_unit=", number_of_deltas_in_one_unit)
+  total_number_of_deltas=m* number_of_deltas_in_one_unit+m+1
+  
+  print("total_number_of_deltas=", total_number_of_deltas)
+  #number_of_deltas_per_unit=int(number_of_deltas/m)
+  #print("number_of_deltas_per_unit=", number_of_deltas_per_unit)
+  delta=int(num_frames/total_number_of_deltas)
+  print("delta=", delta)
   ##############################
+  first_m=-int(number_of_deltas_in_one_unit/2)*delta 
+  print("first_m=", first_m)
+  step_size_for_m=(number_of_deltas_in_one_unit+1)*delta
+  print("step_size_for_m=", step_size_for_m)
+  #############################
   all_cell_names=new_naive_names
   temp_list=all_cell_names
-  for k in range(n):# was n
+  for k in range(number_of_potential_divisions):# was n
     daughters=[]
     for item in temp_list:     
       a=item+"0"
@@ -91,25 +134,29 @@ def create_first_dictionary_of_xs(new_naive_names,num_frames,max_number_of_cells
       daughters =daughters+[a,b]
     temp_list =daughters   
     all_cell_names=all_cell_names+temp_list
-  #print("all_cell_names=", all_cell_names)
+   
+  print("all_cell_names=", all_cell_names)
   #######################################    
     
   numbers =[len(item) for item in all_cell_names]
-  max_number =max(numbers)
-  print("max_number=", max_number)  
+  max_name_length =max(numbers)
+  print("max_name_length=", max_name_length)  
   xs={}
-  for i  in range(len(new_naive_names)):
-        xs[new_naive_names[i]]=int((num_frames/(len(new_naive_names)+1))*(i+1))
+  
+  for i in range(len(new_naive_names)):
+        xs[new_naive_names[i]]=first_m+step_size_for_m*(i+1) 
+  print("xs for new_naive_names_only", xs)
+        #xs[new_naive_names[i]]=int((num_frames/(len(new_naive_names)+1))*(i+1))
   for k in range(len(all_cell_names)):# creates x-coordinates for all possible daughters                                # based on max_number_of_cells in the movie
        cell_name =all_cell_names[k]        
-       kk=len(cell_name)
-       if kk<max_number:
-         item_1=xs[cell_name]-num_frames/(2**(kk+1))
-         item_2=xs[cell_name]+num_frames/(2**(kk+1))            
+       kkk=len(cell_name)
+       if kkk<max_name_length:         
+         item_1=xs[cell_name]-delta*( number_of_deltas_in_one_unit/2**kkk)
+         item_2=xs[cell_name]+delta*( number_of_deltas_in_one_unit/2**kkk)   
          xs[cell_name+"0"]=int(item_1)
          xs[cell_name+"1"]=int(item_2)              
   return xs
-#######################################
+ 
 
 ####### xs contains x-coordinates for each cell (for plotting dynamic lineage)
 # It is created based on cell names in Frame 1 (see function def_Close_popup)
