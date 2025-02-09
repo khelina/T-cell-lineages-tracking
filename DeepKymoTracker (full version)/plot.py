@@ -81,15 +81,16 @@ def create_first_color_dictionary(max_number_of_cells, init_number_of_cells, num
 
 
 ################################
+"""
 import math
 #######################
 new_naive_names=["a","b"]
 num_frames=100
-observed_max_number_of_cells=7
+observed_max_number_of_cells=4
 xs=create_first_dictionary_of_xs(new_naive_names,num_frames,observed_max_number_of_cells)
 print("xs=", xs)
 ##########################
-
+"""
 #############################
 def create_first_dictionary_of_xs(new_naive_names,num_frames,observed_max_number_of_cells):
   #n= int(math.log(max_number_of_cells,2)) +1
@@ -151,8 +152,8 @@ def create_first_dictionary_of_xs(new_naive_names,num_frames,observed_max_number
        cell_name =all_cell_names[k]        
        kkk=len(cell_name)
        if kkk<max_name_length:         
-         item_1=xs[cell_name]-delta*( number_of_deltas_in_one_unit/2**kkk)
-         item_2=xs[cell_name]+delta*( number_of_deltas_in_one_unit/2**kkk)   
+         item_1=xs[cell_name]-delta*(2**(kk-kkk))
+         item_2=xs[cell_name]+delta*(2**(kk-kkk))   
          xs[cell_name+"0"]=int(item_1)
          xs[cell_name+"1"]=int(item_2)              
   return xs
