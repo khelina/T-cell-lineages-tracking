@@ -62,7 +62,7 @@ def detect_figure_8(segmented_patch):# detects division in patch
         image, contours, hierarchy = cv2.findContours(im1,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
         parameters=[]      
         immmg, cnts, hier = cv2.findContours(im1,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
-        print("len(contours) inside detect_figure_8_before=", len(cnts))
+        #print("len(contours) inside detect_figure_8_before=", len(cnts))
        
         for cnt in contours:
           area=cv2.contourArea(cnt)
@@ -81,7 +81,7 @@ def detect_figure_8(segmented_patch):# detects division in patch
   else:
       verdict="no division"
   immmg, cnts, hier = cv2.findContours(im1,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
-  print("len(contours) inside detect_figure_8_after=", len(cnts))
+  #print("len(contours) inside detect_figure_8_after=", len(cnts))
   return verdict,segmented_patch,im1# if no division, im1=segmented_patch, the cell is not cut
 ################ recalculate centres of daugher cells after division
 def recalculate_centre(segmented_image,old_coords, frame_size):
@@ -111,7 +111,7 @@ def process_figure_8(im1,centre, frame_size):#separates figure into 2 cells and 
     im2, contours, hierarchy = cv2.findContours(im1,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE) 
     parameters=[]
     separated_cells=[]
-    print("len(contours) inside process_figure_8=", len(contours))
+   # print("len(contours) inside process_figure_8=", len(contours))
     for kkk  in range(len(contours)):	
         img=np.zeros((96,96),dtype="uint8")
         cv2.drawContours(img, contours, kkk, 255, -1)

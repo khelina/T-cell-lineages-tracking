@@ -1023,11 +1023,12 @@ button_shift_edit.grid(row=2, column=0,padx=10,pady=(10,10))
 button_fluor=tk.Button(frame12_page3,text="7. Apply to all fluorescent and red",bg=button_color,activebackground="red",font=all_font, command=lambda: Thread(target=cut_fluor_wells).start())
 button_fluor.pack()
 ###########################################################################
-######### PAGE 4 : EXECUTE AND CORRECT TRACKING ##############################
+######### PAGE 4 :STEP-3:  EXECUTE AND CORRECT TRACKING ##############################
 ###############################################################################
 page4=pages[3]
 page4.config(bg=bg_color)
 canvas_size_p4 =382
+lineage_extension_for_new_cells=80
 
 frame1_page4 = tk.Frame(master=page4, width=1528, height=50, bg="blue")
 frame1_page4.grid(row=0, column=0, rowspan=1, columnspan=6, sticky=W+E+N+S)
@@ -1044,7 +1045,7 @@ frame5_page4.grid(row=2, column=0, rowspan=1, columnspan=1)
 frame6_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=canvas_size_p4, bg="white")
 frame6_page4.grid(row=2, column=1, rowspan=1, columnspan=1)
 
-frame7_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=canvas_size_p4, bg="red")
+frame7_page4 = tk.Frame(master=page4, width=canvas_size_p4+lineage_extension_for_new_cells, height=canvas_size_p4, bg="red")
 frame7_page4.grid(row=2, column=2, rowspan=1, columnspan=1)
 
 frame8_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=canvas_size_p4, bg="blue")
@@ -1081,7 +1082,7 @@ label_curr_frame_name.grid(row=1, column=0,padx=100)
 label_lineage = tk.Label(frame10_page4, text="Lineage", bg="#87CEFA", fg="black", font='TkDefaultFont 10 bold' )
 label_lineage.grid(row=0, column=0, padx=100)
 ################################
-canvas_lineage = Canvas(frame7_page4, bg="green", height=canvas_size_p4, width=canvas_size_p4+100)
+canvas_lineage = Canvas(frame7_page4, bg="green", height=canvas_size_p4, width=canvas_size_p4+lineage_extension_for_new_cells)
 canvas_lineage.grid(row=0,column=0)
 ###################################################
 zero_image = Image.new('RGB', (canvas_size_p4, canvas_size_p4))
@@ -1097,8 +1098,8 @@ popup_window_size=800
 #####################################
 global fluor_images, fluor_images_compressed,bright_images, fluor_names, br_names
 fluor_images, fluor_images_compressed,bright_images, fluor_names, br_names=None,None,None, None, None  
-global  lineage_per_frame_p4,start_frame,dict_of_divisions,  cells
-lineage_per_frame_p4,start_frame,dict_of_divisions, cells = None,1, {},{}
+global  lineage_per_frame_p4,start_frame,dict_of_divisions,  cells, changeble_movie_params
+lineage_per_frame_p4,start_frame,dict_of_divisions, cells,changeble_movie_params = None,1, {},{},[]
 global  count, pedigree, flag
 pedigree,flag= None ," "
 count = np.zeros((100), dtype="uint8")# for division
@@ -1115,8 +1116,8 @@ clicked = StringVar()
 clicked.set(" ")
 
 ##################################
-global manual_IDs,manual_centroids,mother_name 
-manual_IDs,  manual_centroids, mother_name=[], [], None
+global manual_IDs,manual_centroids,mother_name,  daughter_indicators 
+manual_IDs,  manual_centroids, mother_name, daughter_indicators=[], [], None, []
 #################
 def load_helper_functions():
     os.chdir(software_folder)
@@ -1125,7 +1126,7 @@ def load_helper_functions():
         create_previous_frame, plot_frame, create_first_color_dictionary,\
         create_pedigree, create_output_movie, load_weights, extract_lineage,create_dictionary_of_xs,\
         create_lineage_image_one_frame, extract_file_name, load_clip, update_lineage,force_manual_IDs,create_lineage_for_Lorenzo,sorted_aphanumeric,update_color_dictionary,update_naive_names_list,update_xs,\
-        load_full_raw_movie,create_models,extract_output_images,create_name_dictionary_p4,display_image_p4,removeLeadingZeros,rename_file, show_3_canvases
+        load_full_raw_movie,create_models,extract_output_images,create_name_dictionary_p4,display_image_p4,removeLeadingZeros,rename_file, show_3_canvases,update_changeable_params_history,extract_changeable_params_history
 
     from preprocess import create_output_folders, load_weights, extract_file_name,load_clip,load_full_raw_movie,create_models,removeLeadingZeros
     
@@ -1134,12 +1135,12 @@ def load_helper_functions():
                                    update_dictionary_after_division, check_division_frame_number)
 
     from functions import (predict_tracking_general,  backup_track, predict_first_frame, segment_and_clean,
-                           hungarian, create_previous_frame, predict_tracking, extract_lineage, update_lineage,force_manual_IDs, extract_movie_parameters)
+                           hungarian, create_previous_frame, predict_tracking,force_manual_IDs)
     
     from plot import plot_frame, create_first_color_dictionary,update_color_dictionary,update_naive_names_list,update_xs, rename_file
     from postprocess import create_pedigree,  create_output_movie, create_dictionary_of_xs, create_lineage_image_one_frame,sorted_aphanumeric
     from keras.models import model_from_json
-    from extract_lineage_for_Lorenzo import create_lineage_for_Lorenzo
+    from extract_lineage_for_Lorenzo import create_lineage_for_Lorenzo,extract_lineage,update_lineage, extract_const_movie_parameters,update_changeable_params_history,extract_changeable_params_history
     from interface_functions import extract_output_images,create_name_dictionary_p4,display_image_p4, show_3_canvases
     from keras.optimizers import Adam
 ###########################################    
@@ -1179,11 +1180,9 @@ def initiate_tracking_page():
             all_names_fluor.append(full_name_fluor)
      #print("len(output_names) before=", len(output_names))
      
-     global full_core_fluor_name, n_digits, first_frame_number, start_empty_file_name
+     global full_core_fluor_name, n_digits, first_frame_number, start_empty_file_name, frame_size
      full_core_fluor_name, n_digits, first_frame_number= extract_file_name(all_names_fluor[0])
-     #full_core_bright_name, n_digits, first_frame_number= extract_file_name(all_names_bright[0])
-     #print("all_names_fluor=", all_names_fluor)
-     #view_slider.config(from_=first_frame_number,to=first_frame_number)
+     
      init_image=cv2.imread(all_names_fluor[0],0)
      last_image=cv2.imread(all_names_fluor[-1 ],0)
      frame_size=init_image[0].shape[0]
@@ -1217,7 +1216,7 @@ def initiate_tracking_page():
                    os.mkdir(outpath)# create OUTPUT folder and start tracking from Frame 1
                    del all_names_fluor
                    prepare_for_first_go()
-               else:# 4. RESULT_FLUOR is not empty
+               else:# 4. RESULT_FLUOR is not empty, i.e. movie has been processed (partly or fully)
                   print("RESULT_FLUOR is not empty")
                 
                   output_names_fluor=[]
@@ -1226,7 +1225,55 @@ def initiate_tracking_page():
                      #feedback_label.configure(text="Loading input movie ...")                      
                      output_name_fluor = os.path.join(output_fluor_folder, filename)
                      output_names_fluor.append(output_name_fluor)
+                     
                   print("len(output_names_fluor)=",len(output_names_fluor))
+                  ####################
+                  ####################
+                  from preprocess import create_output_folders
+                  global out_folders
+                  out_folders = create_output_folders(outpath)# creates names only  
+    
+                  global true_cell_radius, patch_size,max_number_of_cells,  xs, full_core_bright_name,curr_frame_cell_names,flag,edit_id_indicator, \
+                  base_colours,colour_counter,colour_dictionary,unused_naive_names, contrast_value, dict_of_divisions,number_of_added_new_cells
+                  true_cell_radius, edit_id_indicator=IntVar(),StringVar()
+   
+                  (frame_size, true_cell_radius_pickle, patch_size,max_number_of_cells,
+                  num_frames, full_core_fluor_name, n_digits, full_core_bright_name, first_frame_number,
+                  base_colours, contrast_value)= extract_const_movie_parameters(outpath)
+                  
+    
+                  true_cell_radius.set(true_cell_radius_pickle)
+                  ###################################
+                  global xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,unused_naive_names,\
+                  dict_of_divisions,number_of_added_new_cells
+                  list_of_ch_movie_params=extract_changeable_params_history(outpath)
+                  xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,unused_naive_names,dict_of_divisions,number_of_added_new_cells= list_of_ch_movie_params[-1][0],list_of_ch_movie_params[-1][1],list_of_ch_movie_params[-1][2],\
+                  list_of_ch_movie_params[-1][3],list_of_ch_movie_params[-1][4],list_of_ch_movie_params[-1][5],list_of_ch_movie_params[-1][6],list_of_ch_movie_params[-1][7],list_of_ch_movie_params[-1][8]
+                  print("list_of_ch_movie_params[-1]=", list_of_ch_movie_params[-1])
+                  print("len(list_of_ch_movie_params)=", len(list_of_ch_movie_params))
+                  ######################################
+                  edit_id_indicator.set(edit_id_indicator_pickle)
+                  ########################################################
+                  cell_info_label.config(text= "FRAME SIZE: "+str(frame_size)+"x"+str(frame_size)+
+                           "\nCELL DIAMETER:= "+str(2*true_cell_radius.get())+"\nPATCH SIZE= "+str(2*patch_size)+" x "+str(2*patch_size))
+                  #############################################
+                  lineage_per_frame = extract_lineage(outpath)
+                  last_frame_cell_dict=lineage_per_frame[-1]
+                  n_cells=len(last_frame_cell_dict)    
+                  internal_cell_names=list(last_frame_cell_dict.keys())
+    
+                  global coords, start_frame
+                  start_frame=last_frame_cell_dict[internal_cell_names[0]][12]+1    
+                  coords=last_frame_cell_dict[internal_cell_names[0]][14]
+    
+                  global output_images,lineage_images, output_names,lineage_images_cv2    
+                  output_images,lineage_images, output_names,lineage_images_cv2=extract_output_images(out_folders[3],out_folders[5],canvas_size_p4, output_images,output_names)
+    
+                  global  previous_lineage_image, lineage_image_size
+                  previous_lineage_image=lineage_images_cv2[-1]     
+                  lineage_image_size=previous_lineage_image.shape[0]
+                  #######################################################
+                  #################################################
                   if len(all_names_fluor)>len(output_names_fluor):
                      print("partly tracked")
                      global popup_partly_tracked, button_retrieve    
@@ -1247,21 +1294,7 @@ def initiate_tracking_page():
                      def close_fully_popup():
                       popup_fully_tracked.destroy()                      
                       display_first_frame()
-                    
-                    
-                     global out_folders,output_images,lineage_images, output_names
-                     out_folders = create_output_folders(outpath)
-                     output_images,lineage_images,output_names,lineage_images_cv2=extract_output_images(out_folders[3],out_folders[5], canvas_size_p4,output_images,output_names)
-                     list_of_movie_params= extract_movie_parameters(outpath)
-                     num_frames,first_frame_number, true_cell_radius_pickle, patch_size=list_of_movie_params[4],list_of_movie_params[12],list_of_movie_params[1],list_of_movie_params[2]
-                     cell_info_label.config(text= "FRAME SIZE: "+str(frame_size)+"x"+str(frame_size)+
-                           "\nCELL DIAMETER:= "+str(2*true_cell_radius_pickle)+"\nPATCH SIZE= "+str(2*patch_size)+" x "+str(2*patch_size),
-                           fg="#00FFFF", bg="black")
-                     #xs,full_core_bright_name=list_of_movie_params[7],list_of_movie_params[8]
-                     #curr_frame_cell_names,flag,edit_id_indicator_pickle=list_of_movie_params[9],list_of_movie_params[10],list_of_movie_params[11]
-                     #first_frame_number=list_of_movie_params[12]
-                     #view_slider.config(from_=first_frame_number,to=num_frames)
-                     #view_slider.config(to=len(output_images)+first_frame_number-2)
+                                        
                      global popup_fully_tracked    
                      popup_fully_tracked = tk.Toplevel(master=page4, bg="blue")
                      w,h = 200,50                      
@@ -1281,10 +1314,7 @@ def initiate_tracking_page():
 #############################################################
  
 def prepare_for_first_go():
-    #global manual_init_positions
-    #manual_init_positions=[]
-    #print("manual_init_positions in prepare_for_first_go=",manual_init_posiitons)
-      
+    
     global popup_first_preview, canvas_popup_fluor_p4,canvas_popup_bright_p4,canvas_popup_red_p4    
     popup_first_preview = tk.Toplevel(master=page4, width=1528, height=50, bg="blue")
     
@@ -1341,8 +1371,6 @@ def prepare_for_first_go():
     button_assign_positions = Button(frame7, text="2c. Assign initial cell positions",font='TkDefaultFont 10 bold', bg=button_color, command=create_assign_cell_positions_popup)
     button_assign_positions.pack()
 ###################################################
-    
-    #print("manual_init_positions inside preapre for first go=", manual_init_positions)
           
     def click_cells_to_count(event):     
       canvas_mid_pop.create_oval(event.x-2, event.y-2, event.x+2,
@@ -1437,7 +1465,8 @@ def prepare_for_first_go():
     ########### load the first clip         
     #global fluor_images,fluor_images_compressed,bright_images,fluor_names,bright_names                 
     #fluor_images,fluor_images_compressed,bright_images,fluor_names,bright_names =load_clip(0,full_core_fluor_name,full_core_bright_name,n_digits, num_frames, first_frame_number)
-    global   previous_lineage_image, lineage_image_size     
+    global   previous_lineage_image, lineage_image_size, number_of_added_new_cells
+    number_of_added_new_cells=0     
     #frame_size=fluor_images[0].shape[0]
     cell_info_label.config(text= "FRAME SIZE:"+str(frame_size)+"x"+str(frame_size), fg="#00FFFF", bg="black")
     print("frame_size_before=", frame_size)
@@ -1445,77 +1474,18 @@ def prepare_for_first_go():
         lineage_image_size=num_frames#this is the size of lineage image
     else:
         lineage_image_size=num_frames
-    previous_lineage_image =np.zeros((lineage_image_size, lineage_image_size,3), dtype="uint8") 
+    previous_lineage_image =np.zeros((lineage_image_size, lineage_image_size+200,3), dtype="uint8") 
     feedback_label.config(text="Movie loaded, {} frames.\nNow, you need to specify how many cells are there in Frame 1.".format(num_frames))   
     button_load.configure(background =button_color)
     global start_frame
     start_frame=first_frame_number
-    print("start_frame inside prepare for first_go=", start_frame)
- 
-   
+    print("start_frame inside prepare for first_go=", start_frame)   
     update_flash([button_contrast])
 #######################################
 global retrieve_unfinished_movie
-def retrieve_unfinished_movie():
+def retrieve_unfinished_movie():# in retrieve mode
     print("I am inside retrieve function")
-   
-    from preprocess import create_output_folders
-    global out_folders
-    out_folders = create_output_folders(outpath)# creates names only  
-    ######## calcilate number of frames, core name in file names
     
-    list_of_movie_params= extract_movie_parameters(outpath)
-    #print("list_of_movie_params=", list_of_movie_params)
-    global frame_size, true_cell_radius, patch_size,max_number_of_cells,num_frames, full_core_fluor_name, n_digits, xs, full_core_bright_name,curr_frame_cell_names,flag,edit_id_indicator, first_frame_number
-    true_cell_radius, edit_id_indicator=IntVar(),StringVar()                     
-    frame_size, true_cell_radius_pickle, patch_size,max_number_of_cells= list_of_movie_params[0],list_of_movie_params[1],list_of_movie_params[2],list_of_movie_params[3]
-    true_cell_radius.set(true_cell_radius_pickle)
-    print("true_cell_radius_pickle=",true_cell_radius_pickle)
-
-    num_frames, full_core_fluor_name, n_digits=list_of_movie_params[4],list_of_movie_params[5],list_of_movie_params[6]
-    xs,full_core_bright_name=list_of_movie_params[7],list_of_movie_params[8]
-    curr_frame_cell_names,flag,edit_id_indicator_pickle=list_of_movie_params[9],list_of_movie_params[10],list_of_movie_params[11]
-    first_frame_number=list_of_movie_params[12]
-    cell_info_label.config(text= "FRAME SIZE: "+str(frame_size)+"x"+str(frame_size)+
-                           "\nCELL DIAMETER:= "+str(2*true_cell_radius.get())+"\nPATCH SIZE= "+str(2*patch_size)+" x "+str(2*patch_size))
-    #view_slider.config(to=num_frames)
-    #view_slider.config(from_=first_frame_number,to=num_frames)
-    global base_colours,colour_counter,colour_dictionary,unused_naive_names, contrast_value, dict_of_divisions
-    base_colours,colour_counter,colour_dictionary,unused_naive_names, contrast_value, dict_of_divisions=list_of_movie_params[13],list_of_movie_params[14],list_of_movie_params[15],list_of_movie_params[16],list_of_movie_params[17],list_of_movie_params[18]
-    lineage_per_frame = extract_lineage(outpath)
-    print(" len(lineage_per_frame) inside retrieve=",  len(lineage_per_frame))
-    last_frame_cell_dict=lineage_per_frame[-1]
-    n_cells=len(last_frame_cell_dict)
-    edit_id_indicator.set(edit_id_indicator_pickle)
-    internal_cell_names=list(last_frame_cell_dict.keys())
-    global coords, start_frame
-    ############### start frame extraction is not perfect here!!! Should be improved!!!
-    start_frame=last_frame_cell_dict[internal_cell_names[0]][12]+1
-    print("first_frame_number=", first_frame_number)
-    print("start_frame=", start_frame)
-    coords=last_frame_cell_dict[internal_cell_names[0]][14]
-    print("coords=", coords)
-    print(" internal_cell_names=",  internal_cell_names)
-    #print(" xs=",  xs)
-       
-    print(" curr_frame_cell_names=",  curr_frame_cell_names)
-    ################### ERROR!! I should take previous_lineage_image form lineage_images_cv2 (see below)
-    global  previous_lineage_image, lineage_image_size     
-    previous_lineage_image=cv2.imread(os.path.join(outpath,"still_lineage.tif"), -1)
-    lineage_image_size=previous_lineage_image.shape[0]
-    #####################################
-    global output_images,lineage_images, output_names,lineage_images_cv2
-    print("len(output_names before)=", len(output_names))
-    
-    ################## output_images
-    print("outpath=", outpath)
-    fluor_path=os.path.join(outpath,out_folders[3])
-    lineage_path=os.path.join(outpath,out_folders[5])
-    print("fluor_path=", fluor_path)
-    
-    output_images,lineage_images, output_names,lineage_images_cv2=extract_output_images(out_folders[3],out_folders[5],canvas_size_p4, output_images,output_names)
-    print("len(lineage_images_cv2) in retrieve=",len(lineage_images_cv2))
-    print("len(output_names after)=", len(output_names))
     update_flash([button_execute])                
     display_first_frame()
     input_info_label.config(text= "INPUT MOVIE:"+ "\n"+str(my_dir)+"\nTOTAL NUMBER OF FRAMES: "+str(num_frames)+"\nNUMBER OF TRACKED FRAMES:  " +str(len(output_names)-1))           
@@ -1525,12 +1495,7 @@ def retrieve_unfinished_movie():
 button_load = Button(frame1_page4, text="1. Click to open file menu and then select input movie folder",
                bg=button_color,font='TkDefaultFont 10 bold', command=lambda:[threading.Thread(target=initiate_tracking_page).start(), update_flash([]), feedback_label.configure(text="Loading input movie ...") ])
 button_load.grid(row=2, column=0, padx=10, pady=20)
-#start_flash([button_load],"load", page4, flashers)
 
-####################################
-
-#global  coords_very_first # coords_very_first is necessary for plotting lineage later
-#coords_very_first= []
 ################################
 ######### measure cell radius in cell_measure_popup window (Bitton 2b)
 ############################
@@ -1572,14 +1537,15 @@ def save_cell_radius():
     
     #return true_cell_radius, patch_size
 #################################
-def record_movie_parameters():# record cell_size and other parameters in pickle file to be used at Step 4 (segmentation correction)
-    list_of_movie_params=[frame_size, true_cell_radius.get(), patch_size,max_number_of_cells,
-                          num_frames, full_core_fluor_name, n_digits, xs, full_core_bright_name,curr_frame_cell_names, flag, edit_id_indicator.get(), first_frame_number,
-                          base_colours,colour_counter,colour_dictionary,unused_naive_names, contrast_value, dict_of_divisions]
-    parameters_path=os.path.join(outpath,"movie_parameters.pkl")  
-    with open(parameters_path, 'wb') as f:
-        for i in range(len(list_of_movie_params)):
-           pickle.dump(list_of_movie_params[i], f,protocol=pickle.HIGHEST_PROTOCOL)
+#######################################
+def record_const_movie_parameters():# record cell_size and other parameters in pickle file to be used at Step 4 and in retrieve mode
+    list_of_const_movie_params=[frame_size, true_cell_radius.get(), patch_size,max_number_of_cells,
+                          num_frames, full_core_fluor_name, n_digits,full_core_bright_name, first_frame_number,
+                          base_colours, contrast_value]
+    const_parameters_path=os.path.join(outpath,"constant_movie_parameters.pkl")  
+    with open(const_parameters_path, 'wb') as f:
+        for i in range(len(list_of_const_movie_params)):
+           pickle.dump(list_of_const_movie_params[i], f,protocol=pickle.HIGHEST_PROTOCOL)
 #####################################
 def create_cell_measure_popup():
     update_flash([])
@@ -1794,7 +1760,7 @@ def clear_memory_of_models(tracker, segmentor, refiner):
           del tracker    
      tf.reset_default_graph() 
 ###########################################
-def cut_lineage(start_frame_internal): # after manual editing
+def cut_lineage(start_frame_internal): # after pausing
     lineage_per_frame_p4=extract_lineage(outpath)
     print("len(lineage_per_frame_p4) BEFORE=", len(lineage_per_frame_p4))
     del lineage_per_frame_p4[(start_frame_internal)-1:]# was -1
@@ -1808,15 +1774,18 @@ def cut_lineage(start_frame_internal): # after manual editing
     print("len(output_names)=",len(output_names)) 
     global previous_lineage_image
     print("len(lineage_images_cv2) before cut lineage=",len(lineage_images_cv2))   
-    previous_lineage_image=lineage_images_cv2[start_frame_internal-1]   
+    previous_lineage_image=lineage_images_cv2[start_frame_internal-2]
+
     del lineage_images_cv2[(start_frame_internal-1):] 
     del lineage_images[(start_frame_internal-1):]
-    print("len(lineage_images_cv2) after cut=",len(lineage_images_cv2))          
+    
+    print("len(lineage_images_cv2) after cut=",len(lineage_images_cv2))
+    """          
     global dict_of_divisions 
     print("dict_of_divisios before cut_lineage=", dict_of_divisions)     
     dict_of_divisions = {key:val for key, val in dict_of_divisions.items() if val <= start_frame}
     print("dict_of_divisios after cut_lineage=", dict_of_divisions)
-    
+    """
     folders_to_truncate=["MASKS","RESULT_FLUORESCENT","LINEAGE_IMAGES","CLEANED_PATCHES", "RESULT_BRIGHT"]
     for folder in folders_to_truncate:
         full_path_to_folder=os.path.join(outpath,folder)
@@ -1858,7 +1827,7 @@ def execute():
     button_execute.configure(background = 'red')   
     label_edit.configure(text=" ")    
     feedback_label.config(text="Wait, loading models ...", fg="yellow")
-    global lineage_images, output_images, lineage_per_frame_p4, previous_lineage_image     
+    global lineage_images, output_images, lineage_per_frame_p4, previous_lineage_image, lineage_images_cv2     
     if lineage_per_frame_p4:
         del lineage_per_frame_p4
     
@@ -1895,7 +1864,8 @@ def execute():
         print("TRACKING PREDICTED FOR CLIP BEGINNING WITH FRAME  ", first_number_in_clip)
                 
         for kk in range(len(clip_centr)):# it is actually 4 (number of frames in clip)
-            current_frame_number=first_number_in_clip+kk            
+            current_frame_number=first_number_in_clip+kk
+            cv2.imwrite(r"C:\Users\helina\Desktop\previous\previous_frame_%s.tif" % ( current_frame_number), previous_lineage_image)            
             print("FRAME NUMBER = ",  current_frame_number)# segmenting all the 4 frames in the clip            
             #print("edit_id_indicator.get()=",edit_id_indicator.get())
             if  edit_id_indicator.get()=="yes" and kk==0:
@@ -1943,8 +1913,9 @@ def execute():
                       
             if manual_division_indicator.get()=="yes":
                  manual_division_indicator.set("no")
-            record_movie_parameters()   
-            update_lineage([cells],outpath,'ab')# appends {cells}  to pickle (to make lineage_per_frame)
+            record_const_movie_parameters()
+            update_changeable_params_history([xs,curr_frame_cell_names,flag,edit_id_indicator.get(),colour_counter,colour_dictionary,unused_naive_names,dict_of_divisions,number_of_added_new_cells],outpath, 'ab')
+            update_lineage([cells],outpath,'ab')# concatenates {cells}  to pickle 
             feedback_label.config(text="Execution in progress: \nFrame "+ str(first_number_in_clip+kk)+"\n - If you need to stop for editing, press Button 3a."
                             "\n - Otherwise, wait until execution is finished.")
             #label_current.configure(text="Current frame: " +str(first_frame_number+k+kk+1), fg="red")           
@@ -1953,15 +1924,15 @@ def execute():
             #print("n_digits_inside execute=", n_digits)
            
             current_lineage_image=create_lineage_image_one_frame(cells, previous_lineage_image, xs, first_number_in_clip+kk, first_frame_number)
-            #print("current_lineage_image.shape =", current_lineage_image.shape)
+            print("current_lineage_image.shape =", current_lineage_image.shape)
             #print("fluor_names inside exeute=", fluor_names)
             coords, destin_fluor = plot_frame(cells, clip_centr, first_number_in_clip, kk,
                                 fluor_images, fluor_names, out_folders, coords, coords, bright_images, br_names, frame_size , n_digits, first_frame_number, contrast_value, current_lineage_image,patch_size)          
             
-            previous_lineage_image=current_lineage_image# need it for the next lineage image                      
+                      
             image_seg=destin_fluor
             photo_image_seg=turn_image_into_tkinter(image_seg, canvas_size_p4)
-            canvas_current.create_image(0,0,anchor=NW,image=photo_image_seg)
+            #canvas_current.create_image(0,0,anchor=NW,image=photo_image_seg)
             output_images.append(photo_image_seg)
             output_name=rename_file(out_folders[3],fluor_names[kk])
             output_name_base=os.path.split(output_name)[1]          
@@ -1969,20 +1940,25 @@ def execute():
             #output_names.append(rename_file(out_folders[3],fluor_names[kk]))         
             image_lin=current_lineage_image
             image_lin_copy=copy.deepcopy(image_lin)         
-            lineage_images_cv2.append(image_lin_copy)                    
+            lineage_images_cv2.append(image_lin_copy)
+            previous_lineage_image=current_lineage_image# need it for the next lineage image
+            print("len(lineage_images_cv2) inside execute=",len(lineage_images_cv2))
+            print("image_lin.shape=",image_lin.shape)                       
             photo_image_lin=turn_image_into_tkinter(image_lin, canvas_size_p4)
-            canvas_lineage.create_image(0,0,anchor=NW,image=photo_image_lin)          
+            #canvas_lineage.create_image(0,0,anchor=NW,image=photo_image_lin)          
             lineage_images.append(photo_image_lin)
             input_info_label.config(text= "INPUT MOVIE:"+ "\n"+str(my_dir)+"\nTOTAL NUMBER OF FRAMES: "+str(num_frames)+"\nNUMBER OF TRACKED FRAMES:  " +str(len(output_names)-1)) 
             centroids_for_benchmarking.append(coords)            
             
             #print("set view_slider at ",first_frame_number+k+kk)
-            print("set view_slider at ",first_number_in_clip+kk)
+            
             if  first_number_in_clip == start_frame and kk==0:
             #if  k == start_frame-1 and kk==0:
                  view_slider.config(from_=first_frame_number,to=first_frame_number+len(all_names_fluor)-1)
             
             view_slider.set(first_number_in_clip+kk)
+            slide_frames(view_slider.get())
+            print("set view_slider at ",first_number_in_clip+kk)
             if variable_stop=="Stop":              
                start_frame=current_frame_number+1
                print("current_frame_number after stop=", current_frame_number)
@@ -1996,7 +1972,7 @@ def execute():
        
         print("BROKE OUT OF BIG LOOP")
         if variable_stop=="Stop":
-            first_number_in_clip = first_number_in_clip+kk
+            #first_number_in_clip = first_number_in_clip+kk
             N_cells = coords.shape[0]
             break
         else:            
@@ -2033,14 +2009,16 @@ def stop_execution_manually():
     variable_stop = "Stop"
     button_pause.configure(background = "red")
     #print("START_FRAME after pushing pause=", start_frame)
-    
+    print("dict_of_divisions after execution inside stop_exec_manually=", dict_of_divisions)
 #################################################################    
 button_pause = Button(frame2_page4, text="3a. Pause ",activebackground="red",
                bg='#9ACD32', font='TkDefaultFont 10 bold', command=stop_execution_manually)
 button_pause.grid(row=0, column=2, padx=10, pady=20)  
 #############################
 def slide_frames(value):# view_slider (main screen)
-    image_number = int(value)    
+
+    image_number = int(value)
+    #print("image_number inside slide_frames=", image_number)    
     internal_image_number=image_number-first_frame_number+1    
     label_curr_frame_name.config(text=output_names[image_number-first_frame_number+1])
     label_current.configure(text="Current frame: " +str(image_number), fg="black")     
@@ -2077,7 +2055,7 @@ def get_cell_IDs_manually(event):# gets cell ID from previous frame during editi
     else:
         canvas_IDs=canvas_current# click on current frame to get IDs
         shift=1
-    global manual_IDs, cell_names_external
+    global manual_IDs, cell_names_external, daughter_indicators
     print("len(lineage_per_frame_p4)=",len(lineage_per_frame_p4))
     frame=int(view_slider.get())
     print("frame number from slider=",frame)
@@ -2099,6 +2077,10 @@ def get_cell_IDs_manually(event):# gets cell ID from previous frame during editi
     print("manual_IDs=", manual_IDs)     
     cell_name_internal="cell_"+ str(cell_number) 
     cell_name_external=lineage_per_frame_p4[internal_frame_number-shift][cell_name_internal][11]# was -1
+    daughter_ind=lineage_per_frame_p4[internal_frame_number-shift][cell_name_internal][16]# was -1
+    daughter_indicators.append(daughter_ind)
+    
+    print("daughter_indicators=", daughter_indicators)
     print("cell_name_external=", cell_name_external)
     cell_names_external.append(cell_name_external)    
     colour_four_channel=colour_dictionary[cell_name_external]    
@@ -2128,7 +2110,7 @@ def start_editing_IDs():
     feedback_label.configure(text="First, click on the cell of interest in Previous Frame.\n"
                "Then, click on its desired position in Current Frame.\n You can repeat it MULTIPLE TIMES.\nFinally, save edits by pressing 5a.Save ID edits.")    
     global manual_centroids, manual_IDs, cell_names_external
-    manual_centroids, manual_IDs, cell_names_external=[],[], [] 
+    manual_centroids, manual_IDs, cell_names_external, daughter_indicators=[],[], [],[] 
     canvas_previous.bind("<Button-1>", get_cell_IDs_manually) 
     canvas_current.bind("<Button-1>", get_centroids_manually)
     update_flash([button_save_id])
@@ -2177,6 +2159,11 @@ def stop_editing_IDs():
     cut_lineage(start_frame_internal)
     del output_images[(start_frame_internal):]# was start_frame:
     del output_names[(start_frame_internal):]
+    ##################################
+    global dict_of_divisions 
+    print("dict_of_divisios before edit_IDs=", dict_of_divisions)     
+    dict_of_divisions = {key:val for key, val in dict_of_divisions.items() if val <= start_frame}
+    print("dict_of_divisios after edit_IDs=", dict_of_divisions)
     ##############################
     canvas_previous.delete('all')
     canvas_current.delete('all')    
@@ -2207,8 +2194,8 @@ def start_editing_division():
     mother_number=None 
     feedback_label.configure(text="First, click on mother cell in Previous Frame.\n"
                "Then, click on daughter cells in Current Frame.\nYou can do it ONLY ONCE.\n Finally, save by pressing 6a. Save division edits.")    
-    global manual_centroids, manual_IDs,cell_names_external
-    manual_centroids, manual_IDs, cell_names_external=[],[],[]
+    global manual_centroids, manual_IDs,cell_names_external, daughter_indicators
+    manual_centroids, manual_IDs, cell_names_external, daughter_indicators=[],[],[],[]
     
     canvas_previous.bind("<Button-1>", get_cell_IDs_manually) 
     canvas_current.bind("<Button-1>", get_centroids_manually)
@@ -2288,6 +2275,7 @@ def stop_editing_division():
     cut_lineage(internal_start_frame)
     del output_images[(internal_start_frame):]# was start_frame:
     del output_names[(internal_start_frame):]
+    
     print("dict_of_divisions final =", dict_of_divisions)
     canvas_previous.delete('all')
     canvas_current.delete('all')    
@@ -2316,59 +2304,40 @@ def add_new_cell():
   canvas_current.bind("<Button-1>", get_centroids_manually)  
   global manual_centroids
   manual_centroids=[]
-  print("coords=", coords)
-  print("coords.shape=", coords.shape)
+  #print("coords=", coords)
+  #print("coords.shape=", coords.shape)
 ###############################################
-def save_added_cell():
-   
-    global start_frame
-    #print("manual_centroids=", manual_centroids)
-    #print("curr_frame_cell_names=", curr_frame_cell_names)
-    start_frame=int(view_slider.get())
-     
-    
-    print("start_frame from slider=",start_frame)
+def save_added_cell():   
+    global start_frame    
+    start_frame=int(view_slider.get())   
     internal_start_frame=start_frame-first_frame_number+1
-    print("internal_start_frame=", internal_start_frame)
     
-    ###############################
-    keys=list(lineage_per_frame_p4[internal_start_frame-1].keys())   
-    #coords_old=lineage_per_frame_p4[internal_start_frame-1][keys[0]][14]    
-    #keys=list(lineage_per_frame_p4[start_frame-1].keys())
-  
+    keys=list(lineage_per_frame_p4[internal_start_frame-1].keys())      
     b = np.array(manual_centroids)
   
-    global coords, curr_frame_cell_names, xs, previous_lineage_image   
+    global coords, curr_frame_cell_names, xs, previous_lineage_image,number_of_added_new_cells   
     coords_old=coords
-    coords=np.concatenate((coords_old, b), axis=0)
-    
-    #curr_frame_cell_names=["cell_" + key][11] for key in keys]   
-    number_of_added_cells=len(manual_centroids)
-    print("number_of_added_cells=", number_of_added_cells)
+    coords=np.concatenate((coords_old, b), axis=0)     
+    number_of_now_added_cells=len(manual_centroids)
+    #print("number_of_added_cells=", number_of_now_added_cells)
     global colour_dictionary, new_naive_names, colour_counter, base_colours, unused_naive_names
     #######
-    new_naive_names, unused_naive_names=update_naive_names_list(unused_naive_names, number_of_added_cells)
+    new_naive_names, unused_naive_names=update_naive_names_list(unused_naive_names, number_of_now_added_cells)
+    #print("new_naive_names before", new_naive_names)
     colour_dictionary, colour_counter=update_color_dictionary(colour_dictionary,new_naive_names,base_colours, colour_counter)    
-    curr_frame_cell_names+=new_naive_names
-    print("xs before=", xs)
-    ########
-    xs, previous_lineage_image=update_xs(xs,new_naive_names, num_frames, previous_lineage_image, lineage_image_size)
-    
-    print("xs after=", xs)
-            
-    lineage_images_cv2[internal_start_frame-1]=previous_lineage_image  
-   
+    curr_frame_cell_names+=new_naive_names    
+    xs=update_xs(xs,new_naive_names, num_frames,  lineage_image_size, number_of_added_new_cells)
+    number_of_added_new_cells+=number_of_now_added_cells          
+    lineage_images_cv2[internal_start_frame-1]=previous_lineage_image     
     label_edit.configure(text="Added cells:\n " + str(new_naive_names), bg="black")
     canvas_previous.delete('all')
     canvas_current.delete('all')    
     canvas_lineage.delete('all')
-
-
-    print("colour_counter=",colour_counter)
-    print("colour_dictionary=",colour_dictionary)
-    print("new_naive_names=",new_naive_names)
-    print("unused_naive_names=",unused_naive_names)
-    print("curr_frame_cell_names=",curr_frame_cell_names)    
+  
+    global dict_of_divisions 
+    #print("dict_of_divisios before save_added=", dict_of_divisions)     
+    dict_of_divisions = {key:val for key, val in dict_of_divisions.items() if val <= start_frame}
+    #print("dict_of_divisios after save_added=", dict_of_divisions)    
     cut_lineage(internal_start_frame)
     del output_images[(internal_start_frame):]# was start_frame:
     del output_names[(internal_start_frame):]
@@ -2376,31 +2345,29 @@ def save_added_cell():
     button_pause.configure(background = button_color)
     button_save_added_cell.grid_forget()
 #####################################
-def remove_died_cell():  
- # button_save_removed_cell = Button(frame3_page4, text="Save removed cell",activebackground="red", font=all_font, 
-              #bg='#9ACD32', command=lambda:save_removed_cell())
-  #button_save_removed_cell.grid(row=1, column=3, columnspan=1)
+def remove_died_cell():   
   button_save_removed_cell.grid(row=3, column=3, columnspan=1)
   update_flash([button_save_removed_cell])
   canvas_current.bind("<Button-1>", get_cell_IDs_manually) 
-  global manual_IDs,cell_names_external
-  manual_IDs, cell_names_external=[],[]  
+  global manual_IDs,cell_names_external, daughter_indicators
+  manual_IDs, cell_names_external, daughter_indicators=[],[],[]  
 ###########################################
 def save_removed_cell():
     label_edit.configure(text="Deleted cells:\n " + str(cell_names_external), bg="black")
     global start_frame, lineage_per_frame_p4
     start_frame=int(view_slider.get())   
-    
-    print("start_frame from slider=",start_frame)
-    internal_start_frame=start_frame-first_frame_number+1
-    print("internal_start_frame=", internal_start_frame)
-    
+    internal_start_frame=start_frame-first_frame_number+1    
     ###############################
     keys=list(lineage_per_frame_p4[internal_start_frame-1].keys())   
     coords_old=lineage_per_frame_p4[internal_start_frame-1][keys[0]][14]    
-    print("coords_old=", coords_old)
     print("manual_IDs=", manual_IDs)
     print("cell_names_external=", cell_names_external)
+    #print(" daughter_indicators inside remove_cells", daughter_indicators)
+    if "daughter-1" in daughter_indicators or "daughter-2"in daughter_indicators:
+        global dict_of_divisions 
+        #print("dict_of_divisios before remove_deade_cell=", dict_of_divisions)     
+        dict_of_divisions = {key:val for key, val in dict_of_divisions.items() if val < start_frame}
+        #print("dict_of_divisios after remove_dead_cell=", dict_of_divisions)
     global coords, curr_frame_cell_names
     print("curr_frame_cell_names=", curr_frame_cell_names)
     n=len(manual_IDs)
@@ -2409,12 +2376,12 @@ def save_removed_cell():
         ext_name=cell_names_external[i]# luckily, they are in the same order
         curr_frame_cell_names.remove(ext_name)
     coords=np.delete(coords_old, (manual_IDs), axis=0)
-    print("coords=", coords)
     print("curr_frame_cell_names", curr_frame_cell_names)
            
     cut_lineage(internal_start_frame)
     del output_images[(internal_start_frame):]# was start_frame:
     del output_names[(internal_start_frame):]
+    #print("len(output_images)=", len(output_images))
     canvas_previous.delete('all')
     canvas_current.delete('all')    
     canvas_lineage.delete('all')
@@ -2563,8 +2530,8 @@ from plot import paste_patch, prepare_contours,paste_benchmark_patch
 #from functions import seeded_watershed_final
 from interface_functions import turn_image_into_tkinter,display_both_channels, show_2_canvases
 from postprocess import create_output_movie
-from extract_lineage_for_Lorenzo import create_lineage_for_Lorenzo
-from functions import  clean_manual_patch, segment_manual_patch,segment_one_cell_at_a_time, extract_movie_parameters
+from extract_lineage_for_Lorenzo import create_lineage_for_Lorenzo, extract_const_movie_parameters
+from functions import  clean_manual_patch, segment_manual_patch,segment_one_cell_at_a_time
 ############ LAYOUT
 
 page5.geometry('1530x2000')
@@ -3079,7 +3046,7 @@ global extract_info_from_file_name
 
 from postprocess import (sorted_aphanumeric, change_dict,extract_info_from_file_name, create_pedigree, create_per_cell_info,
               load_result_images)
-from functions import extract_lineage,extract_movie_parameters
+from extract_lineage_for_Lorenzo import extract_lineage,extract_const_movie_parameters
 
 
 def retrieve():

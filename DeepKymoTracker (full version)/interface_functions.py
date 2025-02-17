@@ -36,7 +36,25 @@ def turn_image_into_tkinter(image, window_size): # if image is open in cv2
       image_copy=np.uint8(image_norm)      
   else:
      image_copy=np.uint8(image)
-  image_resized=cv2.resize(image_copy, (window_size,window_size), interpolation = cv2.INTER_AREA)
+  ###################################
+  print("image_copy.shape=",image_copy.shape)
+  print("windoe_size=", window_size)
+  if image_copy.shape[0]!=image_copy.shape[1]:
+     num_frames=image_copy.shape[0]
+     image_resized=np.zeros(image_copy.shape, np.uint8)
+     basic_part=image_copy[:,:num_frames]
+     added_part=image_copy[:, num_frames:]
+     print("basic_part.shape=", basic_part.shape)
+     print("added_part.shape=", added_part.shape)
+     #coefficient=image_copy.shape[0]/window_size
+     basic_resized=cv2.resize(basic_part, (window_size,window_size), interpolation = cv2.INTER_AREA)
+     added_resized=cv2.resize(added_part, (80,window_size), interpolation = cv2.INTER_AREA)
+     #added_resized=resize_image_aspect_ratio(added_part, window_size)
+     print("added_resized.shape=", added_resized.shape)
+     image_resized= np.concatenate((basic_resized,added_resized), axis=1)
+  else:
+    image_resized=cv2.resize(image_copy, (window_size,window_size), interpolation = cv2.INTER_AREA)
+  #####################################################
   if len(image.shape)==2:
        image_rgb=cv2.cvtColor(image_resized,cv2.COLOR_GRAY2RGB)
   elif image.shape[2]==3:
@@ -48,6 +66,9 @@ def turn_image_into_tkinter(image, window_size): # if image is open in cv2
   photo_image=Image.fromarray(image_rgb)
   photo_image =ImageTk.PhotoImage(photo_image)
   return  photo_image 
+###############################################
+
+
 #################################################
 def display_both_channels(filled_fluor,filled_bright,canvas_fluor,canvas_bright,window_size):      
       photo_fluor=turn_image_into_tkinter(filled_fluor, window_size) 
@@ -113,10 +134,10 @@ def show_3_canvases(canvas_previous,canvas_current,canvas_lineage,output_images,
   canvas_previous.delete('all')
   canvas_current.delete('all')    
   canvas_lineage.delete('all')
-  print("len(output_images)=",len(output_images)) 
-  print("image_number inside 3 canvases=",image_number)
+  #print("len(output_images) inside 3 canvases=",len(output_images)) 
+  #print("image_number inside 3 canvases=",image_number)
   internal_image_number=image_number-first_frame_number+1
-  print("internal_image_number=",internal_image_number)
+  #print("internal_image_number inside 3 canvases=",internal_image_number)
   if internal_image_number<len(output_images):   
    canvas_current.create_image(0, 0, anchor=NW, image=output_images[internal_image_number])
    canvas_previous.create_image(0, 0, anchor=NW, image=output_images[internal_image_number-1])

@@ -6,7 +6,8 @@ from keras.optimizers import Adam
 from keras.models import model_from_json
 import re
 
-from functions import segment_patch, extract_lineage
+from functions import segment_patch
+from extract_lineage_for_Lorenzo import extract_lineage
 Bordersize=100
 #########################################
 

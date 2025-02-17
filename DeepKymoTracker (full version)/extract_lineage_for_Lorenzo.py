@@ -7,6 +7,77 @@ from preprocess import extract_red_frame_numbers
 ###############################################
 Bordersize=100
 #######################################
+"""
+list_of_constant_movie_params=[frame_size, true_cell_radius.get(), patch_size,max_number_of_cells,
+                          num_frames, full_core_fluor_name, n_digits, full_core_bright_name, first_frame_number,
+                          base_colours,contrast_value]
+parameters_path=os.path.join(outpath,"constant_movie_parameters.pkl")  
+with open(parameters_path, 'wb') as f:
+        for i in range(len(list_of_movie_params)):
+           pickle.dump(list_of_movie_params[i], f,protocol=pickle.HIGHEST_PROTOCOL)
+#############################################
+list_of_ch_movie_params=[xs,curr_frame_cell_names,flag,edit_id_indicator.get(),colour_counter,colour_dictionary,unused_naive_names,dict_of_divisions,number_of_added_new_cells]
+"""
+def update_changeable_params_history(list_of_ch_movie_params,outpath, mode):# was cells
+    ch_param_path=os.path.join(outpath,"changeble_movie_parameters_history.pkl")  
+    with open(ch_param_path, mode) as f:
+        pickle.dump(list_of_ch_movie_params, f,protocol=pickle.HIGHEST_PROTOCOL)
+        #for i in range(len(list_of_ch_movie_params)):
+           #pickle.dump(list_of_ch_movie_params[i], f,protocol=pickle.HIGHEST_PROTOCOL)
+#############################################################
+def extract_changeable_params_history(outpath):
+    ch_parameters_path=os.path.join(outpath,"changeble_movie_parameters_history.pkl")
+    list_of_ch_movie_params = []
+    with (open(ch_parameters_path, "rb")) as openfile:
+     while True:
+        try:
+            list_of_ch_movie_params.append(pickle.load(openfile))
+        except EOFError:
+            break
+    #xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,unused_naive_names,dict_of_divisions,number_of_added_new_cells= list_of_ch_movie_params[0],list_of_ch_movie_params[1],list_of_ch_movie_params[2],\
+    #list_of_ch_movie_params[3],list_of_ch_movie_params[4],list_of_ch_movie_params[5],list_of_ch_movie_params[6],list_of_ch_movie_params[7],list_of_ch_movie_params[8]
+    #return xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,unused_naive_names,dict_of_divisions,number_of_added_new_cells
+    return list_of_ch_movie_params
+######################################## 
+def update_lineage(llist,outpath, mode):# was cells
+    lineage_path=os.path.join(outpath,"lineage_per_frame.pkl")  
+    with open(lineage_path, mode) as f:
+        for i in range(len(llist)):
+           pickle.dump(llist[i], f,protocol=pickle.HIGHEST_PROTOCOL)
+####################################
+def extract_const_movie_parameters(outpath):
+    parameters_path=os.path.join(outpath,"constant_movie_parameters.pkl")
+    list_of_const_movie_params = []
+    with (open(parameters_path, "rb")) as openfile:
+     while True:
+        try:
+            list_of_const_movie_params.append(pickle.load(openfile))
+        except EOFError:
+            break
+    #print("list_of_const_movie_params", list_of_const_movie_params)
+    frame_size, true_cell_radius_pickle, patch_size,max_number_of_cells,\
+    num_frames, full_core_fluor_name, n_digits, full_core_bright_name,  first_frame_number,\
+    base_colours,contrast_value= list_of_const_movie_params[0],list_of_const_movie_params[1],list_of_const_movie_params[2],\
+    list_of_const_movie_params[3],list_of_const_movie_params[4],list_of_const_movie_params[5],list_of_const_movie_params[6],list_of_const_movie_params[7],list_of_const_movie_params[8],\
+    list_of_const_movie_params[9],list_of_const_movie_params[10]
+    
+    return frame_size, true_cell_radius_pickle, patch_size,max_number_of_cells,\
+           num_frames, full_core_fluor_name, n_digits, full_core_bright_name,  first_frame_number,\
+           base_colours,contrast_value
+##########################
+def extract_lineage(outpath):
+    lineage_path=os.path.join(outpath,"lineage_per_frame.pkl")
+    lineage_per_frame = []
+    with (open(lineage_path, "rb")) as openfile:
+     while True:
+        try:
+            lineage_per_frame.append(pickle.load(openfile))
+        except EOFError:
+            break    
+    return lineage_per_frame
+##############################
+#####################################
+"""
 def extract_lineage(outpath):
     lineage_path=os.path.join(outpath,"lineage_per_frame.pkl")
     lineage = []
@@ -17,6 +88,7 @@ def extract_lineage(outpath):
         except EOFError:
             break    
     return lineage
+"""
 ###################################################
 def load_red_names(source):
  red_names=[]
@@ -25,7 +97,7 @@ def load_red_names(source):
      full_name=os.path.join(source, filename)
      red_names.append(full_name)    
  red_names_sorted =sorted(red_names)
- print("len(red_names_sorted INSIDE)=",len(red_names_sorted))
+ #print("len(red_names_sorted INSIDE)=",len(red_names_sorted))
  return red_names_sorted
 ###############################################
 """
@@ -137,7 +209,7 @@ def create_lineage_per_cell(lineage_per_frame,outpath, frame_size):
   return pedigree_per_cell
 ###############################################
 def create_lineage_for_Lorenzo(outpath, frame_size):
-    print("outpath=", outpath)
+    #print("outpath=", outpath)
     lineage_per_frame=extract_lineage(outpath)
     lineage_per_cell=create_lineage_per_cell(lineage_per_frame,outpath, frame_size)
     

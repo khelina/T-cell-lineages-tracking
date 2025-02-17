@@ -11,7 +11,7 @@ import tkinter
 from copy import deepcopy
 #############################################################
 Bordersize=100
-from functions import extract_lineage
+from extract_lineage_for_Lorenzo import extract_lineage
 ##############################################################
 ## This function creates lineage_per_cell (out of lineage_per_frame) 
 ## It is executed  only after the movie has been tracked (button Create Output Movie)
@@ -89,7 +89,7 @@ def create_dictionary_of_xs( template, coords_very_first, num_frames,max_number_
 # This function creates current_lineage_image to be plotted for each frame during execution
 # It is based on dictionary of xs (gives x-coordinate) and frame (which frame number, i.e. y-coordinate)
 def create_lineage_image_one_frame(cells, previous_lineage_image, xs, frame, first_frame_number):
- print("previous_lineage_image.shape ENTER CREATE_LIN)IMAGE=",previous_lineage_image.shape)
+ #print("previous_lineage_image.shape ENTER CREATE_LIN)IMAGE=",previous_lineage_image.shape)
  
  ###### prepare points for lineage images ######
  point_radius=10# radius of plotted point in lineage image

@@ -653,12 +653,12 @@ def dilate_cell(ensemble_output,a,b,c,d,mask, cell_number,frame_size):
       cv2.imwrite("C:\\Users\\kfedorchuk\\Desktop\\test_1.tif", test_1*50) 
       cv2.imwrite("C:\\Users\\kfedorchuk\\Desktop\\test_2.tif", test_2*50)                          
       if np.all(test_1==test_2)==True:
-          print("no problem so far")
+          #print("no problem so far")
           previous_mask=mask_copy
           previous_patch=ensemble_output
           continue
       else:
-          print("break from the loop ! ")
+          #print("break from the loop ! ")
           improved_patch=previous_patch
           mask=previous_mask
           break
@@ -1091,7 +1091,7 @@ def clean_patch(output_raw,flag, x_coord_patch, y_coord_patch):
          
          
   im2_uneroded, contours, hierarchy_uneroded = cv2.findContours(output_raw,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
-  print("len(contours) in the patch =", len(contours))
+  #print("len(contours) in the patch =", len(contours))
   """      
   kernel= np.ones((3,3),np.uint8)
   output = cv2.erode(output_raw,kernel,iterations = 2)
@@ -1154,6 +1154,7 @@ def clean_patch(output_raw,flag, x_coord_patch, y_coord_patch):
         
         return cleaned_patch# output is one patch with 2 boggest contours in it
 #####################################################################
+"""
 def extract_lineage(outpath):
     lineage_path=os.path.join(outpath,"lineage_per_frame.pkl")
     lineage_per_frame = []
@@ -1164,6 +1165,7 @@ def extract_lineage(outpath):
         except EOFError:
             break    
     return lineage_per_frame
+"""
 ##############################
 def create_previous_frame(cells, frame_size):
     previous_frame= np.zeros((frame_size,frame_size),dtype="float64")      
@@ -1177,7 +1179,8 @@ def create_previous_frame(cells, frame_size):
       base[base==255]=i+1               
       previous_frame+=base
     return previous_frame
-############################################################# 
+#############################################################
+""" 
 def update_lineage(llist,outpath, mode):# was cells
     lineage_path=os.path.join(outpath,"lineage_per_frame.pkl")  
     with open(lineage_path, mode) as f:
@@ -1195,3 +1198,4 @@ def extract_movie_parameters(outpath):
             break    
     return list_of_movie_params
 ##########################
+"""

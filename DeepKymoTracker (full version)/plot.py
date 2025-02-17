@@ -26,13 +26,15 @@ def update_naive_names_list(unused_naive_names, n):# n = number of new (added) n
         new_naive_names.append(letter)
         unused_naive_names.remove(letter)
     return new_naive_names, unused_naive_names
-#######################################
-def update_xs(xs,new_names, num_frames, previous_lineage_image, lineage_image_size):
+################# when adding new cell
+def update_xs(xs,new_names, num_frames,  lineage_image_size,number_of_added_new_cells):
+       print("I am inside update_xs")
        for ii in range(len(new_names)):
           new_name=new_names[ii]
-          xs[new_name]=num_frames+20*(ii+1)         
-          previous_lineage_image=np.concatenate((previous_lineage_image,np.zeros((lineage_image_size,40,3), dtype=previous_lineage_image.dtype)), axis=1)
-          return xs, previous_lineage_image
+          print("new_name=", new_name)
+          xs[new_name]=num_frames+20*(ii+1+number_of_added_new_cells)         
+          #previous_lineage_image=np.concatenate((previous_lineage_image,np.zeros((lineage_image_size,40,3), dtype=previous_lineage_image.dtype)), axis=1)
+       return xs
 ###################################
 def create_first_color_dictionary(max_number_of_cells, init_number_of_cells, num_frames): 
   base_colours=[[238,238,0,255],#cyan 1
@@ -73,24 +75,13 @@ def create_first_color_dictionary(max_number_of_cells, init_number_of_cells, num
   colour_dictionary, colour_counter ={},0
   colour_dictionary, colour_counter=update_color_dictionary(colour_dictionary,new_naive_names,base_colours, colour_counter)
   xs=create_first_dictionary_of_xs(new_naive_names, num_frames,max_number_of_cells)    
-  print("ready for execution")
+  #print("ready for execution")
   #print("final_list", final_list)
   
   return colour_dictionary, new_naive_names, base_colours, colour_counter, unused_naive_names, xs
 #######################################
 
 
-################################
-"""
-import math
-#######################
-new_naive_names=["a","b"]
-num_frames=100
-observed_max_number_of_cells=4
-xs=create_first_dictionary_of_xs(new_naive_names,num_frames,observed_max_number_of_cells)
-print("xs=", xs)
-##########################
-"""
 #############################
 def create_first_dictionary_of_xs(new_naive_names,num_frames,observed_max_number_of_cells):
   #n= int(math.log(max_number_of_cells,2)) +1
@@ -103,27 +94,27 @@ def create_first_dictionary_of_xs(new_naive_names,num_frames,observed_max_number
     if (2**(kk-1))*m<observed_max_number_of_cells<=(2**kk)*m:
         number_of_potential_divisions=kk
         break
-  print("number_of_potential_divisions=", number_of_potential_divisions)
+  #print("number_of_potential_divisions=", number_of_potential_divisions)
   ## n = final max number of potential divisions
   
   potential_max_number_of_cells=(2**kk)*m
   max_number_of_cells_in_one_unit=2**kk
-  print("potential_max_number_of_cells=", potential_max_number_of_cells)
+  #print("potential_max_number_of_cells=", potential_max_number_of_cells)
   #print("actual_max_number_of_cells=", actual_max_number_of_cells)
   number_of_deltas_in_one_unit=(2**kk-1)*2
-  print("number_of_deltas_in_one_unit=", number_of_deltas_in_one_unit)
+  #print("number_of_deltas_in_one_unit=", number_of_deltas_in_one_unit)
   total_number_of_deltas=m* number_of_deltas_in_one_unit+m+1
   
-  print("total_number_of_deltas=", total_number_of_deltas)
+  #print("total_number_of_deltas=", total_number_of_deltas)
   #number_of_deltas_per_unit=int(number_of_deltas/m)
   #print("number_of_deltas_per_unit=", number_of_deltas_per_unit)
   delta=int(num_frames/total_number_of_deltas)
-  print("delta=", delta)
+  #print("delta=", delta)
   ##############################
   first_m=-int(number_of_deltas_in_one_unit/2)*delta 
-  print("first_m=", first_m)
+  #print("first_m=", first_m)
   step_size_for_m=(number_of_deltas_in_one_unit+1)*delta
-  print("step_size_for_m=", step_size_for_m)
+  #print("step_size_for_m=", step_size_for_m)
   #############################
   all_cell_names=new_naive_names
   temp_list=all_cell_names
@@ -136,17 +127,17 @@ def create_first_dictionary_of_xs(new_naive_names,num_frames,observed_max_number
     temp_list =daughters   
     all_cell_names=all_cell_names+temp_list
    
-  print("all_cell_names=", all_cell_names)
+  #print("all_cell_names=", all_cell_names)
   #######################################    
     
   numbers =[len(item) for item in all_cell_names]
   max_name_length =max(numbers)
-  print("max_name_length=", max_name_length)  
+  #print("max_name_length=", max_name_length)  
   xs={}
   
   for i in range(len(new_naive_names)):
         xs[new_naive_names[i]]=first_m+step_size_for_m*(i+1) 
-  print("xs for new_naive_names_only", xs)
+  #print("xs for new_naive_names_only", xs)
         #xs[new_naive_names[i]]=int((num_frames/(len(new_naive_names)+1))*(i+1))
   for k in range(len(all_cell_names)):# creates x-coordinates for all possible daughters                                # based on max_number_of_cells in the movie
        cell_name =all_cell_names[k]        
@@ -227,7 +218,7 @@ def create_first_color_dictionary_wrong(max_number_of_cells, N_cells, colour_cou
       new_naive_names,unused_naive_names= update_naive_names_list(unused_naive_names, N_cells) 
   colour_dictionary ={}
   colour_dictionary, colour_counter=update_color_dictionary(colour_dictionary,new_naive_names,base_colours, colour_counter)    
-  print("ready for execution")
+  #print("ready for execution")
   #print("final_list", final_list)  
   return colour_dictionary, new_naive_names, base_colours, colour_counter, unused_naive_names
 ##############################################################
@@ -336,7 +327,7 @@ def plot_frame(cells,clip_centr,k,kk,fluor_images,fluor_names,out_folders,coords
          
         
          patch_name=create_name_for_cleaned_patch(bright_name, kkk)
-         print("patch_name=", patch_name)
+         #print("patch_name=", patch_name)
          cv2.imwrite(os.path.join(out_folders[8],patch_name), cells["cell_%s" % kkk][3])               
          #cv2.imwrite(os.path.join(out_folders[8],"segmented_patch_%s_cell_%s.tif") % (k+kk,kkk), cells["cell_%s" % kkk][3])         
          output_patch=cells["cell_%s" % kkk][3]
@@ -347,9 +338,9 @@ def plot_frame(cells,clip_centr,k,kk,fluor_images,fluor_names,out_folders,coords
          destin_bright=paste_patch(destin_bright,patch_with_contours,a,b,c,d,collour,1.0, frame_size)        
          destin_fluor=paste_patch(destin_fluor,patch_with_contours,a,b,c,d,collour,1.0, frame_size)
          centroid=cells["cell_%s" % kkk][6]
-         print("centroid=", centroid)
+         #print("centroid=", centroid)
          start_point, end_point=(int(centroid[0]-p_size), int(centroid[1]-p_size)), (int(centroid[0]+p_size), int(centroid[1]+p_size))
-         print("start_point, end_point=", start_point, end_point)
+         #print("start_point, end_point=", start_point, end_point)
          #destin_fluor = cv2.rectangle(destin_fluor, start_point, end_point, collour[:-1], 1)
          #destin_fluor = cv2.rectangle(destin_fluor, (b,d), (a,c), collour[:-1], 1)
          one_cell_mask =paste_benchmark_patch(output_patch,a,b,c,d,kkk, frame_size)
@@ -364,7 +355,7 @@ def plot_frame(cells,clip_centr,k,kk,fluor_images,fluor_names,out_folders,coords
          #cv2.putText(destin_bright,texxt,(int(xx)-10,int(yy)+5),cv2.FONT_HERSHEY_PLAIN,1,collour,1)         
                   
          coords[kkk,0],coords[kkk,1]=xx, yy
-       print("check_fluor_destin   ",rename_file(out_folders[3],fluor_names[kk]))       
+       #print("check_fluor_destin   ",rename_file(out_folders[3],fluor_names[kk]))       
        cv2.imwrite(rename_file(out_folders[3],fluor_names[kk]),destin_fluor)# plot destin_fluor to RESULT FLUOR folder
        
        cv2.imwrite(rename_file(out_folders[9],bright_names[kk]),destin_bright)#plot destin_bright to RESULT BRIGHT folder
@@ -377,7 +368,7 @@ def plot_frame(cells,clip_centr,k,kk,fluor_images,fluor_names,out_folders,coords
        #benchmark_seg ="mask"+str(k+1+kk+first_frame_number).zfill(n_digits)+".tif"
        
        mask_name=create_name_for_mask(bright_name)
-       print("mask_name=", mask_name)
+       #print("mask_name=", mask_name)
        #behchmark_seg ="mask"+str(k+kk+1).zfill(n_digits)+".tif"       
        cv2.imwrite(os.path.join(out_folders[0],mask_name),destin_mask)
        return  coords, destin_fluor     

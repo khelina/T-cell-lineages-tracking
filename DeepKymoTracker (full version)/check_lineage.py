@@ -1,6 +1,6 @@
 import os
 software_folder = os.getcwd()
-from functions import extract_lineage
+from extract_lineage_for_Lorenzo import extract_lineage
 
 #outpath=r"C:\Users\helina\Desktop\DeepKymoTracker\OUTPUT_INPUT_MOVIE r"
 outpath=r"C:\Users\helina\Desktop\DeepKymoTracker\OUTPUT_INPUT_MOVIE_SHORT"
@@ -24,51 +24,79 @@ for i in range(len(x)):
 print(check_list)
 
 ###############################
-"""
-def if_elif_else(x):
-    if x<2:
-        print("x<2")
-    elif 2<=x<=10:
-        print("2<=x<=10")
-    else:
-         print("x>2")
-if_elif_else(15)
-#############################
-def if_else_if(x):
-    if x<2:
-        print("x<2")
-    else:
-        print("x>=2")
-    if x>-1:
-         print("x>-1")
-if_else_if(-5)
+#################################################
+###################################################
+import pickle
+import os
+outpath=r"C:\Users\helina\Desktop\DeepKymoTracker\OUTPUT_INPUT_MOVIE_SHORT"
+def extract_changeable_params_history(outpath):
+    ch_parameters_path=os.path.join(outpath,"changeble_movie_parameters_history.pkl")
+    list_of_ch_movie_params = []
+    with (open(ch_parameters_path, "rb")) as openfile:
+     while True:
+        try:
+            list_of_ch_movie_params.append(pickle.load(openfile))
+        except EOFError:
+            break
+    #xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,unused_naive_names,dict_of_divisions,number_of_added_new_cells= list_of_ch_movie_params[0],list_of_ch_movie_params[1],list_of_ch_movie_params[2],\
+    #list_of_ch_movie_params[3],list_of_ch_movie_params[4],list_of_ch_movie_params[5],list_of_ch_movie_params[6],list_of_ch_movie_params[7],list_of_ch_movie_params[8]
+    #return xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,unused_naive_names,dict_of_divisions,number_of_added_new_cells
+    return list_of_ch_movie_params
+###################################################
+list_of_ch_movie_params=extract_changeable_params_history(outpath)
+print("list_of_ch_movie_params = ",list_of_ch_movie_params)
+print("len(list_of_ch_movie_params)=",len(list_of_ch_movie_params))
+####################################################
+##########################################################
+################################################################
+import pickle
+import os
+outpath=r"C:\Users\helina\Desktop\DeepKymoTracker\OUTPUT_INPUT_MOVIE_SHORT"
+def extract_lineage(outpath):
+    lineage_path=os.path.join(outpath,"lineage_per_frame.pkl")
+    lineage_per_frame = []
+    with (open(lineage_path, "rb")) as openfile:
+     while True:
+        try:
+            lineage_per_frame.append(pickle.load(openfile))
+        except EOFError:
+            break    
+    return lineage_per_frame
+lineage_per_frame =extract_lineage(outpath)
+print("lineage_per_frame  = ",lineage_per_frame )
+print("len(lineage_per_frame)  = ",len(lineage_per_frame ))
+ 
+############################################
+################################################
+###################################
+import pickle
+import os
+outpath=r"C:\Users\helina\Desktop"
 ##############################################
-k=1
-stop_var="No"
-div_var=0
-while k<10:
-    print("k=", k)
-    for kk in range(4):
-        frame_number=k+kk
-        print("frame_number=", frame_number)
-        if stop_var=="Stop":
-            print("stoppped small loop due to Stop")
-            break
-        if div_var==1:
-            print("stoped small loop due to Div")
-            break
-    if stop_var=="Stop":
-        k=k+kk+1
-        print("stopped big loop due to Stop")
-        break
-    else:
-        if div_var==1:
-            k=k+kk+2
-            print("continue big loop after Div")
-        else:
-            print("continue big loop, nithing was detected")
-            k+=4
-    
-print("Broke out of big loop")
-print("k=", k)        
-"""    
+def record_list(llist,outpath, mode):# was cells
+    destin_path=os.path.join(outpath,"experiment_pickle.pkl")  
+    with open(destin_path, mode) as f:
+        pickle.dump(llist, f,protocol=pickle.HIGHEST_PROTOCOL)
+        #for i in range(len(llist)):
+           #pickle.dump(llist[i], f,protocol=pickle.HIGHEST_PROTOCOL)
+#####################################################llist
+llist=[[1,0],[2,1],4,8,16]
+record_list(llist,outpath, "wb")
+new_list=[32, 64]
+record_list(new_list,outpath, "ab")
+###########################################
+def extract_list(outpath):
+    lineage_path=os.path.join(outpath,"experiment_pickle.pkl")
+    extracted_list = []
+    with (open(lineage_path, "rb")) as openfile:
+     while True:
+        try:
+             extracted_list.append(pickle.load(openfile))
+        except EOFError:
+            break    
+    return  extracted_list
+#######################################
+extracted_list =extract_list(outpath)
+print(" extracted_list  = ", extracted_list )
+print(" len(extracted_list)  = ",len( extracted_list ))
+extracted_list[1]
