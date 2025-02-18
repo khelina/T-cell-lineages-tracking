@@ -7,37 +7,29 @@ from preprocess import extract_red_frame_numbers
 ###############################################
 Bordersize=100
 #######################################
-"""
-list_of_constant_movie_params=[frame_size, true_cell_radius.get(), patch_size,max_number_of_cells,
-                          num_frames, full_core_fluor_name, n_digits, full_core_bright_name, first_frame_number,
-                          base_colours,contrast_value]
-parameters_path=os.path.join(outpath,"constant_movie_parameters.pkl")  
-with open(parameters_path, 'wb') as f:
-        for i in range(len(list_of_movie_params)):
-           pickle.dump(list_of_movie_params[i], f,protocol=pickle.HIGHEST_PROTOCOL)
-#############################################
-list_of_ch_movie_params=[xs,curr_frame_cell_names,flag,edit_id_indicator.get(),colour_counter,colour_dictionary,unused_naive_names,dict_of_divisions,number_of_added_new_cells]
-"""
-def update_changeable_params_history(list_of_ch_movie_params,outpath, mode):# was cells
+
+def update_changeable_params_history(changeable_params_history,outpath, mode):# was cells
     ch_param_path=os.path.join(outpath,"changeble_movie_parameters_history.pkl")  
     with open(ch_param_path, mode) as f:
-        pickle.dump(list_of_ch_movie_params, f,protocol=pickle.HIGHEST_PROTOCOL)
-        #for i in range(len(list_of_ch_movie_params)):
-           #pickle.dump(list_of_ch_movie_params[i], f,protocol=pickle.HIGHEST_PROTOCOL)
+        #pickle.dump(changeable_params_history, f,protocol=pickle.HIGHEST_PROTOCOL)
+        for i in range(len(changeable_params_history)):
+           pickle.dump(changeable_params_history[i], f,protocol=pickle.HIGHEST_PROTOCOL)
 #############################################################
-def extract_changeable_params_history(outpath):
+def extract_changeable_params_history(outpath, start_frame_internal):
     ch_parameters_path=os.path.join(outpath,"changeble_movie_parameters_history.pkl")
-    list_of_ch_movie_params = []
+    changeable_params_history = []
     with (open(ch_parameters_path, "rb")) as openfile:
      while True:
         try:
-            list_of_ch_movie_params.append(pickle.load(openfile))
+            changeable_params_history.append(pickle.load(openfile))
         except EOFError:
             break
-    #xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,unused_naive_names,dict_of_divisions,number_of_added_new_cells= list_of_ch_movie_params[0],list_of_ch_movie_params[1],list_of_ch_movie_params[2],\
-    #list_of_ch_movie_params[3],list_of_ch_movie_params[4],list_of_ch_movie_params[5],list_of_ch_movie_params[6],list_of_ch_movie_params[7],list_of_ch_movie_params[8]
-    #return xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,unused_naive_names,dict_of_divisions,number_of_added_new_cells
-    return list_of_ch_movie_params
+    p= start_frame_internal
+    xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,unused_naive_names,dict_of_divisions,number_of_added_new_cells=  changeable_params_history[p][0], changeable_params_history[p][1], changeable_params_history[p][2],\
+    changeable_params_history[p][3], changeable_params_history[p][4], changeable_params_history[p][5], changeable_params_history[p][6], changeable_params_history[p][7], changeable_params_history[p][8]
+    #print("history_of_ch_movie_params[-1]=",  history_of_ch_movie_params[-1])
+    #print("len(history_of_ch_movie_params)=", len( history_of_ch_movie_params))    
+    return xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,unused_naive_names,dict_of_divisions,number_of_added_new_cells,changeable_params_history    
 ######################################## 
 def update_lineage(llist,outpath, mode):# was cells
     lineage_path=os.path.join(outpath,"lineage_per_frame.pkl")  
@@ -77,18 +69,7 @@ def extract_lineage(outpath):
     return lineage_per_frame
 ##############################
 #####################################
-"""
-def extract_lineage(outpath):
-    lineage_path=os.path.join(outpath,"lineage_per_frame.pkl")
-    lineage = []
-    with (open(lineage_path, "rb")) as openfile:
-     while True:
-        try:
-            lineage.append(pickle.load(openfile))
-        except EOFError:
-            break    
-    return lineage
-"""
+
 ###################################################
 def load_red_names(source):
  red_names=[]
@@ -100,13 +81,6 @@ def load_red_names(source):
  #print("len(red_names_sorted INSIDE)=",len(red_names_sorted))
  return red_names_sorted
 ###############################################
-"""
-import numpy as np
-import cv2
-def calculate_average_int(matrix):
-    a=np.ma.masked_equal(matrix, 0).mean() 
-    return a
-"""
 
 #######################################
 
