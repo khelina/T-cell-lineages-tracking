@@ -215,8 +215,11 @@ def calculate_cell_parametres(segmented_patch,a,b,c,d, frame_size):
 def segment_manual_patch(segmentor, refiner,empty_fluor,empty_bright,centroid,coord, cell_radius, frame_size, p_size,marker,final_mask,cell_number):# segments frame and creates dictionary of cells         
          #p_size=48 # this is  half of patch size (usually 96x96)
          #value_1 = float(np.mean(empty_fluor))
-         
-         empty_fluor_base=cv2.copyMakeBorder(empty_fluor, top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize, borderType= cv2.BORDER_CONSTANT, value = float(np.min(empty_fluor)))
+         #empty_fluor_base=cv2.copyMakeBorder(empty_fluor, top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize, borderType= cv2.BORDER_CONSTANT, value = float(0))
+         #empty_bright_base=cv2.copyMakeBorder(empty_bright, top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize, borderType= cv2.BORDER_CONSTANT, value = float(0))
+         value = float(np.mean(empty_fluor))
+         print("value=", value)
+         empty_fluor_base=cv2.copyMakeBorder(empty_fluor, top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize, borderType= cv2.BORDER_CONSTANT, value = float(np.mean(empty_fluor)))
          empty_bright_base=cv2.copyMakeBorder(empty_bright, top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize, borderType= cv2.BORDER_CONSTANT, value = float(np.mean(empty_bright)))
          ss=0
          x0,y0 =centroid[0],centroid[1]
@@ -270,11 +273,44 @@ def segment_manual_patch(segmentor, refiner,empty_fluor,empty_bright,centroid,co
                break         
          ensemble_output=cv2.resize(ensemble_output, shape, interpolation = cv2.INTER_AREA)
          ensemble_output[ensemble_output!=0]=255
+         
          #cv2.imwrite(r"C:\Users\kfedorchuk\Desktop\ensemble_output.tif", ensemble_output)
          cleaned_output, final_mask=clean_manual_patch(ensemble_output, marker, a,b,c,d,frame_size,final_mask,cell_number)
          #cv2.imwrite(r"C:\Users\kfedorchuk\Desktop\cleaned_output.tif", cleaned_output)
          return cleaned_output,a,b,c,d, final_mask  
 ###########################################
+frame_size=580
+import numpy as np
+import cv2
+Bordersize=100
+segmented_patch=cv2.imread(r"C:\Users\helina\Desktop\patch.tif",-1)
+def unstick_cell_from_border(segmented_patch,frame_size, a,b,c,d):
+    check_image_base=np.zeros((frame_size,frame_size),dtype="uint8")
+    print("check_image_base.shape=",check_image_base.shape)
+    check_image=cv2.copyMakeBorder(check_image_base, top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize, borderType= cv2.BORDER_CONSTANT, value=0 )
+    a,b,c,d=10,10+segmented_patch.shape[1],400,400+segmented_patch.shape[0]                          
+    #a,b,c,d=int(round(x0))+Bordersize-p_size,int(round(x0))+Bordersize+p_size,int(round(y0))+Bordersize-p_size,int(round(y0))+Bordersize+p_size           
+    check_image[c:d,a:b]=segmented_patch
+    check_image[check_image==255]=150
+    print("check_image.shape=",check_image.shape)
+    cv2.imwrite(r"C:\Users\helina\Desktop\check_image.tif", check_image)
+    mask_base=np.zeros((frame_size,frame_size),dtype="uint8")
+    print("mask_base.shape=",mask_base.shape)
+    mask_base_1=cv2.copyMakeBorder(mask_base, top=1, bottom=1, left=1, right=1, borderType= cv2.BORDER_CONSTANT, value=50)
+    print("mask_base_1.shape=",mask_base_1.shape)
+    mask=cv2.copyMakeBorder(mask_base_1, top=Bordersize-1, bottom=Bordersize-1, left=Bordersize-1, right=Bordersize-1, borderType= cv2.BORDER_CONSTANT, value=0)
+    cv2.imwrite(r"C:\Users\helina\Desktop\mask.tif", mask)
+    print("mask.shape=",mask.shape)
+    result = np.where(check_image == 150)
+    test_image=mask+check_image
+    cv2.imwrite(r"C:\Users\helina\Desktop\test_image.tif", test_image)
+    if (mask[result]==50).any():
+    #if (test_image==200).any()==True:
+      print("disaster")
+    else:
+      print("good")                
+    
+    
 #######################################
 def segment_one_cell_at_a_time(segmentor, refiner,empty_fluor,empty_bright,centroid,cell_radius, frame_size, p_size, marker,final_mask,cell_number):        
       coord=centroid
@@ -539,7 +575,8 @@ def segment_and_clean(dict_of_divisions,cells,count,coords,text,segmentor, refin
       segmented_outputs.append([ensemble_output,a,b,c,d,p])
       #r"C:\Users\helina\Desktop\segmented_outputs\output_%s_frame_%s.tif"
                    
-   # put all segmented patches in one (382,382) frame  init_seg 
+   # put all segmented patches in one (382,382) frame  init_seg
+   # parallel_image is needed to get contours separated
    init_seg= np.zeros((frame_size+2*Bordersize,frame_size+2*Bordersize),dtype="float64")
    parallel_image= np.zeros((frame_size+2*Bordersize,frame_size+2*Bordersize),dtype="float64")                       
    for pp in range(len(centroids)):      
@@ -675,7 +712,8 @@ def create_mask(final_list):# create mask for a frame from final_list
       base[one_cell_image==255]=cell_number+1               
       mask+=base
     return mask
-##############################################   
+#############################################
+## split contours with 2 or more intensities   
 def split_with_final_list(final_list, coords, frame_number, out_folders, frame_size):     
      final_centroids=np.zeros((len(coords),2))
      number_of_splits=0
@@ -847,7 +885,7 @@ def find_frame_intensities_sorted(real_cells, parallel_frame, coords, frame_size
         #print("intensities=", intensities)
         a,b,c,d=real_cells[k][3],real_cells[k][4],real_cells[k][5],real_cells[k][6],         
         frame_intensities.append([curr_one_cell, a,b,c,d, intensities])    
-    # expand on basic intensities 1,2,4,6,8,16,.....
+    # expand on basic intensities 1,2,4,8,16,.....(for example, [3] becomes [1,2])
     basic_frame_intensities=[]
     for kk in range(len(frame_intensities)):
         old_item=frame_intensities[kk]
@@ -861,7 +899,7 @@ def find_frame_intensities_sorted(real_cells, parallel_frame, coords, frame_size
     #for_print =[basic_frame_intensities[i][-1] for i in range(len(basic_frame_intensities))]
     #print("basic_frame_intensities=", for_print)
     # now we clean basic_frame_intensities so that one contour has either" 1. one intensity
-    # i this case, it is final 2. More than one intensity: in this case, this is occlusion which needs to be split up later
+    # in this case, it is final 2. More than one intensity: in this case, this is occlusion which needs to be split up later
     # p reference is given to [1] and 1 is deleted from other int lists
     # this means that we ignore overlapping segmentations 1+2=3, they just mean that cell 1 and cell 2 should be split later
     for kk in range(len(basic_frame_intensities)):         

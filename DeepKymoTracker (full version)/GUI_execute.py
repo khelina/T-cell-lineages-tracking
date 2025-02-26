@@ -1057,8 +1057,12 @@ frame9_page4.grid(row=3, column=1, rowspan=1, columnspan=1, sticky=W+E+N+S)
 frame10_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=1538, bg="grey")
 frame10_page4.grid(row=3, column=2, rowspan=1, columnspan=1, sticky=W+E+N+S)
 
+frame12_page4 = tk.Frame(master=page4, width=1528, height=50, bg="green")
+frame12_page4.grid(row=4, column=0, rowspan=1, columnspan=6, sticky=W+E+N+S)
+
+
 frame11_page4 = tk.Frame(master=page4, width=1528, height=50, bg="yellow")
-frame11_page4.grid(row=4, column=0, rowspan=1, columnspan=6, sticky=W+E+N+S)
+frame11_page4.grid(row=5, column=0, rowspan=1, columnspan=6, sticky=W+E+N+S)
 
 canvas_previous = Canvas(frame5_page4, bg=bg_color, height=canvas_size_p4, width=canvas_size_p4)
 canvas_previous.pack(anchor='nw', fill='both', expand=True)
@@ -1067,17 +1071,20 @@ canvas_current.pack(anchor='nw', fill='both', expand=True)
 ########################### These labels do not change
 
 title_label = tk.Label(frame1_page4, text="STEP 3: EXECUTE AND CORRECT TRACKING",
-              bg="yellow", fg="red", font=("Times", "24"))
-title_label.grid(row=0, column=1, padx=2, sticky="n")
+              bg="yellow", fg="red", font=("Times", "24")).pack()
+#title_label.grid(row=0, column=1, padx=2, sticky="n")
+
 label_previous = tk.Label(frame8_page4, text="Previous Frame", bg="#87CEFA", fg="black", font='TkDefaultFont 10 bold' )
 label_previous.grid(row=0, column=5, padx=100)
 
 label_current = tk.Label(frame9_page4, text="Current Frame", bg="#87CEFA", fg="black", font='TkDefaultFont 10 bold' )
-label_current.grid(row=0, column=0,padx=100)
+#label_current.grid(row=0, column=0,padx=100)
+label_current.pack()
 
 
 label_curr_frame_name = tk.Label(frame9_page4, text="           ", bg="black", fg="cyan", font='TkDefaultFont 10 bold' )
-label_curr_frame_name.grid(row=1, column=0,padx=100)
+#label_curr_frame_name.grid(row=1, column=0,padx=100)
+label_curr_frame_name.pack()
 
 label_lineage = tk.Label(frame10_page4, text="Lineage", bg="#87CEFA", fg="black", font='TkDefaultFont 10 bold' )
 label_lineage.grid(row=0, column=0, padx=100)
@@ -1114,7 +1121,20 @@ per_cell_dict = {}
 global clicked# used in radio buttons for editing,indicates which canvas is used for IDs extraction, value = "Current" or "Previous"
 clicked = StringVar()
 clicked.set(" ")
+###############################################
+global update_feedback_text_p4
+from preprocess import update_feedback_text_p4
+global instruct_var_p4,feedback_var_p4,feedback_dict_p4
+instruct_var_p4,feedback_var_p4=StringVar(), StringVar()
+feedback_dict_p4={"movie name":" ","frame size":" ","cell diameter":" ","patch size":" ","number in frame 1":" ","max number":" ", "total number of frames":" ","number of processed":" "}
+feedback_text_p4=update_feedback_text_p4(feedback_dict_p4)
+feedback_var_p4.set(feedback_text_p4)
 
+feedback_label_p4=tk.Label(frame1_page4,textvariable=feedback_var_p4 ,bg="black", fg=result_color, font=all_font, height=5)
+feedback_label_p4.pack(fill=BOTH)   
+
+instruct_var_p4.set(" Step 3 allows you to track and manually correct tracking errors if necessary. \n\nTo choose raw movie , press Button 1."
+                    "\nThen, navigate to your INPUT_MOVIE and click on it. ")
 ##################################
 global manual_IDs,manual_centroids,mother_name,  daughter_indicators 
 manual_IDs,  manual_centroids, mother_name, daughter_indicators=[], [], None, []
@@ -1159,11 +1179,15 @@ models,models_directory=create_models(software_folder)
 ############### If yes, ask whether user wants to continue or start all over again
 ################ by creating a popup option menu
 def initiate_tracking_page():
-     #print("manual_init_positions in initiate=",manual_init_posiitons)
-     #button_load.configure(background = 'red')
+     button_load.configure(background = 'red')
      global my_dir, input_movie_folder
      my_dir = filedialog.askdirectory()# input movie folder
-     input_info_label.config(text= "INPUT MOVIE:"+ "\n"+str(my_dir)+"\n")
+     #input_info_label.config(text= "INPUT MOVIE:"+ "\n"+str(my_dir)+"\n")
+     #################################
+     feedback_dict_p4["movie name"]=str(my_dir)
+     #feedback_text_p4=update_feedback_text_p4(feedback_dict_p4)
+     #feedback_var_p4.set(feedback_text_p4)
+     ###################################
      input_movie_folder = os.path.basename(my_dir)
      global outpath
      #load_helper_functions()
@@ -1173,12 +1197,14 @@ def initiate_tracking_page():
      #output_names=[None]     
      for filename in sorted_aphanumeric(os.listdir(my_dir)):   
         if filename.endswith("ch00.tif"):
-            feedback_label.configure(text="Loading input movie ...")
+            instruct_var_p4.set("Loading input movie ...")
+            #feedback_label_p4.configure(text="Loading input movie ...")
             #output_name=filename 
             #output_names.append(output_names)                     
             full_name_fluor = os.path.join(my_dir, filename)
             all_names_fluor.append(full_name_fluor)
      #print("len(output_names) before=", len(output_names))
+     feedback_dict_p4["total number of frames"]=str(len(all_names_fluor))
      
      global full_core_fluor_name, n_digits, first_frame_number, start_empty_file_name, frame_size
      full_core_fluor_name, n_digits, first_frame_number= extract_file_name(all_names_fluor[0])
@@ -1218,14 +1244,15 @@ def initiate_tracking_page():
                    prepare_for_first_go()
                else:# 4. RESULT_FLUOR is not empty, i.e. movie has been processed (partly or fully)
                   print("RESULT_FLUOR is not empty")
-                
+                  global output_names_fluor
                   output_names_fluor=[]
                   for filename in sorted_aphanumeric(os.listdir(output_fluor_folder)):   
                     if filename.endswith("ch00.tif"):
                      #feedback_label.configure(text="Loading input movie ...")                      
                      output_name_fluor = os.path.join(output_fluor_folder, filename)
                      output_names_fluor.append(output_name_fluor)
-                     
+                  feedback_dict_p4["number of processed"]=str(len(output_names_fluor))
+                 
                   print("len(output_names_fluor)=",len(output_names_fluor))
                   ####################
                   ####################
@@ -1234,27 +1261,32 @@ def initiate_tracking_page():
                   out_folders = create_output_folders(outpath)# creates names only  
     
                   global true_cell_radius, patch_size,max_number_of_cells,  xs, full_core_bright_name,curr_frame_cell_names,flag,edit_id_indicator, \
-                  base_colours,colour_counter,colour_dictionary,unused_naive_names, contrast_value, dict_of_divisions,number_of_added_new_cells
+                  base_colours,colour_counter,colour_dictionary,unused_naive_names, contrast_value, dict_of_divisions,number_of_added_new_cells,number_in_first_frame
                   true_cell_radius, edit_id_indicator=IntVar(),StringVar()
    
                   (frame_size, true_cell_radius_pickle, patch_size,max_number_of_cells,
                   num_frames, full_core_fluor_name, n_digits, full_core_bright_name, first_frame_number,
-                  base_colours, contrast_value)= extract_const_movie_parameters(outpath)
+                  base_colours, contrast_value, number_in_first_frame)= extract_const_movie_parameters(outpath)
                   
     
                   true_cell_radius.set(true_cell_radius_pickle)
                   ###################################
-                  """
-                  global xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,unused_naive_names,\
-                  dict_of_divisions,number_of_added_new_cells
-                  list_of_ch_movie_params=extract_changeable_params_history(outpath)
-                  xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,unused_naive_names,dict_of_divisions,number_of_added_new_cells= extract_changeable_params_history(outpath)
-                  edit_id_indicator.set(edit_id_indicator_pickle)
-                  """
-                  ########################################################
-                  cell_info_label.config(text= "FRAME SIZE: "+str(frame_size)+"x"+str(frame_size)+
-                           "\nCELL DIAMETER:= "+str(2*true_cell_radius.get())+"\nPATCH SIZE= "+str(2*patch_size)+" x "+str(2*patch_size))
+                   ########################################################
+                  #cell_info_label.config(text= "FRAME SIZE: "+str(frame_size)+"x"+str(frame_size)+
+                           #"\nCELL DIAMETER:= "+str(2*true_cell_radius.get())+"\nPATCH SIZE= "+str(2*patch_size)+" x "+str(2*patch_size))
                   #############################################
+                  #################################
+                  feedback_dict_p4["cell diameter"]=str(2*true_cell_radius.get())
+                  feedback_dict_p4["frame size"]=str(frame_size)+"x"+str(frame_size)
+                  feedback_dict_p4["patch size"]=str(2*patch_size)+" x "+str(2*patch_size)
+                  feedback_dict_p4["number in frame 1"]=str(number_in_first_frame)
+                  feedback_dict_p4["max number"]=str(max_number_of_cells)
+                  
+                  feedback_text_p4=update_feedback_text_p4(feedback_dict_p4)
+                  feedback_var_p4.set(feedback_text_p4)
+     ###################################
+                 
+                  
                   lineage_per_frame = extract_lineage(outpath)
                   last_frame_cell_dict=lineage_per_frame[-1]
                   n_cells=len(last_frame_cell_dict)    
@@ -1274,16 +1306,17 @@ def initiate_tracking_page():
                   #################################################
                   if len(all_names_fluor)>len(output_names_fluor):
                      print("partly tracked")
+                     button_load.configure(background = button_color)
                      global popup_partly_tracked, button_retrieve    
                      popup_partly_tracked = tk.Toplevel(master=page4, width=200, height=50, bg="red")
                      label_popup = tk.Label(popup_partly_tracked, text="Partly tracked",width=100, height=20, bg="black", fg="yellow", font='TkDefaultFont 10 bold' )
                      label_popup.pack()
                      #button_retrieve = Button(popup_partly_tracked, text="Retrieve unfinished movie",
                      #bg=button_color,font='TkDefaultFont 10 bold', command=lambda:[threading.Thread(target=retrieve_unfinished_movie).start(), update_flash([]), feedback_label.configure(text="Loading unfinished movie ..."),popup_partly_tracked.destroy() ])
-                     button_retrieve = Button(popup_partly_tracked, text="Retrieve unfinished movie",
-                     bg=button_color,font='TkDefaultFont 10 bold', command=lambda:[retrieve_unfinished_movie(), update_flash([]), feedback_label.configure(text="Loading unfinished movie ..."),popup_partly_tracked.destroy() ])
+                     button_retrieve = Button(popup_partly_tracked, text="OK",
+                     bg=button_color,font='TkDefaultFont 10 bold', command=lambda:[retrieve_unfinished_movie(), update_flash([button_execute]), instruct_var_p4.set("Loading unfinished movie ..."),popup_partly_tracked.destroy() ])
                      button_retrieve.pack()
-                     
+                     update_flash([ button_retrieve])
                      #button_close = Button(popup_partly_tracked, text=" Close",font='TkDefaultFont 10 bold', bg=button_color, command=popup_partly_tracked.destroy())
                      #button_close.pack()
         
@@ -1302,7 +1335,7 @@ def initiate_tracking_page():
                      label_popup.pack()
                      button_ok = Button(popup_fully_tracked, text=" OK",font='TkDefaultFont 10 bold', bg=button_color, command=close_fully_popup)
                      button_ok.pack()
-                     input_info_label.config(text= "INPUT MOVIE:"+ "\n"+str(my_dir)+"\nTOTAL NUMBER OF FRAMES: "+str(num_frames)+"\nNUMBER OF TRACKED FRAMES:  " +str(len(output_names)-1))  
+                     #input_info_label.config(text= "INPUT MOVIE:"+ "\n"+str(my_dir)+"\nTOTAL NUMBER OF FRAMES: "+str(num_frames)+"\nNUMBER OF TRACKED FRAMES:  " +str(len(output_names)-1))  
             else:# 3. if RESULT_FLUOR does not exist
                  print("RESULT_FLUORESCENT does not exist")
                  shutil.rmtree(outpath)# delete OUPUT if it exists
@@ -1312,7 +1345,8 @@ def initiate_tracking_page():
 #############################################################
  
 def prepare_for_first_go():
-    
+    feedback_dict_p4["number of processed"]="0"
+    instruct_var_p4.set("Input mivie is loaded. Now, you need to set up some parametres using buttons 2a,2b,2c and 2d.")
     global popup_first_preview, canvas_popup_fluor_p4,canvas_popup_bright_p4,canvas_popup_red_p4    
     popup_first_preview = tk.Toplevel(master=page4, width=1528, height=50, bg="blue")
     
@@ -1343,8 +1377,8 @@ def prepare_for_first_go():
     frame9 = tk.Frame(master=popup_first_preview , width=1528, height=50,bg="white")
     frame9.grid(row=4, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
     ###########################################
-    l_feedback=tk.Label(frame1,text= "Input movie: ", bg="black", fg="cyan", font=("Times", "12"))
-    l_feedback.pack()
+    #l_feedback=tk.Label(frame1,text= "Input movie: ", bg="black", fg="cyan", font=("Times", "12"))
+    #l_feedback.pack()
     
     global  canvas_left_pop, canvas_mid_pop, canvas_right_pop 
     canvas_left_pop = Canvas(frame2, bg=bg_color, height=canvas_size_p4, width=canvas_size_p4)
@@ -1379,8 +1413,14 @@ def prepare_for_first_go():
       if max_number_of_cells==1:
           update_flash([button_close])
       print("max_number_of_cells=",max_number_of_cells)
-      cell_numbers_label.config(text="# CELLS IN FRAME 1 = "+str(len(manual_init_positions))+
-                                '\nMAX # CELLS IN A FRAME = '+str(max_number_of_cells))
+      #cell_numbers_label.config(text="# CELLS IN FRAME 1 = "+str(len(manual_init_positions))+
+                                #'\nMAX # CELLS IN A FRAME = '+str(max_number_of_cells))
+      #################################
+      #feedback_dict_p4["number in frame 1"]=str(len(manual_init_positions))
+      feedback_dict_p4["max number"]=str(max_number_of_cells)
+      feedback_text_p4=update_feedback_text_p4(feedback_dict_p4)
+      feedback_var_p4.set(feedback_text_p4)
+     ###################################
 ########################################################    
     def start_counting_cells():
         print(" I am inside start_counting_cells")
@@ -1445,8 +1485,9 @@ def prepare_for_first_go():
     pop_slider.pack()
     #view_slider.config(from_=first_frame_number, to=first_frame_number+len(all_names_fluor)-1)      
     slide_frames_pop(first_frame_number)
-    instruct_label = tk.Label(frame8, text=" Welcome to STEP 3 of the pipeline! \n\nTo choose input movie you want to track, press Button 1. ",fg="yellow",bg="black", font='TkDefaultFont 10 bold', width=120, height=4)
-    instruct_label.grid(row=1, column=0,columnspan=4, sticky=W)
+    #instruct_var_p4.set("Loading input movie ...")
+    #instruct_label = tk.Label(frame8, text=" Welcome to STEP 3 of the pipeline! \n\nTo choose input movie you want to track, press Button 1. ",fg="yellow",bg="black", font='TkDefaultFont 10 bold', width=120, height=4)
+    #instruct_label.grid(row=1, column=0,columnspan=4, sticky=W)
     
     button_close = Button(frame9, text=" Close initial popup",font='TkDefaultFont 10 bold', bg=button_color, command=close_popup_canvas)
     button_close.pack()
@@ -1454,7 +1495,7 @@ def prepare_for_first_go():
     global  full_core_bright_name, out_folders#, output_names
     
     #view_slider.config(to=num_frames)       
-    input_info_label.config(text= "INPUT MOVIE:"+ "\n"+str(my_dir)+"\nTOTAL NUMBER OF FRAMES: "+str(num_frames)+"\nNUMBER OF TRACKED FRAMES:  " +str(len(output_names)-1)) 
+    #input_info_label.config(text= "INPUT MOVIE:"+ "\n"+str(my_dir)+"\nTOTAL NUMBER OF FRAMES: "+str(num_frames)+"\nNUMBER OF TRACKED FRAMES:  " +str(len(output_names)-1)) 
     #input_info_label.config(text= "INPUT MOVIE:"+ "\n"+str(my_dir)+"\nNUMBER OF FRAMES: "+str(num_frames))    
     out_folders = create_output_folders(outpath)
     #output_names=[None]    
@@ -1466,14 +1507,19 @@ def prepare_for_first_go():
     global   previous_lineage_image, lineage_image_size, number_of_added_new_cells
     number_of_added_new_cells=0     
     #frame_size=fluor_images[0].shape[0]
-    cell_info_label.config(text= "FRAME SIZE:"+str(frame_size)+"x"+str(frame_size), fg="#00FFFF", bg="black")
+    #cell_info_label.config(text= "FRAME SIZE:"+str(frame_size)+"x"+str(frame_size), fg="#00FFFF", bg="black")
+    #################################    
+    feedback_dict_p4["frame size"]=str(frame_size)+"x"+str(frame_size)
+    feedback_text_p4=update_feedback_text_p4(feedback_dict_p4)
+    feedback_var_p4.set(feedback_text_p4)
+     ###################################
     print("frame_size_before=", frame_size)
     if num_frames<=382:
         lineage_image_size=num_frames#this is the size of lineage image
     else:
         lineage_image_size=num_frames
     previous_lineage_image =np.zeros((lineage_image_size, lineage_image_size+200,3), dtype="uint8") 
-    feedback_label.config(text="Movie loaded, {} frames.\nNow, you need to specify how many cells are there in Frame 1.".format(num_frames))   
+    #feedback_label.config(text="Movie loaded, {} frames.\nNow, you need to specify how many cells are there in Frame 1.".format(num_frames))   
     button_load.configure(background =button_color)
     global start_frame
     start_frame=first_frame_number
@@ -1491,13 +1537,14 @@ def retrieve_unfinished_movie():# in retrieve mode
     ########################################################
     update_flash([button_execute])                
     display_first_frame()
-    input_info_label.config(text= "INPUT MOVIE:"+ "\n"+str(my_dir)+"\nTOTAL NUMBER OF FRAMES: "+str(num_frames)+"\nNUMBER OF TRACKED FRAMES:  " +str(len(output_names)-1))           
-    feedback_label.config(text="Movie loaded, {} frames.\nNow, you need to specify how many cells are there in Frame 1.".format(num_frames))
+    #input_info_label.config(text= "INPUT MOVIE:"+ "\n"+str(my_dir)+"\nTOTAL NUMBER OF FRAMES: "+str(num_frames)+"\nNUMBER OF TRACKED FRAMES:  " +str(len(output_names)-1))           
+    #feedback_label.config(text="Movie loaded, {} frames.\nNow, you need to specify how many cells are there in Frame 1.".format(num_frames))
     
 ###########################################
 button_load = Button(frame1_page4, text="1. Click to open file menu and then select input movie folder",
-               bg=button_color,font='TkDefaultFont 10 bold', command=lambda:[threading.Thread(target=initiate_tracking_page).start(), update_flash([]), feedback_label.configure(text="Loading input movie ...") ])
-button_load.grid(row=2, column=0, padx=10, pady=20)
+               bg=button_color,font='TkDefaultFont 10 bold', command=lambda:[threading.Thread(target=initiate_tracking_page).start(), update_flash([]), feedback_label_p4.configure(text="Loading input movie ...") ])
+button_load.pack()
+#button_load.grid(row=2, column=0, padx=10, pady=20)
 
 ################################
 ######### measure cell radius in cell_measure_popup window (Bitton 2b)
@@ -1514,7 +1561,8 @@ def change_radius(value):# change cell radius manually
   new_circles=[]  
   scaled_cell_radius=int(value)
   true_cell_radius.set(int(round(scaled_cell_radius*frame_size/popup_window_size)))
-  radius_slider.config(label="Cell radius =  "+str(true_cell_radius.get())) 
+  radius_slider.config(label="Cell radius =  "+str(true_cell_radius.get()))
+  
   #radius_slider.set(cell_radius)
   global circles
   for k in range(len(centres)):
@@ -1534,21 +1582,28 @@ def save_cell_radius():
     #patch_size=int(round(true_cell_radius.get()*2.4))
     print("cell_radius, patch_size=", true_cell_radius.get(), patch_size)
     popup_for_radius.destroy()
-    cell_info_label.config(text= "FRAME SIZE: "+str(frame_size)+"x"+str(frame_size)+
-                           "\nCELL DIAMETER:= "+str(2*true_cell_radius.get())+"\nPATCH SIZE= "+str(2*patch_size)+" x "+str(2*patch_size),
-                           fg="#00FFFF", bg="black")
-    
-    #return true_cell_radius, patch_size
+    #cell_info_label.config(text= "FRAME SIZE: "+str(frame_size)+"x"+str(frame_size)+
+                           #"\nCELL DIAMETER:= "+str(2*true_cell_radius.get())+"\nPATCH SIZE= "+str(2*patch_size)+" x "+str(2*patch_size),
+                           #fg="#00FFFF", bg="black")
+     #################################    
+    feedback_dict_p4["cell diameter"]=str(2*true_cell_radius.get())
+    feedback_dict_p4["patch size"]=str(2*patch_size)+" x "+str(2*patch_size)
+    feedback_text_p4=update_feedback_text_p4(feedback_dict_p4)
+    feedback_var_p4.set(feedback_text_p4)
+     ###################################
+   
 #################################
 #######################################
+
 def record_const_movie_parameters():# record cell_size and other parameters in pickle file to be used at Step 4 and in retrieve mode
     list_of_const_movie_params=[frame_size, true_cell_radius.get(), patch_size,max_number_of_cells,
                           num_frames, full_core_fluor_name, n_digits,full_core_bright_name, first_frame_number,
-                          base_colours, contrast_value]
+                          base_colours, contrast_value, len(coords_very_first)]
     const_parameters_path=os.path.join(outpath,"constant_movie_parameters.pkl")  
     with open(const_parameters_path, 'wb') as f:
         for i in range(len(list_of_const_movie_params)):
            pickle.dump(list_of_const_movie_params[i], f,protocol=pickle.HIGHEST_PROTOCOL)
+
 #####################################
 def create_cell_measure_popup():
     update_flash([])
@@ -1655,7 +1710,8 @@ def create_assign_cell_positions_popup():
     #update_flash([])
     global  manual_init_positions
     manual_init_positions =[]
-    feedback_label.configure(text="Waiting for manual assignment of cell positions in Frame 1 ...")
+    instruct_var_p4.set("Waiting for manual assignment of cell positions in Frame 1 ...")
+    #feedback_label_p4.configure(text="Waiting for manual assignment of cell positions in Frame 1 ...")
     button_contrast.configure(bg=button_color, fg="black")
     global popup_assign_pos,  cliplimit
     cliplimit=IntVar()
@@ -1696,8 +1752,10 @@ def click_position(event):
     manual_init_positions.append([event.x/popup_window_size*frame_size, event.y/popup_window_size*frame_size])
     if len(manual_init_positions)==1:
         update_flash([button_save_init_positions])
-    cell_numbers_label.config(text="NUMBER OF CELLS IN FRAME 1 = "+str(len(manual_init_positions)))
-    
+    #cell_numbers_label.config(text="NUMBER OF CELLS IN FRAME 1 = "+str(len(manual_init_positions)))
+    feedback_dict_p4["number in frame 1"]=str(len(manual_init_positions))
+    feedback_text_p4=update_feedback_text_p4(feedback_dict_p4)
+    feedback_var_p4.set(feedback_text_p4)
 ##################################
 def close_assign_window():
      update_flash([button_count_cells]) 
@@ -1711,34 +1769,24 @@ def close_popup_canvas(): # save initial positions of cells in Frame 1
           
       colour_dictionary, new_naive_names, base_colours, colour_counter, unused_naive_names,xs= create_first_color_dictionary(
         max_number_of_cells, len(manual_init_positions), num_frames)
-      #print("colour_counter=",colour_counter)
-      #print("colour_dictionary=",colour_dictionary)
-      #print("new_naive_names=",new_naive_names)
-      #print("unused_naive_names=",unused_naive_names)
-      #print("max_number_of_cells=",max_number_of_cells)
-      #print("xs=", xs)
-      #global xs
-      #xs=create_dictionary_of_xs(new_naive_names, coords_very_first, num_frames, max_number_of_cells)   
+      
       N_cells=len(manual_init_positions)      
       global curr_frame_cell_names, flag,  edit_id_indicator
       curr_frame_cell_names = new_naive_names# names of cell in the current frame
       flag="manual centroids"
       edit_id_indicator.set("yes")
       coords = np.zeros((N_cells, 2))
-      #print("xs=", xs)
-       #print("template_names=", template_names)
+      
       print("curr_frame_cell_names=", curr_frame_cell_names)
      
      
-      
-      #prev_frame = np.zeros((frame_size, frame_size), dtype="float64")
-     
       for i in range(N_cells):
         coords[i] = manual_init_positions[i]
-        
+      record_const_movie_parameters()  
       print("coords=", coords)
       button_contrast.configure(text =str(len(coords))+ " cells" ,background="black", fg="#00FFFF")
-      feedback_label.config(text="The positions of cells in Frame 1 has been saved.\n\nTo start execution, press Button 3.")
+      instruct_var_p4.set("The positions of cells in Frame 1 has been saved.\n\nTo start execution, press Button 3.")
+      #feedback_label_p4.config(text="The positions of cells in Frame 1 has been saved.\n\nTo start execution, press Button 3.")
       #stop_flash("save", popup, flashers)
       update_flash([button_execute])
      
@@ -1832,15 +1880,15 @@ def execute():
     canvas_current.delete("all")
     canvas_lineage.delete("all")
     button_execute.configure(background = 'red')   
-    label_edit.configure(text=" ")    
-    feedback_label.config(text="Wait, loading models ...", fg="yellow")
+    #label_edit.configure(text=" ")    
+    #feedback_label.config(text="Wait, loading models ...", fg="yellow")
     global lineage_images, output_images, lineage_per_frame_p4, previous_lineage_image, lineage_images_cv2     
     if lineage_per_frame_p4:
         del lineage_per_frame_p4
     
     global variable_stop,  tracker, segmentor, refiner# this variable allows to stop the loop (controlled by Stop button)     
     global coords, curr_frame_cell_names, count,  cells, old_number_of_cells, edit_id_indicator,kk
-    label_edit.configure(text="curr_frame_cell_names:\n " + str(curr_frame_cell_names), bg="black")     
+    #label_edit.configure(text="curr_frame_cell_names:\n " + str(curr_frame_cell_names), bg="black")     
     N_cells = coords.shape[0]
     division_indicator=0
     centroids_for_benchmarking=[coords]
@@ -1850,7 +1898,7 @@ def execute():
     kk = 0  # the number of frame within clip    
     clear_memory_of_models(tracker, segmentor, refiner)
     tracker, segmentor, refiner=load_weights(models)    
-    feedback_label.config(text="Execution is about to begin ...")
+    #feedback_label.config(text="Execution is about to begin ...")
     update_flash([button_pause])
     
     print("num_frames=", num_frames)
@@ -1920,11 +1968,11 @@ def execute():
                       
             if manual_division_indicator.get()=="yes":
                  manual_division_indicator.set("no")
-            record_const_movie_parameters()
+            #record_const_movie_parameters()
             update_changeable_params_history([[xs,curr_frame_cell_names,flag,edit_id_indicator.get(),colour_counter,colour_dictionary,unused_naive_names,dict_of_divisions,number_of_added_new_cells]],outpath, 'ab')
             update_lineage([cells],outpath,'ab')# concatenates {cells}  to pickle 
-            feedback_label.config(text="Execution in progress: \nFrame "+ str(first_number_in_clip+kk)+"\n - If you need to stop for editing, press Button 3a."
-                            "\n - Otherwise, wait until execution is finished.")
+            #eedback_label.config(text="Execution in progress: \nFrame "+ str(first_number_in_clip+kk)+"\n - If you need to stop for editing, press Button 3a."
+                            #"\n - Otherwise, wait until execution is finished.")
             #label_current.configure(text="Current frame: " +str(first_frame_number+k+kk+1), fg="red")           
             N_cells = len(cells)
             print("cells after division detector=", list(cells.keys()))
@@ -1954,7 +2002,10 @@ def execute():
             photo_image_lin=turn_image_into_tkinter(image_lin, canvas_size_p4)
             #canvas_lineage.create_image(0,0,anchor=NW,image=photo_image_lin)          
             lineage_images.append(photo_image_lin)
-            input_info_label.config(text= "INPUT MOVIE:"+ "\n"+str(my_dir)+"\nTOTAL NUMBER OF FRAMES: "+str(num_frames)+"\nNUMBER OF TRACKED FRAMES:  " +str(len(output_names)-1)) 
+            #input_info_label.config(text= "INPUT MOVIE:"+ "\n"+str(my_dir)+"\nTOTAL NUMBER OF FRAMES: "+str(num_frames)+"\nNUMBER OF TRACKED FRAMES:  " +str(len(output_names)-1)) 
+            feedback_dict_p4["number of processed"]=str(len(output_names)-1)
+            feedback_text_p4=update_feedback_text_p4(feedback_dict_p4)
+            feedback_var_p4.set(feedback_text_p4)
             centroids_for_benchmarking.append(coords)            
             
             #print("set view_slider at ",first_frame_number+k+kk)
@@ -1997,10 +2048,10 @@ def execute():
        update_flash([])     
  if variable_stop=="Stop":
      print("MANAGED TO BREAK OUT OF CLIP LOOP")
-     feedback_label.config(text="You stopped execution manually. \nPress Button 4 to check results." )
+     feedback_label_p4.config(text="You stopped execution manually. \nPress Button 4 to check results." )
      variable_stop="Do not stop"
  else:
-     feedback_label.config(text="Execution finished! \nPress Button 4 to check results." )
+     feedback_label_p4.config(text="Execution finished! \nPress Button 4 to check results." )
      finish_time=time.time()
      execution_time=finish_time-start_time
      print("execution_time=", execution_time)
@@ -2033,7 +2084,8 @@ def slide_frames(value):# view_slider (main screen)
 ##############################################
 global view_slider# main screen
 view_slider = Scale(frame9_page4, from_=1, to=1, orient=HORIZONTAL, troughcolor="green", command=slide_frames, length=370)      
-view_slider.grid(row=6, column=0, pady=5) 
+#view_slider.grid(row=6, column=0, pady=5)
+view_slider.pack() 
 ###########################################
 def display_first_frame():# display all frames after pushing button "Display result"
     view_slider.config(from_=first_frame_number,to=len(output_images)+first_frame_number-2)   
@@ -2046,7 +2098,7 @@ def display_first_frame():# display all frames after pushing button "Display res
     # creates and saves per cell pedigree in pickle file, but then it is deleted when you push button "Execute"  
     pedigree = create_pedigree(lineage_per_frame_p4, outpath, frame_size) 
         
-    feedback_label.config(text="Check results by sliding the bar under Current Frame."
+    feedback_label_p4.config(text="Check results by sliding the bar under Current Frame."
                     "\n - If you need to edit cell IDs, press Button 5."
                     "\n - If you need to edit missed division, press Button 6."
                     "\n - If you are happy with the result press Button 7 to create lineage movie.")       
@@ -2462,19 +2514,12 @@ button_display = Button(frame2_page4, text="4. Display result", font='TkDefaultF
                bg='#9ACD32',activebackground="red", command=lambda: [display_first_frame(), update_flash([])])
 button_display.grid(row=2, column=0, padx=20)
 
-feedback_label = tk.Label(frame1_page4, text=" Welcome to STEP 3 of the pipeline! \n\nTo choose input movie you want to track, press Button 1. ",fg="yellow",bg="black", font='TkDefaultFont 10 bold', width=120, height=4)
-feedback_label.grid(row=1, column=0,columnspan=4, sticky=W)
+################################################
 
-input_info_label = tk.Label(frame1_page4, text=my_dir, bg="black", fg="cyan")
-input_info_label.grid(row=2, column=1, padx=2)
-
-cell_info_label = tk.Label(frame1_page4, text=my_dir,fg="#00FFFF", bg="black")
-cell_info_label.grid(row=2, column=2, padx=2)
-
-cell_numbers_label = tk.Label(frame1_page4, text=my_dir,fg="#00FFFF", bg="black")
-cell_numbers_label.grid(row=2, column=3, padx=2)
-#progressbar = ttk.Progressbar(
-    #frame9_page4, orient='horizontal', mode='determinate', length=100)
+l_instr_name_p4=tk.Label(frame9_page4,text="INSTRUCTIONS FOR USER :" ,bg="black", font=all_font, fg="orange").pack()
+instruct_label_p4=tk.Label(frame12_page4,textvariable=instruct_var_p4 ,bg="black", fg="yellow", font=all_font, height=5)
+instruct_label_p4.pack(fill=BOTH)
+ 
 button_save_id = Button(frame3_page4, text="Save ID edits", activebackground="red",font=all_font, 
               bg=button_color, command=lambda:stop_editing_IDs())
 button_save_id.grid(row=3, column=0)
@@ -2515,7 +2560,7 @@ R_remove_dead_cell = Radiobutton(frame3_page4, text="Remove dead cell",backgroun
 R_remove_dead_cell.grid(row=0, column=3,pady=10, padx=10)
 ################################################
 
-label_edit = tk.Label(frame3_page4, text=" ", font='TkDefaultFont 10 bold',  bg="black", fg="yellow", width=50, height=4)
+#label_edit = tk.Label(frame3_page4, text=" ", font='TkDefaultFont 10 bold',  bg="black", fg="yellow", width=50, height=4)
 
 
 ###########################################################################
@@ -2621,16 +2666,10 @@ def choose_and_load_tracked_movie():
     global frame_p5_size,cell_radius_p5,patch_size_p5
     #frame_p5_size=int(empty_fluors[0].shape[0])
     #############
-    list_of_movie_params=extract_movie_parameters(output_dir)
-    frame_p5_size,cell_radius_p5,patch_size_p5= list_of_movie_params[0],list_of_movie_params[1],list_of_movie_params[2]
-    #list_of_movie_params=[frame_size, true_cell_radius.get(), patch_size,max_number_of_cells]
-    #global cell_radius_p5,patch_size_p5
+    frame_p5_size, cell_radius_p5, patch_size_p5,max_number_of_cells,\
+    num_frames, full_core_fluor_name, n_digits, full_core_bright_name,  first_frame_number,\
+    base_colours,contrast_value=extract_const_movie_parameters(output_dir)
     
-    #if frame_p5_size==256:
-        #cell_radius_p5, patch_size_p5=7, 16
-    #else:
-        #cell_radius_p5, patch_size_p5=20, 48
-    ##########################
     print("frame_p5_size=",frame_p5_size)
     global photo_filled_fluors, photo_filled_brights
     dialog_label_5.config(text="Preparing images for display...")
@@ -2663,7 +2702,7 @@ global old_cell_color, old_cell_number
 old_cell_color, old_cell_number=[255,255,255,255],-2
 
 #############################################
-def get_frame_info():
+def get_frame_info():# for manual segmentation correction
     button_frame_info.configure(background = 'red')
     
     global segmentor, refiner

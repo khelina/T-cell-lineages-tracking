@@ -75,7 +75,7 @@ def create_output_folders(outpath):
                  "LINEAGE_IMAGES",
                  "PLOTS",
                  "PATCHES_FOR_RESULTS",
-                 "CLEANED_PATCHES", "RESULT_BRIGHT"]              
+                 "CLEANED_PATCHES", "RESULT_BRIGHT","FLUOR_BOREDRS"]              
    for i in range(len(subfolder_names)):
        destination=os.path.join(outpath,subfolder_names[i])
        if not os.path.exists(destination):
@@ -133,6 +133,19 @@ def load_image_names(source):
  red_names_sorted =sorted(red_names,key=characters)
  print("len(bright_names_sorted INSIDE)=",len(bright_names_sorted))
  return bright_names_sorted,fluor_names_sorted, red_names_sorted
+##################################################
+
+def update_feedback_text_p4(feedback_dict_p4):
+    text="Input movie :  "+feedback_dict_p4["movie name"]+\
+         "\nFrame size :  "+feedback_dict_p4["frame size"]+\
+         "                  Cell diameter : "+feedback_dict_p4["cell diameter"]+\
+         "                  Patch size : "+feedback_dict_p4["patch size"]+\
+         "\nNumber of cells in Frame 1 : "+feedback_dict_p4["number in frame 1"]+\
+         "                  Maximum number of cells : "+feedback_dict_p4["max number"]+\
+         "\nTotal number of frames :  "+feedback_dict_p4["total number of frames"]+\
+         "\nNumber of processed frames :  "+ feedback_dict_p4["number of processed"]
+         
+    return text
 ##################################################
 def update_feedback_text(feedback_dict):
     text="Source :"+feedback_dict["s"]+\

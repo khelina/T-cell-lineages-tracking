@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import os
 import math
+from copy import deepcopy
 #############################
 Bordersize=100
 ######################################
@@ -273,8 +274,13 @@ def prepare_contours(input_image):# input_image must be gray. binary 0,255
     return empty
 #############################################################
 def paste_patch(destin_image,patch,a,b,c,d,color,alpha, frame_size):
-    destin_image_border=cv2.copyMakeBorder(destin_image, top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize, borderType= cv2.BORDER_REPLICATE ) 
-    patch=patch.astype(np.uint8)          
+    destin_image_border=cv2.copyMakeBorder(destin_image, top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize,  borderType= cv2.BORDER_CONSTANT, value = float(np.mean(destin_image)) )
+    debug_destin_image =destin_image_border.copy()
+    debug_destin_image= cv2.cvtColor(debug_destin_image,cv2.COLOR_BGRA2GRAY)   
+     #borderType= cv2.BORDER_CONSTANT, value = float(np.min(empty_fluor))
+    patch=patch.astype(np.uint8)
+    debug_patch=deepcopy(patch)
+    debug_destin_image[c:d, a:b] = debug_patch      
     mask=patch.copy()  
     patch=cv2.cvtColor(patch, cv2.COLOR_GRAY2RGBA) 
     patch[mask==255]=color 
@@ -289,8 +295,9 @@ def paste_patch(destin_image,patch,a,b,c,d,color,alpha, frame_size):
     #a_old,b_old,c_old,d_old=olds[kkk][0],olds[kkk][1],olds[kkk][2],olds[kkk][3]
     #destin_image_border = cv2.rectangle(destin_image_border, (b_old,d_old), (a_old,c_old), color[:-1], 1)
     ##############################################
+    
     destin_image_cropped=destin_image_border[Bordersize:frame_size+Bordersize,Bordersize:frame_size+Bordersize]
-    return destin_image_cropped
+    return destin_image_cropped,  debug_destin_image
 ##########################################################################
 def paste_benchmark_patch(patch,a,b,c,d,cell_number, frame_size):    
     image_with_one_cell_border=np.zeros((frame_size+2*Bordersize,frame_size+2*Bordersize),dtype="uint16")     
@@ -335,8 +342,8 @@ def plot_frame(cells,clip_centr,k,kk,fluor_images,fluor_names,out_folders,coords
          a,b,c,d=cells["cell_%s" % kkk][7],cells["cell_%s" % kkk][8],cells["cell_%s" % kkk][9],cells["cell_%s" % kkk][10]        
          
          collour=cells["cell_%s" % kkk][15]
-         destin_bright=paste_patch(destin_bright,patch_with_contours,a,b,c,d,collour,1.0, frame_size)        
-         destin_fluor=paste_patch(destin_fluor,patch_with_contours,a,b,c,d,collour,1.0, frame_size)
+         destin_bright, debug_bright_image=paste_patch(destin_bright,patch_with_contours,a,b,c,d,collour,1.0, frame_size)        
+         destin_fluor, debug_destin_image=paste_patch(destin_fluor,patch_with_contours,a,b,c,d,collour,1.0, frame_size)
          centroid=cells["cell_%s" % kkk][6]
          #print("centroid=", centroid)
          start_point, end_point=(int(centroid[0]-p_size), int(centroid[1]-p_size)), (int(centroid[0]+p_size), int(centroid[1]+p_size))
@@ -355,6 +362,7 @@ def plot_frame(cells,clip_centr,k,kk,fluor_images,fluor_names,out_folders,coords
          #cv2.putText(destin_bright,texxt,(int(xx)-10,int(yy)+5),cv2.FONT_HERSHEY_PLAIN,1,collour,1)         
                   
          coords[kkk,0],coords[kkk,1]=xx, yy
+       cv2.imwrite(rename_file(out_folders[10],fluor_names[kk]), debug_destin_image)
        #print("check_fluor_destin   ",rename_file(out_folders[3],fluor_names[kk]))       
        cv2.imwrite(rename_file(out_folders[3],fluor_names[kk]),destin_fluor)# plot destin_fluor to RESULT FLUOR folder
        
