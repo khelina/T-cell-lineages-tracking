@@ -29,21 +29,12 @@ import shutil
 #############################################################################
 win= tk.Tk()
 
-#w = 800 # width for the Tk root
-#h = 650 # height for the Tk root
-
-
+win.geometry('%dx%d+%d+%d' % (1530, 2000, 0, 0))
 ws = win.winfo_screenwidth() # width of the screen
 hs = win.winfo_screenheight() # height of the screen
 
-# calculate x and y coordinates for the Tk root window
-#x = (ws/2) - (w/2)
-#y = (hs/2) - (h/2)
 
-# set the dimensions of the screen 
-# and where it is placed
-#win.geometry('%dx%d+%d+%d' % (1530, 2000, x, y))
-win.geometry('1530x2000')
+#win.geometry('1530x2000')
 
 bg_color,all_font,button_color,result_color,label_color="#A52A2A",'TkDefaultFont 10 bold','#9ACD32',"#00FFFF","#87CEFA"
 
@@ -74,8 +65,9 @@ def go_to_page(num):# num (1,2,3,4,5)= the page you want to go to
 ################################################      
 pages=[]
 for i in range(6):
-    page=tk.Toplevel(master=win, width=1530, height=2000, bg="black")
-    page.geometry('1530x2000')
+    page=tk.Toplevel(master=win)
+    #page.geometry('1530x2000')
+    page.geometry('%dx%d+%d+%d' % (1530, 2000, 0, 0))
     page.config(bg=bg_color)
     page.title(page_titles[i])    
     pages.append(page)   
@@ -1307,35 +1299,38 @@ def initiate_tracking_page():
                   if len(all_names_fluor)>len(output_names_fluor):
                      print("partly tracked")
                      button_load.configure(background = button_color)
-                     global popup_partly_tracked, button_retrieve    
-                     popup_partly_tracked = tk.Toplevel(master=page4, width=200, height=50, bg="red")
-                     label_popup = tk.Label(popup_partly_tracked, text="Partly tracked",width=100, height=20, bg="black", fg="yellow", font='TkDefaultFont 10 bold' )
-                     label_popup.pack()
-                     #button_retrieve = Button(popup_partly_tracked, text="Retrieve unfinished movie",
-                     #bg=button_color,font='TkDefaultFont 10 bold', command=lambda:[threading.Thread(target=retrieve_unfinished_movie).start(), update_flash([]), feedback_label.configure(text="Loading unfinished movie ..."),popup_partly_tracked.destroy() ])
+                     global popup_partly_tracked, button_retrieve
+                     #########################
+                     popup_partly_tracked = tk.Toplevel(master=page4, bg=label_color)
+                     w,h = 400,150                      
+                     x,y = (ws/2) - (w/2),(hs/2) - (h/2)                     
+                     popup_partly_tracked.geometry('%dx%d+%d+%d' % (w, h, x, y))
+                     label_popup = tk.Label(popup_partly_tracked, text="The movie has been partially tracked. \nPress OK to view the processed frames.",width=400, height=5, bg=label_color, fg="black", font='TkDefaultFont 14 bold' )
+                     label_popup.pack()                     
                      button_retrieve = Button(popup_partly_tracked, text="OK",
-                     bg=button_color,font='TkDefaultFont 10 bold', command=lambda:[retrieve_unfinished_movie(), update_flash([button_execute]), instruct_var_p4.set("Loading unfinished movie ..."),popup_partly_tracked.destroy() ])
+                     bg=button_color,font='TkDefaultFont 14 bold', command=lambda:[retrieve_unfinished_movie(), update_flash([button_execute]), instruct_var_p4.set("Loading unfinished movie ..."),popup_partly_tracked.destroy() ])
                      button_retrieve.pack()
                      update_flash([ button_retrieve])
-                     #button_close = Button(popup_partly_tracked, text=" Close",font='TkDefaultFont 10 bold', bg=button_color, command=popup_partly_tracked.destroy())
-                     #button_close.pack()
+                     ########################################
         
                   else:
                      print("fully tracked")
+                     button_load.configure(background = button_color)
                      def close_fully_popup():
+                      update_flash([button_execute])
                       popup_fully_tracked.destroy()                      
                       display_first_frame()
                                         
-                     global popup_fully_tracked    
-                     popup_fully_tracked = tk.Toplevel(master=page4, bg="blue")
-                     w,h = 200,50                      
+                     global popup_fully_tracked, button_ok
+                     popup_fully_tracked = tk.Toplevel(master=page4, bg=label_color)
+                     w,h = 400,150                      
                      x,y = (ws/2) - (w/2),(hs/2) - (h/2)                     
                      popup_fully_tracked.geometry('%dx%d+%d+%d' % (w, h, x, y))
-                     label_popup = tk.Label(popup_fully_tracked, text="Fully tracked",bg="black", fg="yellow", font='TkDefaultFont 10 bold' )
-                     label_popup.pack()
-                     button_ok = Button(popup_fully_tracked, text=" OK",font='TkDefaultFont 10 bold', bg=button_color, command=close_fully_popup)
+                     label_popup = tk.Label(popup_fully_tracked, text="The movie has been fully tracked. \nPress OK to view the processed frames.",width=400, height=5, bg=label_color, fg="black", font='TkDefaultFont 14 bold' )
+                     label_popup.pack()                                          
+                     button_ok = Button(popup_fully_tracked, text=" OK",font='TkDefaultFont 14 bold', bg=button_color, command=close_fully_popup)
                      button_ok.pack()
-                     #input_info_label.config(text= "INPUT MOVIE:"+ "\n"+str(my_dir)+"\nTOTAL NUMBER OF FRAMES: "+str(num_frames)+"\nNUMBER OF TRACKED FRAMES:  " +str(len(output_names)-1))  
+                     update_flash([button_ok])
             else:# 3. if RESULT_FLUOR does not exist
                  print("RESULT_FLUORESCENT does not exist")
                  shutil.rmtree(outpath)# delete OUPUT if it exists
@@ -1347,8 +1342,15 @@ def initiate_tracking_page():
 def prepare_for_first_go():
     feedback_dict_p4["number of processed"]="0"
     instruct_var_p4.set("Input mivie is loaded. Now, you need to set up some parametres using buttons 2a,2b,2c and 2d.")
-    global popup_first_preview, canvas_popup_fluor_p4,canvas_popup_bright_p4,canvas_popup_red_p4    
-    popup_first_preview = tk.Toplevel(master=page4, width=1528, height=50, bg="blue")
+    ##########
+   
+    
+    #########
+    global popup_first_preview, canvas_popup_fluor_p4,canvas_popup_bright_p4,canvas_popup_red_p4
+    popup_first_preview = tk.Toplevel(master=page4, bg=label_color)
+                     
+    popup_first_preview.geometry('%dx%d+%d+%d' % (1530, 2000-160, 0, 160))
+    #popup_first_preview = tk.Toplevel(master=page4, width=1528, height=50, bg="blue")
     
     frame1 = tk.Frame(master=popup_first_preview , width=1528, height=50, bg="orange")
     frame1.grid(row=0, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
@@ -1402,6 +1404,7 @@ def prepare_for_first_go():
     
     button_assign_positions = Button(frame7, text="2c. Assign initial cell positions",font='TkDefaultFont 10 bold', bg=button_color, command=create_assign_cell_positions_popup)
     button_assign_positions.pack()
+    
 ###################################################
           
     def click_cells_to_count(event):     
@@ -1488,7 +1491,8 @@ def prepare_for_first_go():
     #instruct_var_p4.set("Loading input movie ...")
     #instruct_label = tk.Label(frame8, text=" Welcome to STEP 3 of the pipeline! \n\nTo choose input movie you want to track, press Button 1. ",fg="yellow",bg="black", font='TkDefaultFont 10 bold', width=120, height=4)
     #instruct_label.grid(row=1, column=0,columnspan=4, sticky=W)
-    
+    #instruct_label_popup_p4=tk.Label(frame8,text="Nothing here so far..." ,bg="black", fg="yellow", font=all_font,width=popup_window_size, height=5)
+    #instruct_label_popup_p4.pack(fill=BOTH) 
     button_close = Button(frame9, text=" Close initial popup",font='TkDefaultFont 10 bold', bg=button_color, command=close_popup_canvas)
     button_close.pack()
     ###########################################   
@@ -1611,7 +1615,8 @@ def create_cell_measure_popup():
     #global cliplimit
     #cliplimit=IntVar()
     #cliplimit.set(0.)
-    popup_for_radius = tk.Toplevel(master=popup_first_preview, width=popup_window_size, height=popup_window_size)
+    popup_for_radius = tk.Toplevel(master=popup_first_preview)
+    popup_for_radius.geometry('%dx%d+%d+%d' % (popup_window_size, popup_window_size+200, 0, 0))
     frame1 = tk.Frame(master=popup_for_radius, width=popup_window_size, height=popup_window_size)
     frame1.pack()
     frame2 = tk.Frame(master=popup_for_radius, width=popup_window_size, height=50)
@@ -1637,6 +1642,8 @@ def create_cell_measure_popup():
     global radius_slider, button_save_radius   
     radius_slider=Scale(frame2,from_=1,to=100,orient=HORIZONTAL,troughcolor="#513B1C",activebackground="red",label="Cell radius = "+str(int(true_cell_radius.get())),variable=scaled_cell_radius, command=change_radius, length=150, showvalue=0)
     radius_slider.pack()
+    radius_label_p4=tk.Label(frame2,text="To adjust radius, slide the bar" ,bg="black", fg=result_color, font=all_font,width=popup_window_size, height=5)
+    radius_label_p4.pack(fill=BOTH) 
     
     button_save_radius=tk.Button(frame2,text="Save",activebackground="red", command=save_cell_radius)
     button_save_radius.pack()    
@@ -1662,10 +1669,12 @@ def create_contrast_popup():
     global cliplimit
     cliplimit=IntVar()
     cliplimit.set(0.)
-    popup_contrast = tk.Toplevel(master= popup_first_preview , width=popup_window_size, height=popup_window_size)
-    frame1 = tk.Frame(master=popup_contrast, width=popup_window_size, height=popup_window_size)
+    popup_contrast = tk.Toplevel(master= popup_first_preview, bg=bg_color)
+    popup_contrast.geometry('%dx%d+%d+%d' % (popup_window_size, popup_window_size+200, 0, 0))
+    
+    frame1 = tk.Frame(master=popup_contrast, width=popup_window_size, height=popup_window_size, bg=bg_color)
     frame1.pack()
-    frame2 = tk.Frame(master=popup_contrast, width=popup_window_size, height=50)
+    frame2 = tk.Frame(master=popup_contrast, width=popup_window_size, height=50, bg=bg_color)
     frame2.pack()
 
     canvas_contrast = Canvas(frame1, height=popup_window_size, width=popup_window_size, bg="black")
@@ -1677,7 +1686,10 @@ def create_contrast_popup():
     contrast_slider=Scale(frame2,from_=0,to=100,orient=HORIZONTAL,troughcolor="#513B1C",variable=cliplimit,activebackground="red",label="Cliplimit = " +str(int(cliplimit.get())),command=change_contrast, length=150, showvalue=0)
     contrast_slider.pack()
     
-    button_save_contrast=tk.Button(frame2,text="Save",activebackground="red", command=save_contrast)
+    contrast_label_p4=tk.Label(frame2,text="To adjust contrast, slide the bar" ,bg="black", fg="yellow", font=all_font,width=popup_window_size, height=5)
+    contrast_label_p4.pack(fill=BOTH) 
+    
+    button_save_contrast=tk.Button(frame2,text="Save",activebackground="red", command=save_contrast, bg=button_color)
     button_save_contrast.pack()    
     update_flash([contrast_slider])    
 ###################################
@@ -1716,17 +1728,18 @@ def create_assign_cell_positions_popup():
     global popup_assign_pos,  cliplimit
     cliplimit=IntVar()
     cliplimit.set(0.)
-    popup_assign_pos = tk.Toplevel(master=popup_first_preview, width=popup_window_size, height=popup_window_size)
-    sub1 = tk.Frame(master=popup_assign_pos, width=popup_window_size, height=50, bg="#A52A2A")
-    sub1.grid(row=0, column=0, rowspan=1, columnspan=1, sticky=W+E+N+S)
-    global label_click_popup
-    label_click_popup = tk.Label(
-        sub1, text="Click on each cell with the left button of the mouse,\nthen save", bg="black",fg="yellow", font='TkDefaultFont 10 bold')
-    label_click_popup.pack()
+    popup_assign_pos = tk.Toplevel(master=popup_first_preview)
+    popup_assign_pos.geometry('%dx%d+%d+%d' % (popup_window_size, popup_window_size+400, 0, 0))
+    #sub1 = tk.Frame(master=popup_assign_pos, width=popup_window_size, height=50, bg="blue")
+    #sub1.grid(row=0, column=0, rowspan=1, columnspan=1, sticky=W+E+N+S)
+    #global label_click_popup
+    #label_click_popup = tk.Label(
+        #sub1, text="Click on each cell with the left button of the mouse,\nthen save", bg="black",fg="yellow", font='TkDefaultFont 10 bold')
+    #label_click_popup.pack()
      
-    sub2 = tk.Frame(master=popup_assign_pos, width=popup_window_size, height=popup_window_size, bg="#A52A2A")
-    sub2.grid(row=1, column=0, rowspan=1, columnspan=1, sticky=W+E+N+S)
-
+    sub2 = tk.Frame(master=popup_assign_pos, width=popup_window_size, height=popup_window_size, bg="yellow")
+    #sub2.grid(row=1, column=0, rowspan=1, columnspan=1, sticky=W+E+N+S)
+    sub2.pack()
     global canvas_assign_pos
     
     print("manual_init_positions inside create assign=",manual_init_positions)
@@ -1735,9 +1748,11 @@ def create_assign_cell_positions_popup():
     canvas_assign_pos.bind("<Button-1>", click_position)
     
       
-    sub3 = tk.Frame(master=popup_assign_pos, width=popup_window_size, height=50, bg="#A52A2A")
-    sub3.grid(row=2, column=0, rowspan=1, columnspan=1, sticky=W+E+N+S)
-    
+    sub3 = tk.Frame(master=popup_assign_pos, width=popup_window_size, height=300, bg="green")
+    #sub3.grid(row=2, column=0, rowspan=1, columnspan=1, sticky=W+E+N+S)
+    sub3.pack()
+    ass_pos_label_p4=tk.Label(sub3,text="To assign positions, click on cells" ,bg="black", fg=result_color, font=all_font,width=popup_window_size, height=5)
+    ass_pos_label_p4.pack(fill=BOTH) 
     global button_save_init_positions, photo_image
     button_save_init_positions = Button(sub3, text="Save", bg=button_color,activebackground="red", command= close_assign_window)
     button_save_init_positions.pack()
@@ -1868,7 +1883,10 @@ def clear_memory_of_previous_clip(fluor_images, fluor_images_compressed,bright_i
 
 import time
 ########################################################
-def execute(): 
+def execute():
+ #button_display.configure(bg=button_color)
+ button_execute.configure(background = 'red') 
+ instruct_var_p4.set("Execution in progress...")
  global start_frame
  print("START_FRAME inside execute=", start_frame)
  start_time=time.time()
@@ -1879,7 +1897,7 @@ def execute():
     canvas_previous.delete("all")
     canvas_current.delete("all")
     canvas_lineage.delete("all")
-    button_execute.configure(background = 'red')   
+      
     #label_edit.configure(text=" ")    
     #feedback_label.config(text="Wait, loading models ...", fg="yellow")
     global lineage_images, output_images, lineage_per_frame_p4, previous_lineage_image, lineage_images_cv2     
@@ -2062,6 +2080,7 @@ def execute():
 ###############################################
 def stop_execution_manually():
     print("STOPPED MANUALLY!!!!")
+    instruct_var_p4.set("You posed execution. To see all the processed frames, you can push button Display and then use the slider.")
     button_execute.configure(background = button_color)
     global variable_stop
     variable_stop = "Stop"
@@ -2088,6 +2107,8 @@ view_slider = Scale(frame9_page4, from_=1, to=1, orient=HORIZONTAL, troughcolor=
 view_slider.pack() 
 ###########################################
 def display_first_frame():# display all frames after pushing button "Display result"
+    update_flash([])
+    button_display.config(bg="red")
     view_slider.config(from_=first_frame_number,to=len(output_images)+first_frame_number-2)   
     view_slider.set(str(first_frame_number))  
     slide_frames(first_frame_number)
@@ -2149,7 +2170,7 @@ def get_cell_IDs_manually(event):# gets cell ID from previous frame during editi
     colour="#%02x%02x%02x" % tuple(colour_three_channel)
     canvas_IDs.create_oval(event.x-2, event.y-2, event.x+2,
                        event.y+2, outline=colour, fill=colour, width=2)
-    label_edit.configure(text="Cells chosen in Previous Frame:\n " + str(cell_names_external) +"\n", bg="black")  
+    instruct_var_p4.set("Cells chosen in Previous Frame:\n " + str(cell_names_external) +"\n")  
 ########################
 def get_centroids_manually(event):
     if popup_monitor!=None:
@@ -2157,16 +2178,17 @@ def get_centroids_manually(event):
     canvas_current.create_oval(event.x-2, event.y-2, event.x+2,
                        event.y+2, outline=colour, fill=colour, width=2)
     manual_centroids.append([event.x/canvas_size_p4*frame_size, event.y/canvas_size_p4*frame_size])   
-    label_edit.configure(text="Centroids assigned:\n " + str(manual_centroids) +"\n""Centroids assigned in Current Frame:\n " + str(manual_centroids), bg="black")
+    instruct_var_p4.set("Centroids assigned:\n " + str(manual_centroids) +"\n""Centroids assigned in Current Frame:\n " + str(manual_centroids))
 ######################################
 def start_editing_IDs():
     button_save_id.grid(row=3, column=0, columnspan=1)
+    R_edit_ID.configure(background = 'red')
     update_flash([button_save_id])
     if popup_monitor!=None:
           popup_monitor.deiconify()
-    label_edit.configure(text="Click on the cell in Previous Frame.\nMake sure you click on the cell body!\nThen click on the same cell in Current Frame \nMake sure you click on the centroid!")
+    #instruct_label_p4.configure(text="Click on the cell in Previous Frame.\nMake sure you click on the cell body!\nThen click on the same cell in Current Frame \nMake sure you click on the centroid!")
   
-    feedback_label.configure(text="First, click on the cell of interest in Previous Frame.\n"
+    instruct_var_p4.set("First, click on the cell of interest in Previous Frame.\n"
                "Then, click on its desired position in Current Frame.\n You can repeat it MULTIPLE TIMES.\nFinally, save edits by pressing 5a.Save ID edits.")    
     global manual_centroids, manual_IDs, cell_names_external
     manual_centroids, manual_IDs, cell_names_external, daughter_indicators=[],[], [],[] 
@@ -2174,8 +2196,8 @@ def start_editing_IDs():
     canvas_current.bind("<Button-1>", get_centroids_manually)
     update_flash([button_save_id])
     
-    R_edit_division.configure(background = '#9ACD32')
-    R_edit_ID.configure(background = 'red')
+    #R_edit_division.configure(background = '#9ACD32')
+   
     print("dict_of_divisions after start_editing_IDs =", dict_of_divisions) 
 ####################################################
 def stop_editing_IDs():
@@ -2208,7 +2230,7 @@ def stop_editing_IDs():
     print("coords=", coords)
     global mask_current    
     mask_current=lineage_per_frame_p4[start_frame_internal-1][keys[0]][13]    
-    feedback_label.config(text="")
+    instruct_var_p4.set(" ")
  
     text1=[lineage_per_frame_p4[start_frame_internal-2][key][11] for key in keys]
     print("text1=",text1)
@@ -2234,8 +2256,9 @@ def stop_editing_IDs():
     label_current.configure( text="Current frame", fg="black" )
     button_save_id.configure(background = '#9ACD32')
     button_pause.configure(background = button_color)
+    button_display.configure(bg=button_color)
     #button_save_division.configure(background = '#9ACD32')
-    feedback_label.config(text="You finished editing IDs.\n To resume execution, press Button 3." )
+    instruct_label_p4.config(text="You finished editing IDs.\n To resume execution, press Button 3." )
     print("dict_of_divisions after stop_editing_IDs =", dict_of_divisions)
     if  popup_monitor!=None: 
        popup_monitor.destroy()
@@ -2245,11 +2268,11 @@ def start_editing_division():
     button_save_division.grid(row=3, column=1, columnspan=1)
     update_flash([button_save_division]) 
     
-    label_edit.configure(text="Click on mother cell in Previous Frame.\nMake sure you click on the cell body!\nThen click on daughter cells in Current Frame \nMake sure you click on centroids!")
+    #instruct_label_p4.set("Click on mother cell in Previous Frame.\nMake sure you click on the cell body!\nThen click on daughter cells in Current Frame \nMake sure you click on centroids!")
     print("started manual division editing.....")
     global mother_number
     mother_number=None 
-    feedback_label.configure(text="First, click on mother cell in Previous Frame.\n"
+    instruct_var_p4.set("First, click on mother cell in Previous Frame.\n"
                "Then, click on daughter cells in Current Frame.\nYou can do it ONLY ONCE.\n Finally, save by pressing 6a. Save division edits.")    
     global manual_centroids, manual_IDs,cell_names_external, daughter_indicators
     manual_centroids, manual_IDs, cell_names_external, daughter_indicators=[],[],[],[]
@@ -2332,11 +2355,13 @@ def stop_editing_division():
     update_flash([button_execute])
     button_save_division.grid_forget()
     button_pause.configure(background = button_color)
-    #stop_flash("save_division", page4, flashers)
+    button_display.configure(background = button_color)
+    
     R_edit_division.configure(background = '#9ACD32')
-    feedback_label.config(text="You finished editing missed division.\n To resume execution, press Button 3." ) 
+    instruct_var_p4.set("You finished editing missed division.\n To resume execution, press Button 3." ) 
 ############################################
 def add_new_cell():
+  R_add_new_cell.configure(background-"red")
   button_save_added_cell.grid(row=3, column=2, columnspan=1)
   update_flash([button_save_added_cell])  
   global colour
@@ -2375,7 +2400,7 @@ def save_added_cell():
     xs=update_xs(xs,new_naive_names, num_frames,  lineage_image_size, number_of_added_new_cells)
     number_of_added_new_cells+=number_of_now_added_cells          
     lineage_images_cv2[internal_start_frame-1]=previous_lineage_image     
-    label_edit.configure(text="Added cells:\n " + str(new_naive_names), bg="black")
+    instruct_var_p4.set("Added cells:\n " + str(new_naive_names))
     canvas_previous.delete('all')
     canvas_current.delete('all')    
     canvas_lineage.delete('all')
@@ -2388,9 +2413,12 @@ def save_added_cell():
    
     update_flash([button_execute])
     button_pause.configure(background = button_color)
+    button_display.configure(background = button_color)
+    R_add_new_cell.configure(background=button_color)
     button_save_added_cell.grid_forget()
 #####################################
-def remove_died_cell():   
+def remove_died_cell():
+  R_remove_dead_cell.configure(background="red")
   button_save_removed_cell.grid(row=3, column=3, columnspan=1)
   update_flash([button_save_removed_cell])
   canvas_current.bind("<Button-1>", get_cell_IDs_manually) 
@@ -2398,7 +2426,7 @@ def remove_died_cell():
   manual_IDs, cell_names_external, daughter_indicators=[],[],[]  
 ###########################################
 def save_removed_cell():
-    label_edit.configure(text="Deleted cells:\n " + str(cell_names_external), bg="black")
+    instruct_var_p4.set("Deleted cells:\n " + str(cell_names_external))
     global start_frame, lineage_per_frame_p4
     start_frame=int(view_slider.get())   
     internal_start_frame=start_frame-first_frame_number+1    
@@ -2438,6 +2466,8 @@ def save_removed_cell():
     R_remove_dead_cell.config(bg=button_color)
     update_flash([button_execute])
     button_pause.configure(background = button_color)
+    button_display.configure(background = button_color)
+    R_remove_dead_cell.configure(background=button_color)
     button_save_removed_cell.grid_forget()
 ##########################################
 def magnify_current_frame():
@@ -2507,9 +2537,9 @@ def show_channel():# switcvh between fluorescent and bright channels in magnifie
 ################### Buttons and labels Page 4####################
 
 button_execute = Button(frame2_page4, text="3. Execute", font='TkDefaultFont 10 bold', 
-               bg='#9ACD32', activebackground="red",command=lambda:[threading.Thread(target=execute).start(), update_flash([])])               
+               bg='#9ACD32', activebackground="red",command=lambda:[threading.Thread(target=execute).start(), update_flash([]), button_display.configure(bg=button_color)])               
 button_execute.grid(row=0, column=0, pady=20)
-
+#global button_display
 button_display = Button(frame2_page4, text="4. Display result", font='TkDefaultFont 10 bold', 
                bg='#9ACD32',activebackground="red", command=lambda: [display_first_frame(), update_flash([])])
 button_display.grid(row=2, column=0, padx=20)
@@ -2545,19 +2575,20 @@ button_magnify = Button(frame8_page4, text="7. Magnify current frame",activeback
 button_magnify.grid(row=1, column=5, padx=100)
 
 global R_edit_ID, R_edit_division, R_add_new_cell,R_remove_dead_cell
+edit_label_name=tk.Label(frame3_page4,text="Edit tools",bg=label_color,  font=("Times", "14")). grid(row=0, column=2, pady=5, padx=30)
 R_edit_ID = Radiobutton(frame3_page4, text="Edit IDs", value="Previous", font=all_font, variable=clicked, command=lambda:start_editing_IDs(), background=button_color, activebackground="red")
-R_edit_ID.grid(row=0, column=0, pady=10, padx=10)
+R_edit_ID.grid(row=1, column=0, pady=10, padx=10)
 
 R_edit_division = Radiobutton(frame3_page4, text="Edit division",background=button_color, font=all_font,
                  value="Previous", activebackground="red",variable=clicked,  command=lambda:start_editing_division())
-R_edit_division.grid(row=0, column=1, pady=10, padx=10)
+R_edit_division.grid(row=1, column=1, pady=10, padx=10)
 
 R_add_new_cell = Radiobutton(frame3_page4, text="Add new cell", value="Previous", font=all_font, variable=clicked, command=lambda:add_new_cell(), background=button_color, activebackground="red")
-R_add_new_cell.grid(row=0, column=2, pady=10, padx=10)
+R_add_new_cell.grid(row=1, column=2, pady=10, padx=10)
 
 R_remove_dead_cell = Radiobutton(frame3_page4, text="Remove dead cell",background=button_color, font=all_font,
                  value="Current", activebackground="red",variable=clicked, command=remove_died_cell)    
-R_remove_dead_cell.grid(row=0, column=3,pady=10, padx=10)
+R_remove_dead_cell.grid(row=1, column=3,pady=10, padx=10)
 ################################################
 
 #label_edit = tk.Label(frame3_page4, text=" ", font='TkDefaultFont 10 bold',  bg="black", fg="yellow", width=50, height=4)
