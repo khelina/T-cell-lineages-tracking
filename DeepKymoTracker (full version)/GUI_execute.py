@@ -1022,38 +1022,38 @@ page4.config(bg=bg_color)
 canvas_size_p4 =382
 lineage_extension_for_new_cells=80
 
-frame1_page4 = tk.Frame(master=page4, width=1528, height=50, bg="blue")
+frame1_page4 = tk.Frame(master=page4, width=1528, height=50, bg=bg_color)
 frame1_page4.grid(row=0, column=0, rowspan=1, columnspan=6, sticky=W+E+N+S)
 
-frame2_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=30, bg="yellow")
+frame2_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=30, bg=bg_color)
 frame2_page4.grid(row=1, column=0, rowspan=1, columnspan=1, sticky=W+E+N+S)
 
-frame3_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=30, bg="green")
+frame3_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=30, bg=bg_color)
 frame3_page4.grid(row=1, column=1, rowspan=1, columnspan=5, sticky=W+E+N+S)
 
-frame5_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=canvas_size_p4, bg="orange")
+frame5_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=canvas_size_p4, bg=bg_color)
 frame5_page4.grid(row=2, column=0, rowspan=1, columnspan=1)
 
-frame6_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=canvas_size_p4, bg="white")
+frame6_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=canvas_size_p4, bg=bg_color)
 frame6_page4.grid(row=2, column=1, rowspan=1, columnspan=1)
 
-frame7_page4 = tk.Frame(master=page4, width=canvas_size_p4+lineage_extension_for_new_cells, height=canvas_size_p4, bg="red")
+frame7_page4 = tk.Frame(master=page4, width=canvas_size_p4+lineage_extension_for_new_cells, height=canvas_size_p4, bg=bg_color)
 frame7_page4.grid(row=2, column=2, rowspan=1, columnspan=1)
 
-frame8_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=canvas_size_p4, bg="blue")
+frame8_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=canvas_size_p4, bg=bg_color)
 frame8_page4.grid(row=3, column=0, rowspan=1, columnspan=1,sticky=W+E+N+S)
 
-frame9_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=1538, bg="magenta")
+frame9_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=1538, bg=bg_color)
 frame9_page4.grid(row=3, column=1, rowspan=1, columnspan=1, sticky=W+E+N+S)
 
-frame10_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=1538, bg="grey")
+frame10_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=1538, bg=bg_color)
 frame10_page4.grid(row=3, column=2, rowspan=1, columnspan=1, sticky=W+E+N+S)
 
-frame12_page4 = tk.Frame(master=page4, width=1528, height=50, bg="green")
+frame12_page4 = tk.Frame(master=page4, width=1528, height=50, bg=bg_color)
 frame12_page4.grid(row=4, column=0, rowspan=1, columnspan=6, sticky=W+E+N+S)
 
 
-frame11_page4 = tk.Frame(master=page4, width=1528, height=50, bg="yellow")
+frame11_page4 = tk.Frame(master=page4, width=1528, height=50, bg=bg_color)
 frame11_page4.grid(row=5, column=0, rowspan=1, columnspan=6, sticky=W+E+N+S)
 
 canvas_previous = Canvas(frame5_page4, bg=bg_color, height=canvas_size_p4, width=canvas_size_p4)
@@ -1081,7 +1081,7 @@ label_curr_frame_name.pack()
 label_lineage = tk.Label(frame10_page4, text="Lineage", bg="#87CEFA", fg="black", font='TkDefaultFont 10 bold' )
 label_lineage.grid(row=0, column=0, padx=100)
 ################################
-canvas_lineage = Canvas(frame7_page4, bg="green", height=canvas_size_p4, width=canvas_size_p4+lineage_extension_for_new_cells)
+canvas_lineage = Canvas(frame7_page4, bg=bg_color, height=canvas_size_p4, width=canvas_size_p4+lineage_extension_for_new_cells)
 canvas_lineage.grid(row=0,column=0)
 ###################################################
 zero_image = Image.new('RGB', (canvas_size_p4, canvas_size_p4))
@@ -1298,6 +1298,7 @@ def initiate_tracking_page():
                   #################################################
                   if len(all_names_fluor)>len(output_names_fluor):
                      print("partly tracked")
+                     instruct_var_p4.set("The movie has been partially tracked. \nPress OK to view the processed frames.")
                      button_load.configure(background = button_color)
                      global popup_partly_tracked, button_retrieve
                      #########################
@@ -1308,7 +1309,7 @@ def initiate_tracking_page():
                      label_popup = tk.Label(popup_partly_tracked, text="The movie has been partially tracked. \nPress OK to view the processed frames.",width=400, height=5, bg=label_color, fg="black", font='TkDefaultFont 14 bold' )
                      label_popup.pack()                     
                      button_retrieve = Button(popup_partly_tracked, text="OK",
-                     bg=button_color,font='TkDefaultFont 14 bold', command=lambda:[retrieve_unfinished_movie(), update_flash([button_execute]), instruct_var_p4.set("Loading unfinished movie ..."),popup_partly_tracked.destroy() ])
+                     bg=button_color,font='TkDefaultFont 14 bold', command=lambda:[retrieve_unfinished_movie(), update_flash([button_execute]), popup_partly_tracked.destroy() ])
                      button_retrieve.pack()
                      update_flash([ button_retrieve])
                      ########################################
@@ -1316,11 +1317,16 @@ def initiate_tracking_page():
                   else:
                      print("fully tracked")
                      button_load.configure(background = button_color)
+                     button_execute.configure(bg=button_color)
+                     instruct_var_p4.set("The movie has been fully tracked. \nPress OK to view the processed frames.")
                      def close_fully_popup():
+                      
                       update_flash([button_execute])
                       popup_fully_tracked.destroy()                      
                       display_first_frame()
-                                        
+                      instruct_var_p4.set("The movie has been fully tracked.\nUse slide bar to check results."\
+                                          "\nIf you need to edit tracking errors, stop the slide bar on the frame of interest and choose one of the options under Edit tools."\
+                                              "\nIf you are happy with the results,press Exit or Next to proceed to segmentation correction.")                  
                      global popup_fully_tracked, button_ok
                      popup_fully_tracked = tk.Toplevel(master=page4, bg=label_color)
                      w,h = 400,150                      
@@ -1341,42 +1347,42 @@ def initiate_tracking_page():
  
 def prepare_for_first_go():
     feedback_dict_p4["number of processed"]="0"
-    instruct_var_p4.set("Input mivie is loaded. Now, you need to set up some parametres using buttons 2a,2b,2c and 2d.")
+    instruct_var_p4.set("Input mivie is loaded. Setting up parameters of the movie in progress...")
     ##########
    
     
     #########
     global popup_first_preview, canvas_popup_fluor_p4,canvas_popup_bright_p4,canvas_popup_red_p4
-    popup_first_preview = tk.Toplevel(master=page4, bg=label_color)
-                     
+    popup_first_preview = tk.Toplevel(master=page4, bg=bg_color)
+    popup_first_preview.title("PAGE 4 POPUP WINDOW: SETTING CONSTANT PARAMETERS OF INPUT MOVIE")                 
     popup_first_preview.geometry('%dx%d+%d+%d' % (1530, 2000-160, 0, 160))
     #popup_first_preview = tk.Toplevel(master=page4, width=1528, height=50, bg="blue")
     
-    frame1 = tk.Frame(master=popup_first_preview , width=1528, height=50, bg="orange")
+    frame1 = tk.Frame(master=popup_first_preview , width=1528, height=50, bg=bg_color)
     frame1.grid(row=0, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
     
-    frame2 = tk.Frame(master=popup_first_preview , width=canvas_size_p4, height=canvas_size_p4, bg="yellow")
+    frame2 = tk.Frame(master=popup_first_preview , width=canvas_size_p4, height=canvas_size_p4, bg=bg_color)
     frame2.grid(row=1, column=0, rowspan=1, columnspan=1, sticky=W+E+N+S)
     
-    frame3 = tk.Frame(master=popup_first_preview , width=canvas_size_p4, height=canvas_size_p4, bg="white")
+    frame3 = tk.Frame(master=popup_first_preview , width=canvas_size_p4, height=canvas_size_p4, bg=bg_color)
     frame3.grid(row=1, column=1, rowspan=1, columnspan=1, sticky=W+E+N+S)
     
-    frame4 = tk.Frame(master=popup_first_preview , width=canvas_size_p4, height=canvas_size_p4, bg="green")
+    frame4 = tk.Frame(master=popup_first_preview , width=canvas_size_p4, height=canvas_size_p4, bg=bg_color)
     frame4.grid(row=1, column=2, rowspan=1, columnspan=1, sticky=W+E+N+S)
     
-    frame5 = tk.Frame(master=popup_first_preview , width=canvas_size_p4, height=canvas_size_p4, bg="red")
+    frame5 = tk.Frame(master=popup_first_preview , width=canvas_size_p4, height=canvas_size_p4, bg=bg_color)
     frame5.grid(row=2, column=0, rowspan=1, columnspan=1, sticky=W+E+N+S)
     
-    frame6 = tk.Frame(master=popup_first_preview , width=canvas_size_p4, height=canvas_size_p4, bg="blue")
+    frame6 = tk.Frame(master=popup_first_preview , width=canvas_size_p4, height=canvas_size_p4, bg=bg_color)
     frame6.grid(row=2, column=1, rowspan=1, columnspan=1, sticky=W+E+N+S)
     
-    frame7 = tk.Frame(master=popup_first_preview , width=canvas_size_p4, height=canvas_size_p4, bg="grey")
+    frame7 = tk.Frame(master=popup_first_preview , width=canvas_size_p4, height=canvas_size_p4, bg=bg_color)
     frame7.grid(row=2, column=2, rowspan=1, columnspan=1, sticky=W+E+N+S)
     
-    frame8 = tk.Frame(master=popup_first_preview , width=1528, height=50,bg="yellow")
+    frame8 = tk.Frame(master=popup_first_preview , width=1528, height=50,bg=bg_color)
     frame8.grid(row=3, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
     
-    frame9 = tk.Frame(master=popup_first_preview , width=1528, height=50,bg="white")
+    frame9 = tk.Frame(master=popup_first_preview , width=1528, height=50,bg=bg_color)
     frame9.grid(row=4, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
     ###########################################
     #l_feedback=tk.Label(frame1,text= "Input movie: ", bg="black", fg="cyan", font=("Times", "12"))
@@ -1395,7 +1401,7 @@ def prepare_for_first_go():
     l_red=tk.Label(frame7,text= "Red ", bg="black", fg="cyan", font=("Times", "12"))
     l_bright.pack(),l_fluor.pack(),l_red.pack()
     global  button_contrast,button_cell_radius,  button_assign_positions,  pop_slider,button_count_cells 
-    button_contrast = Button(frame5, text="2a. Enhance image contrast",font='TkDefaultFont 10 bold', bg=button_color, command=create_contrast_popup)
+    button_contrast = Button(frame5, text="2a. Enhance image contrast",font='TkDefaultFont 10 bold', bg=button_color, command=lambda:[create_contrast_popup(),instruct_var_p4.set("Adjusting contrast....")])
     button_contrast.pack()
     
     button_cell_radius = Button(frame6, text="2b. Measure cell size",font='TkDefaultFont 10 bold', bg=button_color, command=create_cell_measure_popup)
@@ -1427,6 +1433,9 @@ def prepare_for_first_go():
 ########################################################    
     def start_counting_cells():
         print(" I am inside start_counting_cells")
+        instruct_label_popup_p4.configure(text="Maxumum number of cells in input movie is necesary to correctly plot lineage."\
+                                          "\nFirst, using slide bar,choose fluorescent frame with maximum number of cells (typically,this is the last frame."\
+                                              "\n Then, left click on each cell in that frame.\nFinally, press Close this window.")     
         update_flash([])
         button_count_cells.config(bg="red")
         canvas_mid_pop.bind("<Button-1>",click_cells_to_count)
@@ -1491,9 +1500,10 @@ def prepare_for_first_go():
     #instruct_var_p4.set("Loading input movie ...")
     #instruct_label = tk.Label(frame8, text=" Welcome to STEP 3 of the pipeline! \n\nTo choose input movie you want to track, press Button 1. ",fg="yellow",bg="black", font='TkDefaultFont 10 bold', width=120, height=4)
     #instruct_label.grid(row=1, column=0,columnspan=4, sticky=W)
-    #instruct_label_popup_p4=tk.Label(frame8,text="Nothing here so far..." ,bg="black", fg="yellow", font=all_font,width=popup_window_size, height=5)
-    #instruct_label_popup_p4.pack(fill=BOTH) 
-    button_close = Button(frame9, text=" Close initial popup",font='TkDefaultFont 10 bold', bg=button_color, command=close_popup_canvas)
+    global instruct_label_popup_p4
+    instruct_label_popup_p4=tk.Label(frame8,text="Input movie is loaded. Now, you need to set up some parametres using Buttons 2a,2b,2c and 2d consequetively. Start with Button 2a." ,bg="black", fg="yellow", font=all_font,width=10, height=5)
+    instruct_label_popup_p4.pack(fill=BOTH) 
+    button_close = Button(frame9, text=" Close this window",font='TkDefaultFont 10 bold', bg=button_color, command=close_popup_canvas)
     button_close.pack()
     ###########################################   
     global  full_core_bright_name, out_folders#, output_names
@@ -1533,6 +1543,7 @@ def prepare_for_first_go():
 global retrieve_unfinished_movie
 def retrieve_unfinished_movie():# in retrieve mode
     print("I am inside retrieve function")
+    instruct_var_p4.set("Loading unfinished movie ..."),
     ###################################
     global xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,unused_naive_names,\
     dict_of_divisions,number_of_added_new_cells,changeable_params_history
@@ -1541,6 +1552,9 @@ def retrieve_unfinished_movie():# in retrieve mode
     ########################################################
     update_flash([button_execute])                
     display_first_frame()
+    instruct_var_p4.set("Use slide bar to check the results.\n To continue tracking, push Button 3."\
+                        "\nTo correct tracking errors, stop the slider at the frame of interest and go to Edit tools." \
+                        "\nNOTE: tracking will start from the last frame, not the one you stopped the slider at.")
     #input_info_label.config(text= "INPUT MOVIE:"+ "\n"+str(my_dir)+"\nTOTAL NUMBER OF FRAMES: "+str(num_frames)+"\nNUMBER OF TRACKED FRAMES:  " +str(len(output_names)-1))           
     #feedback_label.config(text="Movie loaded, {} frames.\nNow, you need to specify how many cells are there in Frame 1.".format(num_frames))
     
@@ -1584,6 +1598,7 @@ def save_cell_radius():
     update_flash([button_assign_positions])
     patch_size=int(round(true_cell_radius.get()*2.4))
     #patch_size=int(round(true_cell_radius.get()*2.4))
+    instruct_label_popup_p4.configure(text="Cell diameter has been measured. \nNow, go to Button 2c to assign initial cells` positions.")     
     print("cell_radius, patch_size=", true_cell_radius.get(), patch_size)
     popup_for_radius.destroy()
     #cell_info_label.config(text= "FRAME SIZE: "+str(frame_size)+"x"+str(frame_size)+
@@ -1612,17 +1627,19 @@ def record_const_movie_parameters():# record cell_size and other parameters in p
 def create_cell_measure_popup():
     update_flash([])
     global popup_for_radius, canvas_for_radius, photo_image
+    instruct_label_popup_p4.configure(text="Measuring cell diameter is in progress....")     
     #global cliplimit
     #cliplimit=IntVar()
     #cliplimit.set(0.)
-    popup_for_radius = tk.Toplevel(master=popup_first_preview)
+    popup_for_radius = tk.Toplevel(master=popup_first_preview, bg=bg_color)
+    popup_for_radius.title("PAGE 4 POPUP WINDOW: MEASURE CELL DIAMETER")       
     popup_for_radius.geometry('%dx%d+%d+%d' % (popup_window_size, popup_window_size+200, 0, 0))
     frame1 = tk.Frame(master=popup_for_radius, width=popup_window_size, height=popup_window_size)
     frame1.pack()
-    frame2 = tk.Frame(master=popup_for_radius, width=popup_window_size, height=50)
+    frame2 = tk.Frame(master=popup_for_radius, width=popup_window_size, height=50, bg=bg_color)
     frame2.pack()
 
-    canvas_for_radius = Canvas(frame1, height=popup_window_size, width=popup_window_size, bg="black")
+    canvas_for_radius = Canvas(frame1, height=popup_window_size, width=popup_window_size, bg=bg_color)
     canvas_for_radius.pack(anchor='nw', fill='both', expand=True)
     #######################################
     if contrast_value!="0":
@@ -1640,12 +1657,13 @@ def create_cell_measure_popup():
     true_cell_radius.set(int(round(scaled_cell_radius.get()*frame_size/popup_window_size)))
     print("initial_true_radius=",true_cell_radius.get())
     global radius_slider, button_save_radius   
-    radius_slider=Scale(frame2,from_=1,to=100,orient=HORIZONTAL,troughcolor="#513B1C",activebackground="red",label="Cell radius = "+str(int(true_cell_radius.get())),variable=scaled_cell_radius, command=change_radius, length=150, showvalue=0)
+    radius_slider=Scale(frame2,from_=1,to=100,orient=HORIZONTAL,troughcolor="green",activebackground="red",label="Cell radius = "+str(int(true_cell_radius.get())),variable=scaled_cell_radius, command=change_radius, length=150, showvalue=0)
     radius_slider.pack()
-    radius_label_p4=tk.Label(frame2,text="To adjust radius, slide the bar" ,bg="black", fg=result_color, font=all_font,width=popup_window_size, height=5)
+    radius_label_p4=tk.Label(frame2,text="To measure cell radius, left click on a cell (make sure to click on the centroid) and then \nuse the slide bar to change radius.\nThe cell should be entirely enclosed inside green circle."\
+                             "\nTo check,you can also click on all cells in frame",bg="black", fg="yellow", font=all_font,width=popup_window_size, height=5)
     radius_label_p4.pack(fill=BOTH) 
     
-    button_save_radius=tk.Button(frame2,text="Save",activebackground="red", command=save_cell_radius)
+    button_save_radius=tk.Button(frame2,text="Save",activebackground="red", command=save_cell_radius, bg=button_color)
     button_save_radius.pack()    
     canvas_for_radius.bind("<Button-1>",draw_first_circles)    
 ###############################################
@@ -1659,7 +1677,8 @@ def save_contrast():
     ind=cliplimit.get()
     print("ind = ", ind)
     update_flash([button_cell_radius])
-    button_save_contrast.config(bg=button_color)     
+    button_save_contrast.config(bg=button_color)
+    instruct_label_popup_p4.configure(text="Contrast has been adjusted. \nNow, go to Button 2b to measure cell diameter.")     
     popup_contrast.destroy()    
 #########################################
 def create_contrast_popup():
@@ -1670,6 +1689,7 @@ def create_contrast_popup():
     cliplimit=IntVar()
     cliplimit.set(0.)
     popup_contrast = tk.Toplevel(master= popup_first_preview, bg=bg_color)
+    popup_contrast.title("PAGE 4 POPUP WINDOW: ADJUST CONTRAST") 
     popup_contrast.geometry('%dx%d+%d+%d' % (popup_window_size, popup_window_size+200, 0, 0))
     
     frame1 = tk.Frame(master=popup_contrast, width=popup_window_size, height=popup_window_size, bg=bg_color)
@@ -1686,9 +1706,10 @@ def create_contrast_popup():
     contrast_slider=Scale(frame2,from_=0,to=100,orient=HORIZONTAL,troughcolor="#513B1C",variable=cliplimit,activebackground="red",label="Cliplimit = " +str(int(cliplimit.get())),command=change_contrast, length=150, showvalue=0)
     contrast_slider.pack()
     
-    contrast_label_p4=tk.Label(frame2,text="To adjust contrast, slide the bar" ,bg="black", fg="yellow", font=all_font,width=popup_window_size, height=5)
-    contrast_label_p4.pack(fill=BOTH) 
-    
+    contrast_label_p4=tk.Label(frame2,text="To adjust contrast, use the slide bar. \nThen click Save." ,bg="black", fg="yellow", font=all_font,width=popup_window_size, height=5)
+    contrast_label_p4.pack(fill=BOTH)
+    instruct_label_popup_p4.configure(text="Adjusting contrast in progress...")
+    #instruct_var_p4.set("Adjusting contrast....")
     button_save_contrast=tk.Button(frame2,text="Save",activebackground="red", command=save_contrast, bg=button_color)
     button_save_contrast.pack()    
     update_flash([contrast_slider])    
@@ -1719,16 +1740,17 @@ def change_contrast(value):
 ##################################
 global create_assign_cell_positions_popup
 def create_assign_cell_positions_popup():
-    #update_flash([])
+    instruct_label_popup_p4.configure(text="Assigning initial cells` positions is in progress....")     
     global  manual_init_positions
     manual_init_positions =[]
-    instruct_var_p4.set("Waiting for manual assignment of cell positions in Frame 1 ...")
+    #instruct_var_p4.set("Waiting for manual assignment of cell positions in Frame 1 ...")
     #feedback_label_p4.configure(text="Waiting for manual assignment of cell positions in Frame 1 ...")
     button_contrast.configure(bg=button_color, fg="black")
     global popup_assign_pos,  cliplimit
     cliplimit=IntVar()
     cliplimit.set(0.)
-    popup_assign_pos = tk.Toplevel(master=popup_first_preview)
+    popup_assign_pos = tk.Toplevel(master=popup_first_preview, bg=bg_color)
+    popup_assign_pos.title("PAGE 4 POPUP WINDOW: ASSIGN INITIAL CELL POSITIONS") 
     popup_assign_pos.geometry('%dx%d+%d+%d' % (popup_window_size, popup_window_size+400, 0, 0))
     #sub1 = tk.Frame(master=popup_assign_pos, width=popup_window_size, height=50, bg="blue")
     #sub1.grid(row=0, column=0, rowspan=1, columnspan=1, sticky=W+E+N+S)
@@ -1737,21 +1759,22 @@ def create_assign_cell_positions_popup():
         #sub1, text="Click on each cell with the left button of the mouse,\nthen save", bg="black",fg="yellow", font='TkDefaultFont 10 bold')
     #label_click_popup.pack()
      
-    sub2 = tk.Frame(master=popup_assign_pos, width=popup_window_size, height=popup_window_size, bg="yellow")
+    sub2 = tk.Frame(master=popup_assign_pos, width=popup_window_size, height=popup_window_size, bg=bg_color)
     #sub2.grid(row=1, column=0, rowspan=1, columnspan=1, sticky=W+E+N+S)
     sub2.pack()
     global canvas_assign_pos
     
     print("manual_init_positions inside create assign=",manual_init_positions)
-    canvas_assign_pos = Canvas(sub2, bg='black', height=popup_window_size, width=popup_window_size)
+    canvas_assign_pos = Canvas(sub2,  height=popup_window_size, width=popup_window_size,bg=bg_color)
     canvas_assign_pos.pack(anchor='nw', fill='both', expand=True)
     canvas_assign_pos.bind("<Button-1>", click_position)
     
       
-    sub3 = tk.Frame(master=popup_assign_pos, width=popup_window_size, height=300, bg="green")
+    sub3 = tk.Frame(master=popup_assign_pos, width=popup_window_size, height=300, bg=bg_color)
     #sub3.grid(row=2, column=0, rowspan=1, columnspan=1, sticky=W+E+N+S)
     sub3.pack()
-    ass_pos_label_p4=tk.Label(sub3,text="To assign positions, click on cells" ,bg="black", fg=result_color, font=all_font,width=popup_window_size, height=5)
+    ass_pos_label_p4=tk.Label(sub3,text="This is Frame 1 of the input movie.\nTo assign positions of cells of interest, click on centroids."\
+                              "\nThen, click Save.",bg="black", fg="yellow", font=all_font,width=popup_window_size, height=5)
     ass_pos_label_p4.pack(fill=BOTH) 
     global button_save_init_positions, photo_image
     button_save_init_positions = Button(sub3, text="Save", bg=button_color,activebackground="red", command= close_assign_window)
@@ -1773,10 +1796,12 @@ def click_position(event):
     feedback_var_p4.set(feedback_text_p4)
 ##################################
 def close_assign_window():
-     update_flash([button_count_cells]) 
+     update_flash([button_count_cells])
+     instruct_label_popup_p4.configure(text="Initial cells` positions in Frame 1 have been assigned. Now, go to Button 2d to assign maximum number of cells in input movie.") 
      popup_assign_pos.destroy()  
 ############################    
-def close_popup_canvas(): # save initial positions of cells in Frame 1                    
+def close_popup_canvas(): # save initial positions of cells in Frame 1
+                    
       global coords, manual_init_positiona, coords_very_first    
       
       coords_very_first=manual_init_positions
@@ -1800,7 +1825,8 @@ def close_popup_canvas(): # save initial positions of cells in Frame 1
       record_const_movie_parameters()  
       print("coords=", coords)
       button_contrast.configure(text =str(len(coords))+ " cells" ,background="black", fg="#00FFFF")
-      instruct_var_p4.set("The positions of cells in Frame 1 has been saved.\n\nTo start execution, press Button 3.")
+      #instruct_label_popup_p4.configure(text="Initial cells` positions in Frame 1 have been assigned. Now, go to Button 2d to assign maximum number of cells in input movie.") 
+      instruct_var_p4.set("The parameters of the input movie have been set up.\n\nTo start execution, press Button 3.")
       #feedback_label_p4.config(text="The positions of cells in Frame 1 has been saved.\n\nTo start execution, press Button 3.")
       #stop_flash("save", popup, flashers)
       update_flash([button_execute])
@@ -2071,16 +2097,18 @@ def execute():
  else:
      feedback_label_p4.config(text="Execution finished! \nPress Button 4 to check results." )
      finish_time=time.time()
+    
      execution_time=finish_time-start_time
      print("execution_time=", execution_time)
  button_execute.configure(background = button_color)
  update_flash([button_display])
- button_pause.configure(background = "red")
+ button_pause.configure(background = button_color)
+
  print("dict_of_divisions after execution =", dict_of_divisions) 
 ###############################################
 def stop_execution_manually():
     print("STOPPED MANUALLY!!!!")
-    instruct_var_p4.set("You posed execution. To see all the processed frames, you can push button Display and then use the slider.")
+    instruct_var_p4.set("You stopped execution. \nTo see all the processed frames,  push button 4. Display result.")
     button_execute.configure(background = button_color)
     global variable_stop
     variable_stop = "Stop"
@@ -2118,11 +2146,10 @@ def display_first_frame():# display all frames after pushing button "Display res
     print("len(lineage_per_frame_p4)=", len(lineage_per_frame_p4))
     # creates and saves per cell pedigree in pickle file, but then it is deleted when you push button "Execute"  
     pedigree = create_pedigree(lineage_per_frame_p4, outpath, frame_size) 
-        
-    feedback_label_p4.config(text="Check results by sliding the bar under Current Frame."
-                    "\n - If you need to edit cell IDs, press Button 5."
-                    "\n - If you need to edit missed division, press Button 6."
-                    "\n - If you are happy with the result press Button 7 to create lineage movie.")       
+    #instruct_var_p4.set("You stopped execution. \nTo see all the processed frames,  push button 4. Display result.")    
+    instruct_var_p4.set("Check results by sliding the bar under Current Frame."
+                    "\n - If you need to edit, stop the slide bar at the frame of interest and go for one of the options under Edit tools."
+                    "\n - If you are happy with the result, press Button 3. Execute to continue tracking.")       
 ###########3#######################
 def get_cell_IDs_manually(event):# gets cell ID from previous frame during editing
     if popup_monitor!=None:
@@ -2178,7 +2205,7 @@ def get_centroids_manually(event):
     canvas_current.create_oval(event.x-2, event.y-2, event.x+2,
                        event.y+2, outline=colour, fill=colour, width=2)
     manual_centroids.append([event.x/canvas_size_p4*frame_size, event.y/canvas_size_p4*frame_size])   
-    instruct_var_p4.set("Centroids assigned:\n " + str(manual_centroids) +"\n""Centroids assigned in Current Frame:\n " + str(manual_centroids))
+    instruct_var_p4.set("Centroids assigned in Current Frame:\n " + str(manual_centroids))
 ######################################
 def start_editing_IDs():
     button_save_id.grid(row=3, column=0, columnspan=1)
@@ -2189,25 +2216,20 @@ def start_editing_IDs():
     #instruct_label_p4.configure(text="Click on the cell in Previous Frame.\nMake sure you click on the cell body!\nThen click on the same cell in Current Frame \nMake sure you click on the centroid!")
   
     instruct_var_p4.set("First, click on the cell of interest in Previous Frame.\n"
-               "Then, click on its desired position in Current Frame.\n You can repeat it MULTIPLE TIMES.\nFinally, save edits by pressing 5a.Save ID edits.")    
+                "Then, click on its desired position in Current Frame.Make sure you click as close to the centroid as possible!\n You can repeat it MULTIPLE TIMES.\nFinally, save edits by pressing button Save ID edits.")    
     global manual_centroids, manual_IDs, cell_names_external
     manual_centroids, manual_IDs, cell_names_external, daughter_indicators=[],[], [],[] 
     canvas_previous.bind("<Button-1>", get_cell_IDs_manually) 
     canvas_current.bind("<Button-1>", get_centroids_manually)
-    update_flash([button_save_id])
-    
-    #R_edit_division.configure(background = '#9ACD32')
-   
+    update_flash([button_save_id])   
     print("dict_of_divisions after start_editing_IDs =", dict_of_divisions) 
 ####################################################
-def stop_editing_IDs():
-    
+def stop_editing_IDs():    
     R_edit_ID.configure(background = button_color)
     canvas_previous.unbind("<Button 1>")
     canvas_current.unbind("<Button 1>") 
     global start_frame, lineage_per_frame_p4, edit_id_indicator
-  
-    
+      
     start_frame=int(view_slider.get())
     print("start_frame=", start_frame)
     start_frame_internal=start_frame-first_frame_number+1
@@ -2230,7 +2252,7 @@ def stop_editing_IDs():
     print("coords=", coords)
     global mask_current    
     mask_current=lineage_per_frame_p4[start_frame_internal-1][keys[0]][13]    
-    instruct_var_p4.set(" ")
+    instruct_var_p4.set(" ID edits  for frame  " +str(start_frame)+"  have been saved.\nPress Button 3 to resume execution.")
  
     text1=[lineage_per_frame_p4[start_frame_internal-2][key][11] for key in keys]
     print("text1=",text1)
@@ -2258,7 +2280,7 @@ def stop_editing_IDs():
     button_pause.configure(background = button_color)
     button_display.configure(bg=button_color)
     #button_save_division.configure(background = '#9ACD32')
-    instruct_label_p4.config(text="You finished editing IDs.\n To resume execution, press Button 3." )
+    instruct_label_p4.config(text="You finished editing IDs in Frame " +str(start_frame)+".\n To resume tracking, press Button 3." )
     print("dict_of_divisions after stop_editing_IDs =", dict_of_divisions)
     if  popup_monitor!=None: 
        popup_monitor.destroy()
@@ -2273,7 +2295,7 @@ def start_editing_division():
     global mother_number
     mother_number=None 
     instruct_var_p4.set("First, click on mother cell in Previous Frame.\n"
-               "Then, click on daughter cells in Current Frame.\nYou can do it ONLY ONCE.\n Finally, save by pressing 6a. Save division edits.")    
+               "Then, click on daughter cells in Current Frame. Make sure you click as close to the daughter cells` centroids as possible!\nYou can do it ONLY ONCE.\n Finally, save by pressing button Save division edits.")    
     global manual_centroids, manual_IDs,cell_names_external, daughter_indicators
     manual_centroids, manual_IDs, cell_names_external, daughter_indicators=[],[],[],[]
     
@@ -2358,10 +2380,11 @@ def stop_editing_division():
     button_display.configure(background = button_color)
     
     R_edit_division.configure(background = '#9ACD32')
-    instruct_var_p4.set("You finished editing missed division.\n To resume execution, press Button 3." ) 
+    instruct_var_p4.set("You finished editing missed division in Frame  "+str(start_frame)+" .\n To resume execution, press Button 3." ) 
 ############################################
 def add_new_cell():
-  R_add_new_cell.configure(background-"red")
+  instruct_var_p4.set("To add a new cell/cells, click on their cetroids in Current Frame./Once finished, click Save added cells.")
+  R_add_new_cell.configure(background="red")
   button_save_added_cell.grid(row=3, column=2, columnspan=1)
   update_flash([button_save_added_cell])  
   global colour
@@ -2416,6 +2439,7 @@ def save_added_cell():
     button_display.configure(background = button_color)
     R_add_new_cell.configure(background=button_color)
     button_save_added_cell.grid_forget()
+    instruct_var_p4.set("You added new cells in Frame "+str(start_frame)+"  .\nTo resume tracking, push Button 3.")
 #####################################
 def remove_died_cell():
   R_remove_dead_cell.configure(background="red")
@@ -2423,7 +2447,8 @@ def remove_died_cell():
   update_flash([button_save_removed_cell])
   canvas_current.bind("<Button-1>", get_cell_IDs_manually) 
   global manual_IDs,cell_names_external, daughter_indicators
-  manual_IDs, cell_names_external, daughter_indicators=[],[],[]  
+  manual_IDs, cell_names_external, daughter_indicators=[],[],[]
+  instruct_var_p4.set("To remove a cell/cells, click on them in Current Frame.\nOnce finished,click Save removed cells. ")  
 ###########################################
 def save_removed_cell():
     instruct_var_p4.set("Deleted cells:\n " + str(cell_names_external))
@@ -2469,7 +2494,9 @@ def save_removed_cell():
     button_display.configure(background = button_color)
     R_remove_dead_cell.configure(background=button_color)
     button_save_removed_cell.grid_forget()
+    instruct_var_p4.set("You deleted cells in Frame  "+str(start_frame)+"  /nTo resume tracking, push Button 3.")
 ##########################################
+"""
 def magnify_current_frame():
 
     current_frame_number= view_slider.get()
@@ -2516,6 +2543,7 @@ def magnify_current_frame():
     photo=turn_image_into_tkinter(image, 800)
     canvas_popup_current.create_image(0, 0, anchor=NW, image=photo)
     RR1.configure(bg="black", fg="#00FFFF")
+"""
 #######################################
 def show_channel():# switcvh between fluorescent and bright channels in magnified window of current frame
     global photo
@@ -2546,7 +2574,7 @@ button_display.grid(row=2, column=0, padx=20)
 
 ################################################
 
-l_instr_name_p4=tk.Label(frame9_page4,text="INSTRUCTIONS FOR USER :" ,bg="black", font=all_font, fg="orange").pack()
+l_instr_name_p4=tk.Label(frame9_page4,text="INSTRUCTIONS FOR USER :" ,bg="black", font=all_font, fg="red").pack()
 instruct_label_p4=tk.Label(frame12_page4,textvariable=instruct_var_p4 ,bg="black", fg="yellow", font=all_font, height=5)
 instruct_label_p4.pack(fill=BOTH)
  
@@ -2570,9 +2598,9 @@ button_save_removed_cell = Button(frame3_page4, text="Save removed cell",activeb
 button_save_removed_cell.grid(row=3, column=3, columnspan=1)
 button_save_removed_cell.grid_forget()
 
-button_magnify = Button(frame8_page4, text="7. Magnify current frame",activebackground="red", font=all_font, 
-              bg=button_color, command=lambda:magnify_current_frame())
-button_magnify.grid(row=1, column=5, padx=100)
+#button_magnify = Button(frame8_page4, text="7. Magnify current frame",activebackground="red", font=all_font, 
+              #bg=button_color, command=lambda:magnify_current_frame())
+#button_magnify.grid(row=1, column=5, padx=100)
 
 global R_edit_ID, R_edit_division, R_add_new_cell,R_remove_dead_cell
 edit_label_name=tk.Label(frame3_page4,text="Edit tools",bg=label_color,  font=("Times", "14")). grid(row=0, column=2, pady=5, padx=30)
@@ -2598,7 +2626,7 @@ R_remove_dead_cell.grid(row=1, column=3,pady=10, padx=10)
 ############################## PAGE-5 (STEP-4): CORRECT SEGMENTATION #######
 #############################################################################
 page5=pages[4]
-page5.title("4. CORRECT SEGMENTATION")
+page5.title("PAGE 5. CORRECT SEGMENTATION")
 page5.config(bg=bg_color)
 from helpers_for_PAGE_4 import delete_contour_with_specific_colour,update_lineage_after_manual_segm_correction, load_models_p5, load_tracked_movie
 from plot import paste_patch, prepare_contours,paste_benchmark_patch
@@ -2615,38 +2643,38 @@ page5.geometry('1530x2000')
 global window_p5_size
 window_p5_size =600
 
-frame1_page5 = tk.Frame(master=page5, width=1528, height=5, bg=bg_color)
+frame1_page5 = tk.Frame(master=page5, width=1528, height=5, bg="yellow")
 frame1_page5.grid(row=0, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
 
-frame2_page5 = tk.Frame(master=page5, width=1528, height=50, bg=bg_color)
+frame2_page5 = tk.Frame(master=page5, width=1528, height=50, bg="blue")
 frame2_page5.grid(row=1, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
 
-frame3_page5 = tk.Frame(master=page5, width=1528, height=50, bg=label_color)
+frame3_page5 = tk.Frame(master=page5, width=1528, height=50, bg="green")
 frame3_page5.grid(row=2, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
 
-frame4_page5 = tk.Frame(master=page5, width=1528, height=50, bg=bg_color)
+frame4_page5 = tk.Frame(master=page5, width=1528, height=50, bg="grey")
 frame4_page5.grid(row=3, column=0, rowspan=1, columnspan=4,sticky=W+E+N+S)
 ############################################################################
-frame5_page5 = tk.Frame(master=page5, width=window_p5_size, height=window_p5_size, bg=bg_color)
+frame5_page5 = tk.Frame(master=page5, width=window_p5_size, height=window_p5_size, bg="white")
 frame5_page5.grid(row=4, column=0,rowspan=1,columnspan=1, sticky=W)
 
-frame6_page5 = tk.Frame(master=page5, width=window_p5_size, height=window_p5_size , bg=bg_color)
+frame6_page5 = tk.Frame(master=page5, width=window_p5_size, height=window_p5_size , bg="orange")
 frame6_page5.grid(row=4, column=1,rowspan=1,columnspan=1, sticky=W)
 
-frame7_page5 = tk.Frame(master=page5, width=100 , height=window_p5_size , bg=bg_color)
+frame7_page5 = tk.Frame(master=page5, width=100 , height=window_p5_size , bg="cyan")
 frame7_page5.grid(row=4,column=2,rowspan=1,columnspan=1, sticky=W)
 #################################################################
 
-frame8_page5 = tk.Frame(master=page5, width=50, height=window_p5_size, bg=bg_color)
+frame8_page5 = tk.Frame(master=page5, width=50, height=window_p5_size, bg="magenta")
 frame8_page5.grid(row=5, column=0, rowspan=1, columnspan=3,sticky=W+E+N+S)
 
 ######### POPULATE WITH WIDGETS
 
 global canvas_fluor_p5
-canvas_fluor_p5 = Canvas(frame6_page5, bg=bg_color, height=window_p5_size, width=window_p5_size)
+canvas_fluor_p5 = Canvas(frame6_page5, bg="black", height=window_p5_size, width=window_p5_size)
 canvas_fluor_p5.pack(anchor='nw', fill='both', expand=True)
 global canvas_bright_p5
-canvas_bright_p5 = Canvas(frame5_page5, bg=bg_color, height=window_p5_size, width=window_p5_size)
+canvas_bright_p5 = Canvas(frame5_page5, bg="green", height=window_p5_size, width=window_p5_size)
 canvas_bright_p5.pack(anchor='nw', fill='both', expand=True)
 
 
