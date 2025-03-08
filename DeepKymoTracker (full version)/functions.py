@@ -200,8 +200,9 @@ def calculate_cell_parametres(segmented_patch,a,b,c,d, frame_size):
     im2, contours, hierarchy = cv2.findContours(final_image,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
     cell=contours[0]
     bounding_box= cv2.boundingRect(cell)
-                              
-    area=np.round(cv2.contourArea(cell),2)
+    #a = np.array(final_image[:,:,0])                          
+    #area=np.round(cv2.contourArea(cell),2)
+    area=np.count_nonzero(final_image)
     perimeter=np.round(cv2.arcLength(cell,True),2)
     circularity=np.round(4*math.pi*area/perimeter**2,2)     
     M = cv2.moments(cell) 

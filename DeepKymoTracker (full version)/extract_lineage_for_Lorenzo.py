@@ -138,13 +138,13 @@ def create_lineage_per_cell(lineage_per_frame,outpath, frame_size):
 
             big_one_cell_image=big_patch_border[Bordersize:frame_size+Bordersize,Bordersize:frame_size+Bordersize]
             destin_big=os.path.join(dirr, cell_id,"Segmented frames")
-            big_name=os.path.join(destin_big,"segm_frame_cell_%s_frame_%s.tif" % (cell_id,frame_number+1))
+            big_name=os.path.join(destin_big,"segm_frame_cell_%s_frame_%s.tif" % (cell_id,frame_number))
             cv2.imwrite(big_name,big_one_cell_image)
             
             #######
             segm_patch=item[key][3]
             destin_segm=os.path.join(dirr, cell_id,"Segmented patches")
-            segm_name=os.path.join(destin_segm,"segm_patch_cell_%s_frame_%s.tif" % (cell_id,frame_number+1))
+            segm_name=os.path.join(destin_segm,"segm_patch_cell_%s_frame_%s.tif" % (cell_id,frame_number))
             cv2.imwrite(segm_name,segm_patch)
             
             ############
@@ -152,11 +152,11 @@ def create_lineage_per_cell(lineage_per_frame,outpath, frame_size):
             fl_border=np.copy(fl_init)
             fl_border[big_patch_border==0]=0
             fl_patch= fl_border[c:d,a:b]
-            av_fluor=np.round(np.ma.masked_equal(fl_patch, 0).mean(), 2)
+            av_fluor=np.round(np.ma.masked_equal(fl_patch, 0).mean(), 2)# average intensity of fluor cell
                      
             destin_fl_patch=os.path.join(dirr, cell_id,"Fluor patches")
             
-            fl_patch_name=os.path.join(destin_fl_patch,"fluor_patch_cell_%s_frame_%s.tif" % (cell_id,frame_number+1))
+            fl_patch_name=os.path.join(destin_fl_patch,"fluor_patch_cell_%s_frame_%s.tif" % (cell_id,frame_number))
             cv2.imwrite(fl_patch_name,fl_patch)
             
             if frame_number in list_of_red_numbers:
@@ -167,7 +167,7 @@ def create_lineage_per_cell(lineage_per_frame,outpath, frame_size):
                red_border[big_patch_border==0]=0
                red_patch= red_border[c:d,a:b]            
                destin_red_patch=os.path.join(dirr, cell_id,"Red patches")
-               red_patch_name=os.path.join(destin_red_patch,"red_patch_cell_%s_frame_%s.tif" % (cell_id,frame_number+1))
+               red_patch_name=os.path.join(destin_red_patch,"red_patch_cell_%s_frame_%s.tif" % (cell_id,frame_number))
                cv2.imwrite(red_patch_name,red_patch)
                av_red=np.round(np.ma.masked_equal(red_patch, 0).mean(), 2)
             else:
@@ -230,7 +230,7 @@ def create_lineage_for_Lorenzo(outpath, frame_size):
        
        row = 1
        for i in range(len(x)): 
-          score = [cell_name, "Frame %s" % (x[i][0]+1), x[i][1][0],x[i][1][1],x[i][2],x[i][3],x[i][4],x[i][5][0],
+          score = [cell_name, "Frame %s" % (x[i][0]), x[i][1][0],x[i][1][1],x[i][2],x[i][3],x[i][4],x[i][5][0],
                    x[i][5][1],x[i][5][2],x[i][5][3],x[i][6],x[i][7] ]
           ['None' if v is None else v for v in score]
           #print("score=", score)

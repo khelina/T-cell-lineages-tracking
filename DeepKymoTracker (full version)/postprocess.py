@@ -13,6 +13,7 @@ from copy import deepcopy
 Bordersize=100
 from extract_lineage_for_Lorenzo import extract_lineage
 ##############################################################
+### For rhe last step
 ## This function creates lineage_per_cell (out of lineage_per_frame) 
 ## It is executed  only after the movie has been tracked (button Create Output Movie)
 ## Lineage_per_cell will be used in the next steps
@@ -135,7 +136,8 @@ def sorted_aphanumeric(data):
 #################################################
 def load_files(folder_dir):# load linegae images and segmented images to create final movie
  images=[]
- if filename.endswith(".tif"):
+ for filename in os.listdir(folder_dir):
+   if filename.endswith(".tif"):
         full_name=os.path.join(folder_dir, filename)      
         image=cv2.imread(full_name,1)
         images.append(image)       
@@ -195,6 +197,7 @@ def extract_info_from_file_name(file_name):
     print("frame_number=", frame_number)
     return cell_key, cell_property, int(frame_number)
 #############################################################
+### for the last step
 def load_result_images(outpath, keys,progress_bar):
     names, names_1=[],[]     
     bright_images_path=os.path.join(outpath, "RESULT_BRIGHT")
@@ -212,7 +215,7 @@ def load_result_images(outpath, keys,progress_bar):
     one_cell_patches = {key:[] for key in keys}
     dictt={"Area":[], "Perimeter": [], "Circularity": []}
     plots = {key:dictt for key in keys}
-    #bright_images={key:[] for key in keys}    
+    #bright_images_dict={key:[] for key in keys}    
     bright_images_path=os.path.join(outpath, "RESULT_BRIGHT")
     red_patches_path=os.path.join(outpath,"RED_LINEAGE_PATCHES")
     one_cell_patches_path =os.path.join(outpath,"PATCHES_FOR_RESULTS")
@@ -250,7 +253,7 @@ def load_result_images(outpath, keys,progress_bar):
     return red_patches, one_cell_patches, plots, bright_unsorted 
 ################################################################### 
 ###########################################################
-def create_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progress_bar):
+def plot_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progress_bar):
    dirr=os.path.join(outpath,"CELLS_INFO_EXCEL")
    red_patches_path=os.path.join(outpath,"RED_LINEAGE_PATCHES")
    #red_patches_path=outfolders[2] #"RED_PATCHES"
@@ -291,7 +294,7 @@ def create_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progr
      for i in range(len(cell_info)):
        im=cell_info[i][2]     
        one_cell_images.append(im)
-       frame_number =cell_info[i][1]+1
+       frame_number =cell_info[i][1]
        name =os.path.join(one_cell_patches_path,cell_name +"_patch_frame_%s" % frame_number)
        cv2.imwrite(name +".tif",im)
 
@@ -320,14 +323,14 @@ def create_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progr
      area_plots=[] 
      perimeter_plots=[]
      circ_plots=[]
-     x=[frames[kk]+1 for kk in range (len(frames))]
+     x=[frames[kk] for kk in range (len(frames))]
      #progress_bar["value"]=0 
      for i in range(len(cell_info)):
        progress_bar["value"]=(i/total)*100 
        frame_number=frames[i]  
        #frame_number =cell_info[i][1]
        plt.plot(x, areas, 'yo', linewidth=0.5)
-       plt.plot([frame_number+1],[areas[frame_number-first_frame_num]],'bo', linewidth=3.0)
+       plt.plot([frame_number],[areas[frame_number-first_frame_num]],'bo', linewidth=3.0)
        plt.xlabel('Frame')
        plt.ylabel('Area')
        plt.title('Area of '+cell_name)
@@ -349,7 +352,7 @@ def create_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progr
        plt.close(g)
 
        plt.plot(x, perimeters, 'go', linewidth=0.5)
-       plt.plot([frame_number+1],[perimeters[frame_number-first_frame_num]],'bo',linewidth=3.0)
+       plt.plot([frame_number],[perimeters[frame_number-first_frame_num]],'bo',linewidth=3.0)
        plt.xlabel('Frame')
        plt.ylabel('Perimeter')
        plt.title('Perimeter '+cell_name)
@@ -370,7 +373,7 @@ def create_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progr
        plt.close(hh) 
 
        plt.plot(x, circularities, 'ro', linewidth=0.5)
-       plt.plot([frame_number+1],[circularities[frame_number-first_frame_num]],'bo', linewidth=3.0)
+       plt.plot([frame_number],[circularities[frame_number-first_frame_num]],'bo', linewidth=3.0)
        plt.xlabel('Frame')
        plt.ylabel('Circularity')
        plt.title('Circularity '+cell_name)
@@ -409,7 +412,7 @@ def create_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progr
      row = 1
      x=pedigree[cell_name]
      for i in range(len(x)): 
-      score = [cell_name, "Frame %s" % (x[i][1]+1), x[i][3][0],x[i][3][1],x[i][4],x[i][5],x[i][6]]
+      score = [cell_name, "Frame %s" % (x[i][1]), x[i][3][0],x[i][3][1],x[i][4],x[i][5],x[i][6]]
       ['None' if v is None else v for v in score]
       print("score=", score)
     

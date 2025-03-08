@@ -1,10 +1,19 @@
 import os
-software_folder = os.getcwd()
-from extract_lineage_for_Lorenzo import extract_lineage
+import pickle
 
 #outpath=r"C:\Users\helina\Desktop\DeepKymoTracker\OUTPUT_INPUT_MOVIE r"
 outpath=r"C:\Users\helina\Desktop\DeepKymoTracker\OUTPUT_INPUT_MOVIE_SHORT"
-
+def extract_lineage(outpath):
+    lineage_path=os.path.join(outpath,"lineage_per_frame.pkl")
+    lineage_per_frame = []
+    with (open(lineage_path, "rb")) as openfile:
+     while True:
+        try:
+            lineage_per_frame.append(pickle.load(openfile))
+        except EOFError:
+            break    
+    return lineage_per_frame
+##############################
 lineage_per_frame=extract_lineage(outpath)
 print("len(lineage_per_frame)=",len(lineage_per_frame))
 
@@ -18,8 +27,9 @@ for i in range(len(x)):
     print("keys=", keys)
     for key in keys:        
         frame_number=item[key][12]
+        ext_cell_name=item[key][11]
         centr=item[key][6]
-        check_list.append((key,frame_number,centr))
+        check_list.append((key,frame_number,ext_cell_name))
     
 print(check_list)
 
@@ -100,3 +110,13 @@ extracted_list =extract_list(outpath)
 print(" extracted_list  = ", extracted_list )
 print(" len(extracted_list)  = ",len( extracted_list ))
 extracted_list[1]
+#####################################
+######### area of contour and pixel count are different
+import cv2
+import numpy as np
+im = cv2.imread(r"C:\Users\helina\Desktop\contour.tif")
+a = np.array(im[:,:,0])
+_, contour, _ = cv2.findContours(a,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
+area = cv2.contourArea(contour[0])
+print(area)
+print(np.count_nonzero(a))
