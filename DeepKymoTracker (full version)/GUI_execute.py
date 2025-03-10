@@ -3105,6 +3105,9 @@ frame11_page6.grid(row=7, column=0, rowspan=1, columnspan=1)
 canvas_bright = Canvas(frame4_page6, bg=bg_color, height=382, width=382)
 canvas_bright.pack(anchor='nw', fill='both', expand=True)
 
+label_file_name=tk.Label(frame4_page6, text="this is label file_name", bg="black", fg="cyan")
+label_file_name.pack(anchor='nw', fill='both', expand=True)
+
 canvas_lineage = Canvas(frame5_page6, bg=bg_color, height=382, width=382)
 canvas_lineage.pack(anchor='nw', fill='both', expand=True)
 
@@ -3139,7 +3142,7 @@ cell_property.set("Choose cell property")
 global extract_info_from_file_name
 
 from postprocess import (sorted_aphanumeric, change_dict,extract_info_from_file_name, create_pedigree, plot_per_cell_info,
-              load_result_images)
+              load_and_prepare_result_images)
 from extract_lineage_for_Lorenzo import extract_lineage,extract_const_movie_parameters
 from interface_functions import turn_image_into_tkinter
 
@@ -3148,7 +3151,7 @@ def retrieve():
     progress_bar.grid(row=0, column=0,padx=10)
     button_retrieve.config(bg="red")
     button_create.config(bg=button_color)
-    global my_dir,out_folders, outpath, software_folder, options_cells, drop_1, pedigree
+    global my_dir,out_folders, outpath, software_folder, options_cells, menu_cell_ID, pedigree
    
     my_dir = filedialog.askdirectory()# input movie folder (full path) 
     input_movie_folder = os.path.basename(my_dir)
@@ -3161,11 +3164,11 @@ def retrieve():
     global keys   
     keys=list(pedigree.keys())
     label_feedback.config(text="\nRetrieving results ...\n\n\n")   
-    cell_ID.set("Choose cell ID")
-    cell_property.set("Choose cell property")
+    #cell_ID.set("Choose cell ID")
+    #cell_property.set("Choose cell property")
     progress_bar.grid(row=0, column=0,padx=10)
-    global red_patches, one_cell_patches, plots, bright_images
-    red_patches, one_cell_patches, plots, bright_images=load_result_images(outpath, keys, progress_bar)
+    global red_patches, one_cell_patches, plots, bright_names
+    red_patches, one_cell_patches, plots, bright_names=load_and_prepare_result_images(outpath, keys, progress_bar)
     button_retrieve.config(bg=button_color)
    # drop_1.config(bg = "black",font=all_font,fg=result_color)
     #drop_2.config(bg = "black",font=all_font,fg="yellow")
@@ -3174,15 +3177,16 @@ def retrieve():
     label_loaded.grid(row=0, column=1, padx=10)
     label_loaded.config(text="Retrieved results for movie:\n"+ os.path.join(software_folder, input_movie_folder)+
                     "\nExcel files can be accessed at\n"+ os.path.join(outpath,"CELLS_INFO_EXCEL"))
+
     menu_cell_ID.destroy()
-    menu_cell_ID = OptionMenu(frame3_page6, chosen_1, *keys,  command= create_patch_slider)
+    menu_cell_ID = OptionMenu(frame3_page6, cell_ID, *keys,  command= create_patch_slider)
     menu_cell_ID.grid(row=3, column=0, padx=200)
     menu_cell_ID.config(bg = label_color,font=all_font,activebackground="red")
     menu_cell_ID["menu"].config(bg=label_color,activebackground="red")
     button_retrieve.config(bg=button_color)
     update_flash([menu_cell_ID])    
 #############################################
-def prepare_images():
+def create():
     update_flash([])
     button_create.config(bg="red")
     global my_dir,out_folders, outpath, software_folder, options_cells, menu_cell_ID, pedigree
@@ -3207,6 +3211,7 @@ def prepare_images():
     global per_cell_dict
     
     still_lineage=cv2.imread(os.path.join( outpath,"still_lineage.tif"), -1)
+    # plot images necessary for display. They will be loaded later, one-by-one, when sliding patches
     plot_per_cell_info(
         pedigree, outpath, still_lineage,label_feedback, progress_bar)
     #print("len(per_cell_dictionary=", len(pedigree))
@@ -3218,9 +3223,9 @@ def prepare_images():
     menu_cell_ID.grid(row=3, column=0, padx=200)
     menu_cell_ID.config(bg = label_color,font=all_font,activebackground="red")
     menu_cell_ID["menu"].config(bg=label_color,activebackground="red")
-    global red_patches, one_cell_patches, plots, bright_images
+    global red_patches, one_cell_patches, plots, bright_names
     label_feedback.config(text="\nLoading results ...\n\n\n") 
-    red_patches, one_cell_patches, plots, bright_images=load_result_images(outpath, keys, progress_bar)
+    red_patches, one_cell_patches, plots, bright_names=load_and_prepare_result_images(outpath, keys, progress_bar)
     label_loaded.grid(row=0, column=1, padx=10)
     #l_loaded.config(text="Created results for movie:\n"+ os.path.join(software_folder, input_movie_folder))
     label_loaded.config(text="Created results for movie:\n"+ os.path.join(software_folder, input_movie_folder)+
@@ -3228,72 +3233,72 @@ def prepare_images():
     label_feedback.config(text="1. Choose cell ID,\n2. Then choose cell property (Area, Perimeter, or Circularity."+
                           "\n3. Use scrollbar to explore results.")
     button_create.config(bg=button_color)
+    global col_dict
+    col_dict={"Area":["red", "yellow", "yellow"],"Perimeter":["yellow", "red", "yellow"],"Circularity":["yellow", "yellow", "red"]}
     update_flash([menu_cell_ID])
 ############################################
 
 def slide_patch(value):  # value=frame number from patch_slider
-           
+          
     canvas_bright.delete('all')
     canvas_lineage.delete('all')
     canvas_patch.delete('all')
     canvas_graph.delete('all')    
-    """
-    for i in range(len(pedigree[chosen_1.get()])):
-        if pedigree[chosen_1.get()][i][1] == int(value)-1:
-            image_number = i+1
-    """
-    #print("image_number=", image_number)
-    internal_image_number=int(value)-ffrom 
-    patch=one_cell_patches[cell_ID.get()][internal_image_number][0]
-    frame_number=one_cell_patches[cell_ID.get()][0][1]
+    print("INSIDE SLIDE_PATCH")
+    
+    print("ffrom=", ffrom)
+    print("int(value)=",int(value))
+    #frame_number=one_cell_patches[cell_ID.get()][0][1]
+    internal_frame_number=int(value)-ffrom
+    print("internal_image_number=", internal_frame_number)
+    print("one_cell_patches.keys()=",one_cell_patches.keys())
+    patch=one_cell_patches[cell_ID.get()][internal_frame_number][0]
+  
     patch_rgb = cv2.cvtColor(patch, cv2.COLOR_BGR2RGB)
     global im_pil
-    #img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    im_pil=turn_image_into_tkinter(patch_rgb, 382)
-    
+    im_pil=turn_image_into_tkinter(patch_rgb, 382)    
     canvas_patch.create_image(0, 0, anchor=NW, image=im_pil)
     
-    red_patch=red_patches[cell_ID.get()][internal_image_number][0]
+    red_patch=red_patches[cell_ID.get()][internal_frame_number][0]
     global red_im_pil
-    red_patch_rgb = cv2.cvtColor(red_patch, cv2.COLOR_BGR2RGB)
-   
+    red_patch_rgb = cv2.cvtColor(red_patch, cv2.COLOR_BGR2RGB)   
     red_im_pil=turn_image_into_tkinter(red_patch_rgb, 382)
     canvas_lineage.create_image(0, 0, anchor=NW, image=red_im_pil)
     
-    plott_pil=plots[cell_ID.get()][cell_property.get()][ internal_image_number][0]
+    plott_pil=plots[cell_ID.get()][cell_property.get()][ internal_frame_number][0]
     global pl_pil
-    #img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     pl_pil = Image.fromarray(plott_pil)
     pl_pil.thumbnail((382,382), Image.ANTIALIAS)
-    #pl_pil = pl_pil.resize((382, 382), Image.ANTIALIAS)
     pl_pil = ImageTk.PhotoImage(pl_pil)
-    canvas_graph.create_image(0, 0, anchor=NW, image=pl_pil)
-    
-    bright_image= bright_images[ internal_image_number]
+    canvas_graph.create_image(0, 0, anchor=NW, image=pl_pil)    
+    ######################################
+    bright_name=bright_names[ int(value)-first_frame_number_p5]
+    label_file_name.configure(text=os.path.basename(bright_name))
+    bright_image=cv2.imread(bright_name, -1)
+
     bright_image_rgb = cv2.cvtColor(bright_image, cv2.COLOR_BGR2RGB)
-    #bright_image_rgb=bright_image
-    global bright_pil
-    #img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    #bright_pil = Image.fromarray(bright_image_rgb)
-    #bright_pil = bright_pil.resize((382, 382), Image.ANTIALIAS)
-    #bright_pil = ImageTk.PhotoImage(bright_pil)
+    global bright_pil  
     bright_pil=turn_image_into_tkinter(bright_image_rgb, 382)
     canvas_bright.create_image(0, 0, anchor=NW, image=bright_pil)
     
-    #patch_slider.set(value)
+   
     patch_slider.config(label="Frame "+str(value))  
         
     label_centr.config(text="Centroid: " +
-              str(pedigree[cell_ID.get()][ internal_image_number][3]))
+              str(pedigree[cell_ID.get()][ internal_frame_number][3]))
     combination=col_dict[cell_property.get()]
     
     label_area.config(text="Area: " +
-               str(pedigree[cell_ID.get()][internal_image_number][4]), fg=combination[0])
+               str(pedigree[cell_ID.get()][internal_frame_number][4]), fg=combination[0])
     label_perim.config(text="Perimeter: " +
-               str(pedigree[cell_ID.get()][internal_image_number][5]), fg=combination[1])
+               str(pedigree[cell_ID.get()][internal_frame_number][5]), fg=combination[1])
     label_circ.config(text="Circularity: " +
-               str(pedigree[cell_ID.get()][internal_image_number][6]), fg=combination[2])
-
+               str(pedigree[cell_ID.get()][internal_frame_number][6]), fg=combination[2])
+###########################################
+global ffrom
+ffrom=1
+#ffrom=IntVar()
+#ffrom.set(1)
 ######################################
 def create_patch_slider(value):
   update_flash([])
@@ -3310,8 +3315,10 @@ def create_patch_slider(value):
   print("key=", key)
   menu_cell_ID.config( bg="black",fg = result_color,font=all_font,activebackground="red")
   if key!="Choose cell ID":
-    global ffrom, tto   
-    ffrom, tto = pedigree[key][0][1], pedigree[key][-1][1]
+    global ffrom, tto
+    ffrom=pedigree[key][0][1]
+    tto = pedigree[key][-1][1]
+    #ffrom, tto = pedigree[key][0][1], pedigree[key][-1][1]
     print("ffrom=", ffrom)
     print("tto=", tto)
     global patch_slider
@@ -3324,73 +3331,12 @@ def create_patch_slider(value):
     patch_slider.set(ffrom)
   update_flash([menu_cell_property])    
 ###########################################################
-     
-def display_first_patch(value):  # value=cell name from dropdown menu
-    #per_cell_dict=pedigree
-  #internal_image_number=int(value)-first_frame_number_p5+1   
-  #stop_flash("choose_property", page6, flashers)
-  menu_cell_property.config(fg=result_color,bg="black")  
-  canvas_bright.delete('all')
-  canvas_lineage.delete('all')
-  canvas_patch.delete('all')
-  canvas_graph.delete('all')
-    
-  cell_prop=cell_property.get()
-  if cell_prop!="Choose cell property":
-    menu_cell_property.config( bg="black",fg = result_color,font=all_font,activebackground="red")
-    patch_slider.set(ffrom)
-    patch=one_cell_patches[cell_ID.get()][0][0]
-    frame_number=one_cell_patches[cell_ID.get()][0][1]
-    patch_rgb = cv2.cvtColor(patch, cv2.COLOR_BGR2RGB)
-    global im_pil
-    #img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    im_pil = Image.fromarray(patch_rgb)
-    im_pil = im_pil.resize((382, 382), Image.ANTIALIAS)
-    im_pil = ImageTk.PhotoImage(im_pil)
-    canvas_patch.create_image(0, 0, anchor=NW, image=im_pil)
-    
-    
-    
-    red_patch = red_patches[cell_ID.get()][0][0]
-    red_patch_rgb = cv2.cvtColor(red_patch, cv2.COLOR_BGR2RGB)
-    global red_im_pil
-    #img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    red_im_pil = Image.fromarray(red_patch_rgb)
-    red_im_pil = red_im_pil.resize((382, 382), Image.ANTIALIAS)
-    red_im_pil = ImageTk.PhotoImage(red_im_pil)
-    canvas_lineage.create_image(0, 0, anchor=NW, image=red_im_pil)
-    
-    #cell_property=chosen_2.get()
-    #if cell_property!="Choose cell property":
-    plott_pil=plots[cell_ID.get()][cell_property.get()][0][0]
-    global pl_pil
-    #img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    pl_pil = Image.fromarray(plott_pil)
-    pl_pil.thumbnail((382,382), Image.ANTIALIAS)
-    #pl_pil = pl_pil.resize((382, 382), Image.ANTIALIAS)
-    pl_pil = ImageTk.PhotoImage(pl_pil)
-    canvas_graph.create_image(0, 0, anchor=NW, image=pl_pil)
-    
-    
-    bright_image= bright_images[frame_number-ffrom+1]
-    bright_image_rgb = cv2.cvtColor(bright_image, cv2.COLOR_BGR2RGB)
-    #bright_image_rgb=bright_image
-    global bright_pil
-    #img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    bright_pil = Image.fromarray(bright_image_rgb)
-    bright_pil = bright_pil.resize((382, 382), Image.ANTIALIAS)
-    bright_pil = ImageTk.PhotoImage(bright_pil)
-    canvas_bright.create_image(0, 0, anchor=NW, image=bright_pil)       
-    
-    global col_dict
-    col_dict={"Area":["red", "yellow", "yellow"],"Perimeter":["yellow", "red", "yellow"],"Circularity":["yellow", "yellow", "red"]}
-    label_centr.config(text="Centroid: " + str(pedigree[cell_ID.get()][0][3]))
-    combination=col_dict[cell_property.get()]
-    label_area.config(text="Area: " + str(pedigree[cell_ID.get()][0][4]), fg=combination[0])
-    label_perim.config(text="Perimeter: " + str(pedigree[cell_ID.get()][0][5]), fg=combination[1])
-    label_circ.config(text="Circularity: " + str(pedigree[cell_ID.get()][0][6]), fg=combination[2])
-    
-    
+def display_first_patch(value):
+    ffrom_1=str(ffrom)
+    print("ffrom_1=", ffrom_1)    
+    slide_patch(ffrom_1)
+    patch_slider.set(ffrom_1)
+######################################################
 
 global menu_cell_ID,menu_cell_property
 menu_cell_ID = OptionMenu(frame3_page6, cell_ID, *options_cells,  command= create_patch_slider)
@@ -3413,7 +3359,7 @@ label_feedback.grid(row=0, column=1, padx=300, sticky="n")
 
 
 button_create = tk.Button(frame2_page6, text=" Create",
-                bg=button_color, font=all_font,command=lambda: Thread(target=prepare_images).start())
+                bg=button_color, font=all_font,command=lambda: Thread(target=create).start())
 button_create.grid(row=0, column=0,sticky="n", pady=(10,0), padx=20)
 
 

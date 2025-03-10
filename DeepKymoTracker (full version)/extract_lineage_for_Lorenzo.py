@@ -4,6 +4,7 @@ import xlsxwriter
 import numpy as np
 import cv2
 from preprocess import extract_red_frame_numbers
+import matplotlib.pyplot as plt
 ###############################################
 Bordersize=100
 #######################################
@@ -84,6 +85,8 @@ def load_red_names(source):
 
 #######################################
 
+###############################################
+
 def create_lineage_per_cell(lineage_per_frame,outpath, frame_size):
   software_dir,output_dir=os.path.split(outpath)
   origin= os.path.join(software_dir,output_dir[7:])
@@ -104,7 +107,7 @@ def create_lineage_per_cell(lineage_per_frame,outpath, frame_size):
       path=os.path.join(dirr,cell_name)# create folders "1", "10", etc. for segmented images of each cell  
       if not os.path.exists(path):
           os.mkdir(path)
-      subdirs=["Segmented frames", "Segmented patches","Fluor patches","Red patches"]
+      subdirs=["Segmented frames", "Segmented patches","Fluor patches","Bright patches","Red patches"]
       for sub in subdirs:
           subdir=os.path.join(path,sub)
           if not os.path.exists(subdir):
@@ -121,17 +124,23 @@ def create_lineage_per_cell(lineage_per_frame,outpath, frame_size):
           cell_id=item[key][11]
           if name==cell_id:
            
-            
+            cell_name=item[key][11]
             frame_number=item[key][12]
             cX,cY=item[key][6][0],item[key][6][1]
+            a,b,c,d=item[key][7],item[key][8],item[key][9],item[key][10]
             area=item[key][18]
             perimeter=item[key][19]
             circularity=item[key][20]
             bounding_box=item[key][2]
-            ####
-            #print("name = ", name)
-            #print("key = ", key)
-            #print("cell_id = ", cell_id)
+            ############# center cell in patch and add color to patches
+            patch_before=item[key][3]     
+            base=np.zeros((frame_size+2*Bordersize,frame_size+2*Bordersize),dtype="uint8")
+            base[c:d,a:b]=patch_before
+            patch_after=base[int(cY)-48+Bordersize:int(cY)+48+Bordersize,int(cX)-48+Bordersize:int(cX)+48+Bordersize]
+            patch_color=np.zeros((patch_after.shape[0], patch_after.shape[1],3), np.uint8)           
+            coll=item[key][15][:-1]
+            patch_color[patch_after==255]=coll
+            ###################### create big frames with current cell only segmented
             big_patch_border=np.zeros((frame_size+2*Bordersize, frame_size+2*Bordersize), np.uint8)
             a,b,c,d=item[key][7], item[key][8],item[key][9], item[key][10]
             big_patch_border[c:d,a:b]=item[key][3]
@@ -141,24 +150,31 @@ def create_lineage_per_cell(lineage_per_frame,outpath, frame_size):
             big_name=os.path.join(destin_big,"segm_frame_cell_%s_frame_%s.tif" % (cell_id,frame_number))
             cv2.imwrite(big_name,big_one_cell_image)
             
-            #######
+            #######  create segmented patches for current cell
             segm_patch=item[key][3]
             destin_segm=os.path.join(dirr, cell_id,"Segmented patches")
             segm_name=os.path.join(destin_segm,"segm_patch_cell_%s_frame_%s.tif" % (cell_id,frame_number))
             cv2.imwrite(segm_name,segm_patch)
             
-            ############
+            ############ create fluor patches
             fl_init=item[key][4]
             fl_border=np.copy(fl_init)
             fl_border[big_patch_border==0]=0
             fl_patch= fl_border[c:d,a:b]
-            av_fluor=np.round(np.ma.masked_equal(fl_patch, 0).mean(), 2)# average intensity of fluor cell
-                     
-            destin_fl_patch=os.path.join(dirr, cell_id,"Fluor patches")
-            
+            av_fluor=np.round(np.ma.masked_equal(fl_patch, 0).mean(), 2)# average intensity of fluor cell                   
+            destin_fl_patch=os.path.join(dirr, cell_id,"Fluor patches")      
             fl_patch_name=os.path.join(destin_fl_patch,"fluor_patch_cell_%s_frame_%s.tif" % (cell_id,frame_number))
             cv2.imwrite(fl_patch_name,fl_patch)
-            
+            ############## create bright patches
+            br_init=item[key][5]
+            br_border=np.copy(br_init)
+            br_border[big_patch_border==0]=0
+            br_patch= br_border[c:d,a:b]
+            av_bright=np.round(np.ma.masked_equal(br_patch, 0).mean(), 2)# average intensity of bright cell                   
+            destin_br_patch=os.path.join(dirr, cell_id,"Bright patches")      
+            br_patch_name=os.path.join(destin_br_patch,"bright_patch_cell_%s_frame_%s.tif" % (cell_id,frame_number))
+            cv2.imwrite(br_patch_name,br_patch)
+            #############################################
             if frame_number in list_of_red_numbers:
                index=list_of_red_numbers.index(frame_number)
                red_name= red_names_sorted[index]           
@@ -171,17 +187,17 @@ def create_lineage_per_cell(lineage_per_frame,outpath, frame_size):
                cv2.imwrite(red_patch_name,red_patch)
                av_red=np.round(np.ma.masked_equal(red_patch, 0).mean(), 2)
             else:
-                av_red="---"
+                av_red="           ---"
             ######################################
             
-            add=[frame_number,[cX,cY],area,perimeter,circularity, bounding_box, av_fluor, av_red] 
+            add=[cell_name,frame_number, patch_color,[cX,cY],area,perimeter,circularity,coll, bounding_box, av_fluor, av_red, av_bright] 
             pedigree_per_cell[name].append(add)
   print("  list_of_red_numbers=",   list_of_red_numbers)             
   pedigree_path=os.path.join(outpath,"lineage_per_cell.pkl")
   with open(pedigree_path, 'wb') as f:
          pickle.dump(pedigree_per_cell, f)  
   return pedigree_per_cell
-###############################################
+#############################################
 def create_lineage_for_Lorenzo(outpath, frame_size):
     #print("outpath=", outpath)
     lineage_per_frame=extract_lineage(outpath)
@@ -200,18 +216,19 @@ def create_lineage_for_Lorenzo(outpath, frame_size):
        #print("path for excel=", path)
        workbook = xlsxwriter.Workbook(os.path.join(path,cell_name +".xlsx"))     
        worksheet = workbook.add_worksheet()
-       worksheet.set_column('B:B',12)
-       worksheet.set_column('F:F',12)
-       worksheet.set_column('G:G',12)
-       worksheet.set_column('C:C',5)
-       worksheet.set_column('D:D',5)
-       worksheet.set_column('H:H',5)
-       worksheet.set_column('I:I',5)
-       worksheet.set_column('J:J',5)
-       worksheet.set_column('K:K',5)
-       worksheet.set_column('L:L',12)
-       worksheet.set_column('M:M',12)
-       
+       worksheet.set_column('B:B',10)
+       worksheet.set_column('C:C',6)
+       worksheet.set_column('D:D',6)
+       worksheet.set_column('E:E',6)
+       worksheet.set_column('F:F',10)
+       worksheet.set_column('G:G',10)
+       worksheet.set_column('H:H',6)
+       worksheet.set_column('I:I',6)
+       worksheet.set_column('J:J',6)
+       worksheet.set_column('K:K',6)
+       worksheet.set_column('L:L',10)
+       worksheet.set_column('M:M',10)
+       worksheet.set_column('N:N',10)
        
        worksheet.write('A1', ' Cell name')
        worksheet.write('B1', ' Frame')
@@ -220,18 +237,18 @@ def create_lineage_for_Lorenzo(outpath, frame_size):
        worksheet.write('E1', ' Area')
        worksheet.write('F1', ' Perimeter')
        worksheet.write('G1', ' Circularity')
-       worksheet.write('H1', '  x')
-       worksheet.write('I1', '  y')
-       worksheet.write('J1', '  w')
-       worksheet.write('K1', '  h')
+       worksheet.write('H1', '  X_box')
+       worksheet.write('I1', '  Y_box')
+       worksheet.write('J1', '  W_box')
+       worksheet.write('K1', '  H_box')
        worksheet.write('L1', '  Av_fluor')
        worksheet.write('M1', '  Av_red')
-       #x=lineage_per_cell[cell_name]
+       worksheet.write('N1', '  Av_bright')
        
        row = 1
        for i in range(len(x)): 
-          score = [cell_name, "Frame %s" % (x[i][0]), x[i][1][0],x[i][1][1],x[i][2],x[i][3],x[i][4],x[i][5][0],
-                   x[i][5][1],x[i][5][2],x[i][5][3],x[i][6],x[i][7] ]
+          score = [cell_name, "Frame %s" % (x[i][1]), x[i][3][0],x[i][3][1],x[i][4],x[i][5],x[i][6],x[i][8][0],
+                   x[i][8][1],x[i][8][2],x[i][8][3],x[i][9],x[i][10],x[i][11] ]
           ['None' if v is None else v for v in score]
           #print("score=", score)
           #one_cell_big_image=x[i][6]
@@ -240,6 +257,57 @@ def create_lineage_for_Lorenzo(outpath, frame_size):
           for k in range(len(score)):
             worksheet.write(row, k, score[k])
           row+=1
+       ################## plor graphs
+       a=lineage_per_cell[cell_name]
+       first_frame_num=a[0][1]
+       areas=[]
+       perimeters=[]
+       circularities=[]
+       frames=[]
+       centroids=[]
+     
+       for k in range(len(a)):
+        areas.append(a[k][4])
+        perimeters.append(a[k][5])
+        circularities.append(a[k][6])
+        frames.append(a[k][1])
+        centroids.append(a[k][3])             
+      
         
+       x=[frames[kk] for kk in range (len(frames))]      
+       
+       g = plt.figure()
+       plt.plot(x, areas, 'yo', linewidth=0.5)
+       plt.xlabel('Frame')
+       plt.ylabel('Area')
+       plt.title('Area of '+cell_name)
+       plt.savefig('areas_for_excel.png')
+       g.clear()
+       plt.close(g)
+
+      
+       hh = plt.figure()
+       plt.plot(x, perimeters, 'go', linewidth=0.5)
+       plt.xlabel('Frame')
+       plt.ylabel('Perimeter')
+       plt.title('Perimeter of '+cell_name)
+       plt.savefig('perimeters_for_excel.png')
+       hh.clear()
+       plt.close(hh) 
+
+       
+       ggg = plt.figure()
+       plt.plot(x, circularities, 'ro', linewidth=0.5)
+       plt.xlabel('Frame')
+       plt.ylabel('Circularity')
+       plt.title('Circularity of '+cell_name)
+       plt.savefig('circularities_for_excel.png')
+       ggg.clear()
+       plt.close(ggg) 
+       ######################################
+       worksheet.insert_image('P1', 'areas_for_excel.png')
+       worksheet.insert_image('P20', 'perimeters_for_excel.png')
+       worksheet.insert_image('P40', 'circularities_for_excel.png') 
        workbook.close()
     return lineage_per_cell
+#####################################

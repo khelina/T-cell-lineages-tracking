@@ -39,18 +39,21 @@ def create_pedigree(lineage_per_frame,outpath,frame_size):
         cell_name=item[key][11]
         frame=item[key][12]
         cX,cY=item[key][6][0],item[key][6][1]
-        a,b,c,d=item[key][7],item[key][8],item[key][9],item[key][10]       
-        patch_before=item[key][3]     
-        base=np.zeros((frame_size+2*Bordersize,frame_size+2*Bordersize),dtype="uint8")
-        base[c:d,a:b]=patch_before
-        patch_after=base[int(cY)-48+Bordersize:int(cY)+48+Bordersize,int(cX)-48+Bordersize:int(cX)+48+Bordersize]       
+        a,b,c,d=item[key][7],item[key][8],item[key][9],item[key][10]
+        
         im2, contours, hierarchy = cv2.findContours(patch_after,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)                         
         area=np.round(cv2.contourArea(contours[0]),2)
         perimeter=np.round(cv2.arcLength(contours[0],True),2)
         circularity=np.round(4*math.pi*area/perimeter**2,2)
+        
+        patch_before=item[key][3]     
+        base=np.zeros((frame_size+2*Bordersize,frame_size+2*Bordersize),dtype="uint8")
+        base[c:d,a:b]=patch_before
+        patch_after=base[int(cY)-48+Bordersize:int(cY)+48+Bordersize,int(cX)-48+Bordersize:int(cX)+48+Bordersize]
         patch_color=np.zeros((patch_after.shape[0], patch_after.shape[1],3), np.uint8)           
         coll=item[key][15][:-1]
-        patch_color[patch_after==255]=coll        
+        patch_color[patch_after==255]=coll
+        
         add=[cell_name,frame,patch_color,[cX,cY],area,perimeter,circularity, coll]
         add_fed=[frame,[cX,cY]] 
         pedigree["cell-%s" % item[key][11]].append(add)
@@ -185,7 +188,7 @@ def change_dict(init_dict, prop, key, item):
    return init_dict
 ###################################################
 def extract_info_from_file_name(file_name):
-    print("file_name=", file_name)
+    #print("file_name=", file_name)
     first=file_name.index("_")
     cell_key =file_name[:first]
     res_name =file_name[first+1:]
@@ -194,11 +197,11 @@ def extract_info_from_file_name(file_name):
     last_name =res_name[second+1:]
     third=last_name.index("_")
     frame_number =last_name[third+1:-4]
-    print("frame_number=", frame_number)
+    #print("frame_number=", frame_number)
     return cell_key, cell_property, int(frame_number)
 #############################################################
-### for the last step
-def load_result_images(outpath, keys,progress_bar):
+### for the last step (visualise results): prepare images for display
+def load_and_prepare_result_images(outpath, keys,progress_bar):
     names, names_1=[],[]     
     bright_images_path=os.path.join(outpath, "RESULT_BRIGHT")
     for filename in os.listdir(bright_images_path):       
@@ -221,12 +224,16 @@ def load_result_images(outpath, keys,progress_bar):
     one_cell_patches_path =os.path.join(outpath,"PATCHES_FOR_RESULTS")
     plots_path =os.path.join(outpath,"PLOTS")
     p=0
-    bright_unsorted=[]
+    #bright_unsorted=[]
+    bright_names=[]
     for file_name in sorted_aphanumeric(os.listdir(bright_images_path)):        
         #print("file_name=", file_name)
         if file_name.endswith("ch02.tif"):
-          im=cv2.imread(os.path.join(bright_images_path,file_name), -1)
-          bright_unsorted.append(im)
+          #print("bright_file_name=", file_name)
+          full_bright_name=os.path.join(bright_images_path,file_name)
+          bright_names.append(full_bright_name)
+          #im=cv2.imread(os.path.join(bright_images_path,file_name), -1)
+          #bright_unsorted.append(im)
           p+=1
           progress_bar["value"]=(p/total)*100    
     #print("len(bright_unsorted)=", len(bright_unsorted))    
@@ -250,7 +257,7 @@ def load_result_images(outpath, keys,progress_bar):
         else:                     
             plots=change_dict(plots, cell_property, cell_key, item)
     print("len(red_patches)=", len(red_patches))        
-    return red_patches, one_cell_patches, plots, bright_unsorted 
+    return red_patches, one_cell_patches, plots, bright_names 
 ################################################################### 
 ###########################################################
 def plot_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progress_bar):
