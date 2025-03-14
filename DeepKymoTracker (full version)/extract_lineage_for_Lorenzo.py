@@ -5,6 +5,7 @@ import numpy as np
 import cv2
 from preprocess import extract_red_frame_numbers
 import matplotlib.pyplot as plt
+import shutil
 ###############################################
 Bordersize=100
 #######################################
@@ -83,9 +84,9 @@ def load_red_names(source):
  return red_names_sorted
 ###############################################
 
-#######################################
 
-###############################################
+########## 1. Create lineage_per_cell   2. Plot patches inside "cell-n" folders
+######### 3. Empty contents of PER_CELL_RESULTS and VISUALISATION_RESULTS  
 
 def create_lineage_per_cell(lineage_per_frame,outpath, frame_size):
   software_dir,output_dir=os.path.split(outpath)
@@ -99,22 +100,35 @@ def create_lineage_per_cell(lineage_per_frame,outpath, frame_size):
     keys =list(item.keys())
     names+=[item[key][11] for key in keys]
   cell_names =list(set(names))# all cell names encountered in movie
-  dirr=os.path.join(outpath,"CELLS_INFO_WITHOUT_DIAGRAMS_EXCEL")
-  if not os.path.exists(dirr):
-        os.mkdir(dirr)
-  #list_of_cell_names =list(lineage_per_cell.keys())
+  dirr=os.path.join(outpath,"PER_CELL_RESULTS")
+  ############ delete contents of PER_CELL_RESULTS
+  if  os.path.exists(dirr):
+       shutil.rmtree(dirr)
+  os.mkdir(dirr)  
+  ########################################
   for cell_name in cell_names:#
       path=os.path.join(dirr,cell_name)# create folders "1", "10", etc. for segmented images of each cell  
-      if not os.path.exists(path):
-          os.mkdir(path)
+      #if not os.path.exists(path):
+      os.mkdir(path)
       subdirs=["Segmented frames", "Segmented patches","Fluor patches","Bright patches","Red patches"]
       for sub in subdirs:
           subdir=os.path.join(path,sub)
-          if not os.path.exists(subdir):
-             os.mkdir(subdir) 
-  
+          #if not os.path.exists(subdir):
+          os.mkdir(subdir)
+  ###################################
+  ############# delete contents of VISUALISATION_HELPERS
+  visualize_helper_folder=os.path.join(outpath,"HELPERS_(NOT_FOR_USER)","VISUALISATION_HELPERS")
+  if os.path.exists( visualize_helper_folder):
+     shutil.rmtree( visualize_helper_folder)
+  os.mkdir(visualize_helper_folder)
+   #################################
+  visualize_helper_subfolders=["PLOTS","RED_LINEAGE_PATCHES","PATCHES_FOR_RESULTS"]
+  for vis_subfolder in visualize_helper_subfolders:
+       destin=os.path.join(visualize_helper_folder,vis_subfolder)
+       if not os.path.exists(destin):
+           os.mkdir(destin)
+  #############################################
   pedigree_per_cell ={}
-
   for name in cell_names:
     pedigree_per_cell[name]=[]
     for i in range(len(lineage_per_frame)):   
@@ -202,15 +216,19 @@ def create_lineage_for_Lorenzo(outpath, frame_size):
     #print("outpath=", outpath)
     lineage_per_frame=extract_lineage(outpath)
     lineage_per_cell=create_lineage_per_cell(lineage_per_frame,outpath, frame_size)
-    
-    dirr=os.path.join(outpath,"CELLS_INFO_WITHOUT_DIAGRAMS_EXCEL")
-    if not os.path.exists(dirr):
-        os.mkdir(dirr)
+    ##############################################
+    del lineage_per_frame
+    ################### empty folder "PER_CELL_RESULTS" and its subfolders
+    dirr=os.path.join(outpath,"PER_CELL_RESULTS")
+    #if os.path.exists(dirr):
+        #shutil.rmtree(dirr)
+    #os.mkdir(dirr)
     list_of_cell_names =list(lineage_per_cell.keys())
+    print(" list_of_cell_names inside create_lineage_for_LOrenzo=", list_of_cell_names)
     for cell_name in list_of_cell_names:#
        path=os.path.join(dirr,cell_name)# create folders "1", "10", etc. for segmented images of each cell  
-       if not os.path.exists(path):
-          os.mkdir(path)
+       #if not os.path.exists(path):
+       #os.mkdir(path)
        x=lineage_per_cell[cell_name]
              
        #print("path for excel=", path)

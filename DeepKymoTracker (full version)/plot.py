@@ -319,7 +319,7 @@ def plot_frame(cells,clip_centr,k,kk,fluor_images,fluor_names,out_folders,coords
        #############################
        lineage_name=create_name_for_lineage_image(bright_name)
       
-       full_lineage_name =os.path.join(out_folders[5],lineage_name)
+       full_lineage_name =os.path.join(out_folders[4],"LINEAGE_IMAGES",lineage_name)
        cv2.imwrite(full_lineage_name, current_lineage_image) 
        still_lineage=current_lineage_image
        cv2.imwrite(os.path.join(os.path.dirname(out_folders[5]),"still_lineage.tif"), still_lineage)
@@ -335,7 +335,7 @@ def plot_frame(cells,clip_centr,k,kk,fluor_images,fluor_names,out_folders,coords
         
          patch_name=create_name_for_cleaned_patch(bright_name, kkk)
          #print("patch_name=", patch_name)
-         cv2.imwrite(os.path.join(out_folders[8],patch_name), cells["cell_%s" % kkk][3])               
+         cv2.imwrite(os.path.join(out_folders[4],"CLEANED_PATCHES",patch_name), cells["cell_%s" % kkk][3])               
          #cv2.imwrite(os.path.join(out_folders[8],"segmented_patch_%s_cell_%s.tif") % (k+kk,kkk), cells["cell_%s" % kkk][3])         
          output_patch=cells["cell_%s" % kkk][3]
          patch_with_contours=prepare_contours(output_patch)
@@ -362,11 +362,11 @@ def plot_frame(cells,clip_centr,k,kk,fluor_images,fluor_names,out_folders,coords
          #cv2.putText(destin_bright,texxt,(int(xx)-10,int(yy)+5),cv2.FONT_HERSHEY_PLAIN,1,collour,1)         
                   
          coords[kkk,0],coords[kkk,1]=xx, yy
-       cv2.imwrite(rename_file(out_folders[10],fluor_names[kk]), debug_destin_image)
+       cv2.imwrite(rename_file(out_folders[5],fluor_names[kk]), debug_destin_image)
        #print("check_fluor_destin   ",rename_file(out_folders[3],fluor_names[kk]))       
-       cv2.imwrite(rename_file(out_folders[3],fluor_names[kk]),destin_fluor)# plot destin_fluor to RESULT FLUOR folder
+       cv2.imwrite(rename_file(out_folders[1],fluor_names[kk]),destin_fluor)# plot destin_fluor to RESULT FLUOR folder
        
-       cv2.imwrite(rename_file(out_folders[9],bright_names[kk]),destin_bright)#plot destin_bright to RESULT BRIGHT folder
+       cv2.imwrite(rename_file(out_folders[0],bright_names[kk]),destin_bright)#plot destin_bright to RESULT BRIGHT folder
        
        #black_and_white=destin_mask.copy()     
        #black_and_white=black_and_white.astype(np.uint8)
@@ -378,7 +378,7 @@ def plot_frame(cells,clip_centr,k,kk,fluor_images,fluor_names,out_folders,coords
        mask_name=create_name_for_mask(bright_name)
        #print("mask_name=", mask_name)
        #behchmark_seg ="mask"+str(k+kk+1).zfill(n_digits)+".tif"       
-       cv2.imwrite(os.path.join(out_folders[0],mask_name),destin_mask)
+       cv2.imwrite(os.path.join(out_folders[4],"MASKS",mask_name),destin_mask)
        return  coords, destin_fluor     
 ########################################
 

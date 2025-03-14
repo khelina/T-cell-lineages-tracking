@@ -34,7 +34,7 @@ def load_tracked_movie(input_dir,output_dir):
            empty_fluors.append(im_fluor)
            
     print("loaded empty images")       
-    dir_bright=os.path.join(output_dir,"RESULT_BRIGHT")
+    dir_bright=os.path.join(output_dir,"BRIGHT_MOVIE_RESULTS")
     for filename in sorted_aphanumeric(os.listdir(dir_bright)):
            path_im_bright=os.path.join(dir_bright, filename)
            im_bright_filled=cv2.imread(path_im_bright ,-1)
@@ -42,7 +42,7 @@ def load_tracked_movie(input_dir,output_dir):
            filled_brights.append(im_bright_filled)
         
     print("loaded bright filled  images")        
-    dir_fluor=os.path.join(output_dir,"RESULT_FLUORESCENT")
+    dir_fluor=os.path.join(output_dir,"FLUORESCENT_MOVIE_RESULTS")
     for filename in sorted_aphanumeric(os.listdir(dir_fluor)):
            path_im_fluor=os.path.join(dir_fluor, filename)
            im_fluor_filled=cv2.imread(path_im_fluor ,-1)
@@ -50,7 +50,7 @@ def load_tracked_movie(input_dir,output_dir):
            filled_fluors.append(im_fluor_filled)
           
     print("loaded fluor filled  images")        
-    dir_masks=os.path.join(output_dir,"MASKS")
+    dir_masks=os.path.join(output_dir, "HELPERS_(NOT_FOR_USER)","MASKS")
     for filename in sorted_aphanumeric(os.listdir(dir_masks)):
            path_im_mask=os.path.join(dir_masks, filename)
            im_mask=cv2.imread(path_im_mask ,-1)

@@ -9,6 +9,7 @@ import re
 from PIL import ImageTk, Image
 import tkinter
 from copy import deepcopy
+import shutil
 #############################################################
 Bordersize=100
 from extract_lineage_for_Lorenzo import extract_lineage
@@ -28,10 +29,10 @@ def create_pedigree(lineage_per_frame,outpath,frame_size):
   cell_names =list(set(names))
  
   pedigree ={}
-  centroids_per_cell_dict={}
+  #centroids_per_cell_dict={}
   for name in cell_names:
     pedigree["cell-%s" % name]=[]
-    centroids_per_cell_dict["cell-%s" % name]=[]
+    #centroids_per_cell_dict["cell-%s" % name]=[]
   for i in range(len(lineage_per_frame)):   
      item =lineage_per_frame[i]
      keys =list(item.keys())
@@ -57,7 +58,7 @@ def create_pedigree(lineage_per_frame,outpath,frame_size):
         add=[cell_name,frame,patch_color,[cX,cY],area,perimeter,circularity, coll]
         add_fed=[frame,[cX,cY]] 
         pedigree["cell-%s" % item[key][11]].append(add)
-        centroids_per_cell_dict["cell-%s" % item[key][11]].append(add_fed)
+        #centroids_per_cell_dict["cell-%s" % item[key][11]].append(add_fed)
       
   pedigree_path=os.path.join(outpath,"lineage_per_cell.pkl")
   with open(pedigree_path, 'wb') as f:
@@ -147,11 +148,14 @@ def load_files(folder_dir):# load linegae images and segmented images to create 
  return images
 ############ prepare images for output_movie
 def create_output_movie(outpath,frame_size):
+ ############
+
+ ###########
  print("Creating images for movie and saving in TEMPORARY_FOR_MOVIE folder")
- images_out_path=os.path.join(outpath,"IMAGES_FOR_FINAL_MOVIE")
- images_seg=load_files(os.path.join(outpath,"RESULT_BRIGHT"))# was [9]
+ images_out_path=os.path.join(outpath,"HELPERS_(NOT_FOR_USER)" ,"IMAGES_FOR_FINAL_MOVIE")
+ images_seg=load_files(os.path.join(outpath,"BRIGHT_MOVIE_RESULTS"))# was [9]
  print("len(images_seg)=", len(images_seg)) 
- images_lin=load_files(os.path.join(outpath,"LINEAGE_IMAGES"))# was [5]
+ images_lin=load_files(os.path.join(outpath,"HELPERS_(NOT_FOR_USER)" ,"LINEAGE_IMAGES"))# was [5]
  print("len(images_lin)=", len(images_lin))
  images=[]
  for i in range(len(images_lin)):
@@ -203,11 +207,11 @@ def extract_info_from_file_name(file_name):
 ### for the last step (visualise results): prepare images for display
 def load_and_prepare_result_images(outpath, keys,progress_bar):
     names, names_1=[],[]     
-    bright_images_path=os.path.join(outpath, "RESULT_BRIGHT")
+    bright_images_path=os.path.join(outpath, "BRIGHT_MOVIE_RESULTS")
     for filename in os.listdir(bright_images_path):       
           names.append(filename)
     total=len(names)
-    patches_path=os.path.join(outpath, "PATCHES_FOR_RESULTS")
+    patches_path=os.path.join(outpath,"HELPERS_(NOT_FOR_USER)","VISUALISATION_HELPERS" ,"PATCHES_FOR_RESULTS")
     for filename in os.listdir(patches_path):       
           names_1.append(filename)
     total_frames_1=len(names_1)
@@ -219,10 +223,10 @@ def load_and_prepare_result_images(outpath, keys,progress_bar):
     dictt={"Area":[], "Perimeter": [], "Circularity": []}
     plots = {key:dictt for key in keys}
     #bright_images_dict={key:[] for key in keys}    
-    bright_images_path=os.path.join(outpath, "RESULT_BRIGHT")
-    red_patches_path=os.path.join(outpath,"RED_LINEAGE_PATCHES")
-    one_cell_patches_path =os.path.join(outpath,"PATCHES_FOR_RESULTS")
-    plots_path =os.path.join(outpath,"PLOTS")
+    #bright_images_path=os.path.join(outpath, "RESULT_BRIGHT")
+    red_patches_path=os.path.join(outpath,"HELPERS_(NOT_FOR_USER)","VISUALISATION_HELPERS" ,"RED_LINEAGE_PATCHES")
+    one_cell_patches_path =os.path.join(outpath,"HELPERS_(NOT_FOR_USER)","VISUALISATION_HELPERS" ,"PATCHES_FOR_RESULTS")
+    plots_path =os.path.join(outpath,"HELPERS_(NOT_FOR_USER)","VISUALISATION_HELPERS" ,"PLOTS")
     p=0
     #bright_unsorted=[]
     bright_names=[]
@@ -259,14 +263,15 @@ def load_and_prepare_result_images(outpath, keys,progress_bar):
     print("len(red_patches)=", len(red_patches))        
     return red_patches, one_cell_patches, plots, bright_names 
 ################################################################### 
-###########################################################
+######### This is for Step-5: creates VISUALISATION_HELPERS folder
+
 def plot_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progress_bar):
-   dirr=os.path.join(outpath,"CELLS_INFO_EXCEL")
-   red_patches_path=os.path.join(outpath,"RED_LINEAGE_PATCHES")
+   dirr=os.path.join(outpath,"PER_CELL_RESULTS")
+   red_patches_path=os.path.join(outpath,"HELPERS_(NOT_FOR_USER)","VISUALISATION_HELPERS" ,"RED_LINEAGE_PATCHES")
    #red_patches_path=outfolders[2] #"RED_PATCHES"
-   plots_path= os.path.join(outpath,"PLOTS")
+   plots_path= os.path.join(outpath,"HELPERS_(NOT_FOR_USER)","VISUALISATION_HELPERS" ,"PLOTS")
    #plots_path=outfolders[6]#"PLOTS"
-   one_cell_patches_path=os.path.join(outpath,"PATCHES_FOR_RESULTS")
+   one_cell_patches_path=os.path.join(outpath,"HELPERS_(NOT_FOR_USER)","VISUALISATION_HELPERS" ,"PATCHES_FOR_RESULTS")
    #one_cell_patches_path=outfolders[7] # PARCHES_FOR_RESULTS
    #per_cell_dict={}
    list_of_cell_names =list(pedigree.keys())
@@ -283,8 +288,8 @@ def plot_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progres
      total=len(cell_info)
      
   
-     if not os.path.exists(path):
-        os.mkdir(path)
+     #if not os.path.exists(path):
+        #os.mkdir(path)
         
      color=pedigree[cell_name][0][7]   
      #color=colours[cell_name[5:]][:-1]
@@ -432,47 +437,3 @@ def plot_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progres
      worksheet.insert_image('I21', 'circularities_for_excel.png')    
      workbook.close()
 ####################################################################
-"""
-def create_lineage_for_Lorenzo(outpath):
-    print("outpath=", outpath)
-    lineage_per_frame=extract_lineage(outpath)
-    lineage_per_cell=create_lineage_per_cell(lineage_per_frame,outpath)
-    
-    dirr=os.path.join(outpath,"CELLS_INFO_WITHOUT_DIAGRAMS_EXCEL")
-    if not os.path.exists(dirr):
-        os.mkdir(dirr)
-    list_of_cell_names =list(lineage_per_cell.keys())
-    for cell_name in list_of_cell_names:#
-       path=os.path.join(dirr,cell_name)  
-       if not os.path.exists(path):
-          os.mkdir(path)
-       print("path for excel=", path)
-       workbook = xlsxwriter.Workbook(os.path.join(path,cell_name +".xlsx"))     
-       worksheet = workbook.add_worksheet()
-       worksheet.set_column('B:B',12)
-       worksheet.set_column('F:F',12)
-       worksheet.set_column('G:G',12)
-       worksheet.set_column('C:C',5)
-       worksheet.set_column('D:D',5)
-       worksheet.write('A1', 'Cell name')
-       worksheet.write('B1', 'Frame')
-       worksheet.write('C1', 'cX')
-       worksheet.write('D1', 'cY')
-       worksheet.write('E1', 'Area')
-       worksheet.write('F1', 'Perimeter')
-       worksheet.write('G1', 'Circularity')     
-       x=lineage_per_cell[cell_name]
-       
-       row = 1
-       for i in range(len(x)): 
-          score = [cell_name, "Frame %s" % (x[i][0]+1), x[i][1][0],x[i][1][1],x[i][2],x[i][3],x[i][4]]
-          ['None' if v is None else v for v in score]
-          print("score=", score)    
-          for k in range(len(score)):
-            worksheet.write(row, k, score[k])
-          row+=1
-        
-       workbook.close()
-    return lineage_per_cell
-##########################################################
-"""    

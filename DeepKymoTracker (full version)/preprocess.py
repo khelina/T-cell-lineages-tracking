@@ -65,22 +65,36 @@ def load_clip(first_number_in_clip,full_core_fluor_name,full_core_bright_name,n_
     bright_images.append(bright)  
   return  fluor_images,fluor_images_compressed,bright_images,fluor_names,bright_names    
 ############################################
-def create_output_folders(outpath):
+def create_output_folders(outpath):# creates only names if folders already exost. It is importnat when retrieving
    subfolders=[]
-   subfolder_names=["MASKS",
-                 "IMAGES_FOR_FINAL_MOVIE",             
-                 "RED_LINEAGE_PATCHES",
-                 "RESULT_FLUORESCENT",
-                 "CELLS_INFO_EXCEL",
-                 "LINEAGE_IMAGES",
-                 "PLOTS",
-                 "PATCHES_FOR_RESULTS",
-                 "CLEANED_PATCHES", "RESULT_BRIGHT","FLUOR_BOREDRS"]              
+   ################################
+   subfolder_names=["BRIGHT_MOVIE_RESULTS",
+                    "FLUORESCENT_MOVIE_RESULTS",
+                    "RED_MOVIE_RESULTS",
+                    "PER_CELL_RESULTS",
+                    "HELPERS_(NOT_FOR_USER)", "FLUOR_BOREDRS"]
+   ##########################################################                 
    for i in range(len(subfolder_names)):
        destination=os.path.join(outpath,subfolder_names[i])
        if not os.path.exists(destination):
            os.mkdir(destination)
        subfolders.append(destination)
+   ######################################
+   helper_subfolders=[ "CLEANED_PATCHES", "LINEAGE_IMAGES", "MASKS","IMAGES_FOR_FINAL_MOVIE"]
+   for helper_subfolder in helper_subfolders:
+       destinn=os.path.join(outpath,"HELPERS_(NOT_FOR_USER)",helper_subfolder)
+       if not os.path.exists(destinn):
+           os.mkdir(destinn)
+   ###########################################
+   """
+   visualize_helper_folder=os.path.join(outpath,"HELPERS_(NOT_FOR_USER)","VISUALISATION_HELPERS")
+   #################################
+   visualize_helper_subfolders=["PLOTS","RED_LINEAGE_PATCHES","PATCHES_FOR_RESULTS"]
+   for vis_subfolder in visualize_helper_subfolders:
+       destin=os.path.join(visualize_helper_folder,vis_subfolder)
+       if not os.path.exists(destin):
+           os.mkdir(destin)
+   """
    return subfolders
 #############
 def create_models(software_folder):    

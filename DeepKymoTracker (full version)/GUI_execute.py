@@ -1210,6 +1210,7 @@ def initiate_tracking_page():
           start_empty_file_name += " "
      label_curr_frame_name.config(text=start_empty_file_name)
      # check if OUTPUT exists:
+    
      if not os.path.exists(outpath) :# 1. if OUTPUT does not exist       
           os.mkdir(outpath)
           print("OUTPUT does not exist")
@@ -1217,7 +1218,8 @@ def initiate_tracking_page():
           
           prepare_for_first_go()
      else:# 1. if OUTPUT exists
-          if  len(os.listdir(outpath))==0:# 2. if OUTPUT is empty
+          output_fluor_folder=os.path.join(outpath,"FLUORESCENT_MOVIE_RESULTS")
+          if  len(os.listdir( output_fluor_folder))==0:# 2. if OUTPUT is empty
               print("OUTPUT exists but empty")
               shutil.rmtree(outpath)# delete OUPUT if it exists
               os.mkdir(outpath)# create OUTPUT folder and start tracking from Frame 1
@@ -1225,7 +1227,7 @@ def initiate_tracking_page():
               prepare_for_first_go()
           else:# 2. if OUTPUT is not empty
             print("OUTPUT exists but non-empty")
-            output_fluor_folder= os.path.join(outpath, "RESULT_FLUORESCENT")
+            #output_fluor_folder= os.path.join(outpath, "FLUORESCENT_MOVIE_RESULTS")
             if os.path.exists(output_fluor_folder):# 3. if RESULT_FLUOR exists
                print("RESULT_FLUOR exists")
                if  len(os.listdir(output_fluor_folder))==0:# 4.if RESULT_FLUOR is empty
@@ -1289,7 +1291,7 @@ def initiate_tracking_page():
                   coords=last_frame_cell_dict[internal_cell_names[0]][14]
     
                   global output_images,lineage_images, output_names,lineage_images_cv2    
-                  output_images,lineage_images, output_names,lineage_images_cv2=extract_output_images(out_folders[3],out_folders[5],canvas_size_p4, output_images,output_names)
+                  output_images,lineage_images, output_names,lineage_images_cv2=extract_output_images(out_folders[1],os.path.join(out_folders[4],"LINEAGE_IMAGES"),canvas_size_p4, output_images,output_names)
     
                   global  previous_lineage_image, lineage_image_size
                   previous_lineage_image=lineage_images_cv2[-1]     
@@ -1882,7 +1884,7 @@ def cut_lineage(start_frame_internal): # after pausing
     dict_of_divisions = {key:val for key, val in dict_of_divisions.items() if val <= start_frame}
     print("dict_of_divisios after cut_lineage=", dict_of_divisions)
     """
-    folders_to_truncate=["MASKS","RESULT_FLUORESCENT","LINEAGE_IMAGES","CLEANED_PATCHES", "RESULT_BRIGHT"]
+    folders_to_truncate=[os.path.join("HELPERS_(NOT_FOR_USER)","MASKS"),"FLUORESCENT_MOVIE_RESULTS",os.path.join("HELPERS_(NOT_FOR_USER)","LINEAGE_IMAGES"),os.path.join("HELPERS_(NOT_FOR_USER)","CLEANED_PATCHES"), "BRIGHT_MOVIE_RESULTS"]
     for folder in folders_to_truncate:
         full_path_to_folder=os.path.join(outpath,folder)
         for filename in os.listdir(full_path_to_folder):
@@ -2141,11 +2143,11 @@ def display_first_frame():# display all frames after pushing button "Display res
     view_slider.set(str(first_frame_number))  
     slide_frames(first_frame_number)
     
-    global pedigree, lineage_per_frame_p4
+    global  lineage_per_frame_p4
     lineage_per_frame_p4=extract_lineage(outpath)
     print("len(lineage_per_frame_p4)=", len(lineage_per_frame_p4))
     # creates and saves per cell pedigree in pickle file, but then it is deleted when you push button "Execute"  
-    pedigree = create_pedigree(lineage_per_frame_p4, outpath, frame_size) 
+    #pedigree = create_pedigree(lineage_per_frame_p4, outpath, frame_size) 
     #instruct_var_p4.set("You stopped execution. \nTo see all the processed frames,  push button 4. Display result.")    
     instruct_var_p4.set("Check results by sliding the bar under Current Frame."
                     "\n - If you need to edit, stop the slide bar at the frame of interest and go for one of the options under Edit tools."
@@ -3008,7 +3010,7 @@ def create_final_movie():# create final movie + pedigree_per_cell (simplified, i
     dialog_label_5.config(text="Creating lineage and final movie...")
     global output_dir 
     print("output_dir=", output_dir)       
-
+    
     dialog_label_5.config(text="Lineage per cell is stored in" +str(output_dir))
     global frame_p5_size
     lineage_per_cell=create_lineage_for_Lorenzo(output_dir, frame_p5_size)
@@ -3135,89 +3137,52 @@ global cell_ID, cell_property
 cell_ID, cell_property = StringVar(page6),StringVar(page6)
 cell_ID.set("Choose cell ID")
 cell_property.set("Choose cell property")
-#options_cell=""    
-
+global ffrom
+ffrom=1
 ##############################################################
-
 global extract_info_from_file_name
 
-from postprocess import (sorted_aphanumeric, change_dict,extract_info_from_file_name, create_pedigree, plot_per_cell_info,
+from postprocess import (sorted_aphanumeric, change_dict,extract_info_from_file_name, create_pedigree,plot_per_cell_info,
               load_and_prepare_result_images)
 from extract_lineage_for_Lorenzo import extract_lineage,extract_const_movie_parameters
 from interface_functions import turn_image_into_tkinter
-
-def retrieve():
-    update_flash([])
-    progress_bar.grid(row=0, column=0,padx=10)
-    button_retrieve.config(bg="red")
-    button_create.config(bg=button_color)
-    global my_dir,out_folders, outpath, software_folder, options_cells, menu_cell_ID, pedigree
-   
-    my_dir = filedialog.askdirectory()# input movie folder (full path) 
-    input_movie_folder = os.path.basename(my_dir)
-    software_folder = os.path.dirname(my_dir)     
-    outpath = os.path.join(software_folder, "OUTPUT_"+input_movie_folder)
-    print("outpath=", outpath)
-    pedigree_path=os.path.join(outpath,"lineage_per_cell.pkl")
-    with open(pedigree_path, 'rb') as handle:
-         pedigree = pickle.load(handle)   
-    global keys   
-    keys=list(pedigree.keys())
-    label_feedback.config(text="\nRetrieving results ...\n\n\n")   
-    #cell_ID.set("Choose cell ID")
-    #cell_property.set("Choose cell property")
-    progress_bar.grid(row=0, column=0,padx=10)
-    global red_patches, one_cell_patches, plots, bright_names
-    red_patches, one_cell_patches, plots, bright_names=load_and_prepare_result_images(outpath, keys, progress_bar)
-    button_retrieve.config(bg=button_color)
-   # drop_1.config(bg = "black",font=all_font,fg=result_color)
-    #drop_2.config(bg = "black",font=all_font,fg="yellow")
-    label_feedback.config(text="1. Choose cell ID,\n2. Then choose cell property (Area, Perimeter, or Circularity."+
-                          "\n3. Use scrollbar to explore results.")
-    label_loaded.grid(row=0, column=1, padx=10)
-    label_loaded.config(text="Retrieved results for movie:\n"+ os.path.join(software_folder, input_movie_folder)+
-                    "\nExcel files can be accessed at\n"+ os.path.join(outpath,"CELLS_INFO_EXCEL"))
-
-    menu_cell_ID.destroy()
-    menu_cell_ID = OptionMenu(frame3_page6, cell_ID, *keys,  command= create_patch_slider)
-    menu_cell_ID.grid(row=3, column=0, padx=200)
-    menu_cell_ID.config(bg = label_color,font=all_font,activebackground="red")
-    menu_cell_ID["menu"].config(bg=label_color,activebackground="red")
-    button_retrieve.config(bg=button_color)
-    update_flash([menu_cell_ID])    
-#############################################
+##########################################
 def create():
     update_flash([])
     button_create.config(bg="red")
-    global my_dir,out_folders, outpath, software_folder, options_cells, menu_cell_ID, pedigree
-    
+    global my_dir,out_folders, outpath, software_folder, options_cells, menu_cell_ID    
     my_dir = filedialog.askdirectory()# input movie folder (full path) 
     input_movie_folder = os.path.basename(my_dir)
     software_folder = os.path.dirname(my_dir)     
     outpath = os.path.join(software_folder, "OUTPUT_"+input_movie_folder)
     label_feedback.config(text="\nCreating results ...\n\n\n")  
     progress_bar.grid(row=0, column=0,padx=10)
-    global pedigree, frame_size_p6, first_frame_number_p5   
-    lineage_per_frame=extract_lineage(outpath)
+    ################### load lineage_per_cell and constant movie params
+    global pedigree, frame_size_p6, first_frame_number_p5
+    pedigree_path=os.path.join(outpath,"lineage_per_cell.pkl")
+    with open(pedigree_path, 'rb') as handle:
+         pedigree = pickle.load(handle)   
+       
     frame_size_p6, true_cell_radius_pickle, patch_size,max_number_of_cells,\
            num_frames, full_core_fluor_name, n_digits, full_core_bright_name,  first_frame_number_p5,\
            base_colours,contrast_value,number_cells_in_first_frame=extract_const_movie_parameters(outpath)
-    
-    pedigree = create_pedigree(lineage_per_frame, outpath,frame_size_p6)# pedigree is also saved in pickle file
-    print("pickle file has been created!!!!!")
-    #keys_1=list(pedigree.keys())
-    #label_feedback.config(text="Cells discovered:  " +str(keys_1))
-    del lineage_per_frame
-    global per_cell_dict
-    
-    still_lineage=cv2.imread(os.path.join( outpath,"still_lineage.tif"), -1)
-    # plot images necessary for display. They will be loaded later, one-by-one, when sliding patches
-    plot_per_cell_info(
+    #############################################
+    cell_info_folder=os.path.join(outpath,"HELPERS_(NOT_FOR_USER)","VISUALISATION_HELPERS", "PLOTS")
+    if  len(os.listdir(cell_info_folder))==0:
+      print("CREATE")
+      label_feedback.config(text="\nCreating results ...\n\n\n")   
+      still_lineage=cv2.imread(os.path.join( outpath,"still_lineage.tif"), -1)
+      #### plot images necessary for display. They will be loaded later,with def load_and_prepare_result_images
+      plot_per_cell_info(
         pedigree, outpath, still_lineage,label_feedback, progress_bar)
-    #print("len(per_cell_dictionary=", len(pedigree))
-    #print("per_cell_dictionary.keys()=", pedigree.keys())
+    else:
+      print("RETRIEVE")      
+      label_feedback.config(text="\nRetrieving results ...\n\n\n")        
+      progress_bar.grid(row=0, column=0,padx=10)      
+    ######################################################
     global keys   
     keys=list(pedigree.keys())
+    print("keys=", keys)
     menu_cell_ID.destroy()
     menu_cell_ID = OptionMenu(frame3_page6, cell_ID, *keys,  command= create_patch_slider)
     menu_cell_ID.grid(row=3, column=0, padx=200)
@@ -3295,10 +3260,7 @@ def slide_patch(value):  # value=frame number from patch_slider
     label_circ.config(text="Circularity: " +
                str(pedigree[cell_ID.get()][internal_frame_number][6]), fg=combination[2])
 ###########################################
-global ffrom
-ffrom=1
-#ffrom=IntVar()
-#ffrom.set(1)
+
 ######################################
 def create_patch_slider(value):
   update_flash([])
@@ -3362,12 +3324,6 @@ button_create = tk.Button(frame2_page6, text=" Create",
                 bg=button_color, font=all_font,command=lambda: Thread(target=create).start())
 button_create.grid(row=0, column=0,sticky="n", pady=(10,0), padx=20)
 
-
-button_retrieve = tk.Button(frame2_page6, text="Retrieve",
-               bg=button_color, font=all_font, activebackground="red",command=lambda:Thread(target= retrieve).start())
-button_retrieve.grid(row=1, column=0,sticky="n", pady=(0,30), padx=20)
-
-#start_flash([b_retrieve, b_create],"begin", page6, flashers)
 #############################  sub3 #################
 label_centr = tk.Label(frame9_page6, text="Centroid:",bg = "black", fg="yellow" , font=all_font)
 label_centr.grid(row=0, column=0, pady=2)
@@ -3380,6 +3336,7 @@ label_perim.grid(row=2, column=0, pady=2)
 
 label_circ = tk.Label(frame9_page6, text="Circularity:", bg = "black", fg="yellow",font=all_font)
 label_circ.grid(row=3, column=0,pady=(0,70))
+######################### This is the end of Page-6 #############
 ###########################################################
 ############## Navigation between pages: buttons Back, Exit, Next plus buttons on title page
 #########################################################################
@@ -3423,7 +3380,7 @@ def combine_funcs(*funcs):
 ##################################################
 page_titles=["PAGE 1: TITLE PAGE","PAGE 2: EXTRACT MOVIE FROM FOLDER", "PAGE 3: CUT ONE WELL",
              "PAGE 4: EXECUTE AND CORRECT TRACKING", "PAGE 5: CORRECT SEGMENTATION","PAGE 6: VISUALISE RESULTS" ]
-initial_buttons=[[button_choose_folder],[button_select],[button_load],[button_load_p5],[button_create,button_retrieve]]
+initial_buttons=[[button_choose_folder],[button_select],[button_load],[button_load_p5],[button_create]]
 page_numbers=[page1,page2,page3,page4,page5, page6]
 
 ######################## locations of buttons Back, Exit and Next
