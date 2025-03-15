@@ -266,6 +266,7 @@ def load_and_prepare_result_images(outpath, keys,progress_bar):
 ######### This is for Step-5: creates VISUALISATION_HELPERS folder
 
 def plot_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progress_bar):
+   #global progress_bar
    dirr=os.path.join(outpath,"PER_CELL_RESULTS")
    red_patches_path=os.path.join(outpath,"HELPERS_(NOT_FOR_USER)","VISUALISATION_HELPERS" ,"RED_LINEAGE_PATCHES")
    #red_patches_path=outfolders[2] #"RED_PATCHES"
@@ -336,7 +337,7 @@ def plot_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progres
      perimeter_plots=[]
      circ_plots=[]
      x=[frames[kk] for kk in range (len(frames))]
-     #progress_bar["value"]=0 
+     progress_bar["value"]=0 
      for i in range(len(cell_info)):
        progress_bar["value"]=(i/total)*100 
        frame_number=frames[i]  

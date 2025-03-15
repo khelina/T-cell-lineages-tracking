@@ -1292,7 +1292,8 @@ def initiate_tracking_page():
     
                   global output_images,lineage_images, output_names,lineage_images_cv2    
                   output_images,lineage_images, output_names,lineage_images_cv2=extract_output_images(out_folders[1],os.path.join(out_folders[4],"LINEAGE_IMAGES"),canvas_size_p4, output_images,output_names)
-    
+                  print("len(lineage_images)=",len(lineage_images))
+                  print("len(lineage_images_cv2)=",len(lineage_images_cv2))
                   global  previous_lineage_image, lineage_image_size
                   previous_lineage_image=lineage_images_cv2[-1]     
                   lineage_image_size=previous_lineage_image.shape[0]
@@ -1961,7 +1962,7 @@ def execute():
         fluor_images,fluor_images_compressed,bright_images,fluor_names,br_names =load_clip( first_number_in_clip,full_core_fluor_name,full_core_bright_name,n_digits, num_frames, first_frame_number)
         
         clip_centr = predict_tracking_general(
-                coords, fluor_images, fluor_images_compressed, fluor_names,  first_number_in_clip, out_folders[0], tracker,last_frame_number, cell_radius, frame_size)
+                coords, fluor_images, fluor_images_compressed, fluor_names,  first_number_in_clip,  tracker,last_frame_number, cell_radius, frame_size)
         print("TRACKING PREDICTED FOR CLIP BEGINNING WITH FRAME  ", first_number_in_clip)
                 
         for kk in range(len(clip_centr)):# it is actually 4 (number of frames in clip)
@@ -2035,7 +2036,7 @@ def execute():
             photo_image_seg=turn_image_into_tkinter(image_seg, canvas_size_p4)
             #canvas_current.create_image(0,0,anchor=NW,image=photo_image_seg)
             output_images.append(photo_image_seg)
-            output_name=rename_file(out_folders[3],fluor_names[kk])
+            output_name=rename_file(out_folders[1],fluor_names[kk])
             output_name_base=os.path.split(output_name)[1]          
             output_names.append(output_name_base)
             #output_names.append(rename_file(out_folders[3],fluor_names[kk]))         
@@ -2123,7 +2124,7 @@ button_pause = Button(frame2_page4, text="3a. Pause ",activebackground="red",
 button_pause.grid(row=0, column=2, padx=10, pady=20)  
 #############################
 def slide_frames(value):# view_slider (main screen)
-
+    #print("len(lineage_images) inside SLIDE_FRAMES=",len(lineage_images))
     image_number = int(value)
     #print("image_number inside slide_frames=", image_number)    
     internal_image_number=image_number-first_frame_number+1    
@@ -3123,9 +3124,10 @@ label_title = tk.Label(frame1_page6, text="STEP 5: VISUALISE RESULTS",
               bg="yellow", fg="red", font=("Times", "24"))
 label_title.grid(row=0, column=3, padx=500, sticky="n")
 ############################## sub2 #####################
+global progress_bar
 progress_bar = ttk.Progressbar(frame3_page6, orient='horizontal',mode='determinate',length=280)
 progress_bar.grid(row=0, column=0,padx=10)
-progress_bar.grid_remove()
+
 #########################################################
 label_loaded = tk.Label(frame3_page6, text=" \n\n\n",
               bg="black", fg=result_color, font=all_font)
@@ -3147,16 +3149,57 @@ from postprocess import (sorted_aphanumeric, change_dict,extract_info_from_file_
 from extract_lineage_for_Lorenzo import extract_lineage,extract_const_movie_parameters
 from interface_functions import turn_image_into_tkinter
 ##########################################
-def create():
+def create_display_images_p6():
+        #popup_create_display_images.destroy()
+        label_feedback.config(text="\nCreating results ...\n\n\n")   
+        still_lineage=cv2.imread(os.path.join( outpath,"still_lineage.tif"), -1)
+        #### plot images necessary for display. They will be loaded later,with def load_and_prepare_result_images
+        plot_per_cell_info(pedigree, outpath, still_lineage,label_feedback, progress_bar)
+        load_display_images_p6()
+        
+    #######################################
+def retrieve_display_images_p6():
+        print("INSIDE RETRIEVE")
+        #popup_retrieve_display_images.destroy()
+        label_feedback.config(text="\nRetrieving results ...\n\n\n")          
+        load_display_images_p6()
+    ###########################################
+ ######################################################
+def load_display_images_p6():
+      #progress_bar.grid(row=0, column=0,padx=10) 
+      global keys,menu_cell_ID, progress_bar   
+      keys=list(pedigree.keys())
+      print("keys=", keys)
+      menu_cell_ID.destroy()
+      menu_cell_ID = OptionMenu(frame3_page6, cell_ID, *keys,  command= create_patch_slider)
+      menu_cell_ID.grid(row=3, column=0, padx=200)
+      menu_cell_ID.config(bg = label_color,font=all_font,activebackground="red")
+      menu_cell_ID["menu"].config(bg=label_color,activebackground="red")
+      global red_patches, one_cell_patches, plots, bright_names
+      label_feedback.config(text="\nLoading results ...\n\n\n") 
+      red_patches, one_cell_patches, plots, bright_names=load_and_prepare_result_images(outpath, keys, progress_bar)
+      label_loaded.grid(row=0, column=1, padx=10)
+      #l_loaded.config(text="Created results for movie:\n"+ os.path.join(software_folder, input_movie_folder))
+      label_loaded.config(text="Created results for movie:\n"+ os.path.join(software_folder, input_movie_folder)+
+                    "\nExcel files can be accessed at\n"+ os.path.join(outpath,"CELLS_INFO_EXCEL"))
+      label_feedback.config(text="1. Choose cell ID,\n2. Then choose cell property (Area, Perimeter, or Circularity."+
+                          "\n3. Use scrollbar to explore results.")
+      button_create.config(bg=button_color)
+      global col_dict
+      col_dict={"Area":["red", "yellow", "yellow"],"Perimeter":["yellow", "red", "yellow"],"Circularity":["yellow", "yellow", "red"]}
+      update_flash([menu_cell_ID])
+#############################################
+def upload_processed_movie():
     update_flash([])
+    global progress_bar
     button_create.config(bg="red")
-    global my_dir,out_folders, outpath, software_folder, options_cells, menu_cell_ID    
+    global my_dir,out_folders, outpath, software_folder, options_cells, menu_cell_ID,input_movie_folder    
     my_dir = filedialog.askdirectory()# input movie folder (full path) 
     input_movie_folder = os.path.basename(my_dir)
     software_folder = os.path.dirname(my_dir)     
     outpath = os.path.join(software_folder, "OUTPUT_"+input_movie_folder)
     label_feedback.config(text="\nCreating results ...\n\n\n")  
-    progress_bar.grid(row=0, column=0,padx=10)
+    #progress_bar.grid(row=0, column=0,padx=10)
     ################### load lineage_per_cell and constant movie params
     global pedigree, frame_size_p6, first_frame_number_p5
     pedigree_path=os.path.join(outpath,"lineage_per_cell.pkl")
@@ -3167,40 +3210,36 @@ def create():
            num_frames, full_core_fluor_name, n_digits, full_core_bright_name,  first_frame_number_p5,\
            base_colours,contrast_value,number_cells_in_first_frame=extract_const_movie_parameters(outpath)
     #############################################
+   
+    w,h = 400,150 
     cell_info_folder=os.path.join(outpath,"HELPERS_(NOT_FOR_USER)","VISUALISATION_HELPERS", "PLOTS")
-    if  len(os.listdir(cell_info_folder))==0:
+    if  len(os.listdir(cell_info_folder))==0:# display images are not existent, need to be created
       print("CREATE")
-      label_feedback.config(text="\nCreating results ...\n\n\n")   
-      still_lineage=cv2.imread(os.path.join( outpath,"still_lineage.tif"), -1)
-      #### plot images necessary for display. They will be loaded later,with def load_and_prepare_result_images
-      plot_per_cell_info(
-        pedigree, outpath, still_lineage,label_feedback, progress_bar)
+      ############################
+      global  popup_create_display_images
+      popup_create_display_images = tk.Toplevel(master=page6, bg=label_color)                        
+      popup_create_display_images.geometry('%dx%d+%d+%d' % (400, 159, (ws/2) - (w/2), (hs/2) - (h/2)))
+      label_create = tk.Label(popup_create_display_images, text="Display images have not been created yet.|It mught take long to create them. \nPress OK to start.",width=400, height=5, bg=label_color, fg="black", font='TkDefaultFont 14 bold' )
+      label_create.pack()                     
+      button_create_p6 = Button(popup_create_display_images, text="OK",
+      #bg=button_color,font='TkDefaultFont 14 bold', command=lambda:[popup_create_display_images.destroy(),create_display_images_p6()  ])
+      bg=button_color,font='TkDefaultFont 14 bold',command=lambda:[ popup_create_display_images.destroy(), Thread(target=create_display_images_p6).start()])
+      button_create_p6.pack()      
+      ###########################      
     else:
-      print("RETRIEVE")      
+      print("RETRIEVE")# diplay images are already there, just upload them
+      global  popup_retrieve_display_images      
       label_feedback.config(text="\nRetrieving results ...\n\n\n")        
-      progress_bar.grid(row=0, column=0,padx=10)      
-    ######################################################
-    global keys   
-    keys=list(pedigree.keys())
-    print("keys=", keys)
-    menu_cell_ID.destroy()
-    menu_cell_ID = OptionMenu(frame3_page6, cell_ID, *keys,  command= create_patch_slider)
-    menu_cell_ID.grid(row=3, column=0, padx=200)
-    menu_cell_ID.config(bg = label_color,font=all_font,activebackground="red")
-    menu_cell_ID["menu"].config(bg=label_color,activebackground="red")
-    global red_patches, one_cell_patches, plots, bright_names
-    label_feedback.config(text="\nLoading results ...\n\n\n") 
-    red_patches, one_cell_patches, plots, bright_names=load_and_prepare_result_images(outpath, keys, progress_bar)
-    label_loaded.grid(row=0, column=1, padx=10)
-    #l_loaded.config(text="Created results for movie:\n"+ os.path.join(software_folder, input_movie_folder))
-    label_loaded.config(text="Created results for movie:\n"+ os.path.join(software_folder, input_movie_folder)+
-                    "\nExcel files can be accessed at\n"+ os.path.join(outpath,"CELLS_INFO_EXCEL"))
-    label_feedback.config(text="1. Choose cell ID,\n2. Then choose cell property (Area, Perimeter, or Circularity."+
-                          "\n3. Use scrollbar to explore results.")
-    button_create.config(bg=button_color)
-    global col_dict
-    col_dict={"Area":["red", "yellow", "yellow"],"Perimeter":["yellow", "red", "yellow"],"Circularity":["yellow", "yellow", "red"]}
-    update_flash([menu_cell_ID])
+      ############################
+      popup_retrieve_display_images = tk.Toplevel(master=page6, bg=label_color)                        
+      popup_retrieve_display_images.geometry('%dx%d+%d+%d' % (400, 159, (ws/2) - (w/2), (hs/2) - (h/2)))
+      label_retrieve = tk.Label(popup_retrieve_display_images, text="Display images are already.|It should not take long to load them. \nPress OK to proceed.",width=400, height=5, bg=label_color, fg="black", font='TkDefaultFont 14 bold' )
+      label_retrieve.pack()                     
+      button_retrieve_p6 = Button(popup_retrieve_display_images, text="OK",
+      bg=button_color,font='TkDefaultFont 14 bold', command=lambda:[popup_retrieve_display_images.destroy(),Thread(target=retrieve_display_images_p6).start()])
+      button_retrieve_p6.pack()      
+      ###########################    
+   
 ############################################
 
 def slide_patch(value):  # value=frame number from patch_slider
@@ -3320,8 +3359,11 @@ label_feedback = tk.Label(frame2_page6, justify=tk.LEFT,text="Welcome to Step 4 
 label_feedback.grid(row=0, column=1, padx=300, sticky="n")
 
 
-button_create = tk.Button(frame2_page6, text=" Create",
-                bg=button_color, font=all_font,command=lambda: Thread(target=create).start())
+#button_create = tk.Button(frame2_page6, text=" Upload_processed_movie",
+                #bg=button_color, font=all_font,command=lambda: Thread(target=upload_processed_movie).start())
+button_create = tk.Button(frame2_page6, text=" Upload_processed_movie",
+                bg=button_color, font=all_font,command=upload_processed_movie)
+
 button_create.grid(row=0, column=0,sticky="n", pady=(10,0), padx=20)
 
 #############################  sub3 #################

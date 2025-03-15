@@ -73,7 +73,7 @@ def rename_file(destin,infile):
  newest=base+".tif" 
  return newest
 ###################################################
-def predict_tracking_general(coords,fluor_images,fluor_images_compressed,fluor_names,first_number_in_clip,destination,tracker,last_frame_number, cell_radius, frame_size): 
+def predict_tracking_general(coords,fluor_images,fluor_images_compressed,fluor_names,first_number_in_clip,tracker,last_frame_number, cell_radius, frame_size): 
   N_cells=coords.shape[0]  
   # if clip length is too short replicate necessary number of frames
   remaining=4
@@ -91,14 +91,14 @@ def predict_tracking_general(coords,fluor_images,fluor_images_compressed,fluor_n
   #tracker_6=trackers[5]
   for ii in range(0,N_cells, 1):    
           cds=coords[ii:ii+1]
-          centroids=predict_tracking(cds,fluor_images,fluor_images_compressed,fluor_names, first_number_in_clip,destination,tracker,last_frame_number, cell_radius, frame_size)    
+          centroids=predict_tracking(cds,fluor_images,fluor_images_compressed,fluor_names, first_number_in_clip,tracker,last_frame_number, cell_radius, frame_size)    
           for kk in range(4):          
              for kkk in range(1):# was 2
                 clip_centr[kk][ii+kkk]=centroids[kk][kkk]
   clip_centr=clip_centr[:(remaining)]  
   return clip_centr
 ######################################################
-def predict_tracking(coords,fluor_images,fluor_images_compressed,fluor_names, first_number_in_clip,destination,tracker,last_frame_number, cell_radius, frame_size):
+def predict_tracking(coords,fluor_images,fluor_images_compressed,fluor_names, first_number_in_clip,tracker,last_frame_number, cell_radius, frame_size):
    VIDEO=np.zeros((100,100,5))
    print("frame_size=", frame_size)
    seed_empty=np.zeros((frame_size,frame_size), np.uint8)    
