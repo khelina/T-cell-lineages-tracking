@@ -308,9 +308,11 @@ def paste_benchmark_patch(patch,a,b,c,d,cell_number, frame_size):
     final_image=image_with_one_cell_border[Bordersize:frame_size+Bordersize,Bordersize:frame_size+Bordersize]     
     return final_image
 #######################################################
-def plot_frame(cells,clip_centr,k,kk,fluor_images,fluor_names,out_folders,coords, coords_old, bright_images, bright_names, frame_size, n_digits, first_frame_number, contrast_value, current_lineage_image, p_size):      
+def plot_frame(cells,clip_centr,k,kk,fluor_images,fluor_names,out_folders,coords, coords_old, bright_images, bright_names, frame_size, n_digits, first_frame_number, contrast_value, current_lineage_image, p_size,red_images, red_names):      
        destin_mask=np.zeros((frame_size,frame_size),dtype="uint16")       
        destin_fluor=fluor_images[kk]
+       destin_bright=bright_images[kk]
+       destin_red=red_images[kk]
        bright_name=bright_names[kk]
        if contrast_value!="0":              
            clahe = cv2.createCLAHE(clipLimit=float(contrast_value))
@@ -325,9 +327,10 @@ def plot_frame(cells,clip_centr,k,kk,fluor_images,fluor_names,out_folders,coords
        cv2.imwrite(os.path.join(os.path.dirname(out_folders[5]),"still_lineage.tif"), still_lineage)
  
        #########################################
-       destin_bright=bright_images[kk]
+       
        destin_fluor = cv2.cvtColor(destin_fluor,cv2.COLOR_GRAY2BGRA)    
        destin_bright = cv2.cvtColor(destin_bright,cv2.COLOR_GRAY2BGRA)
+       destin_red = cv2.cvtColor(destin_red,cv2.COLOR_GRAY2BGRA)    
         
        coords=np.zeros((len(cells),2))           
        for kkk in range(len(cells)):
@@ -343,7 +346,8 @@ def plot_frame(cells,clip_centr,k,kk,fluor_images,fluor_names,out_folders,coords
          
          collour=cells["cell_%s" % kkk][15]
          destin_bright, debug_bright_image=paste_patch(destin_bright,patch_with_contours,a,b,c,d,collour,1.0, frame_size)        
-         destin_fluor, debug_destin_image=paste_patch(destin_fluor,patch_with_contours,a,b,c,d,collour,1.0, frame_size)
+         destin_fluor, debug_fluor_image=paste_patch(destin_fluor,patch_with_contours,a,b,c,d,collour,1.0, frame_size)
+         destin_red, debug_red_image=paste_patch(destin_red,patch_with_contours,a,b,c,d,collour,1.0, frame_size)
          centroid=cells["cell_%s" % kkk][6]
          #print("centroid=", centroid)
          start_point, end_point=(int(centroid[0]-p_size), int(centroid[1]-p_size)), (int(centroid[0]+p_size), int(centroid[1]+p_size))
@@ -357,17 +361,17 @@ def plot_frame(cells,clip_centr,k,kk,fluor_images,fluor_names,out_folders,coords
          
          cv2.putText(destin_fluor,texxt,(int(xx)-5,int(yy)+5),cv2.FONT_HERSHEY_PLAIN,0.7,collour,1) 
          cv2.putText(destin_bright,texxt,(int(xx)-5,int(yy)+5),cv2.FONT_HERSHEY_PLAIN,0.7,collour,1)         
-       
+         cv2.putText(destin_red,texxt,(int(xx)-5,int(yy)+5),cv2.FONT_HERSHEY_PLAIN,0.7,collour,1) 
          #cv2.putText(destin_fluor,texxt,(int(xx)-10,int(yy)+5),cv2.FONT_HERSHEY_PLAIN,1,collour,1) 
          #cv2.putText(destin_bright,texxt,(int(xx)-10,int(yy)+5),cv2.FONT_HERSHEY_PLAIN,1,collour,1)         
                   
          coords[kkk,0],coords[kkk,1]=xx, yy
-       cv2.imwrite(rename_file(out_folders[5],fluor_names[kk]), debug_destin_image)
+       cv2.imwrite(rename_file(out_folders[5],fluor_names[kk]), debug_fluor_image)
        #print("check_fluor_destin   ",rename_file(out_folders[3],fluor_names[kk]))       
        cv2.imwrite(rename_file(out_folders[1],fluor_names[kk]),destin_fluor)# plot destin_fluor to RESULT FLUOR folder
        
        cv2.imwrite(rename_file(out_folders[0],bright_names[kk]),destin_bright)#plot destin_bright to RESULT BRIGHT folder
-       
+       cv2.imwrite(rename_file(out_folders[2],red_names[kk]),destin_red)#plot destin_bright to RESULT BRIGHT folder
        #black_and_white=destin_mask.copy()     
        #black_and_white=black_and_white.astype(np.uint8)
        #black_and_white[destin_mask!=0]=255

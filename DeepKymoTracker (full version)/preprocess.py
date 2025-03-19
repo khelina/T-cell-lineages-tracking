@@ -44,26 +44,38 @@ def extract_file_name(full_image_name):
   first_frame_in_name=int(first)
   return full_core_name, n_digits, first_frame_in_name
 ###################################################
-def load_clip(first_number_in_clip,full_core_fluor_name,full_core_bright_name,n_digits, num_frames, first_frame_number): 
-  fluor_names, bright_names =[],[]   
-  fluor_images,fluor_images_compressed,bright_images=[],[],[]  
+def load_clip(first_number_in_clip,full_core_fluor_name,full_core_bright_name,n_digits, num_frames, first_frame_number,full_core_red_name): 
+  fluor_names, bright_names, red_names =[],[],[]   
+  fluor_images,fluor_images_compressed,bright_images, red_images=[],[],[],[]  
   last_frame_number=num_frames+first_frame_number-1  
   for kk in range(4):  
    if first_number_in_clip+kk <= last_frame_number:
     fluor_name=full_core_fluor_name+str(first_number_in_clip+kk).zfill(n_digits)+"_ch00.tif"   
-    fluor_names.append(fluor_name)    
+    fluor_names.append(fluor_name)
+    ################################    
     fl_pillow = Image.open(fluor_name)
     raw = np.array(fl_pillow, dtype=np.uint8)  
     fluor_images.append(raw)
+    #####################################
     raw2 = raw.copy()
     fluor_compressed = cv2.resize(raw2, (100, 100), interpolation=cv2.INTER_AREA)   
-    fluor_images_compressed.append(fluor_compressed)    
+    fluor_images_compressed.append(fluor_compressed)
+    ######################################    
     bright_name=full_core_bright_name+str(first_number_in_clip+kk).zfill(n_digits)+"_ch02.tif"
     bright_names.append(bright_name)
+    #########################################
     br_pillow = Image.open(bright_name)
     bright = np.array(br_pillow, dtype=np.uint8)   
-    bright_images.append(bright)  
-  return  fluor_images,fluor_images_compressed,bright_images,fluor_names,bright_names    
+    bright_images.append(bright)
+    ################################################
+    red_name=full_core_red_name+str(first_number_in_clip+kk).zfill(n_digits)+"_ch01.tif"
+    red_names.append(bright_name)
+    #########################################
+    red_pillow = Image.open(red_name)
+    red = np.array(red_pillow, dtype=np.uint8)   
+    red_images.append(red)
+    #############################################
+  return  fluor_images,fluor_images_compressed,bright_images,fluor_names,bright_names, red_names, red_images    
 ############################################
 def create_output_folders(outpath):# creates only names if folders already exost. It is importnat when retrieving
    subfolders=[]

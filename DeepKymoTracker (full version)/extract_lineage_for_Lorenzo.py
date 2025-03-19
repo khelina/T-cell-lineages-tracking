@@ -51,13 +51,13 @@ def extract_const_movie_parameters(outpath):
     #print("list_of_const_movie_params", list_of_const_movie_params)
     frame_size, true_cell_radius_pickle, patch_size,max_number_of_cells,\
     num_frames, full_core_fluor_name, n_digits, full_core_bright_name,  first_frame_number,\
-    base_colours,contrast_value, number_cells_in_first_frame= list_of_const_movie_params[0],list_of_const_movie_params[1],list_of_const_movie_params[2],\
+    base_colours,contrast_value, number_cells_in_first_frame,full_core_red_name= list_of_const_movie_params[0],list_of_const_movie_params[1],list_of_const_movie_params[2],\
     list_of_const_movie_params[3],list_of_const_movie_params[4],list_of_const_movie_params[5],list_of_const_movie_params[6],list_of_const_movie_params[7],list_of_const_movie_params[8],\
-    list_of_const_movie_params[9],list_of_const_movie_params[10],list_of_const_movie_params[11]
+    list_of_const_movie_params[9],list_of_const_movie_params[10],list_of_const_movie_params[11],list_of_const_movie_params[12]
     
     return frame_size, true_cell_radius_pickle, patch_size,max_number_of_cells,\
            num_frames, full_core_fluor_name, n_digits, full_core_bright_name,  first_frame_number,\
-           base_colours,contrast_value,number_cells_in_first_frame
+           base_colours,contrast_value,number_cells_in_first_frame,full_core_red_name
 ##########################
 def extract_lineage(outpath):
     lineage_path=os.path.join(outpath,"lineage_per_frame.pkl")
@@ -188,7 +188,7 @@ def create_lineage_per_cell(lineage_per_frame,outpath, frame_size):
             destin_br_patch=os.path.join(dirr, cell_id,"Bright patches")      
             br_patch_name=os.path.join(destin_br_patch,"bright_patch_cell_%s_frame_%s.tif" % (cell_id,frame_number))
             cv2.imwrite(br_patch_name,br_patch)
-            #############################################
+            ################# print red patches for each cell
             if frame_number in list_of_red_numbers:
                index=list_of_red_numbers.index(frame_number)
                red_name= red_names_sorted[index]           
@@ -220,18 +220,12 @@ def create_lineage_for_Lorenzo(outpath, frame_size):
     del lineage_per_frame
     ################### empty folder "PER_CELL_RESULTS" and its subfolders
     dirr=os.path.join(outpath,"PER_CELL_RESULTS")
-    #if os.path.exists(dirr):
-        #shutil.rmtree(dirr)
-    #os.mkdir(dirr)
+    
     list_of_cell_names =list(lineage_per_cell.keys())
     print(" list_of_cell_names inside create_lineage_for_LOrenzo=", list_of_cell_names)
     for cell_name in list_of_cell_names:#
-       path=os.path.join(dirr,cell_name)# create folders "1", "10", etc. for segmented images of each cell  
-       #if not os.path.exists(path):
-       #os.mkdir(path)
+       path=os.path.join(dirr,cell_name)# create folders "1", "10", etc. for segmented images of each cell        
        x=lineage_per_cell[cell_name]
-             
-       #print("path for excel=", path)
        workbook = xlsxwriter.Workbook(os.path.join(path,cell_name +".xlsx"))     
        worksheet = workbook.add_worksheet()
        worksheet.set_column('B:B',10)
