@@ -212,12 +212,13 @@ def create_lineage_per_cell(lineage_per_frame,outpath, frame_size):
          pickle.dump(pedigree_per_cell, f)  
   return pedigree_per_cell
 #############################################
-def create_lineage_for_Lorenzo(outpath, frame_size):
+def create_lineage_for_Lorenzo(outpath, frame_size, lineage_per_frame_p5):
     #print("outpath=", outpath)
-    lineage_per_frame=extract_lineage(outpath)
-    lineage_per_cell=create_lineage_per_cell(lineage_per_frame,outpath, frame_size)
+    #lineage_per_frame=extract_lineage(outpath)
+    #update_lineage(lineage_per_frame_p5,outpath, 'wb')
+    lineage_per_cell=create_lineage_per_cell(lineage_per_frame_p5,outpath, frame_size)
     ##############################################
-    del lineage_per_frame
+    del lineage_per_frame_p5
     ################### empty folder "PER_CELL_RESULTS" and its subfolders
     dirr=os.path.join(outpath,"PER_CELL_RESULTS")
     

@@ -1,8 +1,8 @@
 import os
 import pickle
-
+import cv2
 #outpath=r"C:\Users\helina\Desktop\DeepKymoTracker\OUTPUT_INPUT_MOVIE r"
-outpath=r"C:\Users\helina\Desktop\DeepKymoTracker\OUTPUT_INPUT_MOVIE_SHORT"
+outpath=r"C:\Users\helina\Desktop\DeepKymoTracker\OUTPUT_INPUT_MOVIE r"
 def extract_lineage(outpath):
     lineage_path=os.path.join(outpath,"lineage_per_frame.pkl")
     lineage_per_frame = []
@@ -16,7 +16,7 @@ def extract_lineage(outpath):
 ##############################
 lineage_per_frame=extract_lineage(outpath)
 print("len(lineage_per_frame)=",len(lineage_per_frame))
-
+destination="C:\\Users\\helina\\Desktop\\DEBUG"
 x=lineage_per_frame
 x[0].keys()
 
@@ -30,6 +30,9 @@ for i in range(len(x)):
         ext_cell_name=item[key][11]
         centr=item[key][6]
         check_list.append((key,frame_number,ext_cell_name))
+        patch=item[key][3]
+        patch_path=os.path.join(destination,"patch_%s.tif" %(i))
+        cv2.imwrite(patch_path,patch)
     
 print(check_list)
 

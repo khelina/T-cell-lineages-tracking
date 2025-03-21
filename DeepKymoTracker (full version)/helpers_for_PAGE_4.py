@@ -18,10 +18,10 @@ def sorted_aphanumeric(data):
 #######################################################
 
 def load_tracked_movie(input_dir,output_dir):    
-    path_filled_brights, path_filled_fluors, path_masks=[],[],[]
+    path_filled_brights, path_filled_fluors, path_filled_reds,path_masks=[],[],[],[]
     
 
-    empty_fluors, empty_brights, filled_fluors, filled_brights, masks=[],[],[],[],[]
+    empty_fluors, empty_brights, empty_reds,filled_fluors, filled_brights,filled_reds, masks=[],[],[],[],[],[],[]
     
     for filename in sorted_aphanumeric(os.listdir(input_dir)):
         if filename.endswith("ch02.tif"):
@@ -32,6 +32,10 @@ def load_tracked_movie(input_dir,output_dir):
            im_fluor=cv2.imread(os.path.join(input_dir, filename),0)
            #image_fluor=cv2.cvtColor(im_fluor,cv2.COLOR_GRAY2BGRA)
            empty_fluors.append(im_fluor)
+        if filename.endswith("ch01.tif"):
+           im_red=cv2.imread(os.path.join(input_dir, filename),0)
+           #image_fluor=cv2.cvtColor(im_fluor,cv2.COLOR_GRAY2BGRA)
+           empty_reds.append(im_red)
            
     print("loaded empty images")       
     dir_bright=os.path.join(output_dir,"BRIGHT_MOVIE_RESULTS")
@@ -48,6 +52,13 @@ def load_tracked_movie(input_dir,output_dir):
            im_fluor_filled=cv2.imread(path_im_fluor ,-1)
            path_filled_fluors.append(path_im_fluor)
            filled_fluors.append(im_fluor_filled)
+           
+    dir_red=os.path.join(output_dir,"RED_MOVIE_RESULTS")
+    for filename in sorted_aphanumeric(os.listdir(dir_red)):
+           path_im_red=os.path.join(dir_red, filename)
+           im_red_filled=cv2.imread(path_im_red ,-1)
+           path_filled_reds.append(path_im_red)
+           filled_reds.append(im_red_filled)
           
     print("loaded fluor filled  images")        
     dir_masks=os.path.join(output_dir, "HELPERS_(NOT_FOR_USER)","MASKS")
@@ -63,7 +74,7 @@ def load_tracked_movie(input_dir,output_dir):
     lineage_per_frame=extract_lineage(output_dir)
     print("loaded lineage_per_frame") 
     
-    return path_filled_brights,path_filled_fluors,path_masks, empty_fluors, empty_brights, filled_fluors, filled_brights, masks, lineage_per_frame
+    return path_filled_brights,path_filled_fluors,path_filled_reds,path_masks, empty_fluors, empty_brights,empty_reds, filled_fluors, filled_brights,filled_reds, masks, lineage_per_frame
 ###############################################
 
 
@@ -109,19 +120,20 @@ def delete_contour_with_specific_colour(filled_image, empty_image,color):
     return filled_image
    
 ################################################
-def update_lineage_after_manual_segm_correction(mask, filled_fluor,filled_bright,modified_cell_IDs,frame_dictionary,cells_in_current_frame_sorted,frame_size, p_size):
-    
-    
+def update_frame_dictionary_after_manual_segm_correction(mask, filled_fluor,filled_bright,modified_cell_IDs,frame_dictionary,cells_in_current_frame_sorted,frame_size, p_size):    
     keys=list(frame_dictionary.keys())
+    modified_cells=list(modified_cell_IDs.keys())
     #print("keys=", keys)
-    for i in range(len(modified_cell_IDs)):
-       cell_ID=modified_cell_IDs[i]
-       #print("cell_ID=",cell_ID)
+    for cell_ID in modified_cells:
+       #cell_ID=modified_cell_IDs[i]
+       print("cell_ID=",cell_ID)
        cell_name=frame_dictionary[ "cell_%s" % cell_ID][11]
-       #print("cell_name=",cell_name)
-       binary_image_with_one_cell =np.zeros((frame_size,frame_size),dtype="uint8")     
-       binary_image_with_one_cell[mask==cell_ID+1] = 255
-      
+       print("cell_name=",cell_name)
+
+       #binary_image_with_one_cell =np.zeros((frame_size,frame_size),dtype="uint8")     
+       #binary_image_with_one_cell[mask==cell_ID+1] = 255
+       binary_image_with_one_cell=modified_cell_IDs[cell_ID]
+       cv2.imwrite(r"C:\Users\helina\Desktop\binary_image_with_one_cell.tif",binary_image_with_one_cell)
        im2, contours, hierarchy = cv2.findContours(binary_image_with_one_cell,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
        cell_contour=contours[0]                          
        new_area=np.round(cv2.contourArea(cell_contour),2)
@@ -134,12 +146,13 @@ def update_lineage_after_manual_segm_correction(mask, filled_fluor,filled_bright
        new_cY = np.round(M["m01"] / M["m00"],2)
        ##########################################
        new_base=cv2.copyMakeBorder(binary_image_with_one_cell , top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize, borderType= cv2.BORDER_CONSTANT, value=0. )
-       a,b,c,d=int(round(new_cX))+Bordersize-p_size,int(round(new_cX))+Bordersize+ p_size,int(round(new_cY))+Bordersize-p_size,int(round(new_cY))+Bordersize+p_size           
-       new_patch = new_base[c:d, a:b]  
+       a_new,b_new,c_new,d_new=int(round(new_cX))+Bordersize-p_size,int(round(new_cX))+Bordersize+ p_size,int(round(new_cY))+Bordersize-p_size,int(round(new_cY))+Bordersize+p_size           
+       new_patch = new_base[c_new:d_new, a_new:b_new]
+       cv2.imwrite(r"C:\Users\helina\Desktop\new_patch.tif",new_patch)
        #########################################
       
        #old_path=os.path.join(path,"cell_%s.tif" %(cell_name))
-       old_patch=frame_dictionary[ "cell_%s" % cell_ID][3]
+       #old_patch=frame_dictionary[ "cell_%s" % cell_ID][3]
        #new_path=os.path.join(path,"new_cell_%s.tif" %(cell_name))
        #cv2.imwrite(old_path,old_patch)
        #cv2.imwrite(new_path, new_patch )
@@ -147,63 +160,21 @@ def update_lineage_after_manual_segm_correction(mask, filled_fluor,filled_bright
        cv2.putText(filled_fluor,cell_name,(int(new_cX)-10,int(new_cY)+5),cv2.FONT_HERSHEY_PLAIN,1,colour,1)
        cv2.putText(filled_bright,cell_name,(int(new_cX)-10,int(new_cY)+5),cv2.FONT_HERSHEY_PLAIN,1,colour,1)
        
-       old_area=frame_dictionary[ "cell_%s" % cell_ID][18]
-       old_perimeter=frame_dictionary[ "cell_%s" % cell_ID][19]
-       old_circularity=frame_dictionary[ "cell_%s" % cell_ID][20]
+       #old_area=frame_dictionary[ "cell_%s" % cell_ID][18]
+       #old_perimeter=frame_dictionary[ "cell_%s" % cell_ID][19]
+       #old_circularity=frame_dictionary[ "cell_%s" % cell_ID][20]
       
        ######## update frame_dictionary
        frame_dictionary["cell_%s" % cell_ID][3]=new_patch
        frame_dictionary["cell_%s" % cell_ID][6]=[new_cX,new_cY]
-       frame_dictionary["cell_%s" % cell_ID][7]=a
-       frame_dictionary["cell_%s" % cell_ID][8]=b
-       frame_dictionary["cell_%s" % cell_ID][9]=c
-       frame_dictionary["cell_%s" % cell_ID][10]=d
+       frame_dictionary["cell_%s" % cell_ID][7]=a_new
+       frame_dictionary["cell_%s" % cell_ID][8]=b_new
+       frame_dictionary["cell_%s" % cell_ID][9]=c_new
+       frame_dictionary["cell_%s" % cell_ID][10]=d_new
        frame_dictionary["cell_%s" % cell_ID][18]=new_area
        frame_dictionary["cell_%s" % cell_ID][19]=new_perimeter
        frame_dictionary["cell_%s" % cell_ID][20]=new_circularity
-       
+       final_patch= frame_dictionary["cell_%s" % cell_ID][3]
+       cv2.imwrite(r"C:\Users\helina\Desktop\final_patch.tif",final_patch)
+    return frame_dictionary  
 ###########################################
-"""
-def begin_with_one_cell():# after pushing button "1 cell"
-    stop_flash("radio", page4, flashers)
-    feedback_label.configure(text="Calculating position of cell in Frame 1 ...")
-    R1.configure(bg="red")
-    R2.configure(bg=button_color)
-    global coords, coords_very_first
-    
-           
-    full_name = os.path.join(directory, "Tracker-1")
-    print("full_name=", full_name)
-    json_file = open(full_name + "-model.json", "r")
-    model_read = json_file.read()
-    json_file.close()        
-        
-    tracker_1 = model_from_json(model_read)
-    tracker_1.load_weights(full_name + "-weights.h5")   
-    tracker_1.compile(Adam(lr=0.003), loss='mse',metrics=['mae'])
-       
-    coords = predict_first_frame(fluor_images_compressed, tracker_1)  
-    coords_very_first= coords.tolist()
-    print("coords=", coords)    
-    global colours, template_names, prev_frame
-    colours, template_names = create_color_dictionary(
-        max_number_of_cells, coords.shape[0])# 10 =maximum number of cells
-    global xs
-    xs=create_dictionary_of_xs( template_names, coords_very_first, num_frames)
-  
-    global text
-    text = template_names[:coords.shape[0]]
-    
-    R2.configure(bg=button_color, fg="black")
-    R1.configure(bg="black", fg="#00FFFF")
-    
-    start_flash([button_execute], "exec", page4, flashers)
-    feedback_label.config(text="The centroids of the cell in Frame 1 has been calculated.\n\nTo start execution, press Button 3.")    
-####################################   
-"""       
-       
-       
-       
-       
-       
- 
