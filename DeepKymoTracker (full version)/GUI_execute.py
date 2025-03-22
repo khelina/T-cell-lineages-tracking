@@ -2588,8 +2588,8 @@ R_remove_dead_cell.grid(row=1, column=3,pady=10, padx=10)
 page5=pages[4]
 page5.title("PAGE 5. CORRECT SEGMENTATION")
 page5.config(bg=bg_color)
-from helpers_for_PAGE_4 import delete_contour_with_specific_colour,update_frame_dictionary_after_manual_segm_correction, load_models_p5, load_tracked_movie
-from plot import paste_patch, prepare_contours,paste_benchmark_patch
+from helpers_for_PAGE_4 import delete_contour_with_specific_colour,update_frame_dictionary_after_manual_segm_correction, load_models_p5, load_tracked_movie_p5
+from plot import paste_patch, prepare_contours,paste_benchmark_patch,create_name_for_cleaned_patch
 
 from interface_functions import turn_image_into_tkinter,display_both_channels, show_2_canvases
 from postprocess import create_output_movie
@@ -2707,7 +2707,7 @@ def choose_and_load_tracked_movie():
     global empty_fluors, empty_brights, empty_reds,filled_fluors, filled_brights,filled_reds, masks
     global lineage_per_frame_p5
     dialog_label_5.config(text="loading tracked movie...")
-    path_filled_brights,path_filled_fluors,path_filled_reds,path_masks, empty_fluors, empty_brights, empty_reds,filled_fluors, filled_brights,filled_reds, masks, lineage_per_frame_p5=load_tracked_movie(input_dir,output_dir)
+    path_filled_brights,path_filled_fluors,path_filled_reds,path_masks, empty_fluors, empty_brights, empty_reds,filled_fluors, filled_brights,filled_reds, masks, lineage_per_frame_p5=load_tracked_movie_p5(input_dir,output_dir)
     global frame_p5_size,cell_radius_p5,patch_size_p5,full_core_red_name, first_frame_number_p5   
     #############
     frame_p5_size, cell_radius_p5, patch_size_p5,max_number_of_cells,\
@@ -2787,13 +2787,11 @@ def get_frame_info():# for manual segmentation correction
     global path_filled_bright, path_filled_fluor,path_filled_red,path_mask
     path_filled_bright, path_filled_fluor,path_filled_red,path_mask= path_filled_brights[internal_frame_number],path_filled_fluors[internal_frame_number],path_filled_reds[internal_frame_number],path_masks[internal_frame_number]
     global final_mask, filled_fluor,filled_bright, filled_red
-    final_mask, filled_fluor, filled_bright, filled_red = copy.deepcopy(mask),copy.deepcopy(filled_fluor_init), copy.deepcopy(filled_bright_init),copy.deepcopy(filled_red_init)
-    #final_mask=mask.copy()
-    update_flash([])
-    #update_flash([button_choose_one_cell, button_start])
+    final_mask, filled_fluor, filled_bright, filled_red = copy.deepcopy(mask),copy.deepcopy(filled_fluor_init), copy.deepcopy(filled_bright_init),copy.deepcopy(filled_red_init)    
+    update_flash([])  
     button_frame_info.configure(background = "red")
 ##########################################################
-def start_editing_by_clicking():
+def start_editing_by_clicking():#enter fast segmentation mode
    canvas_fluor_p5.unbind_all("<Button-1>")
    canvas_fluor_p5.unbind_all("<Button-1>")   
    canvas_fluor_p5.bind("<Button-1>", edit_by_clicking)
@@ -2828,30 +2826,26 @@ def edit_by_clicking(event):
       if len(points)==1:
           update_flash([button_save_frame])
       segmented_frame, segmented_patch,a,b,c,d, final_mask=segment_one_cell_at_a_time(segmentor, refiner,empty_fluor,empty_bright,centroid, cell_radius_p5, frame_p5_size, patch_size_p5, marker,final_mask,cell_number)
+      ##############
+      mask_with_one_cell=paste_benchmark_patch(segmented_patch,a,b,c,d,cell_number, frame_p5_size)
+      final_mask[final_mask==cell_number+1]=0# delete previous contour of cell
+      final_mask+=mask_with_one_cell# insert current contour of cell
       cv2.imwrite(r"C:\Users\helina\Desktop\segmented_patch.tif",segmented_patch)
+      final_mask_debug= final_mask.astype(np.uint8)
+      cv2.imwrite(r"C:\Users\helina\Desktop\final_mask_inside_edit.tif",final_mask_debug*200)
+      ###################
       patch_with_contours=prepare_contours(segmented_patch)    
       global filled_fluor, filled_bright, filled_red
-      #modified_cells=list(modified_cell_IDs.keys())
-      modified_cell_IDs[cell_number]=segmented_frame
-      #if cell_number not in modified_cell_IDs:
-          #modified_cell_IDs.append(cell_number)
-          #modified_cell_segmented_frames.append(segmented_frame)
-          #list_of_modified_frames.append([frame_number,modified_cell_IDs])
-      #print("modified_cell_IDs=",modified_cell_IDs)
-      dialog_label_5.config(text="If you are unable to achieve good segmentation by just clicking, start hand drawing mode by pushing Button 4.")
-      # print("list_of_modified_frames=",list_of_modified_frames)
+      ### here a very important dictionary of modified cells is created multiple times
+      modified_cell_IDs[cell_number]=[segmented_frame, final_mask, segmented_patch]      
+      dialog_label_5.config(text="If you are unable to achieve good segmentation by just clicking, start hand drawing mode by pushing Button 4.")     
       filled_fluor=delete_contour_with_specific_colour(filled_fluor, empty_fluor,cell_color)
       filled_bright=delete_contour_with_specific_colour(filled_bright, empty_bright,cell_color)
       filled_red=delete_contour_with_specific_colour(filled_red, empty_red,cell_color)
       
       filled_fluor,debug_fluor_image=paste_patch(filled_fluor,patch_with_contours,a,b,c,d,cell_color,1.0, frame_p5_size)
       filled_bright, debug_bright_image=paste_patch(filled_bright,patch_with_contours,a,b,c,d,cell_color,1.0, frame_p5_size)
-      filled_red, debug_red_image=paste_patch(filled_red,patch_with_contours,a,b,c,d,cell_color,1.0, frame_p5_size)
-      ############################################
-      #global final_mask
-      #mask_with_one_cell=paste_benchmark_patch(segmented_patch,a,b,c,d,cell_number, frame_p5_size)
-      #final_mask[final_mask==cell_number+1]=0# delete previous contour of cell
-      #final_mask+=mask_with_one_cell# insert current contour of cell
+      filled_red, debug_red_image=paste_patch(filled_red,patch_with_contours,a,b,c,d,cell_color,1.0, frame_p5_size)      
           
       global photo_fluor, photo_bright, canvas_bright_p5,canvas_fluor_p5     
       canvas_bright_p5,canvas_fluor_p5,photo_fluor, photo_bright=display_both_channels(filled_fluor,filled_bright,canvas_fluor_p5,canvas_bright_p5,window_p5_size)      
@@ -2860,7 +2854,7 @@ def edit_by_clicking(event):
 
 ############# This is the 2nd type of segmentation correction:
 ############# Splitting mergeed cells . Need to save the edits after you finish.
-        
+"""        
 #############################################
 def get_cell_IDs(event):# gets cell ID from  frame during Type 2 editing         
   cell_number=mask[int(event.y/window_p5_size*frame_p5_size),int(event.x/window_p5_size*frame_p5_size)]-1
@@ -2883,14 +2877,14 @@ def get_cell_centroids(event):# for splitting merged cell
                        event.y+2, outline=occluded_cell_color, fill=occluded_cell_color, width=2)
     manual_centroids.append([event.x/window_p5_size*frame_p5_size, event.y/window_p5_size*frame_p5_size])   
     centroid_label.config(text="Manual_centroids = "+ str(manual_centroids))
+"""
 ############ This is the 3rd type of segmentation correction:
 ############ manual drawing with mouse.Needs saving after each cell
 
 def choose_one_cell():
     dialog_label_5.config(text="Right-click on the cell you want to correct. Its contours should disappear.")
     button_choose_one_cell.configure(background = 'red')
-    button_start.configure(background = button_color)
-    
+    button_start.configure(background = button_color)    
     canvas_fluor_p5.unbind_all("<Button-1>")
     canvas_fluor_p5.unbind_all("<Button-3>")
     #canvas_fluor_p5.unbind("<Button-1>")
@@ -2898,15 +2892,18 @@ def choose_one_cell():
     canvas_fluor_p5.bind("<Button-3>", get_one_cell_ID)
     update_flash([button_hand_draw])
 ###########################################################
-def get_one_cell_ID(event): # for hand drawing
-   
+def get_one_cell_ID(event): # for hand drawing   
   global photo_fluor, photo_bright, canvas_bright_p5,canvas_fluor_p5  
   global hand_cell_number,hand_cell_color, filled_fluor, filled_bright, colour_four_channel         
   hand_cell_number=final_mask[int(event.y/window_p5_size*frame_p5_size),int(event.x/window_p5_size*frame_p5_size)]-1
   if hand_cell_number>=0:
-   if hand_cell_number not in modified_cell_IDs:
-        modified_cell_IDs.append(hand_cell_number)
-   final_mask[final_mask==hand_cell_number+1]=0         
+   #if hand_cell_number not in modified_cell_IDs:
+        #modified_cell_IDs.append(hand_cell_number)
+
+   final_mask[final_mask==hand_cell_number+1]=0
+   ############# new item added on Saturday 22/03
+   modified_cell_IDs[hand_cell_number]=[segmented_frame, final_mask, segmented_patch]       
+   ################################
    colour_four_channel=cells_in_current_frame_sorted[hand_cell_number][1]    
    colour_three_channel=colour_four_channel[:-1]
    colour_three_channel.reverse()    
@@ -3006,11 +3003,20 @@ def save_edits_for_frame(): #saves all eduts in current frame and modifues linag
     debug_item_after=lineage_per_frame_p5[internal_frame_number]["cell_0"][3]
     cv2.imwrite(r"C:\Users\helina\Desktop\patch_after.tif",debug_item_after)
     ##################################################   
-    cv2.imwrite(path_filled_bright, filled_bright )# rewrite RESULTS_BRIGHR
-    cv2.imwrite(path_filled_fluor, filled_fluor)# rewrite RESULTS_FLUOR
-    cv2.imwrite(path_filled_red, filled_red )
+    cv2.imwrite(path_filled_bright, filled_bright )# rewrite BRIGHT_MOVIE_RESULTS
+    cv2.imwrite(path_filled_fluor, filled_fluor)# rewrite FLEORESCENT_MOVIE_RESULTS
+    cv2.imwrite(path_filled_red, filled_red )# rewrite RED_MOVIE_RESULTS
     cv2.imwrite(path_mask, final_mask) # rewrite MASKS)
-    
+    cv2.imwrite(r"C:\Users\helina\Desktop\final_mask_inside_save_frame.tif",final_mask)
+    ################### rewrite CLEANED_PATCHES
+    cell_numbers=list(modified_cell_IDs.keys())
+    for cell_number in cell_numbers:
+       patch_path=create_name_for_cleaned_patch(path_filled_brights[internal_frame_number], cell_number)
+       print("patch_path=", patch_path)
+       patch=modified_cell_IDs[cell_number][2]
+       cv2.imwrite(os.path.join(output_dir,"HELPERS_(NOT_FOR_USER)","CLEANED_PATCHES",patch_path), patch)  
+        
+    ############################################
     global photo_fluor, photo_bright, canvas_bright_p5,canvas_fluor_p5     
     canvas_bright_p5,canvas_fluor_p5,photo_fluor, photo_bright=display_both_channels(filled_fluor,filled_bright,canvas_fluor_p5,canvas_bright_p5,window_p5_size)         
     global photo_filled_fluors, photo_filled_brights, filled_fluors, filled_brights# update frames on the screen
@@ -3018,8 +3024,8 @@ def save_edits_for_frame(): #saves all eduts in current frame and modifues linag
     photo_filled_brights[ internal_frame_number]=photo_bright
     filled_fluors[ internal_frame_number]=filled_fluor
     filled_brights[ internal_frame_number]=filled_bright
-    #global masks
-    #masks[frame_number-1]=final_mask
+    masks[ internal_frame_number]=final_mask
+    
     button_save_frame.configure(background = button_color)
     dialog_label_5.config(text="You have 3 oprions now:\n  - Go to the next frame ( by using the slide bar) \n - Finish editing the movie (by pushing Button 7)"
                             "\n - Leave it for some other time (by clicking  Exit or Next")
@@ -3219,7 +3225,7 @@ def upload_processed_movie():# look if display images exist. If so, load them, i
        
     frame_size_p6, true_cell_radius_pickle, patch_size,max_number_of_cells,\
            num_frames, full_core_fluor_name, n_digits, full_core_bright_name,  first_frame_number_p5,\
-           base_colours,contrast_value,number_cells_in_first_frame=extract_const_movie_parameters(outpath)
+           base_colours,contrast_value,number_cells_in_first_frame,full_core_red_name=extract_const_movie_parameters(outpath)
     #############################################
     list_of_cell_names =list(pedigree.keys())
     w,h = 400,150 

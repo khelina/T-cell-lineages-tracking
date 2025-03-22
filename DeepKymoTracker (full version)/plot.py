@@ -253,7 +253,7 @@ def create_name_for_cleaned_patch(full_bright_name, kkk):
     section_1 =base_bright_name[:index_t+1]
     section_1_new =section_1+"cell_%s_" % (kkk)
     section_2 = base_bright_name[index_t+1:-8]
-    section_2_new=section_2+"patc.tif"
+    section_2_new=section_2+"patch.tif"
     patch_name=section_1_new+section_2_new       
     return patch_name
 ###########################

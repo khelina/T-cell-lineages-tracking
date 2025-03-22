@@ -171,7 +171,7 @@ def refiner_predict(output_segm,fluor,bright,refiner):# output_segm is binary 0,
     output0=np.int_(pred1)
     output0=output0*255
     output=output0.reshape((96,96))
-    output.astype(np.uint8)
+ 
     return output
 #############################################
 def find_centroids(im):# finds centroid of one cell present in an image   
@@ -310,8 +310,7 @@ def unstick_cell_from_border(segmented_patch,frame_size, a,b,c,d):
       print("disaster")
     else:
       print("good")                
-    
-    
+########################################
 #######################################
 def segment_one_cell_at_a_time(segmentor, refiner,empty_fluor,empty_bright,centroid,cell_radius, frame_size, p_size, marker,final_mask,cell_number):        
       coord=centroid
@@ -319,8 +318,21 @@ def segment_one_cell_at_a_time(segmentor, refiner,empty_fluor,empty_bright,centr
       segmented_frame= np.zeros((frame_size+2*Bordersize,frame_size+2*Bordersize),dtype="float64")
       segmented_frame[c:d,a:b]=segmented_patch
       segmented_frame=segmented_frame[Bordersize:Bordersize+frame_size,Bordersize:Bordersize+frame_size]   
-      segmented_frame = segmented_frame.astype(np.uint8)                       
-      return segmented_frame, segmented_patch,a,b,c,d, final_mask
+      segmented_frame = segmented_frame.astype(np.uint8)
+      #########################################
+      im2, contours, hierarchy = cv2.findContours(segmented_frame,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
+      cell_contour=contours[0]                                
+      M = cv2.moments(cell_contour) 
+      if M["m00"]==0.:
+          M["m00"]=0.001
+      new_cX = np.round(M["m10"] / M["m00"],2)
+      new_cY = np.round(M["m01"] / M["m00"],2)
+       ##########################################
+      new_base=cv2.copyMakeBorder(segmented_frame , top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize, borderType= cv2.BORDER_CONSTANT, value=0. )
+      a_new,b_new,c_new,d_new=int(round(new_cX))+Bordersize-p_size,int(round(new_cX))+Bordersize+ p_size,int(round(new_cY))+Bordersize-p_size,int(round(new_cY))+Bordersize+p_size           
+      new_patch = new_base[c_new:d_new, a_new:b_new] 
+      ########################################                       
+      return segmented_frame, new_patch,a_new,b_new,c_new,d_new, final_mask
 ############# Apply segmentor to a segmented cell once again 
 def refine_segmentation(segmentor, refiner,empty_fluor,empty_bright,centroid,cell_radius, frame_size, p_size, marker,final_mask,cell_number):        
       coord=centroid

@@ -17,7 +17,7 @@ def sorted_aphanumeric(data):
     return sorted(data, key=alphanum_key)
 #######################################################
 
-def load_tracked_movie(input_dir,output_dir):    
+def load_tracked_movie_p5(input_dir,output_dir):    
     path_filled_brights, path_filled_fluors, path_filled_reds,path_masks=[],[],[],[]
     
 
@@ -118,7 +118,8 @@ def delete_contour_with_specific_colour(filled_image, empty_image,color):
     empty_image = cv2.cvtColor(empty_image,cv2.COLOR_GRAY2BGRA)
     filled_image[color_mask==255]=empty_image[color_mask==255]
     return filled_image
-   
+######################## for step-4 (segmentation correctiob)
+
 ################################################
 def update_frame_dictionary_after_manual_segm_correction(mask, filled_fluor,filled_bright,modified_cell_IDs,frame_dictionary,cells_in_current_frame_sorted,frame_size, p_size):    
     keys=list(frame_dictionary.keys())
@@ -130,9 +131,8 @@ def update_frame_dictionary_after_manual_segm_correction(mask, filled_fluor,fill
        cell_name=frame_dictionary[ "cell_%s" % cell_ID][11]
        print("cell_name=",cell_name)
 
-       #binary_image_with_one_cell =np.zeros((frame_size,frame_size),dtype="uint8")     
-       #binary_image_with_one_cell[mask==cell_ID+1] = 255
-       binary_image_with_one_cell=modified_cell_IDs[cell_ID]
+       ######################################
+       binary_image_with_one_cell=modified_cell_IDs[cell_ID][0]
        cv2.imwrite(r"C:\Users\helina\Desktop\binary_image_with_one_cell.tif",binary_image_with_one_cell)
        im2, contours, hierarchy = cv2.findContours(binary_image_with_one_cell,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
        cell_contour=contours[0]                          
@@ -150,7 +150,7 @@ def update_frame_dictionary_after_manual_segm_correction(mask, filled_fluor,fill
        new_patch = new_base[c_new:d_new, a_new:b_new]
        cv2.imwrite(r"C:\Users\helina\Desktop\new_patch.tif",new_patch)
        #########################################
-      
+       new_mask=modified_cell_IDs[cell_ID][1]
        #old_path=os.path.join(path,"cell_%s.tif" %(cell_name))
        #old_patch=frame_dictionary[ "cell_%s" % cell_ID][3]
        #new_path=os.path.join(path,"new_cell_%s.tif" %(cell_name))
@@ -171,6 +171,7 @@ def update_frame_dictionary_after_manual_segm_correction(mask, filled_fluor,fill
        frame_dictionary["cell_%s" % cell_ID][8]=b_new
        frame_dictionary["cell_%s" % cell_ID][9]=c_new
        frame_dictionary["cell_%s" % cell_ID][10]=d_new
+       frame_dictionary["cell_%s" % cell_ID][13]=new_mask
        frame_dictionary["cell_%s" % cell_ID][18]=new_area
        frame_dictionary["cell_%s" % cell_ID][19]=new_perimeter
        frame_dictionary["cell_%s" % cell_ID][20]=new_circularity
