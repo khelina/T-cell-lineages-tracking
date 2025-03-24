@@ -2698,7 +2698,8 @@ def choose_and_load_tracked_movie():
     update_flash([])
     button_load_p5.configure(background = 'red')
     global output_dir, input_dir,software_folder
-    output_dir = filedialog.askdirectory()         
+    output_dir = filedialog.askdirectory()
+          
     head_tail=os.path.split(output_dir)
     head =head_tail[0]
     tail =head_tail[1]
@@ -2729,6 +2730,9 @@ def choose_and_load_tracked_movie():
     image_number=1    
     show_2_canvases(canvas_bright_p5,canvas_fluor_p5,photo_filled_brights,photo_filled_fluors,image_number, window_p5_size)        
     view_slider_p5.configure(to=len(masks))
+    ##############################################
+    
+    ################################################
     button_load_p5.configure(background = button_color)
     update_flash([view_slider_p5])    
 ################################################
@@ -2791,6 +2795,10 @@ def get_frame_info():# for manual segmentation correction
     final_mask, filled_fluor, filled_bright, filled_red = copy.deepcopy(mask),copy.deepcopy(filled_fluor_init), copy.deepcopy(filled_bright_init),copy.deepcopy(filled_red_init)    
     update_flash([])  
     button_frame_info.configure(background = "red")
+    global oval# create invisible magenta oval
+    oval= canvas_fluor_p5.create_oval(5-3, 5-3, 5+3,
+                       5+3, outline="magenta", fill="magenta", width=2)
+    canvas_fluor_p5.itemconfig(1, state='hidden')
 ##########################################################
 """
 def activate_fast_edit_mode():#enter fast segmentation mode
@@ -2833,16 +2841,20 @@ def edit_by_clicking(event):
       modified_cell_IDs[cell_number]=[segmented_frame, final_mask, segmented_patch,[new_cX, new_cY], cell_color, cell_ID]      
       dialog_label_5.config(text="If you are unable to achieve good segmentation by just clicking, start hand drawing mode by pushing Button 4.")     
       filled_fluor=delete_contour_with_specific_colour(filled_fluor, empty_fluor,cell_color)
+     
       filled_bright=delete_contour_with_specific_colour(filled_bright, empty_bright,cell_color)
       filled_red=delete_contour_with_specific_colour(filled_red, empty_red,cell_color)
       
       filled_fluor,debug_fluor_image=paste_patch(filled_fluor,patch_with_contours,a,b,c,d,cell_color,1.0, frame_p5_size)
+      
       filled_bright, debug_bright_image=paste_patch(filled_bright,patch_with_contours,a,b,c,d,cell_color,1.0, frame_p5_size)
       filled_red, debug_red_image=paste_patch(filled_red,patch_with_contours,a,b,c,d,cell_color,1.0, frame_p5_size)      
           
       global photo_fluor, photo_bright, canvas_bright_p5,canvas_fluor_p5     
       canvas_bright_p5,canvas_fluor_p5,photo_fluor, photo_bright=display_both_channels(filled_fluor,filled_bright,canvas_fluor_p5,canvas_bright_p5,window_p5_size)      
-     
+      oval=canvas_fluor_p5.create_oval(init_x-3, init_y-3, init_x+3,
+                       init_y+3, outline="magenta", fill="magenta", width=2)
+    
 ###############################################
 def activate_fast_edit_mode():#enter fast segmentation mode
    button_activate_fast_edit_mode.configure(background = 'red')
@@ -2878,16 +2890,24 @@ def extract_cell_ID_and_marker_by_right_click(event):# for fast mode
     # extract info about clicked cell (from mask)
     global clicked_cell_positon_marker, cell_number,cell_color, mask, cell_ID, cell_name, oval
     clicked_cell_positon_marker=[int(round(event.x/window_p5_size*frame_p5_size)),int(round(event.y/window_p5_size*frame_p5_size))]
-    oval=canvas_fluor_p5.create_oval(event.x-3, event.y-3, event.x+3,
-                       event.y+3, outline="magenta", fill="magenta", width=2)
     cell_number=mask[clicked_cell_positon_marker[1],clicked_cell_positon_marker[0]]-1
-    cell_color=cells_in_current_frame_sorted[cell_number][1]
-    cell_ID=cells_in_current_frame_sorted[cell_number][0]
-    
-    dialog_label_5.config(text="Chosen cell ID="+str(cell_ID)+"\nmarker=" +str(clicked_cell_positon_marker))
     print("cell_number=", cell_number)
-    print("clicked_cell_positon_marker=", clicked_cell_positon_marker)
-    dialog_label_5.config(text="Start left-clicking on the cell itself and on the surrouning background to see how segmentation changes."
+   
+    if cell_number>=0:# in case you accidentally hit background (instead of cell)
+      canvas_fluor_p5.delete(oval)# delete magenta oval on previous cell
+      cell_color=cells_in_current_frame_sorted[cell_number][1]
+      cell_ID=cells_in_current_frame_sorted[cell_number][0]
+      ########################################
+   
+      global init_x,init_y# create magenta oval on clicked cell
+      init_x,init_y=event.x,event.y
+      oval=canvas_fluor_p5.create_oval(init_x-3, init_y-3, init_x+3,
+                       init_y+3, outline="magenta", fill="magenta", width=2)
+      ########################################
+      dialog_label_5.config(text="Chosen cell ID="+str(cell_ID)+"\nmarker=" +str(clicked_cell_positon_marker))
+      
+      print("clicked_cell_positon_marker=", clicked_cell_positon_marker)
+      dialog_label_5.config(text="Start left-clicking on the cell itself and on the surrouning background to see how segmentation changes."
                           "\nOnce you are happy wiht the result, repeat the process all over again with another cell, or if you are finished, click Button 6."
                           "\nYou can  undo by clicking Button 2 and then starting editing the frame all over again. Warning: you cannot undo edits after pushing Button 6 !")
 #####################################################
@@ -2895,6 +2915,7 @@ def get_one_cell_ID(event): # for hand drawing
   global photo_fluor, photo_bright, canvas_bright_p5,canvas_fluor_p5, cell_ID, oval  
   global hand_cell_number,hand_cell_color, filled_fluor, filled_bright, colour_four_channel, filled_red         
   hand_cell_number=final_mask[int(event.y/window_p5_size*frame_p5_size),int(event.x/window_p5_size*frame_p5_size)]-1
+  print(" hand_cell_number=", hand_cell_number)
   if hand_cell_number>=0:# hand_cell_number=0 if you accidentally hit background instead of cell body
    #if hand_cell_number not in modified_cell_IDs:
         #modified_cell_IDs.append(hand_cell_number)
@@ -2904,19 +2925,20 @@ def get_one_cell_ID(event): # for hand drawing
    colour_four_channel=cells_in_current_frame_sorted[hand_cell_number][1]    
    colour_three_channel=colour_four_channel[:-1]
    colour_three_channel.reverse()    
-   print("hand_cell_number=", hand_cell_number)
+  
    hand_cell_color="#%02x%02x%02x" % tuple(colour_three_channel)
-   #oval=canvas_fluor.create_oval(event.x-2, event.y-2, event.x+2,
-                       #event.y+2, outline="green", fill="green", width=2)
-   # erase clicked cell from all images
+   
    
    filled_fluor=delete_contour_with_specific_colour(filled_fluor, empty_fluor,colour_four_channel)
    filled_bright=delete_contour_with_specific_colour(filled_bright, empty_bright,colour_four_channel)
    filled_red=delete_contour_with_specific_colour(filled_red, empty_red,colour_four_channel) 
    # display frames with erased cell    
-   canvas_bright,canvas_fluor,photo_fluor, photo_bright=display_both_channels(filled_fluor,filled_bright,canvas_fluor_p5,canvas_bright_p5,window_p5_size)      
-   oval=canvas_fluor_p5.create_oval(event.x-3, event.y-3, event.x+3,
-                       event.y+3, outline="magenta", fill="magenta", width=2)
+   canvas_bright,canvas_fluor,photo_fluor, photo_bright=display_both_channels(filled_fluor,filled_bright,canvas_fluor_p5,canvas_bright_p5,window_p5_size)
+   canvas_fluor_p5.delete(oval)      
+   global init_x,init_y# create magenta oval on clicked cell
+   init_x,init_y=event.x,event.y
+   oval=canvas_fluor_p5.create_oval(init_x-3, init_y-3, init_x+3,
+                       init_y+3, outline="magenta", fill="magenta", width=2)
    cv2.imwrite("C:\\Users\\kfedorchuk\\Desktop\\filled_fluor_after_click.tif", filled_fluor)
    dialog_label_5.config(text="To be able to start hand drawing, push Button 4a.")   
 ########################
@@ -2994,18 +3016,20 @@ def save_hand_drawing_for_one_cell():
     #modified_cell_IDs[hand_cell_number]=[segmented_frame, final_mask, segmented_patch]
     modified_cell_IDs[hand_cell_number]=[segmented_frame, final_mask, segmented_patch,[new_cX, new_cY], colour_four_channel, cell_ID]      
     #########################################
+    global oval
     canvas_fluor_p5.delete(oval)
     cv2.drawContours(filled_fluor,[ctr] , 0, colour_four_channel, 1)
     cv2.drawContours(filled_bright,[ctr] , 0, colour_four_channel, 1)
     cv2.drawContours(filled_red,[ctr] , 0, colour_four_channel, 1)
-    canvas_bright_p5,canvas_fluor_p5,photo_fluor, photo_bright=display_both_channels(filled_fluor,filled_bright,canvas_fluor_p5,canvas_bright_p5,window_p5_size)      
+    canvas_bright_p5,canvas_fluor_p5,photo_fluor, photo_bright=display_both_channels(filled_fluor,filled_bright,canvas_fluor_p5,canvas_bright_p5,window_p5_size)
+    oval=canvas_fluor_p5.create_oval(init_x-3, init_y-3, init_x+3,
+                       init_y+3, outline="magenta", fill="magenta", width=2)      
     cv2.imwrite("C:\\Users\\kfedorchuk\\Desktop\\mask_after_3.tif", final_mask*10)  
     cv2.imwrite("C:\\Users\\kfedorchuk\\Desktop\\mask_hand.tif", mask_hand)
    
     points=[]
       
-    #if hand_cell_number not in modified_cell_IDs:
-       #modified_cell_IDs.append(hand_cell_number) 
+    
     dialog_label_5.config(text="If you want to hand draw  another cell, push Button 4 once again.\n If you are finished with the current frame, press Button 6."
                           "\nIf you are finished with the whole movie, press Button 7.")
 ################################################################
@@ -3058,6 +3082,7 @@ def save_edits_for_frame(): #saves all eduts in current frame and modifies linag
     filled_reds[ internal_frame_number]=filled_red
     masks[ internal_frame_number]=final_mask
     
+    canvas_fluor_p5.delete(oval)
     button_save_frame.configure(background = button_color)
     dialog_label_5.config(text="You have 3 oprions now:\n  - Go to the next frame ( by using the slide bar) \n - Finish editing the movie (by pushing Button 7)"
                             "\n - Leave it for some other time (by clicking  Exit or Next")
