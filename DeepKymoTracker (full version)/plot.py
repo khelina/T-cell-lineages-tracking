@@ -297,6 +297,9 @@ def paste_patch(destin_image,patch,a,b,c,d,color,alpha, frame_size):
     ##############################################
     
     destin_image_cropped=destin_image_border[Bordersize:frame_size+Bordersize,Bordersize:frame_size+Bordersize]
+    #cv2.putText(destin_image_cropped,texxt,(int(xx)-5,int(yy)+5),cv2.FONT_HERSHEY_PLAIN,0.7,color,1) 
+    #cv2.putText(destin_bright,texxt,(int(xx)-5,int(yy)+5),cv2.FONT_HERSHEY_PLAIN,0.7,collour,1)         
+    #cv2.putText(destin_red,texxt,(int(xx)-5,int(yy)+5),cv2.FONT_HERSHEY_PLAIN,0.7,collour,1) 
     return destin_image_cropped,  debug_destin_image
 ##########################################################################
 def paste_benchmark_patch(patch,a,b,c,d,cell_number, frame_size):    
@@ -345,6 +348,10 @@ def plot_frame(cells,clip_centr,k,kk,fluor_images,fluor_names,out_folders,coords
          a,b,c,d=cells["cell_%s" % kkk][7],cells["cell_%s" % kkk][8],cells["cell_%s" % kkk][9],cells["cell_%s" % kkk][10]        
          
          collour=cells["cell_%s" % kkk][15]
+         
+         xx,yy=cells["cell_%s" % kkk][6][0],cells["cell_%s" % kkk][6][1]
+         texxt=cells["cell_%s" % kkk][11]
+         
          destin_bright, debug_bright_image=paste_patch(destin_bright,patch_with_contours,a,b,c,d,collour,1.0, frame_size)        
          destin_fluor, debug_fluor_image=paste_patch(destin_fluor,patch_with_contours,a,b,c,d,collour,1.0, frame_size)
          destin_red, debug_red_image=paste_patch(destin_red,patch_with_contours,a,b,c,d,collour,1.0, frame_size)
@@ -356,14 +363,13 @@ def plot_frame(cells,clip_centr,k,kk,fluor_images,fluor_names,out_folders,coords
          #destin_fluor = cv2.rectangle(destin_fluor, (b,d), (a,c), collour[:-1], 1)
          one_cell_mask =paste_benchmark_patch(output_patch,a,b,c,d,kkk, frame_size)
          destin_mask+= one_cell_mask
-         xx,yy=cells["cell_%s" % kkk][6][0],cells["cell_%s" % kkk][6][1]
-         texxt=cells["cell_%s" % kkk][11]
+         #xx,yy=cells["cell_%s" % kkk][6][0],cells["cell_%s" % kkk][6][1]
+         #texxt=cells["cell_%s" % kkk][11]
          
          cv2.putText(destin_fluor,texxt,(int(xx)-5,int(yy)+5),cv2.FONT_HERSHEY_PLAIN,0.7,collour,1) 
          cv2.putText(destin_bright,texxt,(int(xx)-5,int(yy)+5),cv2.FONT_HERSHEY_PLAIN,0.7,collour,1)         
          cv2.putText(destin_red,texxt,(int(xx)-5,int(yy)+5),cv2.FONT_HERSHEY_PLAIN,0.7,collour,1) 
-         #cv2.putText(destin_fluor,texxt,(int(xx)-10,int(yy)+5),cv2.FONT_HERSHEY_PLAIN,1,collour,1) 
-         #cv2.putText(destin_bright,texxt,(int(xx)-10,int(yy)+5),cv2.FONT_HERSHEY_PLAIN,1,collour,1)         
+         
                   
          coords[kkk,0],coords[kkk,1]=xx, yy
        cv2.imwrite(rename_file(out_folders[5],fluor_names[kk]), debug_fluor_image)

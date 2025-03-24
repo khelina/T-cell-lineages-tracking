@@ -332,7 +332,7 @@ def segment_one_cell_at_a_time(segmentor, refiner,empty_fluor,empty_bright,centr
       a_new,b_new,c_new,d_new=int(round(new_cX))+Bordersize-p_size,int(round(new_cX))+Bordersize+ p_size,int(round(new_cY))+Bordersize-p_size,int(round(new_cY))+Bordersize+p_size           
       new_patch = new_base[c_new:d_new, a_new:b_new] 
       ########################################                       
-      return segmented_frame, new_patch,a_new,b_new,c_new,d_new, final_mask
+      return segmented_frame, new_patch,a_new,b_new,c_new,d_new, final_mask,[new_cX, new_cY]
 ############# Apply segmentor to a segmented cell once again 
 def refine_segmentation(segmentor, refiner,empty_fluor,empty_bright,centroid,cell_radius, frame_size, p_size, marker,final_mask,cell_number):        
       coord=centroid

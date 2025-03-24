@@ -121,7 +121,7 @@ def delete_contour_with_specific_colour(filled_image, empty_image,color):
 ######################## for step-4 (segmentation correctiob)
 
 ################################################
-def update_frame_dictionary_after_manual_segm_correction(mask, filled_fluor,filled_bright,modified_cell_IDs,frame_dictionary,cells_in_current_frame_sorted,frame_size, p_size):    
+def update_frame_dictionary_after_manual_segm_correction(mask, filled_fluor,filled_bright,modified_cell_IDs,frame_dictionary,frame_size, p_size):    
     keys=list(frame_dictionary.keys())
     modified_cells=list(modified_cell_IDs.keys())
     #print("keys=", keys)
