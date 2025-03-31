@@ -304,7 +304,7 @@ def click_one_cell_slow_mode(event):
                      print("clicked on  same cell")
                  cell_indicator=cell_number
     else:
-         print
+         print("I hit background")
 
 ############# This is the 2nd type of segmentation correction:
 def get_frame_info():# for manual segmentation correction
