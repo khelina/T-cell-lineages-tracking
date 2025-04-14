@@ -12,6 +12,13 @@ import re
 from tkinter import NW
 from threading import Thread
 #####################################
+def drag_start(event):
+        """Begining drag of an object"""
+        # record the item`s location
+        global x,y
+        x = event.x
+        y = event.y
+####################################
 class CustomThread(Thread):
     def _init_(self,group=None,target=None,name=None,args=(), kwargs={},Verbose=None):
         Thread._init_(self,group,name,args,kwargs)
@@ -69,9 +76,15 @@ def turn_image_into_tkinter(image, window_size): # if image is open in cv2
   photo_image =ImageTk.PhotoImage(photo_image)
   return  photo_image 
 ###############################################
-
-
-#################################################
+######### Page-5(Correct segmentaion); for sliding frames
+def show_2_canvases(canvas_bright,canvas_fluor,photo_filled_brights,photo_filled_fluors,image_number, window_size):
+    canvas_bright.delete('all')
+    canvas_fluor.delete('all')
+   
+    canvas_bright.create_image(0, 0, anchor=NW, image=photo_filled_brights[image_number-1])    
+    canvas_fluor.create_image(0, 0, anchor=NW, image=photo_filled_fluors[image_number-1])
+    
+########### Page-5(Correct segmentaion); for correcting one current frame
 def display_both_channels(filled_fluor,filled_bright,canvas_fluor,canvas_bright,window_size):      
       photo_fluor=turn_image_into_tkinter(filled_fluor, window_size) 
       photo_bright=turn_image_into_tkinter(filled_bright, window_size)
@@ -124,14 +137,7 @@ def show_3_channels(canvas_left,canvas_mid,canvas_right,left_names,mid_names,rig
     canvas_mid.create_image(0, 0, anchor=NW, image= mid_tk_image)
     canvas_right.create_image(0, 0, anchor=NW, image= right_tk_image)
     
-###############################################
-def show_2_canvases(canvas_bright,canvas_fluor,photo_filled_brights,photo_filled_fluors,image_number, window_size):
-    canvas_bright.delete('all')
-    canvas_fluor.delete('all')
-   
-    canvas_bright.create_image(0, 0, anchor=NW, image=photo_filled_brights[image_number-1])    
-    canvas_fluor.create_image(0, 0, anchor=NW, image=photo_filled_fluors[image_number-1])
-    
+
 #################################################
 
 def show_3_canvases(canvas_previous,canvas_current,canvas_lineage,output_images,lineage_images,image_number, first_frame_number):

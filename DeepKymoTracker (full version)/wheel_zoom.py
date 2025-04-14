@@ -53,6 +53,8 @@ class Zoom_Advanced(ttk.Frame):
     def move_to(self, event):
         ''' Drag (move) canvas to the new position '''
         self.canvas.scan_dragto(event.x, event.y, gain=1)
+        bbox = self.canvas.bbox(self.container)  # get image area
+        print("bbox=", bbox)
         self.show_image()  # redraw the image
 
     def wheel(self, event):
@@ -60,6 +62,7 @@ class Zoom_Advanced(ttk.Frame):
         x = self.canvas.canvasx(event.x)
         y = self.canvas.canvasy(event.y)
         bbox = self.canvas.bbox(self.container)  # get image area
+        print("bbox=", bbox)
         if bbox[0] < x < bbox[2] and bbox[1] < y < bbox[3]: pass  # Ok! Inside the image
         else: return  # zoom only inside image area
         scale = 1.0
@@ -80,6 +83,7 @@ class Zoom_Advanced(ttk.Frame):
     def show_image(self, event=None):
         ''' Show image on the Canvas '''
         bbox1 = self.canvas.bbox(self.container)  # get image area
+        print("bbox1=", bbox1)
         # Remove 1 pixel shift at the sides of the bbox1
         bbox1 = (bbox1[0] + 1, bbox1[1] + 1, bbox1[2] - 1, bbox1[3] - 1)
         bbox2 = (self.canvas.canvasx(0),  # get visible area of the canvas
