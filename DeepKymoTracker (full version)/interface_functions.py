@@ -85,11 +85,11 @@ def show_2_canvases(canvas_bright,canvas_fluor,photo_filled_brights,photo_filled
     canvas_fluor.create_image(0, 0, anchor=NW, image=photo_filled_fluors[image_number-1])
     
 ########### Page-5(Correct segmentaion); for correcting one current frame
-def display_both_channels(filled_fluor,filled_bright,canvas_fluor,canvas_bright,window_size):      
-      photo_fluor=turn_image_into_tkinter(filled_fluor, window_size) 
-      photo_bright=turn_image_into_tkinter(filled_bright, window_size)
-      canvas_fluor.create_image(0, 0, anchor=NW, image=photo_fluor)      
-      canvas_bright.create_image(0, 0, anchor=NW, image=photo_bright)
+def display_both_channels(filled_fluor,filled_bright,canvas_fluor,canvas_bright,target_size,image_origin_x,image_origin_y):      
+      photo_fluor=turn_image_into_tkinter(filled_fluor, target_size) 
+      photo_bright=turn_image_into_tkinter(filled_bright, target_size)
+      canvas_fluor.create_image(image_origin_x,image_origin_y, anchor=NW, image=photo_fluor)      
+      canvas_bright.create_image(image_origin_x,image_origin_y, anchor=NW, image=photo_bright)
       return canvas_bright,canvas_fluor, photo_fluor, photo_bright
 ###############################################################
 def extract_output_images(output_fluor_path,lineage_path, window_size, output_images, output_names):# extract fluor and linage images for display

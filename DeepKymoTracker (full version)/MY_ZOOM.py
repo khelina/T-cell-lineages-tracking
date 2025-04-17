@@ -117,6 +117,7 @@ def wheel(event):
 
 ###############################functions from GUI_execute.py
 ################################################
+"""
 def start_drawing():    
     canvas_fluor_p5.unbind("all")
     #canvas.bind("<Button-1>", savePosn)
@@ -126,6 +127,7 @@ def start_drawing():
     global points, points_for_original
     points=[]
     points_for_original=[]
+"""
 ####################################################
 def activate_hand_drawing_mode_for_one_cell():
     #bound_box=canvas_fluor_p5.bbox(image_object)
