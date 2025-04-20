@@ -119,7 +119,15 @@ def delete_contour_with_specific_colour(filled_image, empty_image,color):
     filled_image[color_mask==255]=empty_image[color_mask==255]
     return filled_image
 ######################## for step-4 (segmentation correctiob)
-
+def make_contour_red(filled_image, empty_image,color):
+    lower_thresh = np.array(color, dtype = "uint8")
+    upper_thresh= np.array(color, dtype = "uint8")
+    color_mask = cv2.inRange(filled_image, lower_thresh, upper_thresh)
+    cv2.imwrite("C:\\Users\\helina\\Desktop\\color_mask.tif", color_mask)
+    empty_image = cv2.cvtColor(empty_image,cv2.COLOR_GRAY2BGRA)
+    empty_image[color_mask==255]=[0,0,255,255]
+    cv2.imwrite("C:\\Users\\helina\\Desktop\\red_contor.tif", empty_image)
+    return empty_image
 ################################################
 def update_frame_dictionary_after_manual_segm_correction(mask, filled_fluor,filled_bright,modified_cell_IDs,frame_dictionary,frame_size, p_size):    
     keys=list(frame_dictionary.keys())
