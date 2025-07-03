@@ -1,102 +1,60 @@
-import tkinter as tk
-from tkinter import filedialog
-from tkinter import ttk
-from tkinter import *
-from PIL import ImageTk, Image
-from tkinter import messagebox, Canvas
 import numpy as np
-import os
+import itertools
 import cv2
-from interface_functions import turn_image_into_tkinter
-
-win= tk.Tk()
-
-canvas_size=382
-
-win.geometry('%dx%d+%d+%d' % (382, 500, 0, 0))
-ws = win.winfo_screenwidth() # width of the screen
-hs = win.winfo_screenheight() # height of the screen
-
-frame1 = tk.Frame(master=win , width=382, height=50, bg="blue")
-frame1.grid(row=0, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
+#################
+def find_intensities(image):# find all intensities in an image
+  x=list(np.unique(image))
+  x.remove(0.0) 
+  y=[float(format(float(str(x[i])), 'f')) for i in range(len(x))] 
+  return y         
+###############
+# create intensitiy dictionary for n_cells.
+# These intensities are powers of 2 divided by 1000000.
+# for instance: for n_cells=2, int_dictionary={'1e-06': [0], '2e-06': [1], '3e-06': [0, 1]} 
+def create_intensity_dictionary(n_cells):    
+     cell_ids =[ii for ii in range(n_cells)]
+     all_combinations =[]
+     for i in range(1,n_cells+1):
+          combinations = list(itertools.combinations(cell_ids, i))
+          all_combinations+=combinations
     
-frame2 = tk.Frame(master=win , width=canvas_size, height=canvas_size, bg="yellow")
-frame2.grid(row=1, column=0, rowspan=1, columnspan=1, sticky=W+E+N+S)
+     int_dictionary ={}    
+     for k in range(len(all_combinations)):
+         combo =all_combinations[k]
+         summ=0
+         for kk in range(len(combo)):
+            summ+=2**combo[kk]
+         int_dictionary[str(summ)]=list(combo) # summ=1,2,3,4,5,...
+     return int_dictionary  
+###############################################
+init_image=cv2.imread(r"C:\Users\helina\Desktop\int_image.tif",-1)
+init_intensities=find_intensities(init_image)
+print('init_intensities=',init_intensities)
+binaries=[bin(int(init_intensities[i]))[2:] for i in range(len(init_intensities))]
+print('binaries=',binaries)
+counts=[]
+for k in range(len(binaries)):
+   item=binaries[k]
+   cnt = item.count('1')
+   counts.append(cnt)
+print('counts=',counts)
+##################################################
+intensity_dictionary_for_frame=create_intensity_dictionary(3)
+print("intensity_dictionary_for_frame=", intensity_dictionary_for_frame)
+################# clean mask of the cell
+def remove_cell_from_mask(cell_number, init_image, intensity_dictionary_for_frame):
+
+    keys=list(intensity_dictionary_for_frame.keys())
+    print("keys=", keys)
+
+    for key in keys:
+        item=intensity_dictionary_for_frame[key]
+        print("item=", item)
+        if cell_number in item:
+            bad_int=int(key)
+            init_image[init_image==bad_int]=0
+    return init_image
     
-frame3 = tk.Frame(master=win , width=canvas_size, height=50, bg="green")
-frame3.grid(row=2, column=0, rowspan=1, columnspan=1, sticky=W+E+N+S)
-    
-global  canvas_zoom 
-canvas_zoom = Canvas(frame2, bg="black", height=canvas_size, width=canvas_size)
-canvas_zoom.pack(anchor='nw', fill='both', expand=True)
-
-#########################################
-global photo
-image_path=r"C:\Users\helina\Desktop\zoom.tif"
-image=cv2.imread(image_path,-1)
-photo=turn_image_into_tkinter(image, 382)
-image_zoom=canvas_zoom.create_image(0, 0, anchor=NW, image=photo)
-
-
-image_size=image.shape
-print("image_size=", image_size)
-#############################################
-def drag_start(event):
-        """Begining drag of an object"""
-        # record the item`s location
-        global x,y
-        x = event.x
-        y = event.y
-
-def drag_stop(event):
-        """End drag of an object"""
-        # reset the drag information 
-        global x,y
-        x = 0
-        y = 0
-
-def drag(event):
-        """Handle dragging of an object"""
-        # compute how much the mouse has moved
-        global x,y
-        delta_x = event.x - x
-        delta_y = event.y - y
-        # move the object the appropriate amount
-        canvas_zoom.move(image_zoom, delta_x, delta_y)
-        # record the new position
-        x = event.x
-        y= event.y
-canvas_zoom.bind( "<ButtonPress-1>", drag_start)
-canvas_zoom.bind("token<ButtonRelease-1>", drag_stop)
-canvas_zoom.bind("<B1-Motion>", drag)
-#canvas_zoom.bind('<B1-Motion>', lambda event: drag_image( event,canvas_zoom, image_zoom))
-####################################
-
-win.mainloop()
-
-def zoom_in():
-                
-        global  tk_image, my_image, x0, y0, image_object      
-        my_image = cv2.resize(my_image,(int(my_image.shape[0] * 1.2), int(my_image.shape[1] * 1.2)), cv2.INTER_LINEAR)
-        cv2.imwrite(r"C:\Users\helina\Desktop\my_image+zoomed_in.tif", my_image)
-        new_shape=my_image.shape[0]
-        x0_new, y0_new=x0*1.2,y0*1.2
-        x0,y0=x0_new, y0_new
-        print("x0,y0=", x0, y0)
-        print("x0_new,y0_new=", x0_new, y0_new)
-        tk_image =  turn_image_into_tkinter(my_image,new_shape)
-        canvas.delete("all")
-        image_object=canvas.create_image(360-x0_new, 360-y0_new, anchor="nw", image=tk_image)
-
-def zoom_out():
-        global  tk_image, my_image, x0, y0, image_object      
-        my_image = cv2.resize(my_image,(int(my_image.shape[0] * 0.8), int(my_image.shape[1] * 0.8)), cv2.INTER_LINEAR)
-        cv2.imwrite(r"C:\Users\helina\Desktop\my_image+zoomed_in.tif", my_image)
-        new_shape=my_image.shape[0]
-        x0_new, y0_new=x0*0.8,y0*0.8
-        x0,y0=x0_new, y0_new
-        
-        tk_image =  turn_image_into_tkinter(my_image,new_shape)
-        canvas.delete("all")
-        image_object=canvas.create_image(360-x0_new, 360-y0_new, anchor="nw", image=tk_image)
-       
+###########################################
+init_image=remove_cell_from_mask(1, init_image, intensity_dictionary_for_frame)
+cv2.imwrite(r"C:\Users\helina\Desktop\cleaned_image.tif",init_image)

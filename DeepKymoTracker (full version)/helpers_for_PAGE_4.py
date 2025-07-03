@@ -65,8 +65,13 @@ def load_tracked_movie_p5(input_dir,output_dir):
     for filename in sorted_aphanumeric(os.listdir(dir_masks)):
            path_im_mask=os.path.join(dir_masks, filename)
            im_mask=cv2.imread(path_im_mask ,-1)
+           
+           #scaled_mask=scaled_mask.astype(np.float16)
+           print("im_mask.dtype=",im_mask.dtype)
+           print("np.max(im_mask)=",np.max(im_mask))
            path_masks.append(path_im_mask)
            masks.append(im_mask)
+           del im_mask
            
     print("loaded masks")        
            
@@ -124,10 +129,11 @@ def make_contour_red(filled_image, empty_image,color):
     upper_thresh= np.array(color, dtype = "uint8")
     color_mask = cv2.inRange(filled_image, lower_thresh, upper_thresh)
     cv2.imwrite("C:\\Users\\helina\\Desktop\\color_mask.tif", color_mask)
-    empty_image = cv2.cvtColor(empty_image,cv2.COLOR_GRAY2BGRA)
-    empty_image[color_mask==255]=[0,0,255,255]
-    cv2.imwrite("C:\\Users\\helina\\Desktop\\red_contor.tif", empty_image)
-    return empty_image
+    #empty_image = cv2.cvtColor(empty_image,cv2.COLOR_GRAY2BGRA)
+    filled_image=delete_contour_with_specific_colour(filled_image, empty_image,color)
+    filled_image[color_mask==255]=[0,0,255,255]
+    cv2.imwrite("C:\\Users\\helina\\Desktop\\red_contor.tif", filled_image)
+    return filled_image
 ################################################
 def update_frame_dictionary_after_manual_segm_correction(mask, filled_fluor,filled_bright,modified_cell_IDs,frame_dictionary,frame_size, p_size):    
     keys=list(frame_dictionary.keys())
