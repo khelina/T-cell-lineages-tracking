@@ -2727,9 +2727,9 @@ def choose_and_load_tracked_movie():
     #################################
     global resize_coeff, new_shape
     resize_coeff=window_p5_size /frame_p5_size
-    global  image_origin_x,image_origin_y, factor_in, factor_out,zoom_coeff,delta_x,delta_y# for zooming
+    global  image_origin_x,image_origin_y, factor_in, factor_out,factor,zoom_coeff,delta_x,delta_y# for zooming
     delta_x, delta_y=0,0
-    factor_in, factor_out=1,1
+    factor_in, factor_out, factor=1,1,1
     image_origin_x,image_origin_y=0,0
     zoom_coeff=1
     new_shape=window_p5_size
@@ -2752,9 +2752,10 @@ def choose_and_load_tracked_movie():
     button_load_p5.configure(background = button_color)
     update_flash([view_slider_p5])
     ######################### new addtion for click_one_cell
-    global mode_variable# used in radio buttons for editing,indicates which canvas is used for IDs extraction, value = "Current" or "Previous"
-    mode_variable = StringVar()
-    mode_variable.set(" ")   
+    global mode_variable,zoom_status# used in radio buttons for editing,indicates which canvas is used for IDs extraction, value = "Current" or "Previous"
+    mode_variable,zoom_status = StringVar(),StringVar()
+    mode_variable.set(" ") 
+    zoom_status.set("off")
     activate_fast_edit_mode()
     global previous_frame_number, previous_cell_number
     previous_frame_number, previous_cell_number=-2, -2
@@ -2834,9 +2835,9 @@ def activate_slow_edit_mode():
     # display frames with erased cell    
     cv2.imwrite("C:\\Users\\helina\\Desktop\\filled_fluor.tif", filled_fluor)  
     canvas_bright_p5,canvas_fluor_p5,photo_fluor, photo_bright=display_both_channels(filled_fluor_copy,filled_bright_copy,canvas_fluor_p5,canvas_bright_p5,new_shape,image_origin_x,image_origin_y)
-    global oval_x,oval_y# create magenta oval on clicked cell
-    oval=canvas_fluor_p5.create_oval(oval_x-5, oval_y-5, oval_x+5,
-                       oval_y+5, outline="magenta", width=1)
+    global oval_x,oval_y, factor# create magenta oval on clicked cell
+    oval=canvas_fluor_p5.create_oval(oval_x-5*factor, oval_y-5*factor, oval_x+5*factor,
+                       oval_y+5*factor, outline="magenta", width=1)
     #oval=canvas_fluor_p5.create_oval(oval_x-3, oval_y-3, oval_x+3,
                       #oval_y+3, outline="magenta", fill="magenta", width=2)
 #############################################
@@ -2845,14 +2846,15 @@ def right_click_one_cell(event):# extract info about clicked celland take action
     global frame_number, previous_frame_number, previous_cell_number,internal_frame_number, canvas_fluor_p5, canvas_bright_p5
     global clicked_cell_position_marker, cell_number_in_frame, filled_fluor, filled_bright, filled_red
     global oval, cell_color, cell_ID
-    global oval_x,oval_y
+    global oval_x_init,oval_y_init, oval_x,oval_y
     ############################################
     
     #############################################
     frame_number=view_slider_p5.get()
     print("frame_number, previous_frame_number=", frame_number, previous_frame_number)    
     #internal_frame_number=frame_number-first_frame_number_p5    
-    ###################################################    
+    ###################################################
+    print("mode=", mode)    
     if mode=="fast":# the fast editing (by clicking)   
        if frame_number!=previous_frame_number:# if you are in a new frame
           if previous_frame_number!=-2:# at least 1 frame is edited already
@@ -2892,9 +2894,10 @@ def right_click_one_cell(event):# extract info about clicked celland take action
                      cell_ID=cells_in_current_frame_sorted[cell_number_in_frame][0]
                      ########################################
                      #global init_x,init_y# create magenta oval on clicked cell
-                     oval_x,oval_y=event.x,event.y# coordinates in window
+                     oval_x_init,oval_y_init=event.x,event.y# coordinates in window
+                     oval_x,oval_y=oval_x_init,oval_y_init
                      #oval_x,oval_y =clicked_cell_position_marker[0],clicked_cell_position_marker[1]
-                     print("oval_x, oval_y=",oval_x, oval_y)
+                     print("oval_x-init, oval_y_init=",oval_x, oval_y)
                      #oval=canvas_fluor_p5.create_oval(oval_x-5, oval_y-5, oval_x+5,
                           #oval_y+5, outline="magenta",  width=1)
                      global red_color,filled_fluor_copy,filled_bright_copy,filled_red_copy
@@ -2914,11 +2917,11 @@ def right_click_one_cell(event):# extract info about clicked celland take action
                      #global photo_fluor_copy, photo_bright_copy
                      canvas_bright_p5,canvas_fluor_p5,photo_fluor, photo_bright=display_both_channels(filled_fluor_copy,filled_bright_copy,canvas_fluor_p5,canvas_bright_p5,new_shape,image_origin_x,image_origin_y)
                      #canvas_fluor_p5.delete(oval)      
-                     oval=canvas_fluor_p5.create_oval(oval_x-5, oval_y-5, oval_x+5,
-                       oval_y+5, outline="magenta", width=1)
+                     oval=canvas_fluor_p5.create_oval(oval_x-5*factor, oval_y-5*factor, oval_x+5*factor,
+                       oval_y+5*factor, outline="magenta", width=1)
                                      
                      #previous_cell_number=cell_number
-          else:# if you hit cell with he same number, but in different frame
+          else:# if you hit cell with the same number, but in different frame
               #if frame_number!=previous_frame_number:
                     #previous_cell_number=-2
                     print("previous_cell_number=", previous_cell_number)
@@ -3012,10 +3015,11 @@ def get_x_and_y(event):
 ############################################    
 def draw_with_mouse(event):
     global coeff
-    global lasx,lasy, line_fl, line_br   
-    line_fl=canvas_fluor_p5.create_line((lasx,lasy,event.x,event.y), fill="red", width=5)
+    global lasx,lasy, line_fl, line_br 
+    xx,yy=event.x,event.y
+    line_fl=canvas_fluor_p5.create_line((lasx,lasy,xx,yy), fill="red", width=5)
     get_x_and_y(event)
-    line_br=canvas_bright_p5.create_line((lasx,lasy,event.x,event.y), fill="red", width=5)
+    line_br=canvas_bright_p5.create_line((lasx,lasy,xx,yy), fill="red", width=5)
     cell_contour_fl.append(line_fl)
     cell_contour_br.append(line_br)   
     #lasx,lasy=event.x,event.y
@@ -3028,8 +3032,7 @@ def erase_line():# in case you are not happy with your hand contour and want to 
     global cell_contour_fl, cell_contour_br, points,mask_hand, final_mask, points_for_original
     for i in range(len(cell_contour_fl)):        
          canvas_fluor_p5.delete(cell_contour_fl[i])
-         canvas_bright_p5.delete(cell_contour_br[i])
-   
+         canvas_bright_p5.delete(cell_contour_br[i])   
     mask_hand=np.zeros((frame_p5_size,frame_p5_size),np.uint8)
     cell_number_in_mask=2**cell_number_in_frame
     final_mask[final_mask==cell_number_in_mask]=0
@@ -3040,8 +3043,8 @@ def erase_line():# in case you are not happy with your hand contour and want to 
 ###############################################
 ###############################################
 def start_zoom():
-    mode_variable.set("zoom")
-    button_activate_fast_edit_mode.configure(background =button_color)
+    zoom_status.set("on")
+    #button_activate_fast_edit_mode.configure(background =button_color)
     global my_image_fl, my_image_br, points, canvas_fluor_p5, canvas_bright_p5,photo_fluor, photo_bright, internal_frame_number,x0,y0
     points=[]
     frame_number=view_slider_p5.get()
@@ -3061,21 +3064,24 @@ def start_zoom():
     
     print("x0, yo=", x0, y0)
     print(" image_origin_x,image_origin_y=",  image_origin_x,image_origin_y)
-    
-    print("oval_x, oval_y BEFORE=", oval_x, oval_y)
-   
+       
+    oval_x,oval_y=300,300
     canvas_bright_p5,canvas_fluor_p5, photo_fluor, photo_bright=display_both_channels(filled_fluor_copy,filled_bright_copy,canvas_fluor_p5,canvas_bright_p5,window_p5_size,image_origin_x,image_origin_y)
-    oval_x,oval_y= (oval_x+image_origin_x)/zoom_coeff,(oval_y+image_origin_y)/zoom_coeff
     #oval_x,oval_y= (oval_x+image_origin_x)/zoom_coeff,(oval_y+image_origin_y)/zoom_coeff
-    print("oval_x, oval_y  AFTER=", oval_x, oval_y)
-    #print("new_oval_x, new_oval_y=", new_oval_x, new_oval_y)    
+       
     oval=canvas_fluor_p5.create_oval(oval_x-5, oval_y-5, oval_x+5,
-                       oval_y+5, outline="magenta", width=1)
+                       oval_y+5, outline="magenta", width=1)    
+    canvas_fluor_p5.bind('<MouseWheel>', wheel)
+##############################################
+def start_pan():
     canvas_fluor_p5.unbind_all("<Button-1>")
     canvas_fluor_p5.bind( "<ButtonPress-1>", drag_start)
     canvas_fluor_p5.bind("token<ButtonRelease-1>", drag_stop)
     canvas_fluor_p5.bind("<B1-Motion>", drag)
-    canvas_fluor_p5.bind('<MouseWheel>', wheel)
+#######################################
+def stop_pan():
+    canvas_fluor_p5.unbind_all("<Button-1>")  
+    canvas_fluor_p5.bind("<Button-1>", edit_by_clicking)
         
 ###############################################               
 def drag_start(event):
@@ -3116,17 +3122,17 @@ def drag(event):
         canvas_bright_p5.create_image(image_origin_x,image_origin_y, anchor="nw", image=photo_bright)
        
         print("bbox after dragging=", canvas_fluor_p5.bbox(image_object))
-        canvas_fluor_p5.delete(oval)      
+            
         #global init_x,init_y# create magenta oval on clicked cell
         oval_x+=delta_x
         oval_y+=delta_y
-        oval=canvas_fluor_p5.create_oval(oval_x-5, oval_y-5, oval_x+5,
-                       oval_y+5, outline="magenta", width=1)
+        oval=canvas_fluor_p5.create_oval(oval_x-5*factor, oval_y-5*factor, oval_x+5*factor,
+                       oval_y+5*factor, outline="magenta", width=1)
 ##################################
 def wheel(event):
         ''' Zoom with mouse wheel '''
         global  photo_fluor, my_image_fl,photo_bright, my_image_fl_resized, x0, y0,image_object, factor_in, factor_out, zoom_coeff, image_origin_x, image_origin_y, resize_coeff, new_shape 
-        global new_oval_x, new_oval_y, oval_x,oval_y
+        global oval_x_init, oval_y_init, oval_x,oval_y, factor
         if  event.delta == -120:  # scroll down
           factor_out*=0.8
           factor_in*=0.8
@@ -3141,8 +3147,8 @@ def wheel(event):
           new_shape=my_image_fl_resized.shape[0]
    
           #############################################################         
-          x0_new_out, y0_new_out=x0*factor_out,y0*factor_out
-          #x0_new_out, y0_new_out=oval_x*factor_out,oval_y*factor_out
+        
+          x0_new_out, y0_new_out=oval_x_init*factor_out,oval_y_init*factor_out
           photo_fluor =  turn_image_into_tkinter(my_image_fl_resized,new_shape)
           photo_bright =  turn_image_into_tkinter(my_image_br_resized,new_shape)            
           image_origin_x, image_origin_y=300-x0_new_out,300-y0_new_out
@@ -3152,12 +3158,11 @@ def wheel(event):
           canvas_bright_p5.create_image(image_origin_x,image_origin_y, anchor="nw", image=photo_bright)
           resize_coeff=new_shape/frame_p5_size
           zoom_coeff=new_shape/window_p5_size
-          new_oval_x,new_oval_y= x0*factor_out+image_origin_x,y0*factor_out+image_origin_y
-          #oval_x,oval_y= (oval_x+image_origin_x)*zoom_coeff,(oval_y+image_origin_y)*zoom_coeff
-          #oval_x, oval_y=300-oval_x*factor_out,300-oval_y*factor_out 
-          
-          oval=canvas_fluor_p5.create_oval(new_oval_x-5*factor_out, new_oval_y-5*factor_out, new_oval_x+5*factor_out,
-                       new_oval_y+5*factor_out, outline="magenta", width=1)
+          oval_x, oval_y=300,300
+         
+          factor=factor_out
+          oval=canvas_fluor_p5.create_oval(oval_x-5*factor_out, oval_y-5*factor_out, oval_x+5*factor_out,
+                       oval_y+5*factor_out, outline="magenta", width=1)
         if   event.delta == 120:  # scroll up
           factor_in*=1.2
           factor_out*=1.2
@@ -3172,8 +3177,8 @@ def wheel(event):
           my_image_br_resized = cv2.resize(my_image_br_resized,(int(my_image_br_resized.shape[0] * factor_out ), int(my_image_br_resized.shape[1] * factor_out)), cv2.INTER_LINEAR)  
           #################################################
           new_shape=my_image_fl_resized.shape[0]
-          x0_new_in, y0_new_in=x0*factor_in,y0*factor_in
-          #x0_new_in, y0_new_in=oval_x*factor_in,oval_y*factor_in
+          #x0_new_in, y0_new_in=x0*factor_in,y0*factor_in
+          x0_new_in, y0_new_in=oval_x_init*factor_in,oval_y_init*factor_in
           photo_fluor =  turn_image_into_tkinter(my_image_fl_resized,new_shape)
           photo_bright =  turn_image_into_tkinter(my_image_br_resized,new_shape)            
           canvas_fluor_p5.delete("all")
@@ -3184,15 +3189,12 @@ def wheel(event):
           zoom_coeff=new_shape/window_p5_size
           resize_coeff=new_shape/frame_p5_size
           #oval_x, oval_y=300-oval_x*factor_out,300-oval_y*factor_out 
-          new_oval_x,new_oval_y= x0*factor_in+image_origin_x,y0*factor_in+image_origin_y
-          oval=canvas_fluor_p5.create_oval(new_oval_x-5*factor_in, new_oval_y-5*factor_in, new_oval_x+5*factor_in,
-                       new_oval_y+5*factor_in, outline="magenta", width=1)
-          #oval_x*=resize_coeff
-          #oval_y*=resize_coeff
-          #oval=canvas_fluor_p5.create_oval((oval_x-5)*zoom_coeff, (oval_y-5)*zoom_coeff, (oval_x+5)*zoom_coeff,
-                       #(oval_y+5)*zoom_coeff, outline="magenta", width=1)
-        print("oval_x, oval_y=",oval_x, oval_y)
-        print("new_oval_x, new_oval_y=",new_oval_x, new_oval_y)
+          #new_oval_x,new_oval_y= x0*factor_in+image_origin_x,y0*factor_in+image_origin_y
+          oval_x,oval_y=300,300
+          oval=canvas_fluor_p5.create_oval(oval_x-5*factor_in, oval_y-5*factor_in, oval_x+5*factor_in,
+                       oval_y+5*factor_in, outline="magenta", width=1)        
+          factor=factor_in
+        
 ###############################################
 def start_drawing():    
     canvas_fluor_p5.unbind("all")
@@ -3224,13 +3226,16 @@ def stop_zoom():
     canvas_fluor_p5.unbind("all")
     global resize_coeff, new_shape
     resize_coeff=window_p5_size /frame_p5_size
-    global  image_origin_x,image_origin_y, factor_in, factor_out,zoom_coeff,delta_x,delta_y
+    global  image_origin_x,image_origin_y, factor_in, factor_out,factor,zoom_coeff,delta_x,delta_y
     delta_x, delta_y=0,0
-    factor_in, factor_out=1,1
+    factor_in, factor_out, factor=1,1,1
     image_origin_x,image_origin_y=0,0
     zoom_coeff=1
     new_shape=window_p5_size
-    
+    mode_variable.set("fast")
+    oval=canvas_fluor_p5.create_oval(oval_x_init-5*factor, oval_y_init-5*factor, oval_x_init+5*factor,
+                       oval_y_init+5*factor, outline="magenta", width=1)
+    zoom_status.set("off")
 ################################################
 def save_one_edited_cell():   
     #button_activate_hand_drawing_mode_for_one_cell.configure(background = button_color)
@@ -3287,8 +3292,8 @@ def save_one_edited_cell():
        cv2.drawContours(filled_bright,[ctr] , 0, cell_color, 1)
        cv2.drawContours(filled_red,[ctr] , 0, cell_color, 1)
        canvas_bright_p5,canvas_fluor_p5,photo_fluor, photo_bright=display_both_channels(filled_fluor,filled_bright,canvas_fluor_p5,canvas_bright_p5,new_shape,image_origin_x,image_origin_y)
-       oval=canvas_fluor_p5.create_oval(oval_x-5, oval_y-5, oval_x+5,
-                       oval_y+5, outline="magenta",  width=1)             
+       oval=canvas_fluor_p5.create_oval(oval_x-5*factor, oval_y-5*factor,oval_x+5*factor,
+                       oval_y+5*factor, outline="magenta",  width=1)             
        points=[]          
        dialog_label_5.config(text="If you want to hand draw  another cell, push Button 4 once again.\n If you are finished with the current frame, press Button 6."
                           "\nIf you are finished with the whole movie, press Button 7.")
@@ -3305,9 +3310,12 @@ def save_one_edited_cell():
       #global photo_fluor, photo_bright, canvas_bright_p5,canvas_fluor_p5, oval     
       canvas_bright_p5,canvas_fluor_p5,photo_fluor, photo_bright=display_both_channels(filled_fluor,filled_bright,canvas_fluor_p5,canvas_bright_p5,new_shape,image_origin_x,image_origin_y)
       canvas_fluor_p5.delete(oval)      
-      oval=canvas_fluor_p5.create_oval(oval_x-5, oval_y-5, oval_x+5,
-                       oval_y+5, outline="magenta", width=1)
-                
+      oval=canvas_fluor_p5.create_oval(oval_x-5*factor, oval_y-5*factor, oval_x+5*factor,
+                       oval_y+5*factor, outline="magenta", width=1)
+    print("zoom_status=", zoom_status.get())
+    if zoom_status.get()=="on":
+          stop_zoom()
+                    
 #################################################
            
 
@@ -3360,8 +3368,8 @@ def edit_by_clicking(event):
       global photo_fluor, photo_bright, canvas_bright_p5,canvas_fluor_p5, oval     
       canvas_bright_p5,canvas_fluor_p5,photo_fluor, photo_bright=display_both_channels(filled_fluor_copy,filled_bright_copy,canvas_fluor_p5,canvas_bright_p5,new_shape,image_origin_x,image_origin_y)
       canvas_fluor_p5.delete(oval)      
-      oval=canvas_fluor_p5.create_oval(oval_x-5, oval_y-5, oval_x+5,
-                       oval_y+5, outline="magenta", width=1)
+      oval=canvas_fluor_p5.create_oval(oval_x-5*factor, oval_y-5*factor, oval_x+5*factor,
+                       oval_y+5*factor, outline="magenta", width=1)
                 
 #################################################
 
@@ -3539,10 +3547,10 @@ button_activate_slow_edit_mode = Button(frame3b_page5, text="4. Activate slow mo
 button_activate_slow_edit_mode.pack(side=tk.LEFT, padx=10,pady=5)
 
 ###########################################
-start_zoom_button = tk.Button(frame3b_page5, text="Start zooming", command=start_zoom).pack(side=tk.LEFT)
-stop_zoom_button = tk.Button(frame3b_page5, text="Stop zooming", command=stop_zoom).pack(side=tk.LEFT)
-#start_draw_button = tk.Button(root, text="Start drawing", command=activate_hand_drawing_mode_for_one_cell).pack(side=tk.LEFT)
-#stop_draw_button = tk.Button(root, text="Stop drawing", command=stop_drawing).pack(side=tk.LEFT)
+start_zoom_button = tk.Button(frame3b_page5, text="Start zoom", command=start_zoom).pack(side=tk.LEFT)
+stop_zoom_button = tk.Button(frame3b_page5, text="Stop zoom", command=stop_zoom).pack(side=tk.LEFT)
+start_pan_button = tk.Button(frame3b_page5, text="Start pan", command=start_pan).pack(side=tk.LEFT)
+stop_pan_button = tk.Button(frame3b_page5, text="Stop pan", command=stop_pan).pack(side=tk.LEFT)
 
 #############################################
 
