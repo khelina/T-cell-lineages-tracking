@@ -1118,7 +1118,7 @@ global update_feedback_text_p4
 from preprocess import update_feedback_text_p4
 global instruct_var_p4,feedback_var_p4,feedback_dict_p4
 instruct_var_p4,feedback_var_p4=StringVar(), StringVar()
-feedback_dict_p4={"movie name":" ","frame size":" ","cell diameter":" ","patch size":" ","number in frame 1":" ","max number":" ", "total number of frames":" ","number of processed":" "}
+feedback_dict_p4={"movie name":" ","frame size":" ","cell diameter":" ","patch size":" ","number in frame 1":" ","max number":" ", "fluor frames":" ","bright frames":" ","red frames":" ","number of processed":" "}
 feedback_text_p4=update_feedback_text_p4(feedback_dict_p4)
 feedback_var_p4.set(feedback_text_p4)
 
@@ -1183,18 +1183,22 @@ def initiate_tracking_page():
      outpath = os.path.join(software_folder, "OUTPUT_"+input_movie_folder)
      global init_image,last_image, frame_size, num_frames,  all_names_fluor
      all_names_fluor=[]
+     number_of_brights, number_of_reds=0,0
      #output_names=[None]     
      for filename in sorted_aphanumeric(os.listdir(my_dir)):   
         if filename.endswith("ch00.tif"):
-            instruct_var_p4.set("Loading input movie ...")
-            #feedback_label_p4.configure(text="Loading input movie ...")
-            #output_name=filename 
-            #output_names.append(output_names)                     
+            instruct_var_p4.set("Loading input movie ...")                           
             full_name_fluor = os.path.join(my_dir, filename)
             all_names_fluor.append(full_name_fluor)
+        if filename.endswith("ch02.tif"):
+             number_of_brights+=1
+        if filename.endswith("ch01.tif"):
+             number_of_reds+=1
+      
      #print("len(output_names) before=", len(output_names))
-     feedback_dict_p4["total number of frames"]=str(len(all_names_fluor))
-     
+     feedback_dict_p4["fluor frames"]=str(len(all_names_fluor))
+     feedback_dict_p4["bright frames"]=str( number_of_brights)
+     feedback_dict_p4["red frames"]=str( number_of_reds)
      global full_core_fluor_name, n_digits, first_frame_number, start_empty_file_name, frame_size
      full_core_fluor_name, n_digits, first_frame_number= extract_file_name(all_names_fluor[0])
      
@@ -1412,8 +1416,7 @@ def prepare_for_first_go():
     button_assign_positions = Button(frame7, text="2c. Assign initial cell positions",font='TkDefaultFont 10 bold', bg=button_color, command=create_assign_cell_positions_popup)
     button_assign_positions.pack()
     
-###################################################
-          
+###################################################          
     def click_cells_to_count(event):     
       canvas_mid_pop.create_oval(event.x-2, event.y-2, event.x+2,
                        event.y+2, outline="red", fill="red", width=2)
@@ -2675,8 +2678,8 @@ l_title = tk.Label(frame1_page5, text="STEP 4: CORRECT SEGMENTATION",
               bg="yellow", fg="red", font=("Times", "24"))
 l_title.grid(row=0, column=3, padx=500, sticky="n")
 
-feedback_label_5 = tk.Label(frame2_page5, text="Movie:      \nNumber of frames:      Frame size:        ",
-                          fg="cyan",bg="black", font='TkDefaultFont 10 bold', width=200,height=2)
+feedback_label_5 = tk.Label(frame2_page5, text="Movie:      \nFluorescent frames:    Bright frames:       Red frames:       \nFrame size:       Cell diameter: ",
+                          fg="cyan",bg="black", font='TkDefaultFont 10 bold', width=200,height=3)
 feedback_label_5.grid(row=0, column=0, sticky="w")
 
 dialog_label_5 = tk.Label(frame7a_page5, text="Step-4 allows you to manually correct segmentation in a tracked movie."
@@ -2684,10 +2687,10 @@ dialog_label_5 = tk.Label(frame7a_page5, text="Step-4 allows you to manually cor
                           fg="yellow",bg="black", font='TkDefaultFont 10 bold', width=200,height=4)
 dialog_label_5.grid(row=0, column=0, sticky="w")
 ##########################################
-global list_of_modified_frames, points
+#global list_of_modified_frames, points
 #global refiner, segmentor
 #refiner, segmentor=None, None
-list_of_modified_frame, points=[], []
+#list_of_modified_frames, points=[], []
 ###########################################
 l_instr_name_p5=tk.Label(frame7b_page5,text="INSTRUCTIONS FOR USER :" ,bg="black", font=all_font, fg="red").pack()
 ###################################################
@@ -2703,6 +2706,8 @@ def slide_frames_p5(value):
     show_2_canvases(canvas_bright_p5,canvas_fluor_p5,photo_filled_brights,photo_filled_fluors,image_number, window_p5_size) 
 ############################# load all mecessary images
 def choose_and_load_tracked_movie():
+    global edits_indicator
+    edits_indicator="no"
     global button_load_p5
     update_flash([])
     button_load_p5.configure(background = 'red')
@@ -2727,15 +2732,19 @@ def choose_and_load_tracked_movie():
     #################################
     global resize_coeff, new_shape
     resize_coeff=window_p5_size /frame_p5_size
-    global  image_origin_x,image_origin_y, factor_in, factor_out,factor,zoom_coeff,delta_x,delta_y# for zooming
+    global  image_origin_x,image_origin_y, factor_in, factor_out,factor,zoom_coeff,delta_x,delta_y, cell_center_visual_x, cell_center_visual_y# for zooming
     delta_x, delta_y=0,0
     factor_in, factor_out, factor=1,1,1
     image_origin_x,image_origin_y=0,0
     zoom_coeff=1
     new_shape=window_p5_size
+    cell_center_visual_x,cell_center_visual_y=300,300
     ############################
     print("frame_p5_size=",frame_p5_size)
-    feedback_label_5.configure(text="Movie : "+input_dir+"\nNumber of frames = "+str(num_frames)+"      Frame size = "+ str(frame_p5_size)+" x "+str(frame_p5_size))
+    feedback_label_5.configure(text="Movie : "+input_dir+"\nFluorescent frames: "+str(num_frames)+\
+                               "   Bright frames: "+str(len(filled_brights))+"   Red frames:"+str(len(filled_reds))+\
+                                   "\nFrame size = "+ str(frame_p5_size)+" x "+str(frame_p5_size)+"   Cell diameter = "+str(cell_radius_p5*2))
+   
     global photo_filled_fluors, photo_filled_brights
     dialog_label_5.config(text="Preparing images for display...")
     photo_filled_fluors=[ turn_image_into_tkinter(filled_fluors[i], window_p5_size) for i in range(len(masks))]
@@ -2848,7 +2857,8 @@ def right_click_one_cell(event):# extract info about clicked celland take action
     global oval, cell_color, cell_ID
     global oval_x_init,oval_y_init, oval_x,oval_y
     ############################################
-    
+    global edits_indicator
+    edits_indicator="yes"
     #############################################
     frame_number=view_slider_p5.get()
     print("frame_number, previous_frame_number=", frame_number, previous_frame_number)    
@@ -3050,22 +3060,22 @@ def start_zoom():
     frame_number=view_slider_p5.get()
     internal_frame_number=frame_number-first_frame_number_p5
     ##########
-   
+
     canvas_fluor_p5.delete("all")
     canvas_bright_p5.delete("all")
     ####################################
-    global oval_x,oval_y
+    global oval_x,oval_y,cell_center_visual_x,cell_center_visual_y
+    print("cell_centre_visual_x,cell_center_visual_y START_ZOOM=",cell_center_visual_x,cell_center_visual_y)
     ####### place cell of interest in the center of window when start zooming
-    x0, y0=clicked_cell_position_marker[0],clicked_cell_position_marker[1]#x0, y0 - for original photo
-    #image_origin_x,image_origin_y=300-x0,300-y0
-    image_origin_x,image_origin_y=300-oval_x,300-oval_y
+    x0, y0=clicked_cell_position_marker[0],clicked_cell_position_marker[1]#x0, y0 - for original photo  
+    image_origin_x,image_origin_y= cell_center_visual_x-oval_x, cell_center_visual_y-oval_y
     #x0, y0=(300-image_origin_x)/zoom_coeff,(300-image_origin_y)/zoom_coeff#x0, y0 - for original photo
     #################################
     
     print("x0, yo=", x0, y0)
     print(" image_origin_x,image_origin_y=",  image_origin_x,image_origin_y)
        
-    oval_x,oval_y=300,300
+    oval_x,oval_y= cell_center_visual_x, cell_center_visual_y
     canvas_bright_p5,canvas_fluor_p5, photo_fluor, photo_bright=display_both_channels(filled_fluor_copy,filled_bright_copy,canvas_fluor_p5,canvas_bright_p5,window_p5_size,image_origin_x,image_origin_y)
     #oval_x,oval_y= (oval_x+image_origin_x)/zoom_coeff,(oval_y+image_origin_y)/zoom_coeff
        
@@ -3101,7 +3111,7 @@ def drag_stop(event):
 def drag(event):
         """Handle dragging of an object"""
         # compute how much the mouse has moved
-        global x,y, x0,y0, image_origin_x, image_origin_y, center_x, center_y, oval, oval_x,oval_y
+        global x,y,image_origin_x, image_origin_y, cell_center_visual_x, cell_center_visual_y, oval, oval_x,oval_y
         delta_x = event.x - x
         delta_y = event.y - y
         print("delta_x, delta_y=", delta_x, delta_y)
@@ -3114,15 +3124,18 @@ def drag(event):
         image_origin_x+=delta_x
         image_origin_y+=delta_y
         canvas_fluor_p5.delete("all")
-        print("image_origin_x, image_origin_y after drag=", image_origin_x, image_origin_y)     
+        print("image_origin_x, image_origin_y after drag=", image_origin_x, image_origin_y)
+        """
         x0, y0=(300-image_origin_x)/zoom_coeff,(300-image_origin_y)/zoom_coeff#x0, y0 - for original photo
         print("x0, y0=", x0, y0)
+        """
         image_object=canvas_fluor_p5.create_image(image_origin_x,image_origin_y, anchor="nw", image=photo_fluor)
         canvas_bright_p5.delete("all")
         canvas_bright_p5.create_image(image_origin_x,image_origin_y, anchor="nw", image=photo_bright)
        
         print("bbox after dragging=", canvas_fluor_p5.bbox(image_object))
-            
+        cell_center_visual_x+=delta_x
+        cell_center_visual_y+=delta_y 
         #global init_x,init_y# create magenta oval on clicked cell
         oval_x+=delta_x
         oval_y+=delta_y
@@ -3151,14 +3164,14 @@ def wheel(event):
           x0_new_out, y0_new_out=oval_x_init*factor_out,oval_y_init*factor_out
           photo_fluor =  turn_image_into_tkinter(my_image_fl_resized,new_shape)
           photo_bright =  turn_image_into_tkinter(my_image_br_resized,new_shape)            
-          image_origin_x, image_origin_y=300-x0_new_out,300-y0_new_out
+          image_origin_x, image_origin_y= cell_center_visual_x-x0_new_out, cell_center_visual_y-y0_new_out
           canvas_fluor_p5.delete("all")
           canvas_bright_p5.delete("all")
           image_object=canvas_fluor_p5.create_image(image_origin_x, image_origin_y, anchor="nw", image=photo_fluor)
           canvas_bright_p5.create_image(image_origin_x,image_origin_y, anchor="nw", image=photo_bright)
           resize_coeff=new_shape/frame_p5_size
           zoom_coeff=new_shape/window_p5_size
-          oval_x, oval_y=300,300
+          oval_x, oval_y= cell_center_visual_x, cell_center_visual_y
          
           factor=factor_out
           oval=canvas_fluor_p5.create_oval(oval_x-5*factor_out, oval_y-5*factor_out, oval_x+5*factor_out,
@@ -3183,14 +3196,14 @@ def wheel(event):
           photo_bright =  turn_image_into_tkinter(my_image_br_resized,new_shape)            
           canvas_fluor_p5.delete("all")
           canvas_bright_p5.delete("all")
-          image_origin_x, image_origin_y=300-x0_new_in,300-y0_new_in
+          image_origin_x, image_origin_y= cell_center_visual_x-x0_new_in, cell_center_visual_y-y0_new_in
           image_object=canvas_fluor_p5.create_image(image_origin_x, image_origin_y, anchor="nw", image=photo_fluor)
           canvas_bright_p5.create_image(image_origin_x,image_origin_y, anchor="nw", image=photo_bright)
           zoom_coeff=new_shape/window_p5_size
           resize_coeff=new_shape/frame_p5_size
           #oval_x, oval_y=300-oval_x*factor_out,300-oval_y*factor_out 
           #new_oval_x,new_oval_y= x0*factor_in+image_origin_x,y0*factor_in+image_origin_y
-          oval_x,oval_y=300,300
+          oval_x,oval_y= cell_center_visual_x, cell_center_visual_y
           oval=canvas_fluor_p5.create_oval(oval_x-5*factor_in, oval_y-5*factor_in, oval_x+5*factor_in,
                        oval_y+5*factor_in, outline="magenta", width=1)        
           factor=factor_in
@@ -3236,6 +3249,11 @@ def stop_zoom():
     oval=canvas_fluor_p5.create_oval(oval_x_init-5*factor, oval_y_init-5*factor, oval_x_init+5*factor,
                        oval_y_init+5*factor, outline="magenta", width=1)
     zoom_status.set("off")
+
+    global cell_center_visual_x,cell_center_visual_y
+    print("cell_centre_visual_x,cell_center_visual_y BEFORE=",cell_center_visual_x,cell_center_visual_y)
+    cell_center_visual_x,cell_center_visual_y=300,300
+    print("cell_centre_visual_x,cell_center_visual_y AFTER=",cell_center_visual_x,cell_center_visual_y)
 ################################################
 def save_one_edited_cell():   
     #button_activate_hand_drawing_mode_for_one_cell.configure(background = button_color)
@@ -3315,6 +3333,7 @@ def save_one_edited_cell():
     print("zoom_status=", zoom_status.get())
     if zoom_status.get()=="on":
           stop_zoom()
+    
                     
 #################################################
            
@@ -3411,29 +3430,7 @@ def get_frame_info(internal_frame_number):# for manual segmentation correction
     empty_bright=empty_brights[internal_frame_number]
     empty_red=empty_reds[internal_frame_number]
     ###################################
-    """
-    global filled_fluor_init, filled_bright_init,filled_red_init, my_image_fl_resized, zoom_coeff 
-    filled_fluor_init=filled_fluors[internal_frame_number]
-    filled_bright_init=filled_brights[internal_frame_number]
-    filled_red_init=filled_reds[internal_frame_number]
-    #################################
-    print("new_shape=", new_shape)
-    print("zoom_coeff=", zoom_coeff)
-    my_image_fl_resized=filled_fluor_init.copy()
-    print("my_image_fl_resized.shape BEFORE=",my_image_fl_resized.shape)     
-    my_image_fl_resized= cv2.resize(my_image_fl_resized,(window_p5_size,window_p5_size), cv2.INTER_LINEAR)
-    print("my_image_fl_resized.shape MIDDLE=",my_image_fl_resized.shape)       
-    my_image_fl_resized = cv2.resize(my_image_fl_resized,(int(my_image_fl_resized.shape[0] * zoom_coeff ), int(my_image_fl_resized.shape[1] * zoom_coeff)), cv2.INTER_LINEAR)
-    print("my_image_fl_resized.shape AFTER=",my_image_fl_resized.shape)           
-    #######################################
     
-    global photo_fluor, photo_bright, canvas_bright_p5,canvas_fluor_p5
-    #canvas_fluor_p5.unbind_all("<Button-1>")
-    #canvas_fluor_p5.unbind_all("<Button-3>") 
-    print("image_origin_x, image_origin_y inside get_frame _info=", image_origin_x, image_origin_y)    
-    canvas_bright_p5,canvas_fluor_p5,photo_fluor, photo_bright=display_both_channels(my_image_fl_resized,filled_bright_init,canvas_fluor_p5,canvas_bright_p5,my_image_fl_resized.shape[0], image_origin_x, image_origin_y)      
-    #########################################
-    """    
     global path_filled_bright, path_filled_fluor,path_filled_red,path_mask
     path_filled_bright, path_filled_fluor,path_filled_red,path_mask= path_filled_brights[internal_frame_number],path_filled_fluors[internal_frame_number],path_filled_reds[internal_frame_number],path_masks[internal_frame_number]
     global final_mask,filled_fluor,filled_bright, filled_red
@@ -3505,22 +3502,24 @@ def save_edits_for_frame(): #saves all eduts in current frame and modifies linag
        
 #######################################
 def create_final_movie():# create final movie + pedigree_per_cell (simplified, i.e. only centroids and areas)
+  dialog_label_5.config(text="Creating lineage and final movie...")
+  global output_dir,frame_p5_size 
+  print("output_dir=", output_dir)  
+  if edits_indicator=="yes":
     mode=mode_variable.get()
     if mode=="slow":
         save_hand_drawing_for_one_cell()
         activate_fast_edit_mode()
     save_edits_for_frame()
-    dialog_label_5.config(text="Creating lineage and final movie...")
-    global output_dir,frame_p5_size 
-    print("output_dir=", output_dir)       
-    update_lineage(lineage_per_frame_p5,output_dir, 'wb')
-    dialog_label_5.config(text="Lineage per cell is stored in" +str(output_dir))
+             
+  update_lineage(lineage_per_frame_p5,output_dir, 'wb')
+  dialog_label_5.config(text="Lineage per cell is stored in" +str(output_dir))
     
-    lineage_per_cell=create_lineage_for_Lorenzo(output_dir, frame_p5_size,lineage_per_frame_p5)
-    dialog_label_5.config(text="Lineage per cell is stored in" +str(output_dir)+
+  lineage_per_cell=create_lineage_for_Lorenzo(output_dir, frame_p5_size,lineage_per_frame_p5)
+  dialog_label_5.config(text="Lineage per cell is stored in" +str(output_dir)+
                           "Creating final movie...")
-    create_output_movie(output_dir, frame_p5_size)       
-    dialog_label_5.config(text="Lineage per cell is stored in  " +str(os.path.join(output_dir,"lineage_per_cell.pkl"))+
+  create_output_movie(output_dir, frame_p5_size)       
+  dialog_label_5.config(text="Lineage per cell is stored in  " +str(os.path.join(output_dir,"lineage_per_cell.pkl"))+
                           "\nFinal movie is in  " + str(os.path.join(output_dir,"lineage_movie.avi")))
 ############### widgets in Page 5
 

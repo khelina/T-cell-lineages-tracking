@@ -160,7 +160,7 @@ def load_image_names(source):
  print("len(bright_names_sorted INSIDE)=",len(bright_names_sorted))
  return bright_names_sorted,fluor_names_sorted, red_names_sorted
 ##################################################
-
+#this is the teatx for feedback window (execytion step)
 def update_feedback_text_p4(feedback_dict_p4):
     text="Input movie :  "+feedback_dict_p4["movie name"]+\
          "\nFrame size :  "+feedback_dict_p4["frame size"]+\
@@ -168,11 +168,11 @@ def update_feedback_text_p4(feedback_dict_p4):
          "                  Patch size : "+feedback_dict_p4["patch size"]+\
          "\nNumber of cells in Frame 1 : "+feedback_dict_p4["number in frame 1"]+\
          "                  Maximum number of cells : "+feedback_dict_p4["max number"]+\
-         "\nTotal number of frames :  "+feedback_dict_p4["total number of frames"]+\
+         "\nFluorescent frames :  "+feedback_dict_p4["fluor frames"]+"    Brightfield frames :  "+feedback_dict_p4["bright frames"]+"    Red frames :  "+feedback_dict_p4["red frames"]+\
          "\nNumber of processed frames :  "+ feedback_dict_p4["number of processed"]
          
     return text
-##################################################
+################# 
 def update_feedback_text(feedback_dict):
     text="Source :"+feedback_dict["s"]+\
          "\nDestination :"+feedback_dict["dest"]+\

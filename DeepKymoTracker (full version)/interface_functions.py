@@ -164,7 +164,8 @@ def create_name_dictionary_p4(filenames):# available frame names (some might be 
      internal_number=filename[index_t+2:-9]
      name_dictionary[internal_number]=filename
   return  name_dictionary 
-####################################
+#################### this function is used for displaying all 3 types of images
+########### especially if red channel is missing - in this case image is zero
 def display_image_p4(slide_frame_number, channel_names_dictionary, channel_code,canvas_size_p4):
     channel_keys=list(channel_names_dictionary.keys())
     if slide_frame_number in channel_keys:
