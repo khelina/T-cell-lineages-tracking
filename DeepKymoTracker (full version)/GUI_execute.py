@@ -1152,7 +1152,7 @@ def load_helper_functions():
     from plot import plot_frame, create_first_color_dictionary,update_color_dictionary,update_naive_names_list,update_xs, rename_file
     from postprocess import create_pedigree,  create_output_movie, create_dictionary_of_xs, create_lineage_image_one_frame,sorted_aphanumeric
     from keras.models import model_from_json
-    from extract_lineage_for_Lorenzo import create_lineage_for_Lorenzo,extract_lineage,update_lineage, extract_const_movie_parameters,update_changeable_params_history,extract_changeable_params_history
+    from print_excel import print_excel_files,extract_lineage,update_lineage, extract_const_movie_parameters,update_changeable_params_history,extract_changeable_params_history
     from interface_functions import extract_output_images,create_name_dictionary_p4,display_image_p4, show_3_canvases
     from keras.optimizers import Adam
 ###########################################    
@@ -1256,12 +1256,12 @@ def initiate_tracking_page():
                   out_folders = create_output_folders(outpath)# creates names only  
     
                   global true_cell_radius, patch_size,max_number_of_cells,  xs, full_core_bright_name,curr_frame_cell_names,flag,edit_id_indicator, \
-                  base_colours,colour_counter,colour_dictionary,unused_naive_names, contrast_value, dict_of_divisions,number_of_added_new_cells,number_in_first_frame,full_core_red_name
+                  base_colours,colour_counter,colour_dictionary,unused_naive_names, contrast_value, dict_of_divisions,number_of_added_new_cells,number_in_first_frame,full_core_red_name, red_dictionary, bordersize
                   true_cell_radius, edit_id_indicator=IntVar(),StringVar()
    
                   (frame_size, true_cell_radius_pickle, patch_size,max_number_of_cells,
                   num_frames, full_core_fluor_name, n_digits, full_core_bright_name, first_frame_number,
-                  base_colours, contrast_value, number_in_first_frame,full_core_red_name)= extract_const_movie_parameters(outpath)
+                  base_colours, contrast_value, number_in_first_frame,full_core_red_name, red_dictionary, bordersize)= extract_const_movie_parameters(outpath)
                   
     
                   true_cell_radius.set(true_cell_radius_pickle)
@@ -1517,6 +1517,8 @@ def prepare_for_first_go():
     ############################## DEBUG
     if len(all_names_red)!=0:
         full_core_red_name, _, _= extract_file_name(all_names_red[0])
+    else:
+        full_core_red_name="0"
     ##############################################
     ###########################################
     print("n_digits=", n_digits)   
@@ -1544,6 +1546,9 @@ def prepare_for_first_go():
     start_frame=first_frame_number
     print("start_frame inside prepare for first_go=", start_frame)   
     update_flash([button_contrast])
+    global contrast_value
+    contrast_value="0"
+
 #######################################
 global retrieve_unfinished_movie
 def retrieve_unfinished_movie():# in retrieve mode
@@ -1599,9 +1604,10 @@ def change_radius(value):# change cell radius manually
   circles=new_circles
 ###################################################
 def save_cell_radius():
-    global patch_size
+    global patch_size, bordersize
     update_flash([button_assign_positions])
     patch_size=int(round(true_cell_radius.get()*2.4))
+    bordersize=int(round(patch_size/2)) 
     #patch_size=int(round(true_cell_radius.get()*2.4))
     instruct_label_popup_p4.configure(text="Cell diameter has been measured. \nNow, go to Button 2c to assign initial cells` positions.")     
     print("cell_radius, patch_size=", true_cell_radius.get(), patch_size)
@@ -1622,7 +1628,7 @@ def save_cell_radius():
 def record_const_movie_parameters():# record cell_size and other parameters in pickle file to be used at Step 4 and in retrieve mode
     list_of_const_movie_params=[frame_size, true_cell_radius.get(), patch_size,max_number_of_cells,
                           num_frames, full_core_fluor_name, n_digits,full_core_bright_name, first_frame_number,
-                          base_colours, contrast_value, len(coords_very_first),full_core_red_name]
+                          base_colours, contrast_value, len(coords_very_first),full_core_red_name, red_dictionary, bordersize]
     const_parameters_path=os.path.join(outpath,"constant_movie_parameters.pkl")  
     with open(const_parameters_path, 'wb') as f:
         for i in range(len(list_of_const_movie_params)):
@@ -1648,9 +1654,11 @@ def create_cell_measure_popup():
     canvas_for_radius.pack(anchor='nw', fill='both', expand=True)
     #######################################
     if contrast_value!="0":
-           global last_image              
+           global init_image              
            clahe = cv2.createCLAHE(clipLimit=float(contrast_value))
            init_image=clahe.apply(last_image)
+    else:
+        init_image=last_image
                
     photo_image=turn_image_into_tkinter(init_image,popup_window_size)     
     canvas_for_radius.create_image(0,0, anchor=NW, image=photo_image)
@@ -1673,10 +1681,7 @@ def create_cell_measure_popup():
     canvas_for_radius.bind("<Button-1>",draw_first_circles)    
 ###############################################
 ################### adjust contrast if necessary in contrast_popup (Button 2a)  
-########################################
-global contrast_value
-contrast_value=StringVar()
-contrast_value.set("0")
+####################################### #
 
 def save_contrast():
     ind=cliplimit.get()
@@ -1725,9 +1730,9 @@ def change_contrast(value):
         update_flash([button_save_contrast])
     canvas_contrast.delete("all")
     contrast_slider.config(label="Cliplimit =  "+ value)
-    init_image_copy=init_image.copy()   
-    if value!="0":
-      global contrast_value
+    init_image_copy=init_image.copy()
+    global contrast_value
+    if value!="0":      
       contrast_value=value
       #contrast_indicator.set("yes") 
       clahe = cv2.createCLAHE(clipLimit=float(value))
@@ -1735,6 +1740,7 @@ def change_contrast(value):
       result=cl
     else:     
       result=init_image
+      contrast_value="0"
       #contrast_indicator.set("yes")           
     global photo_image_contrast
     photo_image_contrast=turn_image_into_tkinter(result,popup_window_size)     
@@ -1757,12 +1763,7 @@ def create_assign_cell_positions_popup():
     popup_assign_pos = tk.Toplevel(master=popup_first_preview, bg=bg_color)
     popup_assign_pos.title("PAGE 4 POPUP WINDOW: ASSIGN INITIAL CELL POSITIONS") 
     popup_assign_pos.geometry('%dx%d+%d+%d' % (popup_window_size, popup_window_size+400, 0, 0))
-    #sub1 = tk.Frame(master=popup_assign_pos, width=popup_window_size, height=50, bg="blue")
-    #sub1.grid(row=0, column=0, rowspan=1, columnspan=1, sticky=W+E+N+S)
-    #global label_click_popup
-    #label_click_popup = tk.Label(
-        #sub1, text="Click on each cell with the left button of the mouse,\nthen save", bg="black",fg="yellow", font='TkDefaultFont 10 bold')
-    #label_click_popup.pack()
+    
      
     sub2 = tk.Frame(master=popup_assign_pos, width=popup_window_size, height=popup_window_size, bg=bg_color)
     #sub2.grid(row=1, column=0, rowspan=1, columnspan=1, sticky=W+E+N+S)
@@ -1969,7 +1970,7 @@ def execute():
                 
         global fluor_images, fluor_images_compressed,bright_images, fluor_names, br_names,red_names, red_images 
         clear_memory_of_previous_clip(fluor_images, fluor_images_compressed,bright_images, fluor_names, br_names,red_images, red_names)
-        fluor_images,fluor_images_compressed,bright_images,fluor_names,br_names,red_names, red_images  =load_clip( first_number_in_clip,full_core_fluor_name,full_core_bright_name,n_digits, num_frames, first_frame_number, full_core_red_name)
+        fluor_images,fluor_images_compressed,bright_images,fluor_names,br_names,red_names, red_images  =load_clip( first_number_in_clip,full_core_fluor_name,full_core_bright_name,n_digits, num_frames, first_frame_number, full_core_red_name,red_dictionary)
         
         clip_centr = predict_tracking_general(
                 coords, fluor_images, fluor_images_compressed, fluor_names,  first_number_in_clip,  tracker,last_frame_number, cell_radius, frame_size)
@@ -1991,7 +1992,7 @@ def execute():
             empty_fluor = fluor_images[kk]         
             empty_bright = bright_images[kk]                        
             count, cells, coords,  curr_frame_cell_names, olds = segment_and_clean(
-                dict_of_divisions, cells, count, coords,curr_frame_cell_names, segmentor, refiner, empty_fluor, empty_bright, tracked_centroids, first_number_in_clip+kk, edit_id_indicator, mother_number, out_folders, cell_radius, frame_size, colour_dictionary, patch_size, "first cleaning")
+                dict_of_divisions, cells, count, coords,curr_frame_cell_names, segmentor, refiner, empty_fluor, empty_bright, tracked_centroids, first_number_in_clip+kk, edit_id_indicator, mother_number, out_folders, cell_radius, frame_size, colour_dictionary, patch_size, "first cleaning", bordersize)
           
             print("cell names after segmentation=", list(cells.keys()))           
             ################## Division Detector,look for figure 8 shape          
@@ -2039,7 +2040,7 @@ def execute():
             print("current_lineage_image.shape =", current_lineage_image.shape)
             #print("fluor_names inside exeute=", fluor_names)
             coords, destin_fluor = plot_frame(cells, clip_centr, first_number_in_clip, kk,
-                                fluor_images, fluor_names, out_folders, coords, coords, bright_images, br_names, frame_size , n_digits, first_frame_number, contrast_value, current_lineage_image,patch_size, red_images, red_names)          
+                                fluor_images, fluor_names, out_folders, coords, coords, bright_images, br_names, frame_size , n_digits, first_frame_number, contrast_value, current_lineage_image,patch_size, red_images, red_names, bordersize)          
             
                       
             image_seg=destin_fluor# for displaying dynamically on unterface
@@ -2603,7 +2604,7 @@ from plot import paste_patch, prepare_contours,paste_benchmark_patch,create_name
 
 from interface_functions import turn_image_into_tkinter,display_both_channels, show_2_canvases
 from postprocess import create_output_movie
-from extract_lineage_for_Lorenzo import create_lineage_for_Lorenzo, extract_const_movie_parameters
+from print_excel import print_excel_files, extract_const_movie_parameters
 from functions import  clean_manual_patch, segment_manual_patch,segment_one_cell_at_a_time,create_intensity_dictionary,remove_cell_from_mask
 ############ LAYOUT
 
@@ -2612,7 +2613,7 @@ page5.geometry('1530x2000')
 
 global window_p5_size
 window_p5_size =600
-Bordersize=100
+
 
 frame1_page5 = tk.Frame(master=page5, width=1528, height=5, bg="yellow")
 frame1_page5.grid(row=0, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
@@ -2724,11 +2725,11 @@ def choose_and_load_tracked_movie():
     global lineage_per_frame_p5
     dialog_label_5.config(text="loading tracked movie...")
     path_filled_brights,path_filled_fluors,path_filled_reds,path_masks, empty_fluors, empty_brights, empty_reds,filled_fluors, filled_brights,filled_reds, masks, lineage_per_frame_p5=load_tracked_movie_p5(input_dir,output_dir)
-    global frame_p5_size,cell_radius_p5,patch_size_p5,full_core_red_name, first_frame_number_p5   
+    global frame_p5_size,cell_radius_p5,patch_size_p5,full_core_red_name, first_frame_number_p5,red_dictionary, bordersize   
     #############
     frame_p5_size, cell_radius_p5, patch_size_p5,max_number_of_cells,\
            num_frames, full_core_fluor_name, n_digits, full_core_bright_name,  first_frame_number_p5,\
-           base_colours,contrast_value,number_cells_in_first_frame,full_core_red_name=extract_const_movie_parameters(output_dir)
+           base_colours,contrast_value,number_cells_in_first_frame,full_core_red_name,red_dictionary, bordersize=extract_const_movie_parameters(output_dir)
     #################################
     global resize_coeff, new_shape
     resize_coeff=window_p5_size /frame_p5_size
@@ -2775,6 +2776,8 @@ def choose_and_load_tracked_movie():
     oval_x,oval_y=1,1
     oval=canvas_fluor_p5.create_oval(oval_x-1, oval_y-1, oval_x+1,
                           oval_y+1, outline="magenta",  width=1)
+    global points
+    points=[]
     """
     global segmentor, refiner
     if segmentor==None and refiner==None:      
@@ -3288,7 +3291,7 @@ def save_one_edited_cell():
        print("np.max(final_mask)=",np.max(final_mask))
        #final_mask[mask_hand==255]=cell_indicator+1
        ######### need to get segmented_frame and segmented_patch here to pass to modified_cell_IDs                     
-       segmented_frame= np.zeros((frame_p5_size+2*Bordersize,frame_p5_size+2*Bordersize),dtype="uint8")
+       segmented_frame= np.zeros((frame_p5_size+2*bordersize,frame_p5_size+2*bordersize),dtype="uint8")
        cv2.drawContours(segmented_frame,[ctr] , 0, 255, -1)
        im2, contours, hierarchy = cv2.findContours(segmented_frame,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
        cell_contour=contours[0]                                
@@ -3297,8 +3300,8 @@ def save_one_edited_cell():
           M["m00"]=0.001
        new_cX = np.round(M["m10"] / M["m00"],2)
        new_cY = np.round(M["m01"] / M["m00"],2)
-       new_base=cv2.copyMakeBorder(segmented_frame , top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize, borderType= cv2.BORDER_CONSTANT, value=0. )
-       a_new,b_new,c_new,d_new=int(round(new_cX))+Bordersize-patch_size_p5,int(round(new_cX))+Bordersize+ patch_size_p5,int(round(new_cY))+Bordersize-patch_size_p5,int(round(new_cY))+Bordersize+patch_size_p5           
+       new_base=cv2.copyMakeBorder(segmented_frame , top=bordersize, bottom=bordersize, left=bordersize, right=bordersize, borderType= cv2.BORDER_CONSTANT, value=0. )
+       a_new,b_new,c_new,d_new=int(round(new_cX))+bordersize-patch_size_p5,int(round(new_cX))+bordersize+ patch_size_p5,int(round(new_cY))+bordersize-patch_size_p5,int(round(new_cY))+bordersize+patch_size_p5           
        segmented_patch = new_base[c_new:d_new, a_new:b_new]
        #modified_cell_IDs[hand_cell_number]=[segmented_frame, final_mask, segmented_patch]
        #modified_cell_IDs[cell_number]=[segmented_frame, final_mask, segmented_patch,[new_cX, new_cY], cell_color, cell_ID]
@@ -3320,9 +3323,9 @@ def save_one_edited_cell():
       filled_fluor=delete_contour_with_specific_colour(filled_fluor, empty_fluor,cell_color)     
       filled_bright=delete_contour_with_specific_colour(filled_bright, empty_bright,cell_color)
       filled_red=delete_contour_with_specific_colour(filled_red, empty_red,cell_color)      
-      filled_fluor,debug_fluor_image=paste_patch(filled_fluor,patch_with_contours,a,b,c,d,cell_color,1.0, frame_p5_size)      
-      filled_bright, debug_bright_image=paste_patch(filled_bright,patch_with_contours,a,b,c,d,cell_color,1.0, frame_p5_size)
-      filled_red, debug_red_image=paste_patch(filled_red,patch_with_contours,a,b,c,d,cell_color,1.0, frame_p5_size)
+      filled_fluor,debug_fluor_image=paste_patch(filled_fluor,patch_with_contours,a,b,c,d,cell_color,1.0, frame_p5_size,bordersize)      
+      filled_bright, debug_bright_image=paste_patch(filled_bright,patch_with_contours,a,b,c,d,cell_color,1.0, frame_p5_size,bordersize)
+      filled_red, debug_red_image=paste_patch(filled_red,patch_with_contours,a,b,c,d,cell_color,1.0, frame_p5_size,bordersize)
             
       #### display  current frame with modified cell    
       #global photo_fluor, photo_bright, canvas_bright_p5,canvas_fluor_p5, oval     
@@ -3354,10 +3357,10 @@ def edit_by_clicking(event):
       if len(number_of_clicks)==1:# it is only for flashing
           #update_flash([button_save_frame])
           print("update_flash")
-      segmented_frame, segmented_patch,a,b,c,d, final_mask, new_centroid=segment_one_cell_at_a_time(segmentor, refiner,empty_fluor,empty_bright,manually_clicked_centroid, cell_radius_p5, frame_p5_size, patch_size_p5, clicked_cell_position_marker,final_mask,cell_number_in_frame)
+      segmented_frame, segmented_patch,a,b,c,d, final_mask, new_centroid=segment_one_cell_at_a_time(segmentor, refiner,empty_fluor,empty_bright,manually_clicked_centroid, cell_radius_p5, frame_p5_size, patch_size_p5, clicked_cell_position_marker,final_mask,cell_number_in_frame, bordersize)
       ############## modify mask for frame
       new_cX, new_cY=new_centroid[0],new_centroid[1]
-      mask_with_current_cell=paste_benchmark_patch(segmented_patch,a,b,c,d,cell_number_in_frame, frame_p5_size)
+      mask_with_current_cell=paste_benchmark_patch(segmented_patch,a,b,c,d,cell_number_in_frame, frame_p5_size, bordersize)
       print("cell_number_in_frame=", cell_number_in_frame)
       print("np.max(mask_with_current_cell)=",np.max(mask_with_current_cell))
       cell_number_in_mask=2**cell_number_in_frame
@@ -3379,9 +3382,9 @@ def edit_by_clicking(event):
       filled_fluor_copy=delete_contour_with_specific_colour(filled_fluor_copy, empty_fluor,red_color)     
       filled_bright_copy=delete_contour_with_specific_colour(filled_bright_copy, empty_bright,red_color)
       filled_red_copy=delete_contour_with_specific_colour(filled_red_copy, empty_red,red_color)      
-      filled_fluor_copy,debug_fluor_image=paste_patch(filled_fluor_copy,patch_with_contours,a,b,c,d,red_color,1.0, frame_p5_size)      
-      filled_bright_copy, debug_bright_image=paste_patch(filled_bright_copy,patch_with_contours,a,b,c,d,red_color,1.0, frame_p5_size)
-      filled_red_copy, debug_red_image=paste_patch(filled_red_copy,patch_with_contours,a,b,c,d,red_color,1.0, frame_p5_size)
+      filled_fluor_copy,debug_fluor_image=paste_patch(filled_fluor_copy,patch_with_contours,a,b,c,d,red_color,1.0, frame_p5_size, bordersize)      
+      filled_bright_copy, debug_bright_image=paste_patch(filled_bright_copy,patch_with_contours,a,b,c,d,red_color,1.0, frame_p5_size, bordersize)
+      filled_red_copy, debug_red_image=paste_patch(filled_red_copy,patch_with_contours,a,b,c,d,red_color,1.0, frame_p5_size, bordersize)
             
       #### display  current frame with modified cell    
       global photo_fluor, photo_bright, canvas_bright_p5,canvas_fluor_p5, oval     
@@ -3457,7 +3460,7 @@ def save_edits_for_frame(): #saves all eduts in current frame and modifies linag
     frame_dictionary= lineage_per_frame_p5[internal_frame_number]
     debug_item=lineage_per_frame_p5[internal_frame_number]["cell_0"][3]
     #cv2.imwrite(r"C:\Users\helina\Desktop\patch_before.tif",debug_item)
-    modified_frame_dictionary=update_frame_dictionary_after_manual_segm_correction(final_mask, filled_fluor,filled_bright,modified_cell_IDs,frame_dictionary,frame_p5_size, patch_size_p5)    
+    modified_frame_dictionary=update_frame_dictionary_after_manual_segm_correction(final_mask, filled_fluor,filled_bright,modified_cell_IDs,frame_dictionary,frame_p5_size, patch_size_p5, bordersize)    
     lineage_per_frame_p5[internal_frame_number]=modified_frame_dictionary
     debug_item_after=lineage_per_frame_p5[internal_frame_number]["cell_0"][3]
     #cv2.imwrite(r"C:\Users\helina\Desktop\patch_after.tif",debug_item_after)
@@ -3515,7 +3518,7 @@ def create_final_movie():# create final movie + pedigree_per_cell (simplified, i
   update_lineage(lineage_per_frame_p5,output_dir, 'wb')
   dialog_label_5.config(text="Lineage per cell is stored in" +str(output_dir))
     
-  lineage_per_cell=create_lineage_for_Lorenzo(output_dir, frame_p5_size,lineage_per_frame_p5)
+  lineage_per_cell=print_excel_files(output_dir, frame_p5_size,lineage_per_frame_p5, bordersize)
   dialog_label_5.config(text="Lineage per cell is stored in" +str(output_dir)+
                           "Creating final movie...")
   create_output_movie(output_dir, frame_p5_size)       
@@ -3640,7 +3643,7 @@ global extract_info_from_file_name
 
 from postprocess import (sorted_aphanumeric, change_dict,extract_info_from_file_name, create_pedigree,plot_per_cell_info,
               load_and_prepare_result_images)
-from extract_lineage_for_Lorenzo import extract_lineage,extract_const_movie_parameters
+from print_excel import extract_lineage,extract_const_movie_parameters
 from interface_functions import turn_image_into_tkinter
 ##########################################
 def create_display_images_p6():# plot images necessary for display       

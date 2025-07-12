@@ -11,8 +11,8 @@ import tkinter
 from copy import deepcopy
 import shutil
 #############################################################
-Bordersize=100
-from extract_lineage_for_Lorenzo import extract_lineage
+
+from print_excel import extract_lineage
 ##############################################################
 ### For rhe last step
 ## This function creates lineage_per_cell (out of lineage_per_frame) 

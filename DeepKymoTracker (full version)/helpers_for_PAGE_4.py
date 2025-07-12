@@ -7,8 +7,8 @@ from keras.models import model_from_json
 import re
 
 from functions import segment_patch
-from extract_lineage_for_Lorenzo import extract_lineage
-Bordersize=100
+from print_excel import extract_lineage
+#Bordersize=100
 #########################################
 
 def sorted_aphanumeric(data):
@@ -135,7 +135,7 @@ def make_contour_red(filled_image, empty_image,color):
     cv2.imwrite("C:\\Users\\helina\\Desktop\\red_contor.tif", filled_image)
     return filled_image
 ################################################
-def update_frame_dictionary_after_manual_segm_correction(mask, filled_fluor,filled_bright,modified_cell_IDs,frame_dictionary,frame_size, p_size):    
+def update_frame_dictionary_after_manual_segm_correction(mask, filled_fluor,filled_bright,modified_cell_IDs,frame_dictionary,frame_size, patch_size, bordersize):    
     keys=list(frame_dictionary.keys())
     modified_cells=list(modified_cell_IDs.keys())
     #print("keys=", keys)
@@ -159,8 +159,8 @@ def update_frame_dictionary_after_manual_segm_correction(mask, filled_fluor,fill
        new_cX = np.round(M["m10"] / M["m00"],2)
        new_cY = np.round(M["m01"] / M["m00"],2)
        ##########################################
-       new_base=cv2.copyMakeBorder(binary_image_with_one_cell , top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize, borderType= cv2.BORDER_CONSTANT, value=0. )
-       a_new,b_new,c_new,d_new=int(round(new_cX))+Bordersize-p_size,int(round(new_cX))+Bordersize+ p_size,int(round(new_cY))+Bordersize-p_size,int(round(new_cY))+Bordersize+p_size           
+       new_base=cv2.copyMakeBorder(binary_image_with_one_cell , top=bordersize, bottom=bordersize, left=bordersize, right=bordersize, borderType= cv2.BORDER_CONSTANT, value=0. )
+       a_new,b_new,c_new,d_new=int(round(new_cX))+bordersize-patch_size,int(round(new_cX))+bordersize+ patch_size,int(round(new_cY))+bordersize-patch_size,int(round(new_cY))+bordersize+patch_size           
        new_patch = new_base[c_new:d_new, a_new:b_new]
        cv2.imwrite(r"C:\Users\helina\Desktop\new_patch.tif",new_patch)
        #########################################

@@ -3,7 +3,7 @@ import numpy as np
 import copy
 import math
 #####################################
-Bordersize=100
+#Bordersize=100
 ######################################
 def detect_division(cells, count, k,kk):# detects divisions in the whole frame     
        for_print=[]

@@ -44,7 +44,9 @@ def extract_file_name(full_image_name):
   first_frame_in_name=int(first)
   return full_core_name, n_digits, first_frame_in_name
 ###################################################
-def load_clip(first_number_in_clip,full_core_fluor_name,full_core_bright_name,n_digits, num_frames, first_frame_number,full_core_red_name): 
+def load_clip(first_number_in_clip,full_core_fluor_name,full_core_bright_name,n_digits, num_frames, first_frame_number,full_core_red_name, red_dictionary):
+  red_numbers=list(red_dictionary.keys())
+  print("red_numbers=", red_numbers)
   fluor_names, bright_names, red_names =[],[],[]   
   fluor_images,fluor_images_compressed,bright_images, red_images=[],[],[],[]  
   last_frame_number=num_frames+first_frame_number-1  
@@ -68,12 +70,17 @@ def load_clip(first_number_in_clip,full_core_fluor_name,full_core_bright_name,n_
     bright = np.array(br_pillow, dtype=np.uint8)   
     bright_images.append(bright)
     ################################################
-    red_name=full_core_red_name+str(first_number_in_clip+kk).zfill(n_digits)+"_ch01.tif"
-    red_names.append(bright_name)
-    #########################################
-    red_pillow = Image.open(red_name)
-    red = np.array(red_pillow, dtype=np.uint8)   
-    red_images.append(red)
+    if str(first_number_in_clip+kk).zfill(n_digits) in red_numbers:
+      red_name=full_core_red_name+str(first_number_in_clip+kk).zfill(n_digits)+"_ch01.tif"
+      red_names.append(red_name)
+      #########################################
+      red_pillow = Image.open(red_name)
+      red = np.array(red_pillow, dtype=np.uint8)   
+      red_images.append(red)
+    else:
+      red_names.append("0")
+      red_images.append("0")
+  print("red_names=", red_names)
     #############################################
   return  fluor_images,fluor_images_compressed,bright_images,fluor_names,bright_names, red_names, red_images    
 ############################################
