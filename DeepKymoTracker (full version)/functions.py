@@ -155,7 +155,7 @@ def force_manual_IDs(clip_centr,coords,kk):# corrects tracking errors in frame k
     return clip_centr
 ######################################################
 
-#########################################
+############### 96x96 is the shape Refiner was trained on
 def refiner_predict(output_segm,fluor,bright,refiner):# output_segm is binary 0,255 image, not normalized
     frame=np.zeros((96,96,3))
     frame[:,:,0]=np.array(fluor.reshape((96,96)),dtype="float32")               
@@ -238,7 +238,11 @@ def segment_manual_patch(segmentor, refiner,empty_fluor,empty_bright,centroid,co
           seed_patch_border=seed_patch_base.copy()
           base=np.stack((empty_fluor_border,empty_bright_border,seed_patch_border),axis=2)       
           patch = base[c:d, a:b,:]          
-          shape=(patch.shape[0],patch.shape[1])         
+          shape=(patch.shape[0],patch.shape[1])
+          print("INSIDE SEGMENT MANUAL PATCH")
+          print("patch shape=", shape)
+          print("bordersize=", bordersize)
+          print("x0,yo=", x0,y0)
           patch_input=cv2.resize(patch, (96,96), interpolation = cv2.INTER_AREA)
           seed_patch=patch_input[:,:,2]
           seed_patch = seed_patch.astype('uint8')
@@ -411,7 +415,7 @@ def clean_manual_patch(output_raw,marker,a,b,c,d,frame_size, final_mask,cell_num
           final_mask=final_mask_copy
       else:
           #cleaned_patch=np.zeros((output_raw.shape),dtype="uint8")
-          cleaned_patch=cut_cell_from_mask(final_mask,cell_number,a,b,c,d)
+          cleaned_patch=cut_cell_from_mask(final_mask,cell_number,a,b,c,d, bordersize)
           #print("there is a problem!!!!")
     return cleaned_patch, final_mask      
 ############################# Clean refined segmentation if necessary
@@ -447,7 +451,8 @@ def segment_patch(segmentor, refiner,empty_fluor,empty_bright,centroid,coord, ce
           base=np.stack((empty_fluor_border,empty_bright_border,seed_patch_border),axis=2)       
           patch = base[c:d, a:b,:]          
           shape=(patch.shape[0],patch.shape[1])
-          #print("PATCH SHAPE=", shape)
+          print("PATCH SHAPE INSIDE segment_patch=", shape)
+          print("bordersize=", bordersize)
           patch_input=cv2.resize(patch, (96,96), interpolation = cv2.INTER_AREA)
           seed_patch=patch_input[:,:,2]
           seed_patch = seed_patch.astype('uint8')
@@ -1187,7 +1192,7 @@ def extract_lineage(outpath):
         except EOFError:
             break    
     return lineage_per_frame
-"""
+
 ##############################
 def create_previous_frame(cells, frame_size):
     previous_frame= np.zeros((frame_size,frame_size),dtype="float64")      
@@ -1202,7 +1207,7 @@ def create_previous_frame(cells, frame_size):
       previous_frame+=base
     return previous_frame
 #############################################################
-""" 
+
 def update_lineage(llist,outpath, mode):# was cells
     lineage_path=os.path.join(outpath,"lineage_per_frame.pkl")  
     with open(lineage_path, mode) as f:

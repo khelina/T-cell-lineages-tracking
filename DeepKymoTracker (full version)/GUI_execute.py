@@ -1020,7 +1020,8 @@ button_fluor.pack()
 page4=pages[3]
 page4.config(bg=bg_color)
 canvas_size_p4 =382
-lineage_extension_for_new_cells=80
+global lineage_extension_for_new_cells
+lineage_extension_for_new_cells=0
 
 frame1_page4 = tk.Frame(master=page4, width=1528, height=50, bg=bg_color)
 frame1_page4.grid(row=0, column=0, rowspan=1, columnspan=6, sticky=W+E+N+S)
@@ -1060,6 +1061,10 @@ canvas_previous = Canvas(frame5_page4, bg=bg_color, height=canvas_size_p4, width
 canvas_previous.pack(anchor='nw', fill='both', expand=True)
 canvas_current = Canvas(frame6_page4, bg=bg_color, height=canvas_size_p4, width=canvas_size_p4)
 canvas_current.pack(anchor='nw', fill='both', expand=True)
+#global canvas_lineage
+canvas_lineage_exec = Canvas(frame7_page4, bg=bg_color, height=canvas_size_p4, width=canvas_size_p4)
+#canvas_lineage.grid(row=0,column=0)
+canvas_lineage_exec.pack(anchor='nw', fill='both', expand=True)
 ########################### These labels do not change
 
 title_label = tk.Label(frame1_page4, text="STEP 3: EXECUTE AND CORRECT TRACKING",
@@ -1080,14 +1085,12 @@ label_curr_frame_name.pack()
 
 label_lineage = tk.Label(frame10_page4, text="Lineage", bg="#87CEFA", fg="black", font='TkDefaultFont 10 bold' )
 label_lineage.grid(row=0, column=0, padx=100)
-################################
-canvas_lineage = Canvas(frame7_page4, bg=bg_color, height=canvas_size_p4, width=canvas_size_p4+lineage_extension_for_new_cells)
-canvas_lineage.grid(row=0,column=0)
+
 ###################################################
 zero_image = Image.new('RGB', (canvas_size_p4, canvas_size_p4))
 zero_image = ImageTk.PhotoImage(zero_image)
-global lineage_images, output_images, lineage_images_cv2, output_names
-lineage_images, output_images, lineage_images_cv2, output_names=[], [zero_image],[], ["             "]
+global lineage_images_tk, output_images, lineage_images_cv2, output_names
+lineage_images_tk, output_images, lineage_images_cv2, output_names=[], [zero_image],[], ["             "]
 
 ################################
 global popup_monitor
@@ -1135,7 +1138,7 @@ def load_helper_functions():
     os.chdir(software_folder)
     global predict_first_frame, create_output_folders,\
         detect_division, update_dictionary_after_division, check_division_frame_number, predict_tracking, predict_tracking_general, backup_track, predict_first_frame, segment_and_clean,\
-        create_previous_frame, plot_frame, create_first_color_dictionary,\
+         plot_frame, create_first_color_dictionary,\
         create_pedigree, create_output_movie, load_weights, extract_lineage,create_dictionary_of_xs,\
         create_lineage_image_one_frame, extract_file_name, load_clip, update_lineage,force_manual_IDs,create_lineage_for_Lorenzo,sorted_aphanumeric,update_color_dictionary,update_naive_names_list,update_xs,\
         load_full_raw_movie,create_models,extract_output_images,create_name_dictionary_p4,display_image_p4,removeLeadingZeros,rename_file, show_3_canvases,update_changeable_params_history,extract_changeable_params_history
@@ -1147,7 +1150,7 @@ def load_helper_functions():
                                    update_dictionary_after_division, check_division_frame_number)
 
     from functions import (predict_tracking_general,  backup_track, predict_first_frame, segment_and_clean,
-                           hungarian, create_previous_frame, predict_tracking,force_manual_IDs)
+                           hungarian, predict_tracking,force_manual_IDs)
     
     from plot import plot_frame, create_first_color_dictionary,update_color_dictionary,update_naive_names_list,update_xs, rename_file
     from postprocess import create_pedigree,  create_output_movie, create_dictionary_of_xs, create_lineage_image_one_frame,sorted_aphanumeric
@@ -1292,9 +1295,9 @@ def initiate_tracking_page():
                   start_frame=last_frame_cell_dict[internal_cell_names[0]][12]+1    
                   coords=last_frame_cell_dict[internal_cell_names[0]][14]
     
-                  global output_images,lineage_images, output_names,lineage_images_cv2    
-                  output_images,lineage_images, output_names,lineage_images_cv2=extract_output_images(out_folders[1],os.path.join(out_folders[4],"LINEAGE_IMAGES"),canvas_size_p4, output_images,output_names)
-                  print("len(lineage_images)=",len(lineage_images))
+                  global output_images,lineage_images_tk, output_names,lineage_images_cv2    
+                  output_images,lineage_images_tk, output_names,lineage_images_cv2=extract_output_images(out_folders[1],os.path.join(out_folders[4],"LINEAGE_IMAGES"),canvas_size_p4, output_images,output_names)
+                  print("len(lineage_images_tk)=",len(lineage_images_tk))
                   print("len(lineage_images_cv2)=",len(lineage_images_cv2))
                   global  previous_lineage_image, lineage_image_size
                   previous_lineage_image=lineage_images_cv2[-1]     
@@ -1539,7 +1542,7 @@ def prepare_for_first_go():
         lineage_image_size=num_frames#this is the size of lineage image
     else:
         lineage_image_size=num_frames
-    previous_lineage_image =np.zeros((lineage_image_size, lineage_image_size+200,3), dtype="uint8") 
+    previous_lineage_image =np.zeros((lineage_image_size, lineage_image_size+lineage_extension_for_new_cells,3), dtype="uint8") 
     #feedback_label.config(text="Movie loaded, {} frames.\nNow, you need to specify how many cells are there in Frame 1.".format(num_frames))   
     button_load.configure(background =button_color)
     global start_frame
@@ -1606,11 +1609,11 @@ def change_radius(value):# change cell radius manually
 def save_cell_radius():
     global patch_size, bordersize
     update_flash([button_assign_positions])
-    patch_size=int(round(true_cell_radius.get()*2.4))
-    bordersize=int(round(patch_size/2)) 
+    patch_size=int(round(true_cell_radius.get()*2.4))# it is actually HALF on the square side
+    bordersize=patch_size 
     #patch_size=int(round(true_cell_radius.get()*2.4))
     instruct_label_popup_p4.configure(text="Cell diameter has been measured. \nNow, go to Button 2c to assign initial cells` positions.")     
-    print("cell_radius, patch_size=", true_cell_radius.get(), patch_size)
+
     popup_for_radius.destroy()
     #cell_info_label.config(text= "FRAME SIZE: "+str(frame_size)+"x"+str(frame_size)+
                            #"\nCELL DIAMETER:= "+str(2*true_cell_radius.get())+"\nPATCH SIZE= "+str(2*patch_size)+" x "+str(2*patch_size),
@@ -1815,7 +1818,7 @@ def close_popup_canvas(): # save initial positions of cells in Frame 1
           
       colour_dictionary, new_naive_names, base_colours, colour_counter, unused_naive_names,xs= create_first_color_dictionary(
         max_number_of_cells, len(manual_init_positions), num_frames)
-      
+      print("xs=", xs)
       N_cells=len(manual_init_positions)      
       global curr_frame_cell_names, flag,  edit_id_indicator
       curr_frame_cell_names = new_naive_names# names of cell in the current frame
@@ -1864,7 +1867,7 @@ def cut_lineage(start_frame_internal): # after pausing
     del lineage_per_frame_p4[(start_frame_internal)-1:]# was -1
     print("len(lineage_per_frame_p4) AFTER=", len(lineage_per_frame_p4))   
     update_lineage(lineage_per_frame_p4,outpath,'wb')# "wb" means delete previous lineage and write a new one
-    global output_images,lineage_images,lineage_images_cv2, output_names    
+    global output_images,lineage_images_tk,lineage_images_cv2, output_names    
     #del output_images[(start_frame):]# was start_frame:
     #del output_names[(start_frame):]
     print("start_frame_internal=", start_frame_internal)
@@ -1875,7 +1878,7 @@ def cut_lineage(start_frame_internal): # after pausing
     previous_lineage_image=lineage_images_cv2[start_frame_internal-2]
 
     del lineage_images_cv2[(start_frame_internal-1):] 
-    del lineage_images[(start_frame_internal-1):]
+    del lineage_images_tk[(start_frame_internal-1):]
     del output_images[(start_frame_internal):]# was start_frame:
     del output_names[(start_frame_internal):]
     del changeable_params_history[(start_frame_internal-1):]
@@ -1936,11 +1939,11 @@ def execute():
     cell_radius=true_cell_radius.get()   
     canvas_previous.delete("all")
     canvas_current.delete("all")
-    canvas_lineage.delete("all")
+    canvas_lineage_exec.delete("all")
       
     #label_edit.configure(text=" ")    
     #feedback_label.config(text="Wait, loading models ...", fg="yellow")
-    global lineage_images, output_images, lineage_per_frame_p4, previous_lineage_image, lineage_images_cv2     
+    global lineage_images_tk, output_images, lineage_per_frame_p4, previous_lineage_image, lineage_images_cv2     
     if lineage_per_frame_p4:
         del lineage_per_frame_p4
     
@@ -2056,10 +2059,11 @@ def execute():
             lineage_images_cv2.append(image_lin_copy)
             previous_lineage_image=current_lineage_image# need it for the next lineage image
             print("len(lineage_images_cv2) inside execute=",len(lineage_images_cv2))
-            print("image_lin.shape=",image_lin.shape)                       
+            print("image_lin.shape=",image_lin.shape)
+            #global photo_image_lin                       
             photo_image_lin=turn_image_into_tkinter(image_lin, canvas_size_p4)
             #canvas_lineage.create_image(0,0,anchor=NW,image=photo_image_lin)          
-            lineage_images.append(photo_image_lin)
+            lineage_images_tk.append(photo_image_lin)
             #input_info_label.config(text= "INPUT MOVIE:"+ "\n"+str(my_dir)+"\nTOTAL NUMBER OF FRAMES: "+str(num_frames)+"\nNUMBER OF TRACKED FRAMES:  " +str(len(output_names)-1)) 
             feedback_dict_p4["number of processed"]=str(len(output_names)-1)
             feedback_text_p4=update_feedback_text_p4(feedback_dict_p4)
@@ -2072,7 +2076,7 @@ def execute():
             #if  k == start_frame-1 and kk==0:
                  view_slider.config(from_=first_frame_number,to=first_frame_number+len(all_names_fluor)-1)
             
-            view_slider.set(first_number_in_clip+kk)
+            view_slider.set(first_number_in_clip+kk)# show images dinamically
             slide_frames(view_slider.get())
             print("set view_slider at ",first_number_in_clip+kk)
             if variable_stop=="Stop":              
@@ -2141,7 +2145,7 @@ def slide_frames(value):# view_slider (main screen)
     internal_image_number=image_number-first_frame_number+1    
     label_curr_frame_name.config(text=output_names[image_number-first_frame_number+1])
     label_current.configure(text="Current frame: " +str(image_number), fg="black")     
-    show_3_canvases(canvas_previous,canvas_current,canvas_lineage,output_images,lineage_images,image_number, first_frame_number)
+    show_3_canvases(canvas_previous,canvas_current,canvas_lineage_exec,output_images,lineage_images_tk,image_number, first_frame_number)
 ##############################################
 global view_slider# main screen
 view_slider = Scale(frame9_page4, from_=1, to=1, orient=HORIZONTAL, troughcolor="green", command=slide_frames, length=370)      
@@ -3518,7 +3522,7 @@ def create_final_movie():# create final movie + pedigree_per_cell (simplified, i
   update_lineage(lineage_per_frame_p5,output_dir, 'wb')
   dialog_label_5.config(text="Lineage per cell is stored in" +str(output_dir))
     
-  lineage_per_cell=print_excel_files(output_dir, frame_p5_size,lineage_per_frame_p5, bordersize)
+  lineage_per_cell=print_excel_files(output_dir, frame_p5_size,lineage_per_frame_p5, bordersize,patch_size)
   dialog_label_5.config(text="Lineage per cell is stored in" +str(output_dir)+
                           "Creating final movie...")
   create_output_movie(output_dir, frame_p5_size)       

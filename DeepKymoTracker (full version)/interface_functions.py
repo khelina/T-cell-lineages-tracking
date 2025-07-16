@@ -123,8 +123,7 @@ def show_3_channels(canvas_left,canvas_mid,canvas_right,left_names,mid_names,rig
     canvas_left.delete('all')
     canvas_mid.delete('all')    
     canvas_right.delete('all')
-  
-    
+      
     left_cv_image=cv2.imread(left_names[image_number-1],0)
     mid_cv_image=cv2.imread(mid_names[image_number-1],0)
     right_cv_image=cv2.imread(right_names[image_number-1],0)
@@ -135,26 +134,17 @@ def show_3_channels(canvas_left,canvas_mid,canvas_right,left_names,mid_names,rig
     
     canvas_left.create_image(0, 0, anchor=NW, image= left_tk_image) 
     canvas_mid.create_image(0, 0, anchor=NW, image= mid_tk_image)
-    canvas_right.create_image(0, 0, anchor=NW, image= right_tk_image)
-    
-
-#################################################
-
-def show_3_canvases(canvas_previous,canvas_current,canvas_lineage,output_images,lineage_images,image_number, first_frame_number):
+    canvas_right.create_image(0, 0, anchor=NW, image= right_tk_image)    
+########## show tracking dynamically during execution
+def show_3_canvases(canvas_previous,canvas_current,canvas_lineage_exec,output_images,lineage_images_tk,image_number, first_frame_number):
   canvas_previous.delete('all')
   canvas_current.delete('all')    
-  canvas_lineage.delete('all')
-  print("len(lineage_images) inside 3 canvases=",len(lineage_images)) 
-  print("image_number inside 3 canvases=",image_number)
-  print("len(output_images) inside 3 canvases=",len(output_images)) 
-  internal_image_number=image_number-first_frame_number+1
-  print("internal_image_number inside 3 canvases=",internal_image_number)
-  if internal_image_number<len(output_images):   
+  canvas_lineage_exec.delete('all')  
+  internal_image_number=image_number-first_frame_number+1 
+  if internal_image_number<len(output_images):
    canvas_current.create_image(0, 0, anchor=NW, image=output_images[internal_image_number])
    canvas_previous.create_image(0, 0, anchor=NW, image=output_images[internal_image_number-1])
-   photo_image_lin=lineage_images[internal_image_number-1]   
-   canvas_lineage.create_image(
-        0, 0, anchor=NW, image=photo_image_lin)
+   canvas_lineage_exec.create_image(0, 0, anchor=NW, image=lineage_images_tk[internal_image_number-1])   
 #######################################################
 def create_name_dictionary_p4(filenames):# available frame names (some might be missing)
   name_dictionary={}
@@ -195,7 +185,6 @@ def calculate_angle(rect):
        angle=rect[2]
     return angle, box
 ################################################
-
 def cut_well_from_image(im_bright,seed,well_size, first_x0,delta_x, delta_y, first_rect):
  mask=None
  rot_indicator="no"# shows if you need to rotate final image or not

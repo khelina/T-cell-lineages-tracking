@@ -88,7 +88,7 @@ def load_red_names(source):
 ########## 1. Create lineage_per_cell   2. Plot patches inside "cell-n" folders
 ######### 3. Empty contents of PER_CELL_RESULTS and VISUALISATION_RESULTS  
 
-def create_lineage_per_cell(lineage_per_frame,outpath, frame_size, bordersize):
+def create_lineage_per_cell(lineage_per_frame,outpath, frame_size, bordersize,patch_size):
   software_dir,output_dir=os.path.split(outpath)
   origin= os.path.join(software_dir,output_dir[7:])
   red_names_sorted=load_red_names(origin)
@@ -150,7 +150,8 @@ def create_lineage_per_cell(lineage_per_frame,outpath, frame_size, bordersize):
             patch_before=item[key][3]     
             base=np.zeros((frame_size+2*bordersize,frame_size+2*bordersize),dtype="uint8")
             base[c:d,a:b]=patch_before
-            patch_after=base[int(cY)-48+bordersize:int(cY)+48+bordersize,int(cX)-48+bordersize:int(cX)+48+bordersize]
+            #patch_after=base[int(cY)-48+bordersize:int(cY)+48+bordersize,int(cX)-48+bordersize:int(cX)+48+bordersize]
+            patch_after=base[int(cY)-patch_size+bordersize:int(cY)+patch_size+bordersize,int(cX)-patch_size+bordersize:int(cX)+patch_size+bordersize]
             patch_color=np.zeros((patch_after.shape[0], patch_after.shape[1],3), np.uint8)           
             coll=item[key][15][:-1]
             patch_color[patch_after==255]=coll
@@ -212,11 +213,11 @@ def create_lineage_per_cell(lineage_per_frame,outpath, frame_size, bordersize):
          pickle.dump(pedigree_per_cell, f)  
   return pedigree_per_cell
 #############################################
-def print_excel_files(outpath, frame_size, lineage_per_frame_p5, bordersize):
+def print_excel_files(outpath, frame_size, lineage_per_frame_p5, bordersize,patch_size):
     #print("outpath=", outpath)
     #lineage_per_frame=extract_lineage(outpath)
     #update_lineage(lineage_per_frame_p5,outpath, 'wb')
-    lineage_per_cell=create_lineage_per_cell(lineage_per_frame_p5,outpath, frame_size, bordersize)
+    lineage_per_cell=create_lineage_per_cell(lineage_per_frame_p5,outpath, frame_size, bordersize,patch_size)
     ##############################################
     del lineage_per_frame_p5
     ################### empty folder "PER_CELL_RESULTS" and its subfolders

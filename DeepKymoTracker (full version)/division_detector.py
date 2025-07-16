@@ -84,14 +84,14 @@ def detect_figure_8(segmented_patch):# detects division in patch
   #print("len(contours) inside detect_figure_8_after=", len(cnts))
   return verdict,segmented_patch,im1# if no division, im1=segmented_patch, the cell is not cut
 ################ recalculate centres of daugher cells after division
-def recalculate_centre(segmented_image,old_coords, frame_size):
+def recalculate_centre(segmented_image,old_coords, frame_size, border_size, patch_size):
      x0,y0=old_coords[0],old_coords[1]
      black=np.zeros((frame_size,frame_size),dtype="uint8")
-     black_border=cv2.copyMakeBorder(black, top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize, borderType= cv2.BORDER_REPLICATE )
-     a,b,c,d=int(round(x0))+Bordersize-48,int(round(x0))+Bordersize+48,int(round(y0))+Bordersize-48,int(round(y0))+Bordersize+48  
+     black_border=cv2.copyMakeBorder(black, top=bordersize, bottom=bordersize, left=bordersize, right=bordersize, borderType= cv2.BORDER_REPLICATE )
+     a,b,c,d=int(round(x0))+bordersize-patch_size,int(round(x0))+bordersize+patch_size,int(round(y0))+bordersize-patch_size,int(round(y0))+bordersize+patch_size  
      black_border[c:d, a:b]=segmented_image
      black_border_copy=black_border.copy()
-     black_again=black_border[Bordersize:frame_size+Bordersize,Bordersize:frame_size+Bordersize]
+     black_again=black_border[bordersize:frame_size+bordersize,bordersize:frame_size+bordersize]
      im2, contours, hierarchy = cv2.findContours(black_again,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)     
      c=contours[0]	
      M = cv2.moments(c)
@@ -100,24 +100,26 @@ def recalculate_centre(segmented_image,old_coords, frame_size):
      area=np.round(cv2.contourArea(c),2)
      perimeter=np.round(cv2.arcLength(c,True),2)
      circularity=np.round(4*math.pi*area/perimeter**2,2)
-     new_a,new_b,new_c,new_d =int(round(cX))+Bordersize-48,int(round(cX))+Bordersize+48,int(round(cY))+Bordersize-48,int(round(cY))+Bordersize+48
+     new_a,new_b,new_c,new_d =int(round(cX))+bordersize-patch_size,int(round(cX))+bordersize+patch_size,int(round(cY))+bordersize-patch_size,int(round(cY))+bordersize+patch_size
      
      new_patch=black_border_copy[new_c:new_d,new_a:new_b]     
      return cX,cY, area,perimeter,circularity, new_a,new_b,new_c,new_d, new_patch 
 #################################################
-def process_figure_8(im1,centre, frame_size):#separates figure into 2 cells and patches
-    if im1.shape==(96,96,3):
+def process_figure_8(im1,centre, frame_size, bordersize, patch_size):#separates figure into 2 cells and patches
+    #if im1.shape==(96,96,3):
+    if im1.shape==(2*patch_size,2*patch_size,3):    
              im1 = cv2.cvtColor(im1,cv2.COLOR_BGR2GRAY) 
     im2, contours, hierarchy = cv2.findContours(im1,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE) 
     parameters=[]
     separated_cells=[]
    # print("len(contours) inside process_figure_8=", len(contours))
     for kkk  in range(len(contours)):	
-        img=np.zeros((96,96),dtype="uint8")
+        #img=np.zeros((96,96),dtype="uint8")
+        img=np.zeros((2*patch_size,2*patch_size),dtype="uint8")
         cv2.drawContours(img, contours, kkk, 255, -1)
                 
              
-        cX,cY, area,perimeter,circularity, new_a,new_b,new_c,new_d, new_patch =recalculate_centre(img,(centre[0],centre[1]),frame_size)
+        cX,cY, area,perimeter,circularity, new_a,new_b,new_c,new_d, new_patch =recalculate_centre(img,(centre[0],centre[1]),frame_size, bordersize, patch_size)
         separated_cells.append(new_patch) 
         parameters.append(([cX,cY], area,perimeter,circularity, new_a,new_b,new_c,new_d ))    
     return separated_cells,parameters
