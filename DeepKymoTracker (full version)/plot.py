@@ -28,14 +28,16 @@ def update_naive_names_list(unused_naive_names, n):# n = number of new (added) n
         unused_naive_names.remove(letter)
     return new_naive_names, unused_naive_names
 ################# when adding new cell
-def update_xs(xs,new_names, num_frames,  lineage_image_size,number_of_added_new_cells):
+def update_xs(xs,new_names, num_frames,  lineage_image_size,number_of_added_new_cells, previous_lineage_image, canvas_lineage_exec, canvas_size_p4):
        print("I am inside update_xs")
        for ii in range(len(new_names)):
           new_name=new_names[ii]
           print("new_name=", new_name)
           xs[new_name]=num_frames+20*(ii+1+number_of_added_new_cells)         
-          #previous_lineage_image=np.concatenate((previous_lineage_image,np.zeros((lineage_image_size,40,3), dtype=previous_lineage_image.dtype)), axis=1)
-       return xs
+          previous_lineage_image=np.concatenate((previous_lineage_image,np.zeros((lineage_image_size,60,3), dtype=previous_lineage_image.dtype)), axis=1)
+          print(" previous_lineage_image.shape=", previous_lineage_image.shape)
+          canvas_lineage_exec.config(width=canvas_size_p4+100)
+       return xs, previous_lineage_image
 ###################################
 def create_first_color_dictionary(max_number_of_cells, init_number_of_cells, num_frames): 
   base_colours=[[238,238,0,255],#cyan 1

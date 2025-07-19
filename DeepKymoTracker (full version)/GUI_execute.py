@@ -1019,9 +1019,9 @@ button_fluor.pack()
 ###############################################################################
 page4=pages[3]
 page4.config(bg=bg_color)
+global canvas_size_p4
 canvas_size_p4 =382
-global lineage_extension_for_new_cells
-lineage_extension_for_new_cells=0
+
 
 frame1_page4 = tk.Frame(master=page4, width=1528, height=50, bg=bg_color)
 frame1_page4.grid(row=0, column=0, rowspan=1, columnspan=6, sticky=W+E+N+S)
@@ -1035,10 +1035,10 @@ frame3_page4.grid(row=1, column=1, rowspan=1, columnspan=5, sticky=W+E+N+S)
 frame5_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=canvas_size_p4, bg=bg_color)
 frame5_page4.grid(row=2, column=0, rowspan=1, columnspan=1)
 
-frame6_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=canvas_size_p4, bg=bg_color)
+frame6_page4 = tk.Frame(master=page4, width=canvas_size_p4+300, height=canvas_size_p4, bg="blue")
 frame6_page4.grid(row=2, column=1, rowspan=1, columnspan=1)
 
-frame7_page4 = tk.Frame(master=page4, width=canvas_size_p4+lineage_extension_for_new_cells, height=canvas_size_p4, bg=bg_color)
+frame7_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=canvas_size_p4, bg=bg_color)
 frame7_page4.grid(row=2, column=2, rowspan=1, columnspan=1)
 
 frame8_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=canvas_size_p4, bg=bg_color)
@@ -1061,10 +1061,12 @@ canvas_previous = Canvas(frame5_page4, bg=bg_color, height=canvas_size_p4, width
 canvas_previous.pack(anchor='nw', fill='both', expand=True)
 canvas_current = Canvas(frame6_page4, bg=bg_color, height=canvas_size_p4, width=canvas_size_p4)
 canvas_current.pack(anchor='nw', fill='both', expand=True)
-#global canvas_lineage
+global canvas_lineage_exec
 canvas_lineage_exec = Canvas(frame7_page4, bg=bg_color, height=canvas_size_p4, width=canvas_size_p4)
 #canvas_lineage.grid(row=0,column=0)
-canvas_lineage_exec.pack(anchor='nw', fill='both', expand=True)
+#canvas_lineage_exec.pack(anchor='nw', fill='both', expand=True)
+canvas_lineage_exec.pack(anchor='nw')
+#canvas_lineage_exec.config(width=canvas_size_p4+100)
 ########################### These labels do not change
 
 title_label = tk.Label(frame1_page4, text="STEP 3: EXECUTE AND CORRECT TRACKING",
@@ -1542,7 +1544,7 @@ def prepare_for_first_go():
         lineage_image_size=num_frames#this is the size of lineage image
     else:
         lineage_image_size=num_frames
-    previous_lineage_image =np.zeros((lineage_image_size, lineage_image_size+lineage_extension_for_new_cells,3), dtype="uint8") 
+    previous_lineage_image =np.zeros((lineage_image_size, lineage_image_size,3), dtype="uint8") 
     #feedback_label.config(text="Movie loaded, {} frames.\nNow, you need to specify how many cells are there in Frame 1.".format(num_frames))   
     button_load.configure(background =button_color)
     global start_frame
@@ -1863,18 +1865,19 @@ def clear_memory_of_models(tracker, segmentor, refiner):
 ###########################################
 def cut_lineage(start_frame_internal): # after pausing
     lineage_per_frame_p4=extract_lineage(outpath)
-    print("len(lineage_per_frame_p4) BEFORE=", len(lineage_per_frame_p4))
+    print("CUT_LINEAGE")
+    #print("len(lineage_per_frame_p4) BEFORE=", len(lineage_per_frame_p4))
     del lineage_per_frame_p4[(start_frame_internal)-1:]# was -1
-    print("len(lineage_per_frame_p4) AFTER=", len(lineage_per_frame_p4))   
+    #print("len(lineage_per_frame_p4) AFTER=", len(lineage_per_frame_p4))   
     update_lineage(lineage_per_frame_p4,outpath,'wb')# "wb" means delete previous lineage and write a new one
     global output_images,lineage_images_tk,lineage_images_cv2, output_names    
     #del output_images[(start_frame):]# was start_frame:
     #del output_names[(start_frame):]
-    print("start_frame_internal=", start_frame_internal)
-    print("len(output_images)=",len(output_images))
-    print("len(output_names)=",len(output_names)) 
+    #print("start_frame_internal=", start_frame_internal)
+    #print("len(output_images)=",len(output_images))
+    #print("len(output_names)=",len(output_names)) 
     global previous_lineage_image
-    print("len(lineage_images_cv2) before cut lineage=",len(lineage_images_cv2))   
+    #print("len(lineage_images_cv2) before cut lineage=",len(lineage_images_cv2))   
     previous_lineage_image=lineage_images_cv2[start_frame_internal-2]
 
     del lineage_images_cv2[(start_frame_internal-1):] 
@@ -1884,7 +1887,7 @@ def cut_lineage(start_frame_internal): # after pausing
     del changeable_params_history[(start_frame_internal-1):]
     update_changeable_params_history(changeable_params_history,outpath, "wb")
     
-    print("len(lineage_images_cv2) after cut=",len(lineage_images_cv2))
+    #print("len(lineage_images_cv2) after cut=",len(lineage_images_cv2))
     """          
     global dict_of_divisions 
     print("dict_of_divisios before cut_lineage=", dict_of_divisions)     
@@ -1893,12 +1896,12 @@ def cut_lineage(start_frame_internal): # after pausing
     """
     folders_to_truncate=[os.path.join("HELPERS_(NOT_FOR_USER)","MASKS"),"FLUORESCENT_MOVIE_RESULTS",os.path.join("HELPERS_(NOT_FOR_USER)","LINEAGE_IMAGES"),os.path.join("HELPERS_(NOT_FOR_USER)","CLEANED_PATCHES"), "BRIGHT_MOVIE_RESULTS"]
     for folder in folders_to_truncate:
-        print("folder=", folder)
+        #print("folder=", folder)
         full_path_to_folder=os.path.join(outpath,folder)
         for filename in os.listdir(full_path_to_folder):
-            print("filename=", filename)
+            #print("filename=", filename)
             index_t=filename.index("_t")
-            print("index_t=", index_t)
+            #print("index_t=", index_t)
             number=int(filename[index_t+2:-9])
             if number>=start_frame:
                full_name=os.path.join(full_path_to_folder, filename)
@@ -1943,7 +1946,8 @@ def execute():
       
     #label_edit.configure(text=" ")    
     #feedback_label.config(text="Wait, loading models ...", fg="yellow")
-    global lineage_images_tk, output_images, lineage_per_frame_p4, previous_lineage_image, lineage_images_cv2     
+    global lineage_images_tk, output_images, lineage_per_frame_p4, previous_lineage_image, lineage_images_cv2 
+    print("previous_lineage_image.shape IN EXEC=",previous_lineage_image.shape)    
     if lineage_per_frame_p4:
         del lineage_per_frame_p4
     
@@ -2038,7 +2042,7 @@ def execute():
             N_cells = len(cells)
             print("cells after division detector=", list(cells.keys()))
             #print("n_digits_inside execute=", n_digits)
-           
+            print("previous_lineage_image.shape =", previous_lineage_image.shape)
             current_lineage_image=create_lineage_image_one_frame(cells, previous_lineage_image, xs, first_number_in_clip+kk, first_frame_number)
             print("current_lineage_image.shape =", current_lineage_image.shape)
             #print("fluor_names inside exeute=", fluor_names)
@@ -2442,13 +2446,15 @@ def save_added_cell():
     #print("new_naive_names before", new_naive_names)
     colour_dictionary, colour_counter=update_color_dictionary(colour_dictionary,new_naive_names,base_colours, colour_counter)    
     curr_frame_cell_names+=new_naive_names    
-    xs=update_xs(xs,new_naive_names, num_frames,  lineage_image_size, number_of_added_new_cells)
+    xs, previous_lineage_image=update_xs(xs,new_naive_names, num_frames,  lineage_image_size, number_of_added_new_cells,previous_lineage_image, canvas_lineage_exec, canvas_size_p4)
+    print("previous_lineage_image.shape AFTER CREATION=",previous_lineage_image.shape)
     number_of_added_new_cells+=number_of_now_added_cells          
-    lineage_images_cv2[internal_start_frame-1]=previous_lineage_image     
+    #lineage_images_cv2[internal_start_frame-1]=previous_lineage_image
+    lineage_images_cv2[internal_start_frame-2]=previous_lineage_image     
     instruct_var_p4.set("Added cells:\n " + str(new_naive_names))
     canvas_previous.delete('all')
     canvas_current.delete('all')    
-    canvas_lineage.delete('all')
+    canvas_lineage_exec.delete('all')
   
     
     #print("dict_of_divisios before save_added=", dict_of_divisions)     
