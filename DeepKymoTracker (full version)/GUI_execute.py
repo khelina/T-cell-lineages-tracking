@@ -47,6 +47,7 @@ page_number = tk.IntVar(master=win, value=1)
 num = page_number.get()
 #print("page_number=", num)
 win.withdraw()
+#################################
 
 ################## Create pages and buttons to switch between pages
 ##################################################################   
@@ -1021,7 +1022,7 @@ page4=pages[3]
 page4.config(bg=bg_color)
 global canvas_size_p4
 canvas_size_p4 =382
-
+ 
 
 frame1_page4 = tk.Frame(master=page4, width=1528, height=50, bg=bg_color)
 frame1_page4.grid(row=0, column=0, rowspan=1, columnspan=6, sticky=W+E+N+S)
@@ -1136,12 +1137,19 @@ instruct_var_p4.set(" Step 3 allows you to track and manually correct tracking e
 global manual_IDs,manual_centroids,mother_name,  daughter_indicators 
 manual_IDs,  manual_centroids, mother_name, daughter_indicators=[], [], None, []
 #################
+def activate_buttons(all_buttons_list,active_buttons_list):
+    for button in all_buttons_list:
+        if button in active_buttons_list:
+            button.config(state=NORMAL)
+        else:
+            button.config(state=DISABLED)
+#######################
 def load_helper_functions():
     os.chdir(software_folder)
     global predict_first_frame, create_output_folders,\
         detect_division, update_dictionary_after_division, check_division_frame_number, predict_tracking, predict_tracking_general, backup_track, predict_first_frame, segment_and_clean,\
          plot_frame, create_first_color_dictionary,\
-        create_pedigree, create_output_movie, load_weights, extract_lineage,create_dictionary_of_xs,\
+        create_pedigree, create_output_movie, load_weights, extract_lineage,\
         create_lineage_image_one_frame, extract_file_name, load_clip, update_lineage,force_manual_IDs,create_lineage_for_Lorenzo,sorted_aphanumeric,update_color_dictionary,update_naive_names_list,update_xs,\
         load_full_raw_movie,create_models,extract_output_images,create_name_dictionary_p4,display_image_p4,removeLeadingZeros,rename_file, show_3_canvases,update_changeable_params_history,extract_changeable_params_history
 
@@ -1155,7 +1163,7 @@ def load_helper_functions():
                            hungarian, predict_tracking,force_manual_IDs)
     
     from plot import plot_frame, create_first_color_dictionary,update_color_dictionary,update_naive_names_list,update_xs, rename_file
-    from postprocess import create_pedigree,  create_output_movie, create_dictionary_of_xs, create_lineage_image_one_frame,sorted_aphanumeric
+    from postprocess import create_pedigree,  create_output_movie,  create_lineage_image_one_frame,sorted_aphanumeric
     from keras.models import model_from_json
     from print_excel import print_excel_files,extract_lineage,update_lineage, extract_const_movie_parameters,update_changeable_params_history,extract_changeable_params_history
     from interface_functions import extract_output_images,create_name_dictionary_p4,display_image_p4, show_3_canvases
@@ -1261,12 +1269,12 @@ def initiate_tracking_page():
                   out_folders = create_output_folders(outpath)# creates names only  
     
                   global true_cell_radius, patch_size,max_number_of_cells,  xs, full_core_bright_name,curr_frame_cell_names,flag,edit_id_indicator, \
-                  base_colours,colour_counter,colour_dictionary,unused_naive_names, contrast_value, dict_of_divisions,number_of_added_new_cells,number_in_first_frame,full_core_red_name, red_dictionary, bordersize
+                  base_colours,colour_counter,colour_dictionary,unused_naive_names, contrast_value, dict_of_divisions,number_of_added_new_cells,number_in_first_frame,full_core_red_name, red_dictionary, bordersize, delta
                   true_cell_radius, edit_id_indicator=IntVar(),StringVar()
    
                   (frame_size, true_cell_radius_pickle, patch_size,max_number_of_cells,
                   num_frames, full_core_fluor_name, n_digits, full_core_bright_name, first_frame_number,
-                  base_colours, contrast_value, number_in_first_frame,full_core_red_name, red_dictionary, bordersize)= extract_const_movie_parameters(outpath)
+                  base_colours, contrast_value, number_in_first_frame,full_core_red_name, red_dictionary, bordersize, delta)= extract_const_movie_parameters(outpath)
                   
     
                   true_cell_radius.set(true_cell_radius_pickle)
@@ -1301,9 +1309,11 @@ def initiate_tracking_page():
                   output_images,lineage_images_tk, output_names,lineage_images_cv2=extract_output_images(out_folders[1],os.path.join(out_folders[4],"LINEAGE_IMAGES"),canvas_size_p4, output_images,output_names)
                   print("len(lineage_images_tk)=",len(lineage_images_tk))
                   print("len(lineage_images_cv2)=",len(lineage_images_cv2))
-                  global  previous_lineage_image, lineage_image_size
+                  global  previous_lineage_image, lineage_image_width
                   previous_lineage_image=lineage_images_cv2[-1]     
-                  lineage_image_size=previous_lineage_image.shape[0]
+                  canvas_lineage_width=previous_lineage_image.shape[1]*canvas_size_p4/previous_lineage_image.shape[0]
+                  print("canvas_lineage_width=", canvas_lineage_width)
+                  canvas_lineage_exec.config(width=canvas_lineage_width)
                   #######################################################
                   #################################################
                   if len(all_names_fluor)>len(output_names_fluor):
@@ -1328,15 +1338,17 @@ def initiate_tracking_page():
                      print("fully tracked")
                      button_load.configure(background = button_color)
                      button_execute.configure(bg=button_color)
+                     
                      instruct_var_p4.set("The movie has been fully tracked. \nPress OK to view the processed frames.")
-                     def close_fully_popup():
-                      
+                     #############################################################
+                     def close_fully_popup():                     
                       update_flash([button_execute])
                       popup_fully_tracked.destroy()                      
                       display_first_frame()
                       instruct_var_p4.set("The movie has been fully tracked.\nUse slide bar to check results."\
                                           "\nIf you need to edit tracking errors, stop the slide bar on the frame of interest and choose one of the options under Edit tools."\
-                                              "\nIf you are happy with the results,press Exit or Next to proceed to segmentation correction.")                  
+                                              "\nIf you are happy with the results,press Exit or Next to proceed to segmentation correction.")
+                     ################################################
                      global popup_fully_tracked, button_ok
                      popup_fully_tracked = tk.Toplevel(master=page4, bg=label_color)
                      w,h = 400,150                      
@@ -1633,7 +1645,7 @@ def save_cell_radius():
 def record_const_movie_parameters():# record cell_size and other parameters in pickle file to be used at Step 4 and in retrieve mode
     list_of_const_movie_params=[frame_size, true_cell_radius.get(), patch_size,max_number_of_cells,
                           num_frames, full_core_fluor_name, n_digits,full_core_bright_name, first_frame_number,
-                          base_colours, contrast_value, len(coords_very_first),full_core_red_name, red_dictionary, bordersize]
+                          base_colours, contrast_value, number_in_first_frame,full_core_red_name, red_dictionary, bordersize, delta]
     const_parameters_path=os.path.join(outpath,"constant_movie_parameters.pkl")  
     with open(const_parameters_path, 'wb') as f:
         for i in range(len(list_of_const_movie_params)):
@@ -1813,12 +1825,13 @@ def close_assign_window():
 ############################    
 def close_popup_canvas(): # save initial positions of cells in Frame 1
                     
-      global coords, manual_init_positiona, coords_very_first    
+      global coords, manual_init_positions, coords_very_first, number_in_first_frame    
       
       coords_very_first=manual_init_positions
-      global colour_dictionary, new_naive_names, colour_counter, base_colours, unused_naive_names, xs
+      number_in_first_frame=len(coords_very_first)
+      global colour_dictionary, new_naive_names, colour_counter, base_colours, unused_naive_names, xs, delta
           
-      colour_dictionary, new_naive_names, base_colours, colour_counter, unused_naive_names,xs= create_first_color_dictionary(
+      colour_dictionary, new_naive_names, base_colours, colour_counter, unused_naive_names,xs, delta= create_first_color_dictionary(
         max_number_of_cells, len(manual_init_positions), num_frames)
       print("xs=", xs)
       N_cells=len(manual_init_positions)      
@@ -1841,6 +1854,8 @@ def close_popup_canvas(): # save initial positions of cells in Frame 1
       #feedback_label_p4.config(text="The positions of cells in Frame 1 has been saved.\n\nTo start execution, press Button 3.")
       #stop_flash("save", popup, flashers)
       update_flash([button_execute])
+      global all_buttons_page4
+      activate_buttons(all_buttons_page4,[button_execute])
      
       popup_first_preview.destroy()
 
@@ -1930,7 +1945,7 @@ def clear_memory_of_previous_clip(fluor_images, fluor_images_compressed,bright_i
 import time
 ########################################################
 def execute():
- #button_display.configure(bg=button_color)
+ activate_buttons(all_buttons_page4,[button_pause])
  button_execute.configure(background = 'red') 
  instruct_var_p4.set("Execution in progress...")
  global start_frame
@@ -2124,6 +2139,7 @@ def execute():
      print("execution_time=", execution_time)
  button_execute.configure(background = button_color)
  update_flash([button_display])
+ activate_buttons(all_buttons_page4,[button_display])
  button_pause.configure(background = button_color)
 
  print("dict_of_divisions after execution =", dict_of_divisions) 
@@ -2135,6 +2151,7 @@ def stop_execution_manually():
     global variable_stop
     variable_stop = "Stop"
     button_pause.configure(background = "red")
+    activate_buttons(all_buttons_page4,[button_display])
     #print("START_FRAME after pushing pause=", start_frame)
     print("dict_of_divisions after execution inside stop_exec_manually=", dict_of_divisions)
 #################################################################    
@@ -2159,6 +2176,8 @@ view_slider.pack()
 def display_first_frame():# display all frames after pushing button "Display result"
     update_flash([])
     button_display.config(bg="red")
+    button_execute.configure(bg=button_color)
+    activate_buttons(all_buttons_page4,[R_edit_ID, R_edit_division, R_add_new_cell,R_remove_dead_cell, button_execute ])
     view_slider.config(from_=first_frame_number,to=len(output_images)+first_frame_number-2)   
     view_slider.set(str(first_frame_number))  
     slide_frames(first_frame_number)
@@ -2236,6 +2255,7 @@ def get_centroids_manually(event):
 def start_editing_IDs():
     button_save_id.grid(row=3, column=0, columnspan=1)
     R_edit_ID.configure(background = 'red')
+    activate_buttons(all_buttons_page4,[button_save_id])
     update_flash([button_save_id])
     if popup_monitor!=None:
           popup_monitor.deiconify()
@@ -2300,6 +2320,7 @@ def stop_editing_IDs():
     canvas_lineage.delete('all')
     update_flash([button_execute])
     button_save_id.grid_forget()
+    activate_buttons(all_buttons_page4,[button_execute])
     
     label_current.configure( text="Current frame", fg="black" )
     button_save_id.configure(background = '#9ACD32')
@@ -2313,6 +2334,7 @@ def stop_editing_IDs():
 ###################################################
 def start_editing_division():
     R_edit_division.configure(background = 'red')
+    activate_buttons(all_buttons_page4,[ button_save_division])
     button_save_division.grid(row=3, column=1, columnspan=1)
     update_flash([button_save_division]) 
     
@@ -2406,13 +2428,15 @@ def stop_editing_division():
     button_display.configure(background = button_color)
     
     R_edit_division.configure(background = '#9ACD32')
+    activate_buttons(all_buttons_page4,[ button_execute])
     instruct_var_p4.set("You finished editing missed division in Frame  "+str(start_frame)+" .\n To resume execution, press Button 3." ) 
 ############################################
 def add_new_cell():
   instruct_var_p4.set("To add a new cell/cells, click on their cetroids in Current Frame./Once finished, click Save added cells.")
   R_add_new_cell.configure(background="red")
   button_save_added_cell.grid(row=3, column=2, columnspan=1)
-  update_flash([button_save_added_cell])  
+  update_flash([button_save_added_cell])
+  activate_buttons(all_buttons_page4,[button_save_added_cell])  
   global colour
   colour_init=[0,0,255]
   colour="#%02x%02x%02x" % tuple(colour_init)
@@ -2440,15 +2464,20 @@ def save_added_cell():
     coords=np.concatenate((coords_old, b), axis=0)     
     number_of_now_added_cells=len(manual_centroids)
     #print("number_of_added_cells=", number_of_now_added_cells)
-    global  base_colours
+    global  base_colours, delta
     #######
     new_naive_names, unused_naive_names=update_naive_names_list(unused_naive_names, number_of_now_added_cells)
     #print("new_naive_names before", new_naive_names)
     colour_dictionary, colour_counter=update_color_dictionary(colour_dictionary,new_naive_names,base_colours, colour_counter)    
-    curr_frame_cell_names+=new_naive_names    
-    xs, previous_lineage_image=update_xs(xs,new_naive_names, num_frames,  lineage_image_size, number_of_added_new_cells,previous_lineage_image, canvas_lineage_exec, canvas_size_p4)
+    curr_frame_cell_names+=new_naive_names
+    number_of_processed_cells=number_in_first_frame+number_of_added_new_cells+len(dict_of_divisions)
+    print("number_of_processed_cells=",number_of_processed_cells)
+    number_of_remaining_cells=max_number_of_cells-number_of_processed_cells
+    print("number_of_remaining_cells=",number_of_remaining_cells)
+        
+    xs, previous_lineage_image=update_xs(xs,new_naive_names, number_of_remaining_cells,previous_lineage_image, canvas_lineage_exec, canvas_size_p4, delta)
     print("previous_lineage_image.shape AFTER CREATION=",previous_lineage_image.shape)
-    number_of_added_new_cells+=number_of_now_added_cells          
+    number_of_added_new_cells+=number_of_now_added_cells        
     #lineage_images_cv2[internal_start_frame-1]=previous_lineage_image
     lineage_images_cv2[internal_start_frame-2]=previous_lineage_image     
     instruct_var_p4.set("Added cells:\n " + str(new_naive_names))
@@ -2467,12 +2496,14 @@ def save_added_cell():
     button_display.configure(background = button_color)
     R_add_new_cell.configure(background=button_color)
     button_save_added_cell.grid_forget()
+    activate_buttons(all_buttons_page4,[ button_execute])
     instruct_var_p4.set("You added new cells in Frame "+str(start_frame)+"  .\nTo resume tracking, push Button 3.")
 #####################################
 def remove_died_cell():
   R_remove_dead_cell.configure(background="red")
   button_save_removed_cell.grid(row=3, column=3, columnspan=1)
   update_flash([button_save_removed_cell])
+  activate_buttons(all_buttons_page4,[button_save_removed_cell])
   canvas_current.bind("<Button-1>", get_cell_IDs_manually) 
   global manual_IDs,cell_names_external, daughter_indicators
   manual_IDs, cell_names_external, daughter_indicators=[],[],[]
@@ -2522,6 +2553,7 @@ def save_removed_cell():
     button_display.configure(background = button_color)
     R_remove_dead_cell.configure(background=button_color)
     button_save_removed_cell.grid_forget()
+    activate_buttons(all_buttons_page4,[ button_execute])
     instruct_var_p4.set("You deleted cells in Frame  "+str(start_frame)+"  /nTo resume tracking, push Button 3.")
 ##########################################
 
@@ -2599,9 +2631,11 @@ R_remove_dead_cell = Radiobutton(frame3_page4, text="Remove dead cell",backgroun
                  value="Current", activebackground="red",variable=clicked, command=remove_died_cell)    
 R_remove_dead_cell.grid(row=1, column=3,pady=10, padx=10)
 ################################################
-
+global all_buttons_page4
 #label_edit = tk.Label(frame3_page4, text=" ", font='TkDefaultFont 10 bold',  bg="black", fg="yellow", width=50, height=4)
-
+all_buttons_page4=[button_load,button_execute, button_pause,button_display,\
+                   R_edit_ID,R_edit_division, R_add_new_cell,R_remove_dead_cell,\
+                   button_save_id,button_save_division,button_save_added_cell,button_save_removed_cell]
 
 ###########################################################################
 ############################## PAGE-5 (STEP-4): CORRECT SEGMENTATION #######
@@ -3935,13 +3969,14 @@ def combine_funcs(*funcs):
 page_titles=["PAGE 1: TITLE PAGE","PAGE 2: EXTRACT MOVIE FROM FOLDER", "PAGE 3: CUT ONE WELL",
              "PAGE 4: EXECUTE AND CORRECT TRACKING", "PAGE 5: CORRECT SEGMENTATION","PAGE 6: VISUALISE RESULTS" ]
 initial_buttons=[[button_choose_folder],[button_select],[button_load],[button_load_p5],[button_create]]
+
 page_numbers=[page1,page2,page3,page4,page5, page6]
 
 ######################## locations of buttons Back, Exit and Next
 locations=[frame3_page1,frame8_page2,frame15_page3,frame11_page4,frame8_page5,frame13_page6]
 x_back,x_exit,x_next=700,750,800
 
-             
+######## make initial_buttons flash and create back, exit, next buttons             
 for i in range(0,6):
     
     if i==5:
@@ -3955,6 +3990,9 @@ for i in range(0,6):
           flash_buttons=[]
       else:
           flash_buttons=initial_buttons[i-2]
+          if i==2:
+            #activate_buttons(all_buttons_page4,[initial_buttons[i-2]])
+            activate_buttons(all_buttons_page4,[button_load])
       g_back=partial(update_flash,flash_buttons) 
       Button(location, text="Back",bg="orange",font=all_font, command=combine_funcs(f_back,g_back)).place(x=x_back,y=0)
             

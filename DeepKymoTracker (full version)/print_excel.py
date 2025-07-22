@@ -51,13 +51,13 @@ def extract_const_movie_parameters(outpath):
     #print("list_of_const_movie_params", list_of_const_movie_params)
     frame_size, true_cell_radius_pickle, patch_size,max_number_of_cells,\
     num_frames, full_core_fluor_name, n_digits, full_core_bright_name,  first_frame_number,\
-    base_colours,contrast_value, number_cells_in_first_frame,full_core_red_name, red_dictionary, bordersize = list_of_const_movie_params[0],list_of_const_movie_params[1],list_of_const_movie_params[2],\
+    base_colours,contrast_value, number_cells_in_first_frame,full_core_red_name, red_dictionary, bordersize, delta = list_of_const_movie_params[0],list_of_const_movie_params[1],list_of_const_movie_params[2],\
     list_of_const_movie_params[3],list_of_const_movie_params[4],list_of_const_movie_params[5],list_of_const_movie_params[6],list_of_const_movie_params[7],list_of_const_movie_params[8],\
-    list_of_const_movie_params[9],list_of_const_movie_params[10],list_of_const_movie_params[11],list_of_const_movie_params[12],list_of_const_movie_params[13],list_of_const_movie_params[14]
+    list_of_const_movie_params[9],list_of_const_movie_params[10],list_of_const_movie_params[11],list_of_const_movie_params[12],list_of_const_movie_params[13],list_of_const_movie_params[14],list_of_const_movie_params[15]
     
     return frame_size, true_cell_radius_pickle, patch_size,max_number_of_cells,\
            num_frames, full_core_fluor_name, n_digits, full_core_bright_name,  first_frame_number,\
-           base_colours,contrast_value,number_cells_in_first_frame,full_core_red_name, red_dictionary, bordersize 
+           base_colours,contrast_value,number_cells_in_first_frame,full_core_red_name, red_dictionary, bordersize, delta 
 ##########################
 def extract_lineage(outpath):
     lineage_path=os.path.join(outpath,"lineage_per_frame.pkl")
