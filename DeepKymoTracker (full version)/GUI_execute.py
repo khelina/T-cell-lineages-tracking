@@ -1120,6 +1120,8 @@ global clicked# used in radio buttons for editing,indicates which canvas is used
 clicked = StringVar()
 clicked.set(" ")
 ###############################################
+global fully_tracked_indicator
+fully_tracked_indicator="no"
 global update_feedback_text_p4
 from preprocess import update_feedback_text_p4
 global instruct_var_p4,feedback_var_p4,feedback_dict_p4
@@ -1337,13 +1339,13 @@ def initiate_tracking_page():
                   else:
                      print("fully tracked")
                      button_load.configure(background = button_color)
-                     button_execute.configure(bg=button_color)
-                     
+                     #button_execute.configure(bg=button_color)
+                     global fully_tracked_indicator
+                     fully_tracked_indicator="yes"
                      instruct_var_p4.set("The movie has been fully tracked. \nPress OK to view the processed frames.")
                      #############################################################
                      def close_fully_popup():                     
-                      update_flash([button_execute])
-                      popup_fully_tracked.destroy()                      
+                                         
                       display_first_frame()
                       instruct_var_p4.set("The movie has been fully tracked.\nUse slide bar to check results."\
                                           "\nIf you need to edit tracking errors, stop the slide bar on the frame of interest and choose one of the options under Edit tools."\
@@ -1356,7 +1358,8 @@ def initiate_tracking_page():
                      popup_fully_tracked.geometry('%dx%d+%d+%d' % (w, h, x, y))
                      label_popup = tk.Label(popup_fully_tracked, text="The movie has been fully tracked. \nPress OK to view the processed frames.",width=400, height=5, bg=label_color, fg="black", font='TkDefaultFont 14 bold' )
                      label_popup.pack()                                          
-                     button_ok = Button(popup_fully_tracked, text=" OK",font='TkDefaultFont 14 bold', bg=button_color, command=close_fully_popup)
+                     button_ok = Button(popup_fully_tracked, text=" OK",font='TkDefaultFont 14 bold', bg=button_color, command=lambda:[close_fully_popup(),  popup_fully_tracked.destroy() ])
+                    
                      button_ok.pack()
                      update_flash([button_ok])
             else:# 3. if RESULT_FLUOR does not exist
@@ -1371,7 +1374,6 @@ def prepare_for_first_go():
     feedback_dict_p4["number of processed"]="0"
     instruct_var_p4.set("Input mivie is loaded. Setting up parameters of the movie in progress...")
     ##########
-   
     
     #########
     global popup_first_preview, canvas_popup_fluor_p4,canvas_popup_bright_p4,canvas_popup_red_p4
@@ -1416,12 +1418,28 @@ def prepare_for_first_go():
     canvas_mid_pop = Canvas(frame3, bg=bg_color, height=canvas_size_p4, width=canvas_size_p4)
     canvas_mid_pop.pack(anchor='nw', fill='both', expand=True)
     canvas_right_pop = Canvas(frame4, bg="green", height=canvas_size_p4, width=canvas_size_p4)
-    canvas_right_pop.pack(anchor='nw', fill='both', expand=True)
+    canvas_right_pop.pack(anchor='nw',  expand=True)
     
     l_bright=tk.Label(frame5,text= "Bright ", bg="black", fg="cyan", font=("Times", "12"))
     l_fluor=tk.Label(frame6,text= "Fluor ", bg="black", fg="cyan", font=("Times", "12"))
     l_red=tk.Label(frame7,text= "Red ", bg="black", fg="cyan", font=("Times", "12"))
     l_bright.pack(),l_fluor.pack(),l_red.pack()
+    ################################################
+    def start_counting_cells():
+        print(" I am inside start_counting_cells")
+        instruct_label_popup_p4.configure(text="Maxumum number of cells in input movie is necesary to correctly plot lineage."\
+                                          "\nFirst, using slide bar,choose fluorescent frame with maximum number of cells (typically,this is the last frame."\
+                                              "\n Then, left click on each cell in that frame.\nFinally, press Close this window.")     
+        update_flash([])
+        button_count_cells.config(bg="red")
+        canvas_mid_pop.bind("<Button-1>",click_cells_to_count)
+        global clicked_cells
+        clicked_cells=[]
+        
+        global counting_buttons
+        counting_buttons=[button_count_cells, button_close] 
+        activate_buttons(counting_buttons,[ button_count_cells]) 
+    ##########################################################
     global  button_contrast,button_cell_radius,  button_assign_positions,  pop_slider,button_count_cells 
     button_contrast = Button(frame5, text="2a. Enhance image contrast",font='TkDefaultFont 10 bold', bg=button_color, command=lambda:[create_contrast_popup(),instruct_var_p4.set("Adjusting contrast....")])
     button_contrast.pack()
@@ -1433,6 +1451,16 @@ def prepare_for_first_go():
     button_assign_positions = Button(frame7, text="2c. Assign initial cell positions",font='TkDefaultFont 10 bold', bg=button_color, command=create_assign_cell_positions_popup)
     button_assign_positions.pack()
     
+    button_count_cells = Button(frame7, text="2d. Count max number of cells",font='TkDefaultFont 10 bold', bg=button_color, command=start_counting_cells)
+    button_count_cells.pack()
+    
+    button_close = Button(frame9, text=" Close this window",font='TkDefaultFont 10 bold', bg=button_color, command=close_popup_canvas)
+    button_close.pack()
+    
+    global first_go_buttons
+    first_go_buttons=[button_load,button_contrast,button_cell_radius,  button_assign_positions,  button_count_cells,button_close]
+    activate_buttons(first_go_buttons,[button_contrast])
+    
 ###################################################          
     def click_cells_to_count(event):     
       canvas_mid_pop.create_oval(event.x-2, event.y-2, event.x+2,
@@ -1442,6 +1470,7 @@ def prepare_for_first_go():
       max_number_of_cells=len(clicked_cells)
       if max_number_of_cells==1:
           update_flash([button_close])
+          activate_buttons(counting_buttons,[ button_close])
       print("max_number_of_cells=",max_number_of_cells)
       #cell_numbers_label.config(text="# CELLS IN FRAME 1 = "+str(len(manual_init_positions))+
                                 #'\nMAX # CELLS IN A FRAME = '+str(max_number_of_cells))
@@ -1452,19 +1481,10 @@ def prepare_for_first_go():
       feedback_var_p4.set(feedback_text_p4)
      ###################################
 ########################################################    
-    def start_counting_cells():
-        print(" I am inside start_counting_cells")
-        instruct_label_popup_p4.configure(text="Maxumum number of cells in input movie is necesary to correctly plot lineage."\
-                                          "\nFirst, using slide bar,choose fluorescent frame with maximum number of cells (typically,this is the last frame."\
-                                              "\n Then, left click on each cell in that frame.\nFinally, press Close this window.")     
-        update_flash([])
-        button_count_cells.config(bg="red")
-        canvas_mid_pop.bind("<Button-1>",click_cells_to_count)
-        global clicked_cells
-        clicked_cells=[]
+   
 ###########################################        
-    button_count_cells = Button(frame7, text="2d. Count max number of cells",font='TkDefaultFont 10 bold', bg=button_color, command=start_counting_cells)
-    button_count_cells.pack()
+    #button_count_cells = Button(frame7, text="2d. Count max number of cells",font='TkDefaultFont 10 bold', bg=button_color, command=start_counting_cells)
+    #button_count_cells.pack()
     
     global  all_names_fluor,all_names_bright,all_names_red
         
@@ -1524,8 +1544,8 @@ def prepare_for_first_go():
     global instruct_label_popup_p4
     instruct_label_popup_p4=tk.Label(frame8,text="Input movie is loaded. Now, you need to set up some parametres using Buttons 2a,2b,2c and 2d consequetively. Start with Button 2a." ,bg="black", fg="yellow", font=all_font,width=10, height=5)
     instruct_label_popup_p4.pack(fill=BOTH) 
-    button_close = Button(frame9, text=" Close this window",font='TkDefaultFont 10 bold', bg=button_color, command=close_popup_canvas)
-    button_close.pack()
+    #button_close = Button(frame9, text=" Close this window",font='TkDefaultFont 10 bold', bg=button_color, command=close_popup_canvas)
+    #button_close.pack()
     ###########################################   
     global  full_core_bright_name, out_folders,full_core_red_name
        
@@ -1601,6 +1621,7 @@ def draw_first_circles(event):# draw green circles to measure cell diameter
     circles.append(circle)
     if len(circles)==1:
            update_flash([radius_slider])
+           activate_buttons(radius_popup_buttons,[radius_slider]) 
 ##############################################              
 def change_radius(value):# change cell radius manually  
   new_circles=[]  
@@ -1617,7 +1638,8 @@ def change_radius(value):# change cell radius manually
        #coords.append([event.x, event.y])
        new_circles.append(new_circle)
        if len(new_circles)==1:
-             update_flash([button_save_radius])       
+             update_flash([button_save_radius])
+             activate_buttons(radius_popup_buttons,[button_save_radius, radius_slider])
   circles=new_circles
 ###################################################
 def save_cell_radius():
@@ -1627,7 +1649,7 @@ def save_cell_radius():
     bordersize=patch_size 
     #patch_size=int(round(true_cell_radius.get()*2.4))
     instruct_label_popup_p4.configure(text="Cell diameter has been measured. \nNow, go to Button 2c to assign initial cells` positions.")     
-
+    activate_buttons(radius_popup_buttons,[ button_assign_positions]) 
     popup_for_radius.destroy()
     #cell_info_label.config(text= "FRAME SIZE: "+str(frame_size)+"x"+str(frame_size)+
                            #"\nCELL DIAMETER:= "+str(2*true_cell_radius.get())+"\nPATCH SIZE= "+str(2*patch_size)+" x "+str(2*patch_size),
@@ -1641,15 +1663,6 @@ def save_cell_radius():
    
 #################################
 #######################################
-
-def record_const_movie_parameters():# record cell_size and other parameters in pickle file to be used at Step 4 and in retrieve mode
-    list_of_const_movie_params=[frame_size, true_cell_radius.get(), patch_size,max_number_of_cells,
-                          num_frames, full_core_fluor_name, n_digits,full_core_bright_name, first_frame_number,
-                          base_colours, contrast_value, number_in_first_frame,full_core_red_name, red_dictionary, bordersize, delta]
-    const_parameters_path=os.path.join(outpath,"constant_movie_parameters.pkl")  
-    with open(const_parameters_path, 'wb') as f:
-        for i in range(len(list_of_const_movie_params)):
-           pickle.dump(list_of_const_movie_params[i], f,protocol=pickle.HIGHEST_PROTOCOL)
 
 #####################################
 def create_cell_measure_popup():
@@ -1695,21 +1708,17 @@ def create_cell_measure_popup():
     
     button_save_radius=tk.Button(frame2,text="Save",activebackground="red", command=save_cell_radius, bg=button_color)
     button_save_radius.pack()    
-    canvas_for_radius.bind("<Button-1>",draw_first_circles)    
+    canvas_for_radius.bind("<Button-1>",draw_first_circles)
+       
+    global radius_popup_buttons
+    radius_popup_buttons=[button_cell_radius, button_save_radius,radius_slider,button_assign_positions ]
+    activate_buttons(radius_popup_buttons,[ button_cell_radius])    
 ###############################################
 ################### adjust contrast if necessary in contrast_popup (Button 2a)  
 ####################################### #
-
-def save_contrast():
-    ind=cliplimit.get()
-    print("ind = ", ind)
-    update_flash([button_cell_radius])
-    button_save_contrast.config(bg=button_color)
-    instruct_label_popup_p4.configure(text="Contrast has been adjusted. \nNow, go to Button 2b to measure cell diameter.")     
-    popup_contrast.destroy()    
+  
 #########################################
-def create_contrast_popup():
-    #window_size=800
+def create_contrast_popup():    
     global popup_contrast, canvas_contrast, photo_image, number_of_contrast_changes
     number_of_contrast_changes=[]
     global cliplimit
@@ -1738,13 +1747,19 @@ def create_contrast_popup():
     instruct_label_popup_p4.configure(text="Adjusting contrast in progress...")
     #instruct_var_p4.set("Adjusting contrast....")
     button_save_contrast=tk.Button(frame2,text="Save",activebackground="red", command=save_contrast, bg=button_color)
-    button_save_contrast.pack()    
-    update_flash([contrast_slider])    
+    button_save_contrast.pack()       
+    update_flash([contrast_slider])
+    
+    global contrast_popup_buttons
+    contrast_popup_buttons=[button_contrast, button_save_contrast,button_cell_radius ]
+    activate_buttons(contrast_popup_buttons,[ button_contrast])
+        
 ###################################
 def change_contrast(value):
     number_of_contrast_changes.append(value)
     if len(number_of_contrast_changes)==1:
         update_flash([button_save_contrast])
+        activate_buttons(contrast_popup_buttons,[ button_save_contrast])
     canvas_contrast.delete("all")
     contrast_slider.config(label="Cliplimit =  "+ value)
     init_image_copy=init_image.copy()
@@ -1763,6 +1778,14 @@ def change_contrast(value):
     photo_image_contrast=turn_image_into_tkinter(result,popup_window_size)     
     canvas_contrast.create_image(0,0, anchor=NW, image=photo_image_contrast)
 ###############################
+def save_contrast():
+    ind=cliplimit.get()
+    print("ind = ", ind)
+    update_flash([button_cell_radius])
+    button_save_contrast.config(bg=button_color)
+    activate_buttons(contrast_popup_buttons,[ button_cell_radius])
+    instruct_label_popup_p4.configure(text="Contrast has been adjusted. \nNow, go to Button 2b to measure cell diameter.")     
+    popup_contrast.destroy()  
 ################### Assign initial cell positions in assign_cell_positions_popup (Button 2c)
 
 ##################################
@@ -1804,6 +1827,10 @@ def create_assign_cell_positions_popup():
     button_save_init_positions.pack()
     #update_flash([button_save_init_positions])    
     canvas_assign_pos.create_image(0, 0, anchor=NW, image=photo_image_contrast)
+    
+    global positions_popup_buttons
+    positions_popup_buttons=[button_assign_positions, button_save_init_positions,button_count_cells ]
+    activate_buttons(positions_popup_buttons,[ button_assign_positions]) 
 ################ draw red spots in popup canvas in response to mouse click
 def click_position(event):
     #print("manual_init_positions inside click_position=",manual_init_positions)
@@ -1813,6 +1840,7 @@ def click_position(event):
     manual_init_positions.append([event.x/popup_window_size*frame_size, event.y/popup_window_size*frame_size])
     if len(manual_init_positions)==1:
         update_flash([button_save_init_positions])
+        activate_buttons(positions_popup_buttons,[ button_save_init_positions]) 
     #cell_numbers_label.config(text="NUMBER OF CELLS IN FRAME 1 = "+str(len(manual_init_positions)))
     feedback_dict_p4["number in frame 1"]=str(len(manual_init_positions))
     feedback_text_p4=update_feedback_text_p4(feedback_dict_p4)
@@ -1820,11 +1848,11 @@ def click_position(event):
 ##################################
 def close_assign_window():
      update_flash([button_count_cells])
-     instruct_label_popup_p4.configure(text="Initial cells` positions in Frame 1 have been assigned. Now, go to Button 2d to assign maximum number of cells in input movie.") 
+     instruct_label_popup_p4.configure(text="Initial cells` positions in Frame 1 have been assigned. Now, go to Button 2d to assign maximum number of cells in input movie.")
+     activate_buttons(positions_popup_buttons,[ button_count_cells]) 
      popup_assign_pos.destroy()  
 ############################    
-def close_popup_canvas(): # save initial positions of cells in Frame 1
-                    
+def close_popup_canvas(): # save initial positions of cells in Frame 1                    
       global coords, manual_init_positions, coords_very_first, number_in_first_frame    
       
       coords_very_first=manual_init_positions
@@ -1839,10 +1867,8 @@ def close_popup_canvas(): # save initial positions of cells in Frame 1
       curr_frame_cell_names = new_naive_names# names of cell in the current frame
       flag="manual centroids"
       edit_id_indicator.set("yes")
-      coords = np.zeros((N_cells, 2))
-      
-      print("curr_frame_cell_names=", curr_frame_cell_names)
-     
+      coords = np.zeros((N_cells, 2))      
+      print("curr_frame_cell_names=", curr_frame_cell_names)     
      
       for i in range(N_cells):
         coords[i] = manual_init_positions[i]
@@ -1878,7 +1904,7 @@ def clear_memory_of_models(tracker, segmentor, refiner):
           del tracker    
      tf.reset_default_graph() 
 ###########################################
-def cut_lineage(start_frame_internal): # after pausing
+def cut_lineage(start_frame_internal): # after editing
     lineage_per_frame_p4=extract_lineage(outpath)
     print("CUT_LINEAGE")
     #print("len(lineage_per_frame_p4) BEFORE=", len(lineage_per_frame_p4))
@@ -1894,6 +1920,7 @@ def cut_lineage(start_frame_internal): # after pausing
     global previous_lineage_image
     #print("len(lineage_images_cv2) before cut lineage=",len(lineage_images_cv2))   
     previous_lineage_image=lineage_images_cv2[start_frame_internal-2]
+    cv2.imwrite(r"C:\Users\helina\Desktop\prevous_pause.tif", previous_lineage_image)
 
     del lineage_images_cv2[(start_frame_internal-1):] 
     del lineage_images_tk[(start_frame_internal-1):]
@@ -1940,6 +1967,16 @@ def clear_memory_of_previous_clip(fluor_images, fluor_images_compressed,bright_i
      del red_images
      
 #############################################
+def record_const_movie_parameters():# record cell_size and other parameters in pickle file to be used at Step 4 and in retrieve mode
+    list_of_const_movie_params=[frame_size, true_cell_radius.get(), patch_size,max_number_of_cells,
+                          num_frames, full_core_fluor_name, n_digits,full_core_bright_name, first_frame_number,
+                          base_colours, contrast_value, number_in_first_frame,full_core_red_name, red_dictionary, bordersize, delta]
+    const_parameters_path=os.path.join(outpath,"constant_movie_parameters.pkl")  
+    with open(const_parameters_path, 'wb') as f:
+        for i in range(len(list_of_const_movie_params)):
+           pickle.dump(list_of_const_movie_params[i], f,protocol=pickle.HIGHEST_PROTOCOL)
+
+###########################################
 
 
 import time
@@ -1952,7 +1989,8 @@ def execute():
  print("START_FRAME inside execute=", start_frame)
  start_time=time.time()
  label_curr_frame_name.config(text=start_empty_file_name)
- label_current.configure(text="Current frame:  ", fg="black") 
+ label_current.configure(text="Current frame:  ", fg="black")
+ print("xs in EXECUTE=",xs) 
  try:
     cell_radius=true_cell_radius.get()   
     canvas_previous.delete("all")
@@ -2177,7 +2215,11 @@ def display_first_frame():# display all frames after pushing button "Display res
     update_flash([])
     button_display.config(bg="red")
     button_execute.configure(bg=button_color)
-    activate_buttons(all_buttons_page4,[R_edit_ID, R_edit_division, R_add_new_cell,R_remove_dead_cell, button_execute ])
+    global fully_tracked_indicator
+    if fully_tracked_indicator=="yes":
+           activate_buttons(all_buttons_page4,[R_edit_ID, R_edit_division, R_add_new_cell,R_remove_dead_cell ])
+    else:
+          activate_buttons(all_buttons_page4,[R_edit_ID, R_edit_division, R_add_new_cell,R_remove_dead_cell, button_execute ])  
     view_slider.config(from_=first_frame_number,to=len(output_images)+first_frame_number-2)   
     view_slider.set(str(first_frame_number))  
     slide_frames(first_frame_number)
@@ -2442,7 +2484,8 @@ def add_new_cell():
   colour="#%02x%02x%02x" % tuple(colour_init)
   canvas_current.bind("<Button-1>", get_centroids_manually)  
   global manual_centroids
-  manual_centroids=[] 
+  manual_centroids=[]
+  cv2.imwrite(r"C:\Users\helina\Desktop\prevous_image_in_add.tif", previous_lineage_image)
 ###############################################
 def save_added_cell():   
     global start_frame    

@@ -35,13 +35,15 @@ def update_xs(xs,new_names, remaining_number_of_cells, previous_lineage_image, c
        print(" lineage_image_width BEFORE=", lineage_image_width)
        print(" previous_lineage_image.shape BEFORE=", previous_lineage_image.shape)
        #number_of_processed_cells=1
-       
+       cv2.imwrite(r"C:\Users\helina\Desktop\prevous_image_before.tif", previous_lineage_image)
        #remaining_number_of_cells=observed_max_number_of_cells- number_of_processed_cells
       # print("number_of_processed_cells=", number_of_processed_cells)
        #print("observed_max_number_of_cells=", observed_max_number_of_cells)
        #remaining_number_of_cells=1
+       print("xs BEFORE=",xs)
        xs_internal, width_additional= create_additional_dictionary_of_xs(new_names,delta,remaining_number_of_cells)
        print("width_additional=",width_additional)
+       print("xs_internal=",xs_internal)
        for ii in range(len(new_names)):
           new_name=new_names[ii]
           print("new_name=", new_name)
@@ -56,9 +58,10 @@ def update_xs(xs,new_names, remaining_number_of_cells, previous_lineage_image, c
           print(" lineage_image_width AFTER=", lineage_image_width)
           canvas_lineage_width=lineage_image_width*canvas_size_p4/previous_lineage_image.shape[0]
           
-          
-          print(" canvas_lineage_width=", canvas_lineage_width)
-          canvas_lineage_exec.config(width=canvas_lineage_width)
+       cv2.imwrite(r"C:\Users\helina\Desktop\previous_lineage_image_after.tif", previous_lineage_image)   
+       print(" canvas_lineage_width=", canvas_lineage_width)
+       canvas_lineage_exec.config(width=canvas_lineage_width)
+       print("xs AFTER=",xs)
        return xs, previous_lineage_image
 ###################################
 def create_first_color_dictionary(max_number_of_cells, init_number_of_cells, num_frames): 
