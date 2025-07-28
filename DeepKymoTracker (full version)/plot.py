@@ -157,7 +157,9 @@ def create_first_dictionary_of_xs(initial_naive_names,num_frames,observed_max_nu
          item_1=xs[cell_name]-delta*(2**(kk-kkk))
          item_2=xs[cell_name]+delta*(2**(kk-kkk))   
          xs[cell_name+"0"]=int(item_1)
-         xs[cell_name+"1"]=int(item_2)              
+         xs[cell_name+"1"]=int(item_2)
+  print("xs inside create_first_dictinary of xs=", xs)
+  print("delta=", delta)              
   return xs, delta
 ########################################
 def create_additional_dictionary_of_xs(initial_new_names,delta,remaining_number_of_cells):
@@ -212,76 +214,7 @@ def create_additional_dictionary_of_xs(initial_new_names,delta,remaining_number_
 ####### xs contains x-coordinates for each cell (for plotting dynamic lineage)
 # It is created based on cell names in Frame 1 (see function def_Close_popup)
 # template = new_cell_names (naive) in Frame 1
-def create_first_dictionary_of_xs_old( new_naive_names, num_frames,max_number_of_cells):    
-
-  n= int(math.log(max_number_of_cells,2)) +1
-  daughters_list=[]
-  for k in range(n):# creates final_list - names of all possible daughters of initial cells
  
-    for item in new_naive_names:     
-      a=item+"0"
-      b=item+"1"      
-      daughters_list =daughters_list+[a,b]
-  all_names_list =new_naive_names+daughters_list   
-  first_text=new_naive_names_  
-  name_lengths =[len(item) for item in new_naive_names]
-  max_name_length =max(name_lengths)
-  if len(new_naive_names)==1:# if there is only one cell in Frame 1
-    xs ={"1":int(num_frames/2)}
-  else:# of there are >1 cells in Frame 1 
-    xs={}
-    for i  in range(len(new_naive_names)):
-        xs[new_naive_names[i]]=int((num_frames/(len(new_naive_names)+1))*(i+1))
-  
-  for k in range(len(new_naive_names)):# creates x-coordinates for all possible daughters
-                                # based on max_number_of_cells in the movie
-       cell_name =new_naive_names[k]        
-       kk=len(cell_name)
-       if kk<max_name_length:
-         item_1=xs[cell_name]-num_frames/(2**(kk+1))
-         item_2=xs[cell_name]+num_frames/(2**(kk+1))            
-         xs[cell_name+"0"]=int(item_1)
-         xs[cell_name+"1"]=int(item_2)              
-  return xs
-##################################
-#### This function assigns colours to cells in Frame 1
-def create_first_color_dictionary_wrong(max_number_of_cells, N_cells, colour_counter): 
-  base_colours=[[238,238,0,255],#cyan 1
-        [0,255,255,255],#yellow 10
-        [0,255,127,255],#spring green 11
-        [0,0,255,255],#red 100      
-        [255,0,0,255],#blue 101
-        [255,245,0,255],#turqoise 110
-        [255,0,255,255],#magenta 111
-        [255,191,0,255],#deep sky blue
-        [235,111,131,255],#dark violet
-        [71,99,255,255],#tomato
-        [255,187,255,255],#plum
-        [0,140,255,255],#orange
-        [255,255,0,255],#aqua
-        [147,20,255,255],#deep pink
-        [238,238,0,255]]#cyan  
-    
-  n= int(math.log(max_number_of_cells,2)) +1
-    
-  import string
-  unused_naive_names=list(string.ascii_lowercase)
-  if max_number_of_cells>26:# if number of letters is bigger than English alphabet, then copy beginning from number 27
-         copy_list=unused_naive_names.copy()
-         additional=[copy_list[i]+copy_list[i] for i in range(len(copy_list))]            
-         unused_naive_names+=additional
-  if N_cells==1:
-      new_naive_names=["1"]
-     
-  else:
-      new_naive_names,unused_naive_names= update_naive_names_list(unused_naive_names, N_cells) 
-  colour_dictionary ={}
-  colour_dictionary, colour_counter=update_color_dictionary(colour_dictionary,new_naive_names,base_colours, colour_counter)    
-  #print("ready for execution")
-  #print("final_list", final_list)  
-  return colour_dictionary, new_naive_names, base_colours, colour_counter, unused_naive_names
-##############################################################
-
 ##########################################################
 #import os
 #infile=r"C:\Users\helina\Desktop\tracking new_alessandra\INPUT_MOVIE s30\5_w1BF_s30_t10_ch02.tif"

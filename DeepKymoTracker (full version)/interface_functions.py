@@ -44,9 +44,9 @@ def turn_image_into_tkinter(image, window_size): # if image is open in cv2
   else:
      image_copy=np.uint8(image)
   ###################################
-  print("i am inside turn_image_into_tkinter")
-  print("image_copy.shape=",image_copy.shape)
-  print("windoe_size=", window_size)
+  #print("i am inside turn_image_into_tkinter")
+  #print("image_copy.shape=",image_copy.shape)
+  #print("windoe_size=", window_size)
   
   if image_copy.shape[0]!=image_copy.shape[1]:# for lineage_image
      print("DETECTED LINEAGE IMAGE!")
