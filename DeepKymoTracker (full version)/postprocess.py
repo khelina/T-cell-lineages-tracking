@@ -68,6 +68,7 @@ def create_pedigree(lineage_per_frame,outpath,frame_size):
 ####### xs contains x-coordinates for each cell (for plotting dynamic lineage)
 # It is created based on cell names in Frame 1 (see function def_Close_popup)
 # template = new_cell_names (naive) in Frame 1
+"""
 def create_dictionary_of_xs( template, coords_very_first, num_frames,max_number_of_cells):    
   first_text=template[:len(coords_very_first)]  
   numbers =[len(item) for item in template]
@@ -88,6 +89,7 @@ def create_dictionary_of_xs( template, coords_very_first, num_frames,max_number_
          xs[cell_name+"0"]=int(item_1)
          xs[cell_name+"1"]=int(item_2)              
   return xs
+"""
 #################################################
 
 #######################################
@@ -125,12 +127,6 @@ def create_lineage_image_one_frame(cells, previous_lineage_image, xs, frame, fir
       cv2.circle(previous_lineage_image, points[p][0], point_radius, points[p][1], -1)
  current_lineage_image= previous_lineage_image
 
-     
- #dest =os.path.join(temp_path,"tree_%s.tif" % (frame))
- #cv2.imwrite(dest, current_lineage_image) 
- #still_lineage=current_lineage_image
- #cv2.imwrite(os.path.join( os.path.dirname(temp_path),"still_lineage.tif"), still_lineage)
- 
  return current_lineage_image    
 ##########################################
 def sorted_aphanumeric(data):

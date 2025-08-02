@@ -37,7 +37,7 @@ def sorted_aphanumeric(data):
     alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
     return sorted(data, key=alphanum_key)
 ########################################################
-def turn_image_into_tkinter(image, window_size): # if image is open in cv2
+def turn_image_into_tkinter(image, window_size, lin_image_widths): # if image is open in cv2
   if image.dtype=="uint16":
       image_norm=(image/image.max())*255.  
       image_copy=np.uint8(image_norm)      
@@ -50,18 +50,23 @@ def turn_image_into_tkinter(image, window_size): # if image is open in cv2
   
   if image_copy.shape[0]!=image_copy.shape[1]:# for lineage_image
      print("DETECTED LINEAGE IMAGE!")
+     print("image_copy.shape=",image_copy.shape)
+     print("lin_image_widths=", lin_image_widths)
      num_frames=image_copy.shape[0]
      image_resized=np.zeros(image_copy.shape, np.uint8)
      basic_part=image_copy[:,:num_frames]
-     added_part=image_copy[:, num_frames:]
-     #print("basic_part.shape=", basic_part.shape)
-     #print("added_part.shape=", added_part.shape)
-     #coefficient=image_copy.shape[0]/window_size
-     basic_resized=cv2.resize(basic_part, (window_size,window_size), interpolation = cv2.INTER_AREA)
-     added_resized=cv2.resize(added_part, (80,window_size), interpolation = cv2.INTER_AREA)
-     #added_resized=resize_image_aspect_ratio(added_part, window_size)
-     #print("added_resized.shape=", added_resized.shape)
-     image_resized= np.concatenate((basic_resized,added_resized), axis=1)
+     print("basic_part.shape=",basic_part.shape)
+     start=num_frames
+     image_resized=cv2.resize(basic_part, (window_size,window_size), interpolation = cv2.INTER_AREA)
+     for i in range(1,len(lin_image_widths)):
+         print("start=", start)
+         additional_width=lin_image_widths[i]
+         added_part=image_copy[:, start:start+additional_width]
+         print("added_part.shape=",added_part.shape)
+         added_resized=cv2.resize(added_part, (90,window_size), interpolation = cv2.INTER_AREA)    
+         image_resized= np.concatenate((image_resized,added_resized), axis=1)
+         start=additional_width
+         
   else:
   
      image_resized=cv2.resize(image_copy, (window_size,window_size), interpolation = cv2.INTER_AREA)
@@ -94,7 +99,7 @@ def display_both_channels(filled_fluor,filled_bright,canvas_fluor,canvas_bright,
       canvas_bright.create_image(image_origin_x,image_origin_y, anchor=NW, image=photo_bright)
       return canvas_bright,canvas_fluor, photo_fluor, photo_bright
 ###############################################################
-def extract_output_images(output_fluor_path,lineage_path, window_size, output_images, output_names):# extract fluor and linage images for display
+def extract_output_images(output_fluor_path,lineage_path, window_size, output_images, output_names, lin_image_widths):# extract fluor and linage images for display
     #it is very essential (it is not a mistake) that output_names and output_images are not empty lists!
     lineage_images, lineage_images_cv2=[],[]
     for filename in sorted_aphanumeric(os.listdir(output_fluor_path)):
@@ -103,14 +108,14 @@ def extract_output_images(output_fluor_path,lineage_path, window_size, output_im
         full_output_name=os.path.join(output_fluor_path,output_name)
         output_names.append(output_name)
         fluor_tracked=cv2.imread(full_output_name, -1)
-        photo_fluor_tracked=turn_image_into_tkinter(fluor_tracked, window_size)     
+        photo_fluor_tracked=turn_image_into_tkinter(fluor_tracked, window_size,[])     
         output_images.append(photo_fluor_tracked)
     for filename in sorted_aphanumeric(os.listdir(lineage_path)):
         lineage_image_cv2_name=os.path.join(lineage_path,filename)
         print(" lineage_image_cv2_name=", lineage_image_cv2_name)
         lineage_cv2=cv2.imread(os.path.join(lineage_path,filename), -1)
         lineage_images_cv2.append(lineage_cv2)
-        photo_lineage=turn_image_into_tkinter(lineage_cv2, window_size)     
+        photo_lineage=turn_image_into_tkinter(lineage_cv2, window_size, lin_image_widths)     
         lineage_images.append(photo_lineage)
     return output_images,lineage_images, output_names, lineage_images_cv2
 ##################################################    
@@ -170,7 +175,7 @@ def display_image_p4(slide_frame_number, channel_names_dictionary, channel_code,
          cv2.putText(image,"NO IMAGE",((canvas_size_p4-200)//2,canvas_size_p4//2),cv2.FONT_HERSHEY_PLAIN,3.0,(238,238,0),2) 
          #name= "No image available"
          name_for_display="               "
-    image_for_display=turn_image_into_tkinter(image, canvas_size_p4)         
+    image_for_display=turn_image_into_tkinter(image, canvas_size_p4,[])         
     return  image_for_display, name_for_display
 ###############################################
 def calculate_angle(rect):
