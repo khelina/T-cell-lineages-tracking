@@ -258,7 +258,7 @@ def load_and_process_page2(path,total_number_of_frames,movie_name):
           c=process_tif(a)
           bright_images.append(c)
           global photo_bright
-          photo_bright=turn_image_into_tkinter(c, canvas_size_p2)
+          photo_bright=turn_image_into_tkinter(c, canvas_size_p2,[])
           canvas_bright_p2.create_image(0,0,anchor=NW,image=photo_bright)
           ##############                  
           text_br="\n  Number of brightfield frames:  "
@@ -274,7 +274,7 @@ def load_and_process_page2(path,total_number_of_frames,movie_name):
           b=process_tif(b)
           fluor_images.append(b)
           global photo_fluor
-          photo_fluor=turn_image_into_tkinter(b, canvas_size_p2)
+          photo_fluor=turn_image_into_tkinter(b, canvas_size_p2,[])
           canvas_fluor_p2.create_image(0,0,anchor=NW,image=photo_fluor)
           text_fl="\n  Number of fluorescent frames:  "
           fl_count=display_frame_count(text_fl,i_fl, fl_count)               
@@ -288,7 +288,7 @@ def load_and_process_page2(path,total_number_of_frames,movie_name):
           r=process_tif(r)         
           red_images.append(r)
           global photo_red
-          photo_red=turn_image_into_tkinter(r, canvas_size_p2)
+          photo_red=turn_image_into_tkinter(r, canvas_size_p2,[])
           canvas_red_p2.create_image(0,0,anchor=NW,image=photo_red)
           ###############################
           text_red="\n  Number of red frames:  "
@@ -354,19 +354,19 @@ def slide_p2(value):# display image even when it is missing (in this case it is 
     ###########################################       
     br_image, old_br_name,new_br_name=display_image_p2(value, bright_dictionary,"ch02", n_digits,canvas_size_p2)         
     global br_tk  
-    br_tk=turn_image_into_tkinter(br_image, canvas_size_p2)     
+    br_tk=turn_image_into_tkinter(br_image, canvas_size_p2,[])     
     canvas_bright_p2.create_image(0,0, anchor=NW, image=br_tk)   
     br_name_p2.set("Original name:   "+old_br_name+"\nNew name:   "+new_br_name)    
     ################################    
     fl_image, old_fl_name, new_fl_name=display_image_p2( value, fluor_dictionary,"ch00", n_digits,canvas_size_p2)     
     global fl_tk
-    fl_tk=turn_image_into_tkinter(fl_image, canvas_size_p2)       
+    fl_tk=turn_image_into_tkinter(fl_image, canvas_size_p2,[])       
     canvas_fluor_p2.create_image(0,0, anchor=NW, image=fl_tk)    
     fl_name_p2.set("Original name:   "+old_fl_name+"\nNew name:   "+new_fl_name)    
     ###############################################
     red_image, old_red_name, new_red_name=display_image_p2(value, red_dictionary,"ch01", n_digits,canvas_size_p2)          
     global red_tk  
-    red_tk=turn_image_into_tkinter(red_image, canvas_size_p2)     
+    red_tk=turn_image_into_tkinter(red_image, canvas_size_p2,[])     
     canvas_red_p2.create_image(0,0, anchor=NW, image=red_tk)                   
     red_name_p2.set("Original name:   "+old_red_name+"\nNew name:   "+new_red_name)
 ############################################################
@@ -497,7 +497,7 @@ def select_one_bright():# load all frames,display clicked bright frame
     
     feedback_text=update_feedback_text(feedback_dict)
     feedback_var_p3.set(feedback_text)
-    photo_clicked=turn_image_into_tkinter(clicked_bright, canvas_size_p3)
+    photo_clicked=turn_image_into_tkinter(clicked_bright, canvas_size_p3,[])
     
     canvas_left.create_image(0,0, anchor=NW, image=photo_clicked)
     canvas_left.bind("<Button-1>",measure_intensities)
@@ -524,7 +524,7 @@ def apply_thresh():# threshold the clicked image (aftre measuring well border in
     low, high=min(intensities), max(intensities)    
     ret,thresh = cv2.threshold(clicked_bright,low,high,cv2.THRESH_BINARY_INV)# here you can adjust threshold (it is now from 130 to 255)   
     thresh[thresh!=0]=255
-    thr_image=turn_image_into_tkinter(thresh, canvas_size_p3)    
+    thr_image=turn_image_into_tkinter(thresh, canvas_size_p3,[])    
     canvas_mid.create_image(0,0, anchor=NW, image=thr_image)
     threshold_slider.config(variable=low,label="Threshold = "+str(low))    
     instruct_var_p3.set("The borders of wells should become SOLID white line, WITHOUT INTERRUPTIONS."
@@ -541,7 +541,7 @@ def change_threshold(value): # change threshold
     ret,thresh = cv2.threshold(clicked_bright,low,high,cv2.THRESH_BINARY_INV)# here you can adjust threshold   
     thresh[thresh!=0]=255
     threshold_slider.config(label="Threshold = "+str(value))
-    thr_image=turn_image_into_tkinter(thresh, canvas_size_p3)    
+    thr_image=turn_image_into_tkinter(thresh, canvas_size_p3,[])    
     canvas_mid.create_image(0,0, anchor=NW, image=thr_image)    
 ######################## respond to upper_thresh slider and thresh image accordingly 
 global  seeds
@@ -580,14 +580,14 @@ def choose_well(event):# click on the well of interest, get green circle and red
     global closing_2
     closing_1=cv2.cvtColor(closing,cv2.COLOR_GRAY2RGB)
     cv2.drawContours(closing_1,[first_box],0,(0,0,255),5)# draw red rect around detected well 
-    closing_2=turn_image_into_tkinter(closing_1, canvas_size_p3)   
+    closing_2=turn_image_into_tkinter(closing_1, canvas_size_p3,[])   
     canvas_right.create_image(0,0, anchor=NW, image=closing_2)    
     ######## here it draws red rect in fluorescent image of canvas_left
     im_copy=clicked_bright.copy()# 
     global photo_im_red,M_first,rows,cols
     im_red=cv2.cvtColor(im_copy,cv2.COLOR_GRAY2RGB)
     cv2.drawContours(im_red,[first_box],0,(0,0,255),5)    
-    photo_im_red=turn_image_into_tkinter(im_red, canvas_size_p3)   
+    photo_im_red=turn_image_into_tkinter(im_red, canvas_size_p3,[])   
     canvas_left.create_image(0,0, anchor=NW, image=photo_im_red)    
     rows,cols = clicked_bright.shape 
     M_first = cv2.getRotationMatrix2D((int(round(cols/2)),int(round(rows/2))),angle,1)   
@@ -627,7 +627,7 @@ def cut_first_well():# cut well in the first image and display it in canvas_mid
  global cut_bright
  cut_bright=rot_bright[y_min_first:y_min_first+well_size, x_min_first:x_min_first+well_size]
  global final_s, finalImage_small, final_fake
- final_s=turn_image_into_tkinter(cut_bright, canvas_size_p3) 
+ final_s=turn_image_into_tkinter(cut_bright, canvas_size_p3,[]) 
  finalImage_small=canvas_mid.create_image(0,0, anchor=NW, image=final_s)
  #########################
  #seeds=[]
@@ -720,7 +720,7 @@ def edit_first_frame_shift():
    
     global image1,imageFinal   
     canvas_popup_mid.delete("all")
-    image1=turn_image_into_tkinter(br_image, popup_image_size_p3)
+    image1=turn_image_into_tkinter(br_image, popup_image_size_p3,[])
     imageFinal_big = canvas_popup_mid.create_image(-x1, -y1, image = image1,anchor='nw')
     ##################################################   
     canvas_popup_mid.bind('<B1-Motion>', lambda event: drag_image( event,canvas_popup_mid, imageFinal_big))   
@@ -735,11 +735,11 @@ def cut_and_save_patch(event, canvas_big, canvas_small):
     patch_1=patch.copy()       
     cv2.imwrite(new_name, patch)
     global tk_patch, image2 
-    tk_patch=turn_image_into_tkinter(patch, popup_size_p3)      
+    tk_patch=turn_image_into_tkinter(patch, popup_size_p3,[])      
     canvas_big.delete("all")
     canvas_big.create_image(0,0, image = tk_patch,anchor='nw')
 
-    image2=turn_image_into_tkinter(patch_1, canvas_size_p3)    
+    image2=turn_image_into_tkinter(patch_1, canvas_size_p3,[])    
     canvas_small.create_image(0, 0, image = image2,anchor='nw')
     points=[]
 ##########################################
@@ -778,7 +778,7 @@ def start_editing_frames():
     button_close=tk.Button(frame2,text="Close",bg='#9ACD32',activebackground="red",font='TkDefaultFont 10 bold' , command= destroy_popup)
     button_close.pack()
     
-    first_tk_pop=turn_image_into_tkinter(first, popup_size_p3)
+    first_tk_pop=turn_image_into_tkinter(first, popup_size_p3,[])
     canvas_popup_right.create_image(0,0, anchor=NW, image=first_tk_pop)
     l_popup_canvas.config(text=os.path.basename(bright_names_sorted[0]))
     update_flash([button_current_edit])           
@@ -804,7 +804,7 @@ def edit_current_frame_shift():
         
     size=int(round(image_size_p3[0]*popup_size_p3/well_size))
    
-    image1=turn_image_into_tkinter(br_image, size)      
+    image1=turn_image_into_tkinter(br_image, size,[])      
     imageFinal_big = canvas_popup_right.create_image(-x1, -y1, image = image1,anchor='nw')
     ##################################################
     canvas_popup_right.bind('<B1-Motion>', lambda event: drag_image( event,canvas_popup_right, imageFinal_big))
@@ -847,7 +847,7 @@ def cut_bright_wells():# Button 5. Apply to all bright
     bright_image=cv2.imread(bright_name,-1)  
     final_bright,M,x_min,y_min, rows, cols, rot_indicator, rot_bright=cut_well_from_image(bright_image,seed,well_size,first_x0, delta_x, delta_y, first_rect)
     #print("final_bright.shape,final_bright.dtype=",final_bright.shape,final_bright.dtype)
-    final_bright_tk=turn_image_into_tkinter(final_bright, canvas_size_p3)
+    final_bright_tk=turn_image_into_tkinter(final_bright, canvas_size_p3,[])
     canvas_right.delete("all")
     canvas_right.create_image(0,0, anchor=NW, image=final_bright_tk)
     rotation_matrices.append((M,x_min,y_min, rows, cols, rot_indicator))
@@ -860,7 +860,7 @@ def cut_bright_wells():# Button 5. Apply to all bright
     if k==0:
         global first_tk, first
         first=final_bright       
-        first_tk=turn_image_into_tkinter(first, canvas_size_p3)
+        first_tk=turn_image_into_tkinter(first, canvas_size_p3,[])
   global frame_slider    
   frame_slider=Scale(frame11_page3,from_=1,to=len(bright_names_sorted),orient=HORIZONTAL,troughcolor="#513B1C",bg=label_color,font=all_font,activebackground="red",label="Frame "+str(1), command=slide_p3, length=250, showvalue=0)
   frame_slider.pack()
@@ -885,26 +885,26 @@ def slide_p3(value):
     frame_slider.config(label="Frame "+str(value))       
     br_image=cv2.imread(new_br_names[image_number-1])
     global br_final  
-    br_final=turn_image_into_tkinter(br_image, canvas_size_p3)     
+    br_final=turn_image_into_tkinter(br_image, canvas_size_p3,[])     
     canvas_right.create_image(0,0, anchor=NW, image=br_final)
     l_right_canvas.config(text=os.path.basename(bright_names_sorted[image_number-1]))
     if new_fl_names: 
       fl_image=cv2.imread(new_fl_names[image_number-1])
       global fl_final
-      fl_final=turn_image_into_tkinter(fl_image, canvas_size_p3)       
+      fl_final=turn_image_into_tkinter(fl_image, canvas_size_p3,[])       
       canvas_mid.create_image(0,0, anchor=NW, image=fl_final)
       l_mid_canvas.config(text=os.path.basename(fluor_names_sorted[image_number-1]))
     if new_red_names:
       red_image=cv2.imread(new_red_names[image_number-1])
       global red_final
-      red_final=turn_image_into_tkinter(red_image, canvas_size_p3)       
+      red_final=turn_image_into_tkinter(red_image, canvas_size_p3,[])       
       canvas_left.create_image(0,0, anchor=NW, image=red_final)
       l_left_canvas.config(text=os.path.basename(red_names_sorted[image_number-1]))
     if popup_right:
       br_image_copy=br_image.copy()
       frame_pop_slider.config(label="Frame "+str(value))
       global br_popup  
-      br_popup=turn_image_into_tkinter(br_image_copy, popup_size_p3)     
+      br_popup=turn_image_into_tkinter(br_image_copy, popup_size_p3,[])     
       canvas_popup_right.create_image(0,0, anchor=NW, image=br_popup)
       l_popup_canvas.config(text=os.path.basename(bright_names_sorted[image_number-1]))
 ##################### activate editing frame shift for current frame in canvas_right
@@ -938,7 +938,7 @@ def cut_fluor_wells():#cut fluor and red wells
     new_fl_name=os.path.join(my_destin,tail)
     new_fl_names.append(new_fl_name)   
     cv2.imwrite(new_fl_name, final_fluor)
-    final_fluor_tk=turn_image_into_tkinter(final_fluor, canvas_size_p3)
+    final_fluor_tk=turn_image_into_tkinter(final_fluor, canvas_size_p3,[])
     canvas_mid.delete("all")
     canvas_mid.create_image(0,0, anchor=NW, image=final_fluor_tk)
     l_mid_canvas.config(text=os.path.basename(fluor_name))
@@ -961,7 +961,7 @@ def cut_fluor_wells():#cut fluor and red wells
     else:
       final_red=np.zeros((image_size_p3[1],image_size_p3[0]), np.uint8)
       red_text=" No image available"
-    final_red_tk=turn_image_into_tkinter(final_red, canvas_size_p3)
+    final_red_tk=turn_image_into_tkinter(final_red, canvas_size_p3,[])
     canvas_left.delete("all")
     canvas_left.create_image(0,0, anchor=NW, image=final_red_tk)
     l_left_canvas.config(text=red_text)   
@@ -1308,14 +1308,20 @@ def initiate_tracking_page():
                   global coords, start_frame
                   start_frame=last_frame_cell_dict[internal_cell_names[0]][12]+1    
                   coords=last_frame_cell_dict[internal_cell_names[0]][14]
-    
+                  ##############################
+                  global xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,unused_naive_names,\
+                  dict_of_divisions,number_of_added_new_cells, changable_params_history
+                  xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,unused_naive_names,dict_of_divisions,number_of_added_new_cells,lin_image_widths,changable_params_history= extract_changeable_params_history(outpath, -1)
+                  edit_id_indicator.set(edit_id_indicator_pickle)
+                                    
+                 
                   global output_images,lineage_images_tk, output_names,lineage_images_cv2    
                   output_images,lineage_images_tk, output_names,lineage_images_cv2=extract_output_images(out_folders[1],os.path.join(out_folders[4],"LINEAGE_IMAGES"),canvas_size_p4, output_images,output_names, lin_image_widths)
-                  print("len(lineage_images_tk)=",len(lineage_images_tk))
-                  print("len(lineage_images_cv2)=",len(lineage_images_cv2))
+             
                   global  previous_lineage_image, lineage_image_width
                   previous_lineage_image=lineage_images_cv2[-1]     
-                  canvas_lineage_width=previous_lineage_image.shape[1]*canvas_size_p4/previous_lineage_image.shape[0]
+                  #canvas_lineage_width=previous_lineage_image.shape[1]*canvas_size_p4/previous_lineage_image.shape[0]
+                  canvas_lineage_width=canvas_size_p4+90*(len(lin_image_widths)-1)   
                   print("canvas_lineage_width=", canvas_lineage_width)
                   canvas_lineage_exec.config(width=canvas_lineage_width)
                   #######################################################
@@ -1592,16 +1598,7 @@ def prepare_for_first_go():
 global retrieve_unfinished_movie
 def retrieve_unfinished_movie():# in retrieve mode
     print("I am inside retrieve function")
-    instruct_var_p4.set("Loading unfinished movie ..."),
-    ###################################
-    global xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,unused_naive_names,\
-    dict_of_divisions,number_of_added_new_cells,lin_image_widths, changable_params_history
-    xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,unused_naive_names,dict_of_divisions,number_of_added_new_cells,lin_image_widths,changable_params_history= extract_changeable_params_history(outpath, -1)
-    edit_id_indicator.set(edit_id_indicator_pickle)
-    print("xs=", xs)
-    print("dict_of_divisions=", dict_of_divisions)
-    print("curr_frame_cell_names=", curr_frame_cell_names)
-    ########################################################
+    instruct_var_p4.set("Loading unfinished movie ..."),   
     update_flash([button_execute])                
     display_first_frame()
     instruct_var_p4.set("Use slide bar to check the results.\n To continue tracking, push Button 3."\
@@ -2012,7 +2009,8 @@ def execute():
     
     global variable_stop,  tracker, segmentor, refiner# this variable allows to stop the loop (controlled by Stop button)     
     global coords, curr_frame_cell_names, count,  cells, old_number_of_cells, edit_id_indicator,kk, lin_image_widths
-    #label_edit.configure(text="curr_frame_cell_names:\n " + str(curr_frame_cell_names), bg="black")     
+    #label_edit.configure(text="curr_frame_cell_names:\n " + str(curr_frame_cell_names), bg="black")
+    print("lin_image_widths INSIDE EXECUTE=", lin_image_widths)     
     N_cells = coords.shape[0]
     division_indicator=0
     centroids_for_benchmarking=[coords]
@@ -2525,6 +2523,7 @@ def save_added_cell():
     # change previous lineage image by adding new cells    
     xs, previous_lineage_image,lin_image_widths=update_xs_after_new_cells(xs,new_naive_names, number_of_remaining_cells,previous_lineage_image, canvas_lineage_exec, canvas_size_p4, init_delta,lin_image_widths)
     print("previous_lineage_image.shape AFTER CREATION=",previous_lineage_image.shape)
+    
     number_of_added_new_cells+=number_of_now_added_cells        
     #lineage_images_cv2[internal_start_frame-1]=previous_lineage_image
     lineage_images_cv2[internal_start_frame-2]=previous_lineage_image     
@@ -2823,7 +2822,7 @@ def choose_and_load_tracked_movie():
     #############
     frame_p5_size, cell_radius_p5, patch_size_p5,max_number_of_cells,\
            num_frames, full_core_fluor_name, n_digits, full_core_bright_name,  first_frame_number_p5,\
-           base_colours,contrast_value,number_cells_in_first_frame,full_core_red_name,red_dictionary, bordersize=extract_const_movie_parameters(output_dir)
+           base_colours,contrast_value,number_cells_in_first_frame,full_core_red_name,red_dictionary, bordersize, delta=extract_const_movie_parameters(output_dir)
     #################################
     global resize_coeff, new_shape
     resize_coeff=window_p5_size /frame_p5_size
@@ -2842,9 +2841,9 @@ def choose_and_load_tracked_movie():
    
     global photo_filled_fluors, photo_filled_brights
     dialog_label_5.config(text="Preparing images for display...")
-    photo_filled_fluors=[ turn_image_into_tkinter(filled_fluors[i], window_p5_size) for i in range(len(masks))]
+    photo_filled_fluors=[ turn_image_into_tkinter(filled_fluors[i], window_p5_size,[]) for i in range(len(masks))]
     dialog_label_5.config(text="Prepared 50 % of images for display")
-    photo_filled_brights=[ turn_image_into_tkinter(filled_brights[i], window_p5_size) for i in range(len(masks))]
+    photo_filled_brights=[ turn_image_into_tkinter(filled_brights[i], window_p5_size,[]) for i in range(len(masks))]
     dialog_label_5.config(text="To check segmentation in each frame, use the slide bar below."
                             "\nIf manual correction is needed in a ceartain frame, stop the slider and push button 2.")
       
@@ -2973,7 +2972,8 @@ def right_click_one_cell(event):# extract info about clicked celland take action
               print("in the very first frame, fast mode")
           previous_cell_number=-2# if you are in a new frame
           previous_frame_number=frame_number
-          internal_frame_number=frame_number-first_frame_number_p5
+          #internal_frame_number=frame_number-first_frame_number_p5
+          internal_frame_number=frame_number-1
           get_frame_info(internal_frame_number)
        else:# if it is still the same frame
             print("in the same frame, fast mode")    
@@ -3612,7 +3612,7 @@ def create_final_movie():# create final movie + pedigree_per_cell (simplified, i
   update_lineage(lineage_per_frame_p5,output_dir, 'wb')
   dialog_label_5.config(text="Lineage per cell is stored in" +str(output_dir))
     
-  lineage_per_cell=print_excel_files(output_dir, frame_p5_size,lineage_per_frame_p5, bordersize,patch_size)
+  lineage_per_cell=print_excel_files(output_dir, frame_p5_size,lineage_per_frame_p5, bordersize,patch_size_p5)
   dialog_label_5.config(text="Lineage per cell is stored in" +str(output_dir)+
                           "Creating final movie...")
   create_output_movie(output_dir, frame_p5_size)       
@@ -3743,7 +3743,7 @@ from interface_functions import turn_image_into_tkinter
 def create_display_images_p6():# plot images necessary for display       
         label_instruct_p6.config(text="\nCreating results ...\n\n\n")   
         still_lineage=cv2.imread(os.path.join( outpath,"still_lineage.tif"), -1)
-        plot_per_cell_info(pedigree, outpath, still_lineage,label_instruct_p6, progress_bar)
+        plot_per_cell_info(pedigree, outpath, still_lineage,label_instruct_p6, progress_bar,first_frame_number_p6)
         load_display_images_p6()        
 #######################################
 def retrieve_display_images_p6():# If display iamges were created before, upload them
@@ -3790,14 +3790,14 @@ def upload_processed_movie():# look if display images exist. If so, load them, i
     outpath = os.path.join(software_folder, "OUTPUT_"+input_movie_folder)
     label_instruct_p6.config(text="\nCreating results ...\n\n\n")    
     ################### load lineage_per_cell and constant movie params
-    global pedigree, frame_size_p6, first_frame_number_p5, num_frames, list_of_cell_names
+    global pedigree, frame_size_p6, first_frame_number_p6, num_frames, list_of_cell_names
     pedigree_path=os.path.join(outpath,"lineage_per_cell.pkl")
     with open(pedigree_path, 'rb') as handle:
          pedigree = pickle.load(handle)   
        
     frame_size_p6, true_cell_radius_pickle, patch_size,max_number_of_cells,\
-           num_frames, full_core_fluor_name, n_digits, full_core_bright_name,  first_frame_number_p5,\
-           base_colours,contrast_value,number_cells_in_first_frame,full_core_red_name=extract_const_movie_parameters(outpath)
+           num_frames, full_core_fluor_name, n_digits, full_core_bright_name,  first_frame_number_p6,\
+           base_colours,contrast_value,number_cells_in_first_frame,full_core_red_name, red_dictionary_p5,bordersize_p5,delta_p5=extract_const_movie_parameters(outpath)
     #############################################
     list_of_cell_names =list(pedigree.keys())
     w,h = 400,150 
@@ -3845,13 +3845,13 @@ def slide_patch(value):  # value=frame number from patch_slider
   
     patch_rgb = cv2.cvtColor(patch, cv2.COLOR_BGR2RGB)
     global im_pil
-    im_pil=turn_image_into_tkinter(patch_rgb, 382)    
+    im_pil=turn_image_into_tkinter(patch_rgb, 382,[])    
     canvas_patch.create_image(0, 0, anchor=NW, image=im_pil)
     
     red_patch=red_patches[cell_ID.get()][internal_frame_number][0]
     global red_im_pil
     red_patch_rgb = cv2.cvtColor(red_patch, cv2.COLOR_BGR2RGB)   
-    red_im_pil=turn_image_into_tkinter(red_patch_rgb, 382)
+    red_im_pil=turn_image_into_tkinter(red_patch_rgb, 382,[])
     canvas_lineage.create_image(0, 0, anchor=NW, image=red_im_pil)
     
     plott_pil=plots[cell_ID.get()][cell_property.get()][ internal_frame_number][0]
@@ -3861,13 +3861,13 @@ def slide_patch(value):  # value=frame number from patch_slider
     pl_pil = ImageTk.PhotoImage(pl_pil)
     canvas_graph.create_image(0, 0, anchor=NW, image=pl_pil)    
     ######################################
-    bright_name=bright_names[ int(value)-first_frame_number_p5]
+    bright_name=bright_names[ int(value)-first_frame_number_p6]
     label_file_name.configure(text=os.path.basename(bright_name))
     bright_image=cv2.imread(bright_name, -1)
 
     bright_image_rgb = cv2.cvtColor(bright_image, cv2.COLOR_BGR2RGB)
     global bright_pil  
-    bright_pil=turn_image_into_tkinter(bright_image_rgb, 382)
+    bright_pil=turn_image_into_tkinter(bright_image_rgb, 382,[])
     canvas_bright.create_image(0, 0, anchor=NW, image=bright_pil)
     
    

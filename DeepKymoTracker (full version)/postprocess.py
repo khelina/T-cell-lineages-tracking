@@ -65,33 +65,7 @@ def create_pedigree(lineage_per_frame,outpath,frame_size):
          pickle.dump(pedigree, f)  
   return pedigree
 ####################################################################
-####### xs contains x-coordinates for each cell (for plotting dynamic lineage)
-# It is created based on cell names in Frame 1 (see function def_Close_popup)
-# template = new_cell_names (naive) in Frame 1
-"""
-def create_dictionary_of_xs( template, coords_very_first, num_frames,max_number_of_cells):    
-  first_text=template[:len(coords_very_first)]  
-  numbers =[len(item) for item in template]
-  #max_number =max(numbers)
-  if len(coords_very_first)==1:# if there is only one cell in Frame 1
-    xs ={"1":int(num_frames/2)}
-  else:# of there are >1 cells in Frame 1 
-    xs={}
-    for i  in range(len(first_text)):
-        xs[first_text[i]]=int((num_frames/(len(first_text)+1))*(i+1))
-  for k in range(len(template)):# creates x-coordinates for all possible daughters
-                                # based on max_number_of_cells in the movie
-       cell_name =template[k]        
-       kk=len(cell_name)
-       if kk<max_number_of_cells:
-         item_1=xs[cell_name]-num_frames/(2**(kk+1))
-         item_2=xs[cell_name]+num_frames/(2**(kk+1))            
-         xs[cell_name+"0"]=int(item_1)
-         xs[cell_name+"1"]=int(item_2)              
-  return xs
-"""
-#################################################
-
+#
 #######################################
 # This function creates current_lineage_image to be plotted for each frame during execution
 # It is based on dictionary of xs (gives x-coordinate) and frame (which frame number, i.e. y-coordinate)
@@ -261,7 +235,7 @@ def load_and_prepare_result_images(outpath, keys,progress_bar):
 ################################################################### 
 ######### This is for Step-5: creates VISUALISATION_HELPERS folder
 
-def plot_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progress_bar):
+def plot_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progress_bar, first_frame_number_p6):
    #global progress_bar
    dirr=os.path.join(outpath,"PER_CELL_RESULTS")
    red_patches_path=os.path.join(outpath,"HELPERS_(NOT_FOR_USER)","VISUALISATION_HELPERS" ,"RED_LINEAGE_PATCHES")
@@ -283,14 +257,11 @@ def plot_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progres
      circ_plots=[]
      cell_info=pedigree[cell_name]
      total=len(cell_info)
-     
-  
-     #if not os.path.exists(path):
-        #os.mkdir(path)
-        
+     #first_frame_number=cell_info[0][1]     
      color=pedigree[cell_name][0][7]   
      #color=colours[cell_name[5:]][:-1]
      print("cell_name=", cell_name)
+     print(" first_frame_number=",  first_frame_number_p6)
      print("number of frames=", total)       
      mask = (still_lineage == color).all(axis=-1)
      x=np.zeros(still_lineage.shape,dtype = "uint8")
@@ -307,10 +278,10 @@ def plot_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progres
        name =os.path.join(one_cell_patches_path,cell_name +"_patch_frame_%s" % frame_number)
        cv2.imwrite(name +".tif",im)
 
-       init=still_lineage.copy()              
+       init=still_lineage.copy()# plot red points               
        for k in range(len(points)):
-          if points[k][0]==frame_number:        
-              cv2.circle(init,(points[k][1], points[k][0]), 3,[0,0,255],-1)
+          if points[k][0]==frame_number-first_frame_number_p6:        
+              cv2.circle(init,(points[k][1], points[k][0]), 3,[255,0,0],-1)
        name =os.path.join(red_patches_path,cell_name +"_red_frame_%s" % frame_number)
        cv2.imwrite(name +".tif",init)
        red_patches.append(init)        

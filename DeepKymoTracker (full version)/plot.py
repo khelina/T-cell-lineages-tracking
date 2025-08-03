@@ -95,8 +95,8 @@ def update_xs_after_new_cells(xs,new_names, remaining_number_of_cells, previous_
          
        lineage_image_width+=width_additional
        print(" lineage_image_width AFTER=", lineage_image_width)
-       canvas_lineage_width=lineage_image_width*canvas_size_p4/previous_lineage_image.shape[0]
-          
+       #canvas_lineage_width=lineage_image_width*canvas_size_p4/previous_lineage_image.shape[0]
+       canvas_lineage_width=canvas_size_p4+90*(len(lin_image_widths)-1)   
        cv2.imwrite(r"C:\Users\helina\Desktop\previous_lineage_image_after.tif", previous_lineage_image)   
        print(" canvas_lineage_width=", canvas_lineage_width)
        canvas_lineage_exec.config(width=canvas_lineage_width)

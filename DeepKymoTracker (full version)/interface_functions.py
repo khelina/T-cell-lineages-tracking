@@ -48,7 +48,8 @@ def turn_image_into_tkinter(image, window_size, lin_image_widths): # if image is
   #print("image_copy.shape=",image_copy.shape)
   #print("windoe_size=", window_size)
   
-  if image_copy.shape[0]!=image_copy.shape[1]:# for lineage_image
+  #if image_copy.shape[0]!=image_copy.shape[1]:# for lineage_image
+  if len(lin_image_widths)!=0:# for lineage_image
      print("DETECTED LINEAGE IMAGE!")
      print("image_copy.shape=",image_copy.shape)
      print("lin_image_widths=", lin_image_widths)
@@ -59,13 +60,18 @@ def turn_image_into_tkinter(image, window_size, lin_image_widths): # if image is
      start=num_frames
      image_resized=cv2.resize(basic_part, (window_size,window_size), interpolation = cv2.INTER_AREA)
      for i in range(1,len(lin_image_widths)):
+         print("i=", i)
          print("start=", start)
          additional_width=lin_image_widths[i]
+         print("additional_width=",additional_width)
+       
          added_part=image_copy[:, start:start+additional_width]
          print("added_part.shape=",added_part.shape)
          added_resized=cv2.resize(added_part, (90,window_size), interpolation = cv2.INTER_AREA)    
          image_resized= np.concatenate((image_resized,added_resized), axis=1)
-         start=additional_width
+         start+=additional_width
+         if start>=image_copy.shape[1]:
+             break
          
   else:
   
@@ -93,15 +99,15 @@ def show_2_canvases(canvas_bright,canvas_fluor,photo_filled_brights,photo_filled
     
 ########### Page-5(Correct segmentaion); for correcting one current frame
 def display_both_channels(filled_fluor,filled_bright,canvas_fluor,canvas_bright,target_size,image_origin_x,image_origin_y):      
-      photo_fluor=turn_image_into_tkinter(filled_fluor, target_size) 
-      photo_bright=turn_image_into_tkinter(filled_bright, target_size)
+      photo_fluor=turn_image_into_tkinter(filled_fluor, target_size,[]) 
+      photo_bright=turn_image_into_tkinter(filled_bright, target_size,[])
       canvas_fluor.create_image(image_origin_x,image_origin_y, anchor=NW, image=photo_fluor)      
       canvas_bright.create_image(image_origin_x,image_origin_y, anchor=NW, image=photo_bright)
       return canvas_bright,canvas_fluor, photo_fluor, photo_bright
 ###############################################################
 def extract_output_images(output_fluor_path,lineage_path, window_size, output_images, output_names, lin_image_widths):# extract fluor and linage images for display
     #it is very essential (it is not a mistake) that output_names and output_images are not empty lists!
-    lineage_images, lineage_images_cv2=[],[]
+    lineage_images_tk, lineage_images_cv2=[],[]
     for filename in sorted_aphanumeric(os.listdir(output_fluor_path)):
         #output_name=os.path.join(fluor_path,filename)
         output_name=filename
@@ -116,8 +122,8 @@ def extract_output_images(output_fluor_path,lineage_path, window_size, output_im
         lineage_cv2=cv2.imread(os.path.join(lineage_path,filename), -1)
         lineage_images_cv2.append(lineage_cv2)
         photo_lineage=turn_image_into_tkinter(lineage_cv2, window_size, lin_image_widths)     
-        lineage_images.append(photo_lineage)
-    return output_images,lineage_images, output_names, lineage_images_cv2
+        lineage_images_tk.append(photo_lineage)
+    return output_images,lineage_images_tk, output_names, lineage_images_cv2
 ##################################################    
 def flash(colors_combinations, buttons,flashers_names, win, flashers):  
   for k in range(len(colors_combinations)):        
