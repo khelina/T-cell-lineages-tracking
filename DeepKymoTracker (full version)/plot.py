@@ -18,98 +18,48 @@ def update_color_dictionary(colour_dictionary,new_cell_names,base_colours, colou
             colour_dictionary[cell_name]=base_colours[colour_counter-1-len(base_colours)]
     return colour_dictionary, colour_counter
 ######################################
-### This function is for dealing with new cells - they need naive names": "a", "b", "c", ....
-def update_naive_names_list(unused_naive_names, n):# n = number of new (added) naive cells
+### This function is for dealing with new cells - they need naive names": "a", "b", "c", .,, "aa", "bb",...
+def update_naive_names_list(basic_naive_names, init_number_of_cells,naive_names_counter):# n = number of new (added) naive cells
     new_naive_names=[]
-    for k in range(n):
-        letter=unused_naive_names[0]
-        new_naive_names.append(letter)
-        unused_naive_names.remove(letter)
-    return new_naive_names, unused_naive_names
-#######################################
+    start_basic_letter=naive_names_counter%26 
+    for k in range(init_number_of_cells):
+        naive_names_counter+=1       
+        if naive_names_counter <=26:# 26= the lenght of English alphabet
+             basic_name=basic_naive_names[k+start_basic_letter]
+             new_naive_names.append(basic_name)
+        else:
+            cycle_number=naive_names_counter//26
+            basic_name=basic_naive_names[naive_names_counter%26-1]
+            real_name=basic_name*(cycle_number+1)
+            new_naive_names.append(real_name)      
+    return new_naive_names,naive_names_counter
+########################################
 
-def update_xs_after_new_cell(xs,new_names, remaining_number_of_cells, previous_lineage_image, canvas_lineage_exec, canvas_size_p4, delta, lin_image_widths):
-       print("I am inside update_xs")
-       print("delta=", delta)
-       lineage_image_width=previous_lineage_image.shape[1]
-       print(" lineage_image_width BEFORE=", lineage_image_width)
-       print(" previous_lineage_image.shape BEFORE=", previous_lineage_image.shape)
-       #number_of_processed_cells=1
-       cv2.imwrite(r"C:\Users\helina\Desktop\prevous_image_before.tif", previous_lineage_image)
-       #remaining_number_of_cells=observed_max_number_of_cells- number_of_processed_cells
-      # print("number_of_processed_cells=", number_of_processed_cells)
-       #print("observed_max_number_of_cells=", observed_max_number_of_cells)
-       #remaining_number_of_cells=1
-       print("xs BEFORE=",xs)
-       xs_internal, width_additional= create_additional_dictionary_of_xs(new_names,delta,remaining_number_of_cells)
-       print("width_additional=",width_additional)
-       print("xs_internal=",xs_internal)
-       lin_image_widths.append(width_additional)
-       for ii in range(len(new_names)):
-          new_name=new_names[ii]
-          print("new_name=", new_name)
-           
-          #xs[new_name]=num_frames+20*(ii+1+number_of_added_new_cells)
-          #xs[new_name]=num_frames+xs_internal[new_name]
-          xs[new_name]=lineage_image_width+xs_internal[new_name]
-          previous_lineage_image=np.concatenate((previous_lineage_image,np.zeros((previous_lineage_image.shape[0],width_additional,3), dtype=previous_lineage_image.dtype)), axis=1)
-          print(" previous_lineage_image.shape AFTER=", previous_lineage_image.shape)
-         
-          lineage_image_width+=width_additional
-          print(" lineage_image_width AFTER=", lineage_image_width)
-          canvas_lineage_width=lineage_image_width*canvas_size_p4/previous_lineage_image.shape[0]
-          
-       cv2.imwrite(r"C:\Users\helina\Desktop\previous_lineage_image_after.tif", previous_lineage_image)   
-       print(" canvas_lineage_width=", canvas_lineage_width)
-       canvas_lineage_exec.config(width=canvas_lineage_width)
-       print("xs AFTER=",xs)
-       return xs, previous_lineage_image, lin_image_widths
-
+########################################
 ################# when adding new cell
-def update_xs_after_new_cells(xs,new_names, remaining_number_of_cells, previous_lineage_image, canvas_lineage_exec, canvas_size_p4, delta,lin_image_widths):
+def update_xs_after_new_cells(xs,new_names,previous_lineage_image, canvas_lineage_exec, canvas_size_p4, delta,lin_image_widths):
        #print("I am inside update_xs")
        print("delta=", delta)
-       lineage_image_width=previous_lineage_image.shape[1]
-       print(" lineage_image_width BEFORE=", lineage_image_width)
-       print(" previous_lineage_image.shape BEFORE=", previous_lineage_image.shape)
-       #number_of_processed_cells=1
-       cv2.imwrite(r"C:\Users\helina\Desktop\prevous_image_before.tif", previous_lineage_image)
-       #remaining_number_of_cells=observed_max_number_of_cells- number_of_processed_cells
-      # print("number_of_processed_cells=", number_of_processed_cells)
-       #print("observed_max_number_of_cells=", observed_max_number_of_cells)
-       #remaining_number_of_cells=1
-       print("xs BEFORE=",xs)
-       xs_internal, width_additional= create_additional_dictionary_of_xs(new_names,delta,remaining_number_of_cells)
-       print("width_additional=",width_additional)
-       print("xs_internal=",xs_internal)
+       lineage_image_width=previous_lineage_image.shape[1]             
+       xs_internal, width_additional= create_additional_dictionary_of_xs(new_names,delta)       
        lin_image_widths.append(width_additional)
        for ii in range(len(new_names)):
           new_name=new_names[ii]
-          print("new_name=", new_name)
-           
-          #xs[new_name]=num_frames+20*(ii+1+number_of_added_new_cells)
-          #xs[new_name]=num_frames+xs_internal[new_name]
+          print("new_name=", new_name)          
           xs[new_name]=lineage_image_width+xs_internal[new_name]
-       previous_lineage_image=np.concatenate((previous_lineage_image,np.zeros((previous_lineage_image.shape[0],width_additional,3), dtype=previous_lineage_image.dtype)), axis=1)
-       print(" previous_lineage_image.shape AFTER=", previous_lineage_image.shape)
-         
+       previous_lineage_image=np.concatenate((previous_lineage_image,np.zeros((previous_lineage_image.shape[0],width_additional,3), dtype=previous_lineage_image.dtype)), axis=1)         
        lineage_image_width+=width_additional
        print(" lineage_image_width AFTER=", lineage_image_width)
-       #canvas_lineage_width=lineage_image_width*canvas_size_p4/previous_lineage_image.shape[0]
-       canvas_lineage_width=canvas_size_p4+90*(len(lin_image_widths)-1)   
-       cv2.imwrite(r"C:\Users\helina\Desktop\previous_lineage_image_after.tif", previous_lineage_image)   
-       print(" canvas_lineage_width=", canvas_lineage_width)
+       canvas_lineage_width=canvas_size_p4+90*(len(lin_image_widths)-1)          
        canvas_lineage_exec.config(width=canvas_lineage_width)
        print("xs AFTER=",xs)
        print("lin_image_widths=",lin_image_widths)
        return xs, previous_lineage_image,lin_image_widths
 ###################################
-def create_first_color_dictionary(max_number_of_cells, init_number_of_cells, num_frames): 
-  base_colours=[[238,238,0,255],#cyan 1
+def create_first_color_dictionary(init_number_of_cells, num_frames): 
+  base_colours=[[255,0,0,255],#blue 1  
         [0,255,255,255],#yellow 10
         [0,255,127,255],#spring green 11
-        [0,0,255,255],#red 100      
-        [255,0,0,255],#blue 101
         [255,245,0,255],#turqoise 110
         [255,0,255,255],#magenta 111
         [255,191,0,255],#deep sky blue
@@ -117,37 +67,32 @@ def create_first_color_dictionary(max_number_of_cells, init_number_of_cells, num
         [71,99,255,255],#tomato
         [255,187,255,255],#plum
         [0,140,255,255],#orange
+        [238,238,0,255],#cyan 1
         [255,255,0,255],#aqua
         [147,20,255,255],#deep pink
         [239,238,0,255],#cyan
         [240,238,0,255],#cyan 1
         [0,255,254,255],#yellow 10
         [0,255,128,255]]#spring green 11
-    
-  n= int(math.log(max_number_of_cells,2)) +1
-    
-  import string
-  unused_naive_names=list(string.ascii_lowercase)
-  if max_number_of_cells>26:# if number of letters is bigger than English alphabet, then copy beginning from number 27
-         copy_list=unused_naive_names.copy()
-         additional=[copy_list[i]+copy_list[i] for i in range(len(copy_list))]            
-         unused_naive_names+=additional
+         
+  import string  
+  basic_naive_names=list(string.ascii_lowercase)  
+  #naive_names_counter=init_number_of_cells-1 
+  
   if init_number_of_cells==1:
       new_naive_names=["1"]
-     
+      naive_names_counter=0    
   else:
-      new_naive_names,unused_naive_names= update_naive_names_list(unused_naive_names,init_number_of_cells)
-  ######################################
-  
-  ########################################
-  colour_dictionary, colour_counter ={},0
-  colour_dictionary, colour_counter=update_color_dictionary(colour_dictionary,new_naive_names,base_colours, colour_counter)
+      new_naive_names,naive_names_counter= update_naive_names_list(basic_naive_names,init_number_of_cells,0)  
+  #colour_dictionary, colour_counter ={},0
+  colour_dictionary, colour_counter=update_color_dictionary({},new_naive_names,base_colours, 0)
   xs, init_delta=create_first_dictionary_of_xs(new_naive_names, num_frames)    
-  #print("ready for execution")
-  #print("final_list", final_list)
-  
-  return colour_dictionary, new_naive_names, base_colours, colour_counter, unused_naive_names, xs, init_delta
+   
+  return colour_dictionary, new_naive_names, base_colours, colour_counter, basic_naive_names, xs, init_delta,naive_names_counter
 #######################################
+
+###########################################
+
 def create_first_dictionary_of_xs(initial_naive_names,num_frames):
     print("INSIDE creat_first_xs")
     m=len(initial_naive_names)
@@ -164,60 +109,8 @@ def update_xs_after_division(xs,daughter_1_name,daughter_2_name, mother_name,ini
     xs[daughter_1_name]= xs[mother_name]-new_delta
     xs[daughter_2_name]= xs[mother_name]+new_delta  
     return xs    
-###############################
-def create_first_dictionary_of_xs_old(initial_naive_names,num_frames,observed_max_number_of_cells):  
-  m=len(initial_naive_names)
-  kk=-1# kk=max number of potential divisions
-  while True:
-    kk+=1   
-    if (2**(kk-1))<observed_max_number_of_cells-m+1<=(2**kk):
-        number_of_potential_divisions=kk
-        break
-  print("number_of_potential_divisions=", number_of_potential_divisions)  
-  potential_max_number_of_cells=(2**kk)*m
-  max_number_of_cells_in_one_unit=2**kk 
-  number_of_deltas_in_one_unit=(2**kk-1)*2
-  total_number_of_deltas=m* number_of_deltas_in_one_unit+m+1  
-  delta=int(num_frames/total_number_of_deltas)
-  #print("delta=", delta)
-  ##############################
-  first_m=-int(number_of_deltas_in_one_unit/2)*delta 
-  #print("first_m=", first_m)
-  step_size_for_m=(number_of_deltas_in_one_unit+1)*delta
-  #print("step_size_for_m=", step_size_for_m)
-  #############################
-  all_cell_names=initial_naive_names
-  temp_list=all_cell_names
-  for k in range(number_of_potential_divisions):# was n
-    daughters=[]
-    for item in temp_list:     
-      a=item+"0"
-      b=item+"1"      
-      daughters =daughters+[a,b]
-    temp_list =daughters   
-    all_cell_names=all_cell_names+temp_list   
-  print("all_cell_names=", all_cell_names)
-  #######################################        
-  cell_names_lengths =[len(item) for item in all_cell_names]
-  max_name_length =max(cell_names_lengths)
-  #print("max_name_length=", max_name_length)  
-  xs={}
-  
-  for i in range(len(initial_naive_names)):
-        xs[initial_naive_names[i]]=first_m+step_size_for_m*(i+1)   
-  for k in range(len(all_cell_names)):# creates x-coordinates for all possible daughters                                # based on max_number_of_cells in the movie
-       cell_name =all_cell_names[k]        
-       kkk=len(cell_name)
-       if kkk<max_name_length:         
-         item_1=xs[cell_name]-delta*(2**(kk-kkk))
-         item_2=xs[cell_name]+delta*(2**(kk-kkk))   
-         xs[cell_name+"0"]=int(item_1)
-         xs[cell_name+"1"]=int(item_2)
-  print("xs inside create_first_dictinary of xs=", xs)
-  print("delta=", delta)              
-  return xs, delta
 ###################### when manually adding new cells
-def create_additional_dictionary_of_xs(new_names,init_delta,remaining_number_of_cells):  
+def create_additional_dictionary_of_xs(new_names,init_delta):  
   m=len(new_names)
   print("INSIDE CREATE ADDITIONAL")
   print("m=",m)
@@ -230,54 +123,7 @@ def create_additional_dictionary_of_xs(new_names,init_delta,remaining_number_of_
   print(" width_additional=", width_additional)        
   return xs_additional, width_additional
 #################################################### 
-def create_additional_dictionary_of_xs_old(initial_new_names,init_delta,remaining_number_of_cells):
-  
-  m=len(initial_new_names)
-  kk=-1# kk=max number of potential divisions
-  while True:
-    kk+=1   
-    if (2**(kk-1))<remaining_number_of_cells-m+1<=(2**kk):
-        number_of_potential_divisions=kk
-        break  
-  potential_max_number_of_cells=(2**kk)*m
-  max_number_of_cells_in_one_unit=2**kk 
-  number_of_deltas_in_one_unit=(2**kk-1)*2 
-  total_number_of_deltas_for_additional=m* number_of_deltas_in_one_unit+m   
-  width_additional= total_number_of_deltas_for_additional*delta  
-  first_m=-int(number_of_deltas_in_one_unit/2)*init_delta-init_delta
-  step_size_for_m=(number_of_deltas_in_one_unit+1)*init_delta 
-  #############################
-  all_cell_names=initial_new_names
-  temp_list=all_cell_names
-  for k in range(number_of_potential_divisions):# was n
-    daughters=[]
-    for item in temp_list:     
-      a=item+"0"
-      b=item+"1"      
-      daughters =daughters+[a,b]
-    temp_list =daughters   
-    all_cell_names=all_cell_names+temp_list
- 
-  cell_names_lengths =[len(item) for item in all_cell_names]
-  max_name_length =max(cell_names_lengths)
-  #print("max_name_length=", max_name_length)  
-  xs_additional={}
-  
-  for i in range(len(initial_new_names)):
-        xs_additional[initial_new_names[i]]=first_m+step_size_for_m*(i+1) 
-  #print("xs for new_naive_names_only", xs)
-        #xs[new_naive_names[i]]=int((num_frames/(len(new_naive_names)+1))*(i+1))
-  for k in range(len(all_cell_names)):# creates x-coordinates for all possible daughters                                # based on max_number_of_cells in the movie
-       cell_name =all_cell_names[k]        
-       kkk=len(cell_name)
-       if kkk<max_name_length:         
-         item_1=xs_additional[cell_name]-delta*(2**(kk-kkk))
-         item_2=xs_additional[cell_name]+delta*(2**(kk-kkk))   
-         xs_additional[cell_name+"0"]=int(item_1)
-         xs_additional[cell_name+"1"]=int(item_2)              
-  return xs_additional, width_additional
- 
- 
+
 
 ####### xs contains x-coordinates for each cell (for plotting dynamic lineage)
 # It is created based on cell names in Frame 1 (see function def_Close_popup)

@@ -27,11 +27,11 @@ def extract_changeable_params_history(outpath, start_frame_internal):
         except EOFError:
             break
     p= start_frame_internal
-    xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,unused_naive_names,dict_of_divisions,number_of_added_new_cells, lin_image_widths=  changeable_params_history[p][0], changeable_params_history[p][1], changeable_params_history[p][2],\
-    changeable_params_history[p][3], changeable_params_history[p][4], changeable_params_history[p][5], changeable_params_history[p][6], changeable_params_history[p][7], changeable_params_history[p][8],changeable_params_history[p][9]
+    xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,dict_of_divisions,naive_names_counter, lin_image_widths=  changeable_params_history[p][0], changeable_params_history[p][1], changeable_params_history[p][2],\
+    changeable_params_history[p][3], changeable_params_history[p][4], changeable_params_history[p][5], changeable_params_history[p][6], changeable_params_history[p][7], changeable_params_history[p][8]
     #print("history_of_ch_movie_params[-1]=",  history_of_ch_movie_params[-1])
     #print("len(history_of_ch_movie_params)=", len( history_of_ch_movie_params))    
-    return xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,unused_naive_names,dict_of_divisions,number_of_added_new_cells,lin_image_widths,changeable_params_history     
+    return xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,basic_naive_names,dict_of_divisions,naive_names_counter,lin_image_widths,changeable_params_history     
 ######################################## 
 def update_lineage(llist,outpath, mode):# was cells
     lineage_path=os.path.join(outpath,"lineage_per_frame.pkl")  
@@ -49,13 +49,13 @@ def extract_const_movie_parameters(outpath):
         except EOFError:
             break
     #print("list_of_const_movie_params", list_of_const_movie_params)
-    frame_size, true_cell_radius_pickle, patch_size,max_number_of_cells,\
+    frame_size, true_cell_radius_pickle, patch_size,basic_naive_names,\
     num_frames, full_core_fluor_name, n_digits, full_core_bright_name,  first_frame_number,\
     base_colours,contrast_value, number_cells_in_first_frame,full_core_red_name, red_dictionary, bordersize, delta = list_of_const_movie_params[0],list_of_const_movie_params[1],list_of_const_movie_params[2],\
     list_of_const_movie_params[3],list_of_const_movie_params[4],list_of_const_movie_params[5],list_of_const_movie_params[6],list_of_const_movie_params[7],list_of_const_movie_params[8],\
     list_of_const_movie_params[9],list_of_const_movie_params[10],list_of_const_movie_params[11],list_of_const_movie_params[12],list_of_const_movie_params[13],list_of_const_movie_params[14],list_of_const_movie_params[15]
     
-    return frame_size, true_cell_radius_pickle, patch_size,max_number_of_cells,\
+    return frame_size, true_cell_radius_pickle, patch_size,basic_naive_names,\
            num_frames, full_core_fluor_name, n_digits, full_core_bright_name,  first_frame_number,\
            base_colours,contrast_value,number_cells_in_first_frame,full_core_red_name, red_dictionary, bordersize, delta 
 ##########################

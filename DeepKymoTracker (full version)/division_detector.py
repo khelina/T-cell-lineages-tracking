@@ -84,7 +84,7 @@ def detect_figure_8(segmented_patch):# detects division in patch
   #print("len(contours) inside detect_figure_8_after=", len(cnts))
   return verdict,segmented_patch,im1# if no division, im1=segmented_patch, the cell is not cut
 ################ recalculate centres of daugher cells after division
-def recalculate_centre(segmented_image,old_coords, frame_size, border_size, patch_size):
+def recalculate_centre(segmented_image,old_coords, frame_size, bordersize, patch_size):
      x0,y0=old_coords[0],old_coords[1]
      black=np.zeros((frame_size,frame_size),dtype="uint8")
      black_border=cv2.copyMakeBorder(black, top=bordersize, bottom=bordersize, left=bordersize, right=bordersize, borderType= cv2.BORDER_REPLICATE )
@@ -137,9 +137,9 @@ def debug(cells):
   print("int_number=", int_number)
 ##################################################      
     
-def update_dictionary_after_division(cut_patch,cells,text,count,indicator,coords, frame_size, colors):      
+def update_dictionary_after_division(cut_patch,cells,text,count,indicator,coords, frame_size, colors,bordersize, patch_size):      
     N_cells=len(cells)
-    print("N_cells=", N_cells)
+    print("colors=", colors)
     print("count=", count)
     print("BEFORE UPDATING CELLS")
     #debug(cells)
@@ -150,7 +150,7 @@ def update_dictionary_after_division(cut_patch,cells,text,count,indicator,coords
               im1=cut_patch
               immmg, cnts, hier = cv2.findContours(im1,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
               print("len(contours) before process_figure_8=", len(cnts))           
-              separated_cells,parameters=process_figure_8(im1,cells["cell_%s" % kkk][6], frame_size)
+              separated_cells,parameters=process_figure_8(im1,cells["cell_%s" % kkk][6], frame_size,bordersize, patch_size)
               print("len(separated_cells) after process figure_8=", len(separated_cells))                                         
               indicator+=1                                         
               cells["cell_%s" % kkk][3]=separated_cells[0]

@@ -1165,7 +1165,7 @@ def load_helper_functions():
                            hungarian, predict_tracking,force_manual_IDs)
     
     from plot import plot_frame, create_first_color_dictionary,update_color_dictionary,update_naive_names_list,update_xs_after_new_cells, rename_file,update_xs_after_division
-    from postprocess import create_pedigree,  create_output_movie,  create_lineage_image_one_frame,sorted_aphanumeric
+    from postprocess import   create_output_movie,  create_lineage_image_one_frame,sorted_aphanumeric
     from keras.models import model_from_json
     from print_excel import print_excel_files,extract_lineage,update_lineage, extract_const_movie_parameters,update_changeable_params_history,extract_changeable_params_history
     from interface_functions import extract_output_images,create_name_dictionary_p4,display_image_p4, show_3_canvases
@@ -1272,11 +1272,11 @@ def initiate_tracking_page():
                   global out_folders
                   out_folders = create_output_folders(outpath)# creates names only  
     
-                  global true_cell_radius, patch_size,max_number_of_cells,  xs, full_core_bright_name,curr_frame_cell_names,flag,edit_id_indicator, \
-                  base_colours,colour_counter,colour_dictionary,unused_naive_names, contrast_value, dict_of_divisions,number_of_added_new_cells,number_in_first_frame,full_core_red_name, red_dictionary, bordersize, init_delta
+                  global true_cell_radius, patch_size,basic_naive_names,  xs, full_core_bright_name,curr_frame_cell_names,flag,edit_id_indicator, \
+                  base_colours,colour_counter,colour_dictionary,basic_naive_names, contrast_value, dict_of_divisions,naive_names_counter,number_in_first_frame,full_core_red_name, red_dictionary, bordersize, init_delta
                   true_cell_radius, edit_id_indicator=IntVar(),StringVar()
    
-                  (frame_size, true_cell_radius_pickle, patch_size,max_number_of_cells,
+                  (frame_size, true_cell_radius_pickle, patch_size,basic_naive_names,
                   num_frames, full_core_fluor_name, n_digits, full_core_bright_name, first_frame_number,
                   base_colours, contrast_value, number_in_first_frame,full_core_red_name, red_dictionary, bordersize, init_delta)= extract_const_movie_parameters(outpath)
                   
@@ -1292,8 +1292,8 @@ def initiate_tracking_page():
                   feedback_dict_p4["cell diameter"]=str(2*true_cell_radius.get())
                   feedback_dict_p4["frame size"]=str(frame_size)+"x"+str(frame_size)
                   feedback_dict_p4["patch size"]=str(2*patch_size)+" x "+str(2*patch_size)
-                  feedback_dict_p4["number in frame 1"]=str(number_in_first_frame)
-                  feedback_dict_p4["max number"]=str(max_number_of_cells)
+                  feedback_dict_p4["initial number of cells"]=str(number_in_first_frame)
+                  #feedback_dict_p4["max number"]=str(basic_naive_names)
                   
                   feedback_text_p4=update_feedback_text_p4(feedback_dict_p4)
                   feedback_var_p4.set(feedback_text_p4)
@@ -1309,9 +1309,9 @@ def initiate_tracking_page():
                   start_frame=last_frame_cell_dict[internal_cell_names[0]][12]+1    
                   coords=last_frame_cell_dict[internal_cell_names[0]][14]
                   ##############################
-                  global xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,unused_naive_names,\
-                  dict_of_divisions,number_of_added_new_cells, changable_params_history
-                  xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,unused_naive_names,dict_of_divisions,number_of_added_new_cells,lin_image_widths,changable_params_history= extract_changeable_params_history(outpath, -1)
+                  global xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,\
+                  dict_of_divisions,naive_names_counter, changable_params_history
+                  xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,basic_naive_names,dict_of_divisions,naive_names_counter,lin_image_widths,changable_params_history= extract_changeable_params_history(outpath, -1)
                   edit_id_indicator.set(edit_id_indicator_pickle)
                                     
                  
@@ -1433,6 +1433,7 @@ def prepare_for_first_go():
     l_red=tk.Label(frame7,text= "Red ", bg="black", fg="cyan", font=("Times", "12"))
     l_bright.pack(),l_fluor.pack(),l_red.pack()
     ################################################
+    """
     def start_counting_cells():
         print(" I am inside start_counting_cells")
         instruct_label_popup_p4.configure(text="Maxumum number of cells in input movie is necesary to correctly plot lineage."\
@@ -1446,7 +1447,8 @@ def prepare_for_first_go():
         
         global counting_buttons
         counting_buttons=[button_count_cells, button_close] 
-        activate_buttons(counting_buttons,[ button_count_cells]) 
+        activate_buttons(counting_buttons,[ button_count_cells])
+    """
     ##########################################################
     global  button_contrast,button_cell_radius,  button_assign_positions,  pop_slider,button_count_cells 
     button_contrast = Button(frame5, text="2a. Enhance image contrast",font='TkDefaultFont 10 bold', bg=button_color, command=lambda:[create_contrast_popup(),instruct_var_p4.set("Adjusting contrast....")])
@@ -1459,17 +1461,18 @@ def prepare_for_first_go():
     button_assign_positions = Button(frame7, text="2c. Assign initial cell positions",font='TkDefaultFont 10 bold', bg=button_color, command=create_assign_cell_positions_popup)
     button_assign_positions.pack()
     
-    button_count_cells = Button(frame7, text="2d. Count max number of cells",font='TkDefaultFont 10 bold', bg=button_color, command=start_counting_cells)
-    button_count_cells.pack()
+    #button_count_cells = Button(frame7, text="2d. Count max number of cells",font='TkDefaultFont 10 bold', bg=button_color, command=start_counting_cells)
+    #button_count_cells.pack()
     
     button_close = Button(frame9, text=" Close this window",font='TkDefaultFont 10 bold', bg=button_color, command=close_popup_canvas)
     button_close.pack()
     
     global first_go_buttons
-    first_go_buttons=[button_load,button_contrast,button_cell_radius,  button_assign_positions,  button_count_cells,button_close]
+    first_go_buttons=[button_load,button_contrast,button_cell_radius,  button_assign_positions,button_close]
     activate_buttons(first_go_buttons,[button_contrast])
     
-###################################################          
+###################################################
+    """      
     def click_cells_to_count(event):     
       canvas_mid_pop.create_oval(event.x-2, event.y-2, event.x+2,
                        event.y+2, outline="red", fill="red", width=2)
@@ -1488,6 +1491,7 @@ def prepare_for_first_go():
       feedback_text_p4=update_feedback_text_p4(feedback_dict_p4)
       feedback_var_p4.set(feedback_text_p4)
      ###################################
+     """
 ########################################################    
    
 ###########################################        
@@ -1570,8 +1574,8 @@ def prepare_for_first_go():
     ########### load the first clip         
     #global fluor_images,fluor_images_compressed,bright_images,fluor_names,bright_names                 
     #fluor_images,fluor_images_compressed,bright_images,fluor_names,bright_names =load_clip(0,full_core_fluor_name,full_core_bright_name,n_digits, num_frames, first_frame_number)
-    global   previous_lineage_image, lineage_image_size, number_of_added_new_cells
-    number_of_added_new_cells=0     
+    global   previous_lineage_image, lineage_image_size
+    #number_of_added_new_cells=0     
     #frame_size=fluor_images[0].shape[0]
     #cell_info_label.config(text= "FRAME SIZE:"+str(frame_size)+"x"+str(frame_size), fg="#00FFFF", bg="black")
     #################################    
@@ -1830,9 +1834,12 @@ def create_assign_cell_positions_popup():
     #update_flash([button_save_init_positions])    
     canvas_assign_pos.create_image(0, 0, anchor=NW, image=photo_image_contrast)
     
-    global positions_popup_buttons
-    positions_popup_buttons=[button_assign_positions, button_save_init_positions,button_count_cells ]
-    activate_buttons(positions_popup_buttons,[ button_assign_positions]) 
+    global positions_popup_buttons, button_close
+    positions_popup_buttons=[button_assign_positions, button_save_init_positions, button_close ]
+    activate_buttons(positions_popup_buttons,[ button_assign_positions])
+    #global counting_buttons
+    #counting_buttons=[button_count_cells, button_close] 
+    #activate_buttons(counting_buttons,[ button_count_cells])
 ################ draw red spots in popup canvas in response to mouse click
 def click_position(event):
     #print("manual_init_positions inside click_position=",manual_init_positions)
@@ -1844,14 +1851,14 @@ def click_position(event):
         update_flash([button_save_init_positions])
         activate_buttons(positions_popup_buttons,[ button_save_init_positions]) 
     #cell_numbers_label.config(text="NUMBER OF CELLS IN FRAME 1 = "+str(len(manual_init_positions)))
-    feedback_dict_p4["number in frame 1"]=str(len(manual_init_positions))
+    feedback_dict_p4["initial number of cells"]=str(len(manual_init_positions))
     feedback_text_p4=update_feedback_text_p4(feedback_dict_p4)
     feedback_var_p4.set(feedback_text_p4)
 ##################################
 def close_assign_window():
-     update_flash([button_count_cells])
+     #update_flash([button_count_cells])
      instruct_label_popup_p4.configure(text="Initial cells` positions in Frame 1 have been assigned. Now, go to Button 2d to assign maximum number of cells in input movie.")
-     activate_buttons(positions_popup_buttons,[ button_count_cells]) 
+     activate_buttons(positions_popup_buttons,[ button_close]) 
      popup_assign_pos.destroy()  
 ############################    
 def close_popup_canvas(): # save initial positions of cells in Frame 1                    
@@ -1859,10 +1866,10 @@ def close_popup_canvas(): # save initial positions of cells in Frame 1
       
       coords_very_first=manual_init_positions
       number_in_first_frame=len(coords_very_first)
-      global colour_dictionary, new_naive_names, colour_counter, base_colours, unused_naive_names, xs, init_delta
+      global colour_dictionary, new_naive_names, colour_counter, base_colours, basic_naive_names, xs, init_delta,naive_names_counter
           
-      colour_dictionary, new_naive_names, base_colours, colour_counter, unused_naive_names,xs, init_delta= create_first_color_dictionary(
-        max_number_of_cells, len(manual_init_positions), num_frames)
+      colour_dictionary, new_naive_names, base_colours, colour_counter, basic_naive_names, xs, init_delta,naive_names_counter= create_first_color_dictionary(
+         len(manual_init_positions), num_frames)
       print("xs=", xs)
       N_cells=len(manual_init_positions)      
       global curr_frame_cell_names, flag,  edit_id_indicator
@@ -1881,7 +1888,7 @@ def close_popup_canvas(): # save initial positions of cells in Frame 1
       instruct_var_p4.set("The parameters of the input movie have been set up.\n\nTo start execution, press Button 3.")
       #feedback_label_p4.config(text="The positions of cells in Frame 1 has been saved.\n\nTo start execution, press Button 3.")
       #stop_flash("save", popup, flashers)
-      update_flash([button_execute])
+      #update_flash([button_execute])
       global all_buttons_page4
       activate_buttons(all_buttons_page4,[button_execute])
      
@@ -1970,7 +1977,7 @@ def clear_memory_of_previous_clip(fluor_images, fluor_images_compressed,bright_i
      
 #############################################
 def record_const_movie_parameters():# record cell_size and other parameters in pickle file to be used at Step 4 and in retrieve mode
-    list_of_const_movie_params=[frame_size, true_cell_radius.get(), patch_size,max_number_of_cells,
+    list_of_const_movie_params=[frame_size, true_cell_radius.get(), patch_size,basic_naive_names,
                           num_frames, full_core_fluor_name, n_digits,full_core_bright_name, first_frame_number,
                           base_colours, contrast_value, number_in_first_frame,full_core_red_name, red_dictionary, bordersize, init_delta]
     const_parameters_path=os.path.join(outpath,"constant_movie_parameters.pkl")  
@@ -2083,7 +2090,7 @@ def execute():
                  
                    
                    cells, curr_frame_cell_names, count, division_indicator, coords = update_dictionary_after_division(
-                       cut_patch, cells, curr_frame_cell_names, count, division_indicator, coords, frame_size, colour_dictionary)
+                       cut_patch, cells, curr_frame_cell_names, count, division_indicator, coords, frame_size, colour_dictionary,bordersize, patch_size)
                    
                if division_indicator == 1 and mother_8_name != []:                   
                    dict_of_divisions[mother_8_name] = first_number_in_clip+kk
@@ -2095,7 +2102,7 @@ def execute():
                  manual_division_indicator.set("no")
             #record_const_movie_parameters()
             print("curr_frame_cell_names after division=",curr_frame_cell_names) 
-            update_changeable_params_history([[xs,curr_frame_cell_names,flag,edit_id_indicator.get(),colour_counter,colour_dictionary,unused_naive_names,dict_of_divisions,number_of_added_new_cells, lin_image_widths]],outpath, 'ab')
+            update_changeable_params_history([[xs,curr_frame_cell_names,flag,edit_id_indicator.get(),colour_counter,colour_dictionary,dict_of_divisions,naive_names_counter, lin_image_widths]],outpath, 'ab')
             update_lineage([cells],outpath,'ab')# concatenates {cells}  to pickle 
             #eedback_label.config(text="Execution in progress: \nFrame "+ str(first_number_in_clip+kk)+"\n - If you need to stop for editing, press Button 3a."
                             #"\n - Otherwise, wait until execution is finished.")
@@ -2260,16 +2267,7 @@ def get_cell_IDs_manually(event):# gets cell ID from previous frame during editi
     print("internal_frame_number=", internal_frame_number)
     
     keys=list(lineage_per_frame_p4[internal_frame_number-shift].keys())#was -2  
-    mask_image=lineage_per_frame_p4[internal_frame_number-shift][keys[0]][13]
-    
-    
-    #keys=list(lineage_per_frame_p4[int(view_slider.get())-shift].keys())#was -2  
-    #mask_image=lineage_per_frame_p4[int(view_slider.get())-shift][keys[0]][13]
-    
-    #previous_resized =cv2.resize(previous_image, (window_size,window_size), interpolation = cv2.INTER_AREA)  
-    #cell_number=int(previous_resized[event.y,event.x])-1
-    ##########################################
-   
+    mask_image=lineage_per_frame_p4[internal_frame_number-shift][keys[0]][13]   
     ############################################
     cell_number_in_mask=int(mask_image[int(event.y/canvas_size_p4*frame_size),int(event.x/canvas_size_p4*frame_size)])
     cell_number=int(math.log(round(cell_number_in_mask),2)) 
@@ -2331,9 +2329,9 @@ def stop_editing_IDs():
     ###################################
     global previous_lineage_image
     previous_lineage_image=lineage_images_cv2[start_frame_internal-2]
-    global xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,unused_naive_names,\
-    dict_of_divisions,number_of_added_new_cells,lin_image_widths,changeable_params_history
-    xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,unused_naive_names,dict_of_divisions,number_of_added_new_cells,lin_image_widths,changeable_params_history= extract_changeable_params_history(outpath, start_frame_internal)
+    global xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,\
+    dict_of_divisions,naive_names_counter,lin_image_widths,changeable_params_history
+    xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,dict_of_divisions,number_of_added_new_cells,lin_image_widths,changeable_params_history= extract_changeable_params_history(outpath, start_frame_internal)
     #edit_id_indicator.set(edit_id_indicator_pickle)
     edit_id_indicator.set("yes")
     ########################################################
@@ -2421,9 +2419,9 @@ def stop_editing_division():
     global previous_lineage_image
     previous_lineage_image=lineage_images_cv2[start_frame_internal-2]
     ###################################
-    global xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,unused_naive_names,\
-    dict_of_divisions,number_of_added_new_cells,lin_image_widths,changeable_params_history
-    xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,unused_naive_names,dict_of_divisions,number_of_added_new_cells,lin_image_widths,changeable_params_history= extract_changeable_params_history(outpath, start_frame_internal)
+    global xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,\
+    dict_of_divisions,naive_names_counter,lin_image_widths,changeable_params_history
+    xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,dict_of_divisions,number_of_added_new_cells,lin_image_widths,changeable_params_history= extract_changeable_params_history(outpath, start_frame_internal)
     #edit_id_indicator.set(edit_id_indicator_pickle)
     
     print("curr_frame_cell_names before=",curr_frame_cell_names)
@@ -2497,9 +2495,9 @@ def save_added_cell():
     keys=list(lineage_per_frame_p4[internal_start_frame-1].keys())      
     b = np.array(manual_centroids)
     ###################################
-    global xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,unused_naive_names,\
-    dict_of_divisions,number_of_added_new_cells,lin_image_widths,changeable_params_history
-    xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,unused_naive_names,dict_of_divisions,number_of_added_new_cells,lin_image_widths,changeable_params_history= extract_changeable_params_history(outpath, internal_start_frame)
+    global xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,\
+    dict_of_divisions,naive_names_counter,lin_image_widths,changeable_params_history
+    xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,dict_of_divisions,number_of_added_new_cells,lin_image_widths,changeable_params_history= extract_changeable_params_history(outpath, internal_start_frame)
     #edit_id_indicator.set(edit_id_indicator_pickle)
     edit_id_indicator.set(edit_id_indicator_pickle)
      
@@ -2510,18 +2508,18 @@ def save_added_cell():
     coords=np.concatenate((coords_old, b), axis=0)     
     number_of_now_added_cells=len(manual_centroids)
     #print("number_of_added_cells=", number_of_now_added_cells)
-    global  base_colours, delta
+    global  base_colours, delta, naive_names_counter
     #######
-    new_naive_names, unused_naive_names=update_naive_names_list(unused_naive_names, number_of_now_added_cells)
+    new_naive_names,naive_names_counter=update_naive_names_list(basic_naive_names, number_of_now_added_cells,naive_names_counter)
     #print("new_naive_names before", new_naive_names)
     colour_dictionary, colour_counter=update_color_dictionary(colour_dictionary,new_naive_names,base_colours, colour_counter)    
     curr_frame_cell_names+=new_naive_names
-    number_of_processed_cells=number_in_first_frame+number_of_added_new_cells+len(dict_of_divisions)
-    print("number_of_processed_cells=",number_of_processed_cells)
-    number_of_remaining_cells=max_number_of_cells-number_of_processed_cells
-    print("number_of_remaining_cells=",number_of_remaining_cells)
+    #number_of_processed_cells=number_in_first_frame+number_of_added_new_cells+len(dict_of_divisions)
+    #print("number_of_processed_cells=",number_of_processed_cells)
+    #number_of_remaining_cells=max_number_of_cells-number_of_processed_cells
+    #print("number_of_remaining_cells=",number_of_remaining_cells)
     # change previous lineage image by adding new cells    
-    xs, previous_lineage_image,lin_image_widths=update_xs_after_new_cells(xs,new_naive_names, number_of_remaining_cells,previous_lineage_image, canvas_lineage_exec, canvas_size_p4, init_delta,lin_image_widths)
+    xs, previous_lineage_image,lin_image_widths=update_xs_after_new_cells(xs,new_naive_names, previous_lineage_image, canvas_lineage_exec, canvas_size_p4, init_delta,lin_image_widths)
     print("previous_lineage_image.shape AFTER CREATION=",previous_lineage_image.shape)
     
     number_of_added_new_cells+=number_of_now_added_cells        
@@ -2565,9 +2563,9 @@ def save_removed_cell():
     global previous_lineage_image
     previous_lineage_image=lineage_images_cv2[internal_start_frame-2]
     ###################################
-    global xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,unused_naive_names,\
-    dict_of_divisions,number_of_added_new_cells,lin_image_widths,changeable_params_history
-    xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,unused_naive_names,dict_of_divisions,number_of_added_new_cells,lin_image_widths,changeable_params_history= extract_changeable_params_history(outpath, internal_start_frame)
+    global xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,\
+    dict_of_divisions,naive_names_counter,lin_image_widths,changeable_params_history
+    xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,dict_of_divisions,number_of_added_new_cells,lin_image_widths,changeable_params_history= extract_changeable_params_history(outpath, internal_start_frame)
     #edit_id_indicator.set(edit_id_indicator_pickle)
     edit_id_indicator.set(edit_id_indicator_pickle)
      
@@ -3735,7 +3733,7 @@ ffrom=1
 ##############################################################
 global extract_info_from_file_name
 
-from postprocess import (sorted_aphanumeric, change_dict,extract_info_from_file_name, create_pedigree,plot_per_cell_info,
+from postprocess import (sorted_aphanumeric, change_dict,extract_info_from_file_name, plot_per_cell_info,
               load_and_prepare_result_images)
 from print_excel import extract_lineage,extract_const_movie_parameters
 from interface_functions import turn_image_into_tkinter

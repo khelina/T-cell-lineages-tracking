@@ -19,7 +19,10 @@ from print_excel import extract_lineage
 ## It is executed  only after the movie has been tracked (button Create Output Movie)
 ## Lineage_per_cell will be used in the next steps
 ## Also, it is a better way of representing results
+"""
 def create_pedigree(lineage_per_frame,outpath,frame_size):
+  print("INSIDE create_pedigree")
+  print("Bordersize=",Bordersize)
   a=[(lineage_per_frame[i].keys(),i) for i in range(len(lineage_per_frame))] 
   names=[]
   for k in range(len(lineage_per_frame)):
@@ -64,6 +67,7 @@ def create_pedigree(lineage_per_frame,outpath,frame_size):
   with open(pedigree_path, 'wb') as f:
          pickle.dump(pedigree, f)  
   return pedigree
+"""
 ####################################################################
 #
 #######################################
@@ -281,7 +285,7 @@ def plot_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progres
        init=still_lineage.copy()# plot red points               
        for k in range(len(points)):
           if points[k][0]==frame_number-first_frame_number_p6:        
-              cv2.circle(init,(points[k][1], points[k][0]), 3,[255,0,0],-1)
+              cv2.circle(init,(points[k][1], points[k][0]), 1,[255,0,0],-1)
        name =os.path.join(red_patches_path,cell_name +"_red_frame_%s" % frame_number)
        cv2.imwrite(name +".tif",init)
        red_patches.append(init)        
