@@ -28,10 +28,10 @@ def extract_changeable_params_history(outpath, start_frame_internal):
             break
     p= start_frame_internal
     xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,dict_of_divisions,naive_names_counter, lin_image_widths=  changeable_params_history[p][0], changeable_params_history[p][1], changeable_params_history[p][2],\
-    changeable_params_history[p][3], changeable_params_history[p][4], changeable_params_history[p][5], changeable_params_history[p][6], changeable_params_history[p][7], changeable_params_history[p][8]
+    changeable_params_history[p][3], changeable_params_history[p][4], changeable_params_history[p][5], changeable_params_history[p][6], changeable_params_history[p][7],changeable_params_history[p][8]
     #print("history_of_ch_movie_params[-1]=",  history_of_ch_movie_params[-1])
     #print("len(history_of_ch_movie_params)=", len( history_of_ch_movie_params))    
-    return xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,basic_naive_names,dict_of_divisions,naive_names_counter,lin_image_widths,changeable_params_history     
+    return xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,dict_of_divisions,naive_names_counter,lin_image_widths,changeable_params_history     
 ######################################## 
 def update_lineage(llist,outpath, mode):# was cells
     lineage_path=os.path.join(outpath,"lineage_per_frame.pkl")  

@@ -1311,7 +1311,7 @@ def initiate_tracking_page():
                   ##############################
                   global xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,\
                   dict_of_divisions,naive_names_counter, changable_params_history
-                  xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,basic_naive_names,dict_of_divisions,naive_names_counter,lin_image_widths,changable_params_history= extract_changeable_params_history(outpath, -1)
+                  xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,dict_of_divisions,naive_names_counter,lin_image_widths,changable_params_history= extract_changeable_params_history(outpath, -1)
                   edit_id_indicator.set(edit_id_indicator_pickle)
                                     
                  
@@ -1433,24 +1433,9 @@ def prepare_for_first_go():
     l_red=tk.Label(frame7,text= "Red ", bg="black", fg="cyan", font=("Times", "12"))
     l_bright.pack(),l_fluor.pack(),l_red.pack()
     ################################################
-    """
-    def start_counting_cells():
-        print(" I am inside start_counting_cells")
-        instruct_label_popup_p4.configure(text="Maxumum number of cells in input movie is necesary to correctly plot lineage."\
-                                          "\nFirst, using slide bar,choose fluorescent frame with maximum number of cells (typically,this is the last frame."\
-                                              "\n Then, left click on each cell in that frame.\nFinally, press Close this window.")     
-        update_flash([])
-        button_count_cells.config(bg="red")
-        canvas_mid_pop.bind("<Button-1>",click_cells_to_count)
-        global clicked_cells
-        clicked_cells=[]
-        
-        global counting_buttons
-        counting_buttons=[button_count_cells, button_close] 
-        activate_buttons(counting_buttons,[ button_count_cells])
-    """
+    
     ##########################################################
-    global  button_contrast,button_cell_radius,  button_assign_positions,  pop_slider,button_count_cells 
+    global  button_contrast,button_cell_radius,  button_assign_positions,  pop_slider, button_close 
     button_contrast = Button(frame5, text="2a. Enhance image contrast",font='TkDefaultFont 10 bold', bg=button_color, command=lambda:[create_contrast_popup(),instruct_var_p4.set("Adjusting contrast....")])
     button_contrast.pack()
     
@@ -1468,36 +1453,10 @@ def prepare_for_first_go():
     button_close.pack()
     
     global first_go_buttons
-    first_go_buttons=[button_load,button_contrast,button_cell_radius,  button_assign_positions,button_close]
+    first_go_buttons=[button_load,button_contrast,button_cell_radius,  button_assign_positions]
     activate_buttons(first_go_buttons,[button_contrast])
     
-###################################################
-    """      
-    def click_cells_to_count(event):     
-      canvas_mid_pop.create_oval(event.x-2, event.y-2, event.x+2,
-                       event.y+2, outline="red", fill="red", width=2)
-      clicked_cells.append([event.x, event.y])
-      global max_number_of_cells
-      max_number_of_cells=len(clicked_cells)
-      if max_number_of_cells==1:
-          update_flash([button_close])
-          activate_buttons(counting_buttons,[ button_close])
-      print("max_number_of_cells=",max_number_of_cells)
-      #cell_numbers_label.config(text="# CELLS IN FRAME 1 = "+str(len(manual_init_positions))+
-                                #'\nMAX # CELLS IN A FRAME = '+str(max_number_of_cells))
-      #################################
-      #feedback_dict_p4["number in frame 1"]=str(len(manual_init_positions))
-      feedback_dict_p4["max number"]=str(max_number_of_cells)
-      feedback_text_p4=update_feedback_text_p4(feedback_dict_p4)
-      feedback_var_p4.set(feedback_text_p4)
-     ###################################
-     """
-########################################################    
-   
-###########################################        
-    #button_count_cells = Button(frame7, text="2d. Count max number of cells",font='TkDefaultFont 10 bold', bg=button_color, command=start_counting_cells)
-    #button_count_cells.pack()
-    
+
     global  all_names_fluor,all_names_bright,all_names_red
         
     all_names_fluor, all_names_bright,all_names_red=load_full_raw_movie(my_dir)
@@ -1666,10 +1625,7 @@ def save_cell_radius():
     feedback_text_p4=update_feedback_text_p4(feedback_dict_p4)
     feedback_var_p4.set(feedback_text_p4)
      ###################################
-   
-#################################
-#######################################
-
+ 
 #####################################
 def create_cell_measure_popup():
     update_flash([])
@@ -1856,10 +1812,10 @@ def click_position(event):
     feedback_var_p4.set(feedback_text_p4)
 ##################################
 def close_assign_window():
-     #update_flash([button_count_cells])
+     update_flash([button_close])
      instruct_label_popup_p4.configure(text="Initial cells` positions in Frame 1 have been assigned. Now, go to Button 2d to assign maximum number of cells in input movie.")
      activate_buttons(positions_popup_buttons,[ button_close]) 
-     popup_assign_pos.destroy()  
+     popup_assign_pos.destroy()
 ############################    
 def close_popup_canvas(): # save initial positions of cells in Frame 1                    
       global coords, manual_init_positions, coords_very_first, number_in_first_frame    
@@ -1887,12 +1843,13 @@ def close_popup_canvas(): # save initial positions of cells in Frame 1
       #instruct_label_popup_p4.configure(text="Initial cells` positions in Frame 1 have been assigned. Now, go to Button 2d to assign maximum number of cells in input movie.") 
       instruct_var_p4.set("The parameters of the input movie have been set up.\n\nTo start execution, press Button 3.")
       #feedback_label_p4.config(text="The positions of cells in Frame 1 has been saved.\n\nTo start execution, press Button 3.")
-      #stop_flash("save", popup, flashers)
-      #update_flash([button_execute])
+      
+      update_flash([button_execute])
       global all_buttons_page4
       activate_buttons(all_buttons_page4,[button_execute])
      
       popup_first_preview.destroy()
+
 
 ####################################################
 ############################################  
@@ -1921,30 +1878,14 @@ def cut_lineage(internal_start_frame): # after editing
     #print("len(lineage_per_frame_p4) AFTER=", len(lineage_per_frame_p4))   
     update_lineage(lineage_per_frame_p4,outpath,'wb')# "wb" means delete previous lineage and write a new one
     global output_images,lineage_images_tk,lineage_images_cv2, output_names    
-    #del output_images[(start_frame):]# was start_frame:
-    #del output_names[(start_frame):]
-    #print("start_frame_internal=", start_frame_internal)
-    #print("len(output_images)=",len(output_images))
-    #print("len(output_names)=",len(output_names)) 
-    #global previous_lineage_image
-    #print("len(lineage_images_cv2) before cut lineage=",len(lineage_images_cv2))   
-    #previous_lineage_image=lineage_images_cv2[start_frame_internal-2]
-    #cv2.imwrite(r"C:\Users\helina\Desktop\prevous_pause.tif", previous_lineage_image)
-
+   
     del lineage_images_cv2[(internal_start_frame-1):] 
     del lineage_images_tk[(internal_start_frame-1):]
     del output_images[(internal_start_frame):]# was start_frame:
     del output_names[(internal_start_frame):]
     del changeable_params_history[(internal_start_frame-1):]
     update_changeable_params_history(changeable_params_history,outpath, "wb")
-    
-    #print("len(lineage_images_cv2) after cut=",len(lineage_images_cv2))
-    """          
-    global dict_of_divisions 
-    print("dict_of_divisios before cut_lineage=", dict_of_divisions)     
-    dict_of_divisions = {key:val for key, val in dict_of_divisions.items() if val <= start_frame}
-    print("dict_of_divisios after cut_lineage=", dict_of_divisions)
-    """
+        
     folders_to_truncate=[os.path.join("HELPERS_(NOT_FOR_USER)","MASKS"),"FLUORESCENT_MOVIE_RESULTS",os.path.join("HELPERS_(NOT_FOR_USER)","LINEAGE_IMAGES"),os.path.join("HELPERS_(NOT_FOR_USER)","CLEANED_PATCHES"), "BRIGHT_MOVIE_RESULTS"]
     for folder in folders_to_truncate:
         #print("folder=", folder)

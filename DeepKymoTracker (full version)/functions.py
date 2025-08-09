@@ -239,10 +239,10 @@ def segment_manual_patch(segmentor, refiner,empty_fluor,empty_bright,centroid,co
           base=np.stack((empty_fluor_border,empty_bright_border,seed_patch_border),axis=2)       
           patch = base[c:d, a:b,:]          
           shape=(patch.shape[0],patch.shape[1])
-          print("INSIDE SEGMENT MANUAL PATCH")
-          print("patch shape=", shape)
-          print("bordersize=", bordersize)
-          print("x0,yo=", x0,y0)
+          #print("INSIDE SEGMENT MANUAL PATCH")
+          #print("patch shape=", shape)
+          #print("bordersize=", bordersize)
+          #print("x0,yo=", x0,y0)
           patch_input=cv2.resize(patch, (96,96), interpolation = cv2.INTER_AREA)
           seed_patch=patch_input[:,:,2]
           seed_patch = seed_patch.astype('uint8')
@@ -261,7 +261,7 @@ def segment_manual_patch(segmentor, refiner,empty_fluor,empty_bright,centroid,co
           refiner_output=refiner_predict(segmentor_output,patch_fluor,patch_bright,refiner)# Refiner        
           refiner_output=refiner_output.astype(np.uint8)
           ensemble_output=segmentor_output+refiner_output    
-          test=ensemble_output.copy()          
+          test=ensemble_output.copy()# enlarging patch for cells that do not fit          
           test[1:-1,1:-1]=0 
           if (np.all(test)==0)==True:             
               break
@@ -285,37 +285,7 @@ def segment_manual_patch(segmentor, refiner,empty_fluor,empty_bright,centroid,co
          #cv2.imwrite(r"C:\Users\kfedorchuk\Desktop\cleaned_output.tif", cleaned_output)
          return cleaned_output,a,b,c,d, final_mask  
 ###########################################
-#frame_size=580
-#import numpy as np
-#import cv2
-#Bordersize=100
-#segmented_patch=cv2.imread(r"C:\Users\helina\Desktop\patch.tif",-1)
-def unstick_cell_from_border(segmented_patch,frame_size, a,b,c,d):
-    check_image_base=np.zeros((frame_size,frame_size),dtype="uint8")
-    print("check_image_base.shape=",check_image_base.shape)
-    check_image=cv2.copyMakeBorder(check_image_base, top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize, borderType= cv2.BORDER_CONSTANT, value=0 )
-    a,b,c,d=10,10+segmented_patch.shape[1],400,400+segmented_patch.shape[0]                          
-    #a,b,c,d=int(round(x0))+Bordersize-p_size,int(round(x0))+Bordersize+p_size,int(round(y0))+Bordersize-p_size,int(round(y0))+Bordersize+p_size           
-    check_image[c:d,a:b]=segmented_patch
-    check_image[check_image==255]=150
-    print("check_image.shape=",check_image.shape)
-    cv2.imwrite(r"C:\Users\helina\Desktop\check_image.tif", check_image)
-    mask_base=np.zeros((frame_size,frame_size),dtype="uint8")
-    print("mask_base.shape=",mask_base.shape)
-    mask_base_1=cv2.copyMakeBorder(mask_base, top=1, bottom=1, left=1, right=1, borderType= cv2.BORDER_CONSTANT, value=50)
-    print("mask_base_1.shape=",mask_base_1.shape)
-    mask=cv2.copyMakeBorder(mask_base_1, top=Bordersize-1, bottom=Bordersize-1, left=Bordersize-1, right=Bordersize-1, borderType= cv2.BORDER_CONSTANT, value=0)
-    cv2.imwrite(r"C:\Users\helina\Desktop\mask.tif", mask)
-    print("mask.shape=",mask.shape)
-    result = np.where(check_image == 150)
-    test_image=mask+check_image
-    cv2.imwrite(r"C:\Users\helina\Desktop\test_image.tif", test_image)
-    if (mask[result]==50).any():
-    #if (test_image==200).any()==True:
-      print("disaster")
-    else:
-      print("good")                
-########################################
+
 #######################################
 def segment_one_cell_at_a_time(segmentor, refiner,empty_fluor,empty_bright,centroid,cell_radius, frame_size, patch_size, marker,final_mask,cell_number,bordersize):        
       coord=centroid
@@ -388,11 +358,11 @@ def clean_manual_patch(output_raw,marker,a,b,c,d,frame_size, final_mask,cell_num
          big[c:d,a:b]=one
          test_image=big[bordersize:frame_size+bordersize,bordersize:frame_size+bordersize]
          #cv2.imwrite(r"C:\Users\kfedorchuk\Desktop\test_image.tif", test_image)
-         if test_image[y0,x0]==255:
+         if test_image[y0,x0]==255:# leave only the contour which intersects with marker
              cleaned_patch=one
              counter+=1
              break
-    if counter==0:
+    if counter==0:# did not manage to change the contour of cell by manual clicking
         #do not change, leave the initial contour
         cleaned_patch=cut_cell_from_mask(final_mask,cell_number,a,b,c,d, bordersize)
     # check that this contour does not intersect with neighbouring cells.
@@ -418,7 +388,7 @@ def clean_manual_patch(output_raw,marker,a,b,c,d,frame_size, final_mask,cell_num
           cleaned_patch=cut_cell_from_mask(final_mask,cell_number,a,b,c,d, bordersize)
           #print("there is a problem!!!!")
     return cleaned_patch, final_mask      
-############################# Clean refined segmentation if necessary
+############################# Cut 1 cell only with number
 def cut_cell_from_mask(final_mask,cell_number,a,b,c,d, bordersize):
       binary_mask=np.zeros((final_mask.shape),dtype="uint8")
       binary_mask[final_mask==(2**cell_number)]=255
@@ -495,8 +465,8 @@ def segment_patch(segmentor, refiner,empty_fluor,empty_bright,centroid,coord, ce
              area=cv2.contourArea(contours[0])
              #print("area=", area)
          #cv2.imwrite("C:\\Desktop\\before\\segmented_output_before.tif", ensemble_output) 
-         ##########
-         if not np.any(ensemble_output)==True:#if the output patch is black                     
+         ###########if the output patch is black draw small circle instead (otherwise algorithm will get stuck)
+         if not np.any(ensemble_output)==True:                     
              art_output=np.zeros((frame_size,frame_size),dtype="uint8")
              circle_base=cv2.copyMakeBorder(art_output, top=bordersize, bottom=bordersize, left=bordersize, right=bordersize, borderType= cv2.BORDER_CONSTANT, value=0. )                
              circle_centre=(int(round(x0))+bordersize,int(round(y0))+bordersize)
@@ -579,6 +549,9 @@ def segment_and_clean(dict_of_divisions,cells,count,coords,text,segmentor, refin
        a_old,b_old,c_old,d_old=item[1], item[2],item[3], item[4]
        number=item[5][0]#internal cell number
        big_patch=item[0]
+       ###########################
+       
+       ###############################################
        big_patch_border=cv2.copyMakeBorder(big_patch, top=bordersize, bottom=bordersize, left=bordersize, right=bordersize, borderType= cv2.BORDER_CONSTANT, value = 0)
        ensemble_output_old= big_patch_border[c_old:d_old,a_old:b_old]  
        #########################################
@@ -593,13 +566,21 @@ def segment_and_clean(dict_of_divisions,cells,count,coords,text,segmentor, refin
        segmented_frame, refined_output,a,b,c,d, mask=refine_segmentation(segmentor, refiner,empty_fluor,empty_bright,centroid,cell_radius, frame_size, patch_size, centroid,mask_old,number,bordersize)
        #cv2.imwrite("C:\\Users\\helina\\Desktop\\masks_refined\\frame_%s.tif" % (frame_number), mask*50)              
        if not np.any(refined_output)==True:
-         
+          
          ensemble_output=ensemble_output_old
          a,b,c,d= a_old,b_old,c_old,d_old
          mask=mask_old
        else:
          ensemble_output=refined_output
        ###############################################################
+
+       result,test_image=check_if_cell_stuck_to_edge(big_patch)
+       cv2.imwrite(r"C:\Users\helina\Desktop\test_images\test_image_before_%s_cell_%s.tif" % (frame_number,number), test_image)
+       if result==True:
+           step_size=determine_which_edge(big_patch,test_image)
+           ensenble_output,mask,a,b,c,d, test_image=unstick_cell_from_edge(segmentor, refiner,empty_fluor,empty_bright,step_size, cell_radius, frame_size, patch_size, centroid,mask,number, bordersize)
+           cv2.imwrite(r"C:\Users\helina\Desktop\test_images\test_image_after_%s_cell_%s.tif" % (frame_number,number), test_image)
+       ###########################################################
        #dilation=cv2.copyMakeBorder(dilation, top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize, borderType= cv2.BORDER_CONSTANT, value = 0 )                            
        #ensemble_output= dilation[c:d,a:b]    
        ensemble_output = ensemble_output.astype('uint8')
@@ -618,6 +599,93 @@ def segment_and_clean(dict_of_divisions,cells,count,coords,text,segmentor, refin
        
    return count,cells, coords, text, olds
 #######################################################
+def check_if_cell_stuck_to_edge(frame_with_one_cell):
+    print("  big_patch.shape=", frame_with_one_cell.shape)    
+    frame_with_one_cell[frame_with_one_cell==255]=100
+    check_frame_base=np.zeros((frame_with_one_cell.shape[0]-2,frame_with_one_cell.shape[1]-2),dtype="uint8")
+    check_frame=cv2.copyMakeBorder(check_frame_base, top=1, bottom=1, left=1, right=1, borderType= cv2.BORDER_CONSTANT, value=100 )    
+    test_image=frame_with_one_cell+check_frame
+    result=np.any(test_image==200)
+    return result, test_image
+####################################################        
+def determine_which_edge(frame_with_one_cell,test_image):    
+    edges=[]    
+    coordinates = np.where(test_image == 200)
+    rows, cols = coordinates[0],coordinates[1]
+    print("rows, cols=", rows, cols )
+    ##############################################
+    if 1 in rows:
+        edges.append(["top",[0,1]])
+    if  frame_with_one_cell.shape[0]-1 in rows:
+        edges.append(["bottom",[0,-1]])
+    if 1 in cols:
+        edges.append(["left",[1,0]])
+    if  frame_with_one_cell.shape[1]-1 in cols:
+        edges.append(["right",[-1,0]])
+    print("edges=", edges)
+    ##############################    
+    if len(edges)==1:
+           delta=edges[0][1]
+    elif len(edges)==2:
+           delta=[edges[0][1][0]+edges[1][1][0],edges[0][1][1]+edges[1][1][1]]
+    else:
+           print("Error:len(edges)>2")
+           delta=0
+    print("delta=", delta)
+    return delta
+##########################################
+def unstick_cell_from_edge(segmentor, refiner,empty_fluor,empty_bright,step_size, cell_radius_p5, frame_p5_size, patch_size_p5, centroid,final_mask,cell_number_in_frame, bordersize):
+  while True:
+    manually_clicked_centroid=[centroid[0]+step_size[0],centroid[1]+step_size[1]]
+    #manually_clicked_centroid=[int(round((event.x-image_origin_x)/resize_coeff)),int(round((event.y-image_origin_y)/resize_coeff))]
+    segmented_frame, segmented_patch,a,b,c,d, final_mask, new_centroid=segment_one_cell_at_a_time(segmentor, refiner,empty_fluor,empty_bright,manually_clicked_centroid, cell_radius_p5, frame_p5_size, patch_size_p5, centroid,final_mask,cell_number_in_frame, bordersize)
+    result, test_image=check_if_cell_stuck_to_edge(segmented_frame)
+    if result==False:      
+      mask_with_current_cell=paste_benchmark_patch(segmented_patch,a,b,c,d,cell_number_in_frame, frame_p5_size, bordersize)  
+      cell_number_in_mask=2**cell_number_in_frame
+      final_mask=remove_stuck_cell_from_mask(cell_number_in_frame, final_mask) 
+      final_mask+=mask_with_current_cell
+      break
+    else:
+      centroid=manually_clicked_centroid
+      continue
+  return segmented_patch,final_mask,a,b,c,d, test_image
+############################## clean mask_final from a certain cell
+def remove_stuck_cell_from_mask(bad_cell_number_in_frame, init_image):
+    print("INSIDE REMOVE_CELL_FROM_MASK:")
+    
+    cv2.imwrite(r"C:\Users\helina\Desktop\init_image_before.tif",init_image*20)
+    
+    if init_image.dtype!="uint64":
+        init_image=init_image.astype("uint64")
+    bad_cell_number_in_mask=2**bad_cell_number_in_frame
+    init_image[init_image== bad_cell_number_in_mask]=0   
+    return init_image
+#######################
+##################################################
+def remove_cell_from_mask(bad_cell_number_in_frame, init_image, intensity_dictionary_for_frame):
+    print("INSIDE REMOVE_CELL_FROM_MASK:")
+    keys=list(intensity_dictionary_for_frame.keys())
+    cv2.imwrite(r"C:\Users\helina\Desktop\init_image_before.tif",init_image*20)
+    print("keys=", keys)
+    if init_image.dtype!="uint64":
+        init_image=init_image.astype("uint64")
+    bad_cell_number_in_mask=2**bad_cell_number_in_frame
+    cell_mask_to_delete=np.zeros(init_image.shape,init_image.dtype)
+    print("cell_mask_to_delete.dtype=",cell_mask_to_delete.dtype)
+    print(" bad_cell_number_in_mask=",  bad_cell_number_in_mask)
+    print(" np.max(init_image)=", np.max(init_image))
+    for key in keys:
+        item=intensity_dictionary_for_frame[key]# list of cell numbers for key
+        print("item=", item)
+        if bad_cell_number_in_frame in item:                                   
+              cell_mask_to_delete[init_image==int(key)]=bad_cell_number_in_mask
+    cell_mask_to_delete[cell_mask_to_delete!=0]=bad_cell_number_in_mask
+    cv2.imwrite(r"C:\Users\helina\Desktop\cell_mask_to_delete.tif",cell_mask_to_delete*20)
+    init_image = np.subtract(init_image,cell_mask_to_delete)
+    cv2.imwrite(r"C:\Users\helina\Desktop\init_image_after.tif",init_image*20)
+    return init_image
+########################################
 def dilate_cell(ensemble_output,a,b,c,d,mask, cell_number,frame_size):
    #print("cell_number=", cell_number)
    kernel= np.ones((3,3),np.uint8)
@@ -832,30 +900,6 @@ def create_intensity_dictionary(n_cells):
             summ+=2**combo[kk]
          int_dictionary[str(summ)]=list(combo) # summ=1,2,3,4,5,...
      return int_dictionary  
-############################## clean mask_final from a certain cell
-def remove_cell_from_mask(bad_cell_number_in_frame, init_image, intensity_dictionary_for_frame):
-    print("INSIDE REMOVE_CELL_FROM_MASK:")
-    keys=list(intensity_dictionary_for_frame.keys())
-    cv2.imwrite(r"C:\Users\helina\Desktop\init_image_before.tif",init_image*20)
-    print("keys=", keys)
-    if init_image.dtype!="uint64":
-        init_image=init_image.astype("uint64")
-    bad_cell_number_in_mask=2**bad_cell_number_in_frame
-    cell_mask_to_delete=np.zeros(init_image.shape,init_image.dtype)
-    print("cell_mask_to_delete.dtype=",cell_mask_to_delete.dtype)
-    print(" bad_cell_number_in_mask=",  bad_cell_number_in_mask)
-    print(" np.max(init_image)=", np.max(init_image))
-    for key in keys:
-        item=intensity_dictionary_for_frame[key]# list of cell numbers for key
-        print("item=", item)
-        if bad_cell_number_in_frame in item:                                   
-              cell_mask_to_delete[init_image==int(key)]=bad_cell_number_in_mask
-    cell_mask_to_delete[cell_mask_to_delete!=0]=bad_cell_number_in_mask
-    cv2.imwrite(r"C:\Users\helina\Desktop\cell_mask_to_delete.tif",cell_mask_to_delete*20)
-    init_image = np.subtract(init_image,cell_mask_to_delete)
-    cv2.imwrite(r"C:\Users\helina\Desktop\init_image_after.tif",init_image*20)
-    return init_image
-########################################
 
 ###############################################
 # real_cells is all contours detected in a frame (0, 255)
@@ -1043,48 +1087,7 @@ def find_closest_contour(contour_centroids,coord):
   number=numbers[index]  
   return number
 #########################################################
-def clean_patch_old(output,flag): 
-  if output.dtype!='uint8':
-         output = output.astype('uint8')     
-  im2, contours, hierarchy = cv2.findContours(output,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
-                     
-  if len(contours)==1:
-      if flag=="second cleaning":
-           cleaned_patches=[output]
-           return cleaned_patches
-      else:
-          cleaned_patch=output
-          return cleaned_patch
-  else:    
-     areas=[]   
-     contours_separated=[]    
-     for cnt in contours:
-         one=np.zeros((output.shape),dtype="uint8")
-         one=cv2.drawContours(one,[cnt],0,255, -1)              
-         area=cv2.contourArea(cnt)             
-         areas.append(area)      
-         contours_separated.append(cnt)        
-     w=list(zip(areas,contours_separated))
-     ww=sorted(w,key=lambda student:student[0], reverse=True)
-     ress = list(zip(*ww))
-     areas =list(ress[0])     
-     contours_separated=list(ress[1])    
-     if flag=="second cleaning":
-       cleaned_patches=[]# first patch has 1 biggest cell, 2nd - 2 biggest cells
-       for ii in range(2):
-          cleaned_patch=np.zeros((output.shape),dtype="uint8")
-          for iii in range(ii, ii+1):# leaves 2 biggest cells in a patch
-            cv2.drawContours(cleaned_patch, [contours_separated[iii]] , 0, 255, -1)
-            cleaned_patches.append(cleaned_patch)
-       return cleaned_patches# output is a list of 2 pathces with 2 separate biggest contours in each
-     else:
-        cleaned_patch=np.zeros((output.shape),dtype="uint8")
-        n_contours=2
-        #if areas[1]<100:
-            #n_contours=1
-        for iii in range(n_contours):# leaves 2 biggest cells in a patch for Mohammed movies
-          cv2.drawContours(cleaned_patch, [contours_separated[iii]] , 0, 255, -1)        
-        return cleaned_patch# output is one patch with 2 boggest contours in it  
+
 ################################
 def find_all_distances_to_center(im):# finds all centroids of contours present in image im   
     distances=[]
@@ -1118,18 +1121,7 @@ def clean_patch(output_raw,flag, x_coord_patch, y_coord_patch):
          
          
   im2_uneroded, contours, hierarchy_uneroded = cv2.findContours(output_raw,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
-  #print("len(contours) in the patch =", len(contours))
-  """      
-  kernel= np.ones((3,3),np.uint8)
-  output = cv2.erode(output_raw,kernel,iterations = 2)
-  #output = cv2.morphologyEx(output_raw,cv2.MORPH_OPEN,kernel, iterations = 1)
-    
-  im2, contours, hierarchy = cv2.findContours(output,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
-  if len(contours)!=len(contours_uneroded):
-      output=output_raw
-      contours=contours_uneroded
-  print("len(contours) in the eroded patch=", len(contours)) 
-  """
+ 
   output=output_raw                
   if len(contours)==1:
       if flag=="second cleaning":
@@ -1181,48 +1173,3 @@ def clean_patch(output_raw,flag, x_coord_patch, y_coord_patch):
         
         return cleaned_patch# output is one patch with 2 boggest contours in it
 #####################################################################
-"""
-def extract_lineage(outpath):
-    lineage_path=os.path.join(outpath,"lineage_per_frame.pkl")
-    lineage_per_frame = []
-    with (open(lineage_path, "rb")) as openfile:
-     while True:
-        try:
-            lineage_per_frame.append(pickle.load(openfile))
-        except EOFError:
-            break    
-    return lineage_per_frame
-
-##############################
-def create_previous_frame(cells, frame_size):
-    previous_frame= np.zeros((frame_size,frame_size),dtype="float64")      
-    for i in range(len(cells)):
-      base = np.zeros((frame_size+Bordersize*2,frame_size+Bordersize*2),dtype="float64")  
-      patch=cells["cell_%s" % i][3]
-      patch = patch.astype('float64')  
-      a,b,c,d=cells["cell_%s" % i][7],cells["cell_%s" % i][8],cells["cell_%s" % i][9],cells["cell_%s" % i][10]
-      base[c:d,a:b]=patch
-      base=base[Bordersize:Bordersize+frame_size,Bordersize:Bordersize+frame_size]
-      base[base==255]=i+1               
-      previous_frame+=base
-    return previous_frame
-#############################################################
-
-def update_lineage(llist,outpath, mode):# was cells
-    lineage_path=os.path.join(outpath,"lineage_per_frame.pkl")  
-    with open(lineage_path, mode) as f:
-        for i in range(len(llist)):
-           pickle.dump(llist[i], f,protocol=pickle.HIGHEST_PROTOCOL)
-####################################
-def extract_movie_parameters(outpath):
-    parameters_path=os.path.join(outpath,"movie_parameters.pkl")
-    list_of_movie_params = []
-    with (open(parameters_path, "rb")) as openfile:
-     while True:
-        try:
-            list_of_movie_params.append(pickle.load(openfile))
-        except EOFError:
-            break    
-    return list_of_movie_params
-##########################
-"""

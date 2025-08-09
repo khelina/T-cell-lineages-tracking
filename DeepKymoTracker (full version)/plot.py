@@ -90,9 +90,6 @@ def create_first_color_dictionary(init_number_of_cells, num_frames):
    
   return colour_dictionary, new_naive_names, base_colours, colour_counter, basic_naive_names, xs, init_delta,naive_names_counter
 #######################################
-
-###########################################
-
 def create_first_dictionary_of_xs(initial_naive_names,num_frames):
     print("INSIDE creat_first_xs")
     m=len(initial_naive_names)
@@ -123,16 +120,6 @@ def create_additional_dictionary_of_xs(new_names,init_delta):
   print(" width_additional=", width_additional)        
   return xs_additional, width_additional
 #################################################### 
-
-
-####### xs contains x-coordinates for each cell (for plotting dynamic lineage)
-# It is created based on cell names in Frame 1 (see function def_Close_popup)
-# template = new_cell_names (naive) in Frame 1
- 
-##########################################################
-#import os
-#infile=r"C:\Users\helina\Desktop\tracking new_alessandra\INPUT_MOVIE s30\5_w1BF_s30_t10_ch02.tif"
-#destin=r"C:\Users\helina\Desktop\tracking new_alessandra\OUTPUT_INPUT_MOVIE s30\MASKS"
 def rename_file(destin,infile):# for bright or fluor images       
  infile = os.path.normpath(infile) 
  old =infile.split(os.sep)
@@ -210,14 +197,14 @@ def paste_patch(destin_image,patch,a,b,c,d,color,alpha, frame_size, bordersize):
 def paste_benchmark_patch(patch,a,b,c,d,cell_number, frame_size, bordersize):    
     image_with_one_cell_border=np.zeros((frame_size+2*bordersize,frame_size+2*bordersize),dtype="uint64")     
     patch=patch.astype(np.uint64)
-    print("np.max(patch) before=",np.max(patch))          
+    #print("np.max(patch) before=",np.max(patch))          
     mask=deepcopy(patch)
     patch[mask==255]=2**cell_number     
     #patch[mask==255]=cell_number+1 
-    print("np.max(patch) after=",np.max(patch))            
+    #print("np.max(patch) after=",np.max(patch))            
     image_with_one_cell_border[c:d, a:b] = patch
-    print("np.max(image_with_one_cell_border)=", np.max(image_with_one_cell_border))
-    print("image_with_one_cell_border.dtype=", image_with_one_cell_border.dtype)
+    #print("np.max(image_with_one_cell_border)=", np.max(image_with_one_cell_border))
+    #print("image_with_one_cell_border.dtype=", image_with_one_cell_border.dtype)
     final_image=image_with_one_cell_border[bordersize:frame_size+bordersize,bordersize:frame_size+bordersize]     
     return final_image
 #######################################################
@@ -257,7 +244,7 @@ def plot_frame(cells,clip_centr,k,kk,fluor_images,fluor_names,out_folders,coords
          cv2.imwrite(os.path.join(out_folders[4],"CLEANED_PATCHES",patch_name), cells["cell_%s" % kkk][3])               
          #cv2.imwrite(os.path.join(out_folders[8],"segmented_patch_%s_cell_%s.tif") % (k+kk,kkk), cells["cell_%s" % kkk][3])         
          output_patch=cells["cell_%s" % kkk][3]
-         print("np.max(output_patch)=", np.max(output_patch))
+         #print("np.max(output_patch)=", np.max(output_patch))
          patch_with_contours=prepare_contours(output_patch)
          a,b,c,d=cells["cell_%s" % kkk][7],cells["cell_%s" % kkk][8],cells["cell_%s" % kkk][9],cells["cell_%s" % kkk][10]        
          
@@ -277,8 +264,8 @@ def plot_frame(cells,clip_centr,k,kk,fluor_images,fluor_names,out_folders,coords
          #destin_fluor = cv2.rectangle(destin_fluor, start_point, end_point, collour[:-1], 1)
          #destin_fluor = cv2.rectangle(destin_fluor, (b,d), (a,c), collour[:-1], 1)
          one_cell_mask =paste_benchmark_patch(output_patch,a,b,c,d,kkk, frame_size,bordersize)
-         print("np.max(one_cell_mask)=", np.max(one_cell_mask))
-         print("one_cell_mask.dtype=", one_cell_mask.dtype)
+         #print("np.max(one_cell_mask)=", np.max(one_cell_mask))
+         #print("one_cell_mask.dtype=", one_cell_mask.dtype)
          destin_mask+= one_cell_mask
          #xx,yy=cells["cell_%s" % kkk][6][0],cells["cell_%s" % kkk][6][1]
          #texxt=cells["cell_%s" % kkk][11]
@@ -305,11 +292,11 @@ def plot_frame(cells,clip_centr,k,kk,fluor_images,fluor_names,out_folders,coords
        #benchmark_seg ="mask"+str(k+1+kk+first_frame_number).zfill(n_digits)+".tif"
        
        mask_name=create_name_for_mask(bright_name)
-       print("destin_mask.dtype=", destin_mask.dtype)
-       print("np.max(destin_mask)=", np.max(destin_mask))
+       #print("destin_mask.dtype=", destin_mask.dtype)
+       #print("np.max(destin_mask)=", np.max(destin_mask))
        destin_mask_for_plot=np.round(destin_mask)
        destin_mask_for_plot=destin_mask_for_plot.astype(np.uint64)
-       print("np.max(destin_mask_for_plot)=", np.max(destin_mask_for_plot))
+       #print("np.max(destin_mask_for_plot)=", np.max(destin_mask_for_plot))
        #behchmark_seg ="mask"+str(k+kk+1).zfill(n_digits)+".tif"       
        cv2.imwrite(os.path.join(out_folders[4],"MASKS",mask_name),destin_mask_for_plot)
        return  coords, destin_fluor     

@@ -141,6 +141,7 @@ def update_dictionary_after_division(cut_patch,cells,text,count,indicator,coords
     N_cells=len(cells)
     print("colors=", colors)
     print("count=", count)
+    print("text=", text)
     print("BEFORE UPDATING CELLS")
     #debug(cells)
     for kkk in range(N_cells):#correcting cells dictionary if division

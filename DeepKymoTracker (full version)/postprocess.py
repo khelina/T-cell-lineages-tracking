@@ -19,55 +19,7 @@ from print_excel import extract_lineage
 ## It is executed  only after the movie has been tracked (button Create Output Movie)
 ## Lineage_per_cell will be used in the next steps
 ## Also, it is a better way of representing results
-"""
-def create_pedigree(lineage_per_frame,outpath,frame_size):
-  print("INSIDE create_pedigree")
-  print("Bordersize=",Bordersize)
-  a=[(lineage_per_frame[i].keys(),i) for i in range(len(lineage_per_frame))] 
-  names=[]
-  for k in range(len(lineage_per_frame)):
-    item =lineage_per_frame[k]
-    keys =list(item.keys())
-    names+=[item[key][11] for key in keys]
-  cell_names =list(set(names))
- 
-  pedigree ={}
-  #centroids_per_cell_dict={}
-  for name in cell_names:
-    pedigree["cell-%s" % name]=[]
-    #centroids_per_cell_dict["cell-%s" % name]=[]
-  for i in range(len(lineage_per_frame)):   
-     item =lineage_per_frame[i]
-     keys =list(item.keys())
-     for key in keys:
-        cell_name=item[key][11]
-        frame=item[key][12]
-        cX,cY=item[key][6][0],item[key][6][1]
-        a,b,c,d=item[key][7],item[key][8],item[key][9],item[key][10]
-        
-        im2, contours, hierarchy = cv2.findContours(patch_after,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)                         
-        area=np.round(cv2.contourArea(contours[0]),2)
-        perimeter=np.round(cv2.arcLength(contours[0],True),2)
-        circularity=np.round(4*math.pi*area/perimeter**2,2)
-        
-        patch_before=item[key][3]     
-        base=np.zeros((frame_size+2*Bordersize,frame_size+2*Bordersize),dtype="uint8")
-        base[c:d,a:b]=patch_before
-        patch_after=base[int(cY)-48+Bordersize:int(cY)+48+Bordersize,int(cX)-48+Bordersize:int(cX)+48+Bordersize]
-        patch_color=np.zeros((patch_after.shape[0], patch_after.shape[1],3), np.uint8)           
-        coll=item[key][15][:-1]
-        patch_color[patch_after==255]=coll
-        
-        add=[cell_name,frame,patch_color,[cX,cY],area,perimeter,circularity, coll]
-        add_fed=[frame,[cX,cY]] 
-        pedigree["cell-%s" % item[key][11]].append(add)
-        #centroids_per_cell_dict["cell-%s" % item[key][11]].append(add_fed)
-      
-  pedigree_path=os.path.join(outpath,"lineage_per_cell.pkl")
-  with open(pedigree_path, 'wb') as f:
-         pickle.dump(pedigree, f)  
-  return pedigree
-"""
+
 ####################################################################
 #
 #######################################

@@ -57,21 +57,22 @@ def turn_image_into_tkinter(image, window_size, lin_image_widths): # if image is
      image_resized=np.zeros(image_copy.shape, np.uint8)
      basic_part=image_copy[:,:num_frames]
      print("basic_part.shape=",basic_part.shape)
-     start=num_frames
      image_resized=cv2.resize(basic_part, (window_size,window_size), interpolation = cv2.INTER_AREA)
-     for i in range(1,len(lin_image_widths)):
-         print("i=", i)
-         print("start=", start)
-         additional_width=lin_image_widths[i]
-         print("additional_width=",additional_width)
+     start=num_frames
+     if start<image_copy.shape[1]:
+       for i in range(1,len(lin_image_widths)):
+           print("i=", i)
+           print("start=", start)
+           additional_width=lin_image_widths[i]
+           print("additional_width=",additional_width)
        
-         added_part=image_copy[:, start:start+additional_width]
-         print("added_part.shape=",added_part.shape)
-         added_resized=cv2.resize(added_part, (90,window_size), interpolation = cv2.INTER_AREA)    
-         image_resized= np.concatenate((image_resized,added_resized), axis=1)
-         start+=additional_width
-         if start>=image_copy.shape[1]:
-             break
+           added_part=image_copy[:, start:start+additional_width]
+           print("added_part.shape=",added_part.shape)
+           added_resized=cv2.resize(added_part, (90,window_size), interpolation = cv2.INTER_AREA)    
+           image_resized= np.concatenate((image_resized,added_resized), axis=1)
+           start+=additional_width
+           if start>=image_copy.shape[1]:
+               break
          
   else:
   
@@ -124,13 +125,15 @@ def extract_output_images(output_fluor_path,lineage_path, window_size, output_im
         photo_lineage=turn_image_into_tkinter(lineage_cv2, window_size, lin_image_widths)     
         lineage_images_tk.append(photo_lineage)
     return output_images,lineage_images_tk, output_names, lineage_images_cv2
-##################################################    
+##################################################
+ 
 def flash(colors_combinations, buttons,flashers_names, win, flashers):  
   for k in range(len(colors_combinations)):        
           for kk in range(len(buttons)):                        
              flashers[flashers_names[kk]]  = win.after(300*k, lambda k=k, kk=kk:buttons[kk].configure(background = colors_combinations[k][kk])) 
   flashers[flashers_names[kk+1]] = win.after(300*(k+1), lambda:flash(colors_combinations, buttons,flashers_names, win, flashers))
-  return flashers      
+  return flashers
+      
 ###############################
 def show_3_channels(canvas_left,canvas_mid,canvas_right,left_names,mid_names,right_names,window_size,image_number):
     canvas_left.delete('all')
