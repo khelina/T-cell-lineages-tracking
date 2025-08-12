@@ -320,6 +320,7 @@ def refine_segmentation(segmentor, refiner,empty_fluor,empty_bright,centroid,cel
       return segmented_frame, segmented_patch,a,b,c,d, final_mask
           
 #############
+"""
 def check_marker(segmented_patch,marker, frame_size, a,b,c,d):
     x0,y0=int(round(marker[0])), int(round(marker[1]))
     if segmented_patch.dtype!='uint8':
@@ -341,6 +342,7 @@ def check_marker(segmented_patch,marker, frame_size, a,b,c,d):
         cv2.circle(image_with_circle_border, (x0+bordersize,y0+bordersize), 3, cell_number+1, -1)
         cleaned_patch= image_with_circle_border[c:d,a:b]
     return cleaned_patch
+"""
 #####################This function is used in manual segmentation correction and in def refine_segmentation
 def clean_manual_patch(output_raw,marker,a,b,c,d,frame_size, final_mask,cell_number,bordersize):# leave only the contour which contains marker when correcting 
 # segmentation manually; otherwise, output empty patch
@@ -451,7 +453,7 @@ def segment_patch(segmentor, refiner,empty_fluor,empty_bright,centroid,coord, ce
              c1=c-1
              d1=d+1
              patch = base[c1:d1, a1:b1,:]                     
-             if (d1<frame_size+2*border_size and b1<frame_size+2*border_size and a1>0 and c1>0 ):
+             if (d1<frame_size+2*bordersize and b1<frame_size+2*bordersize and a1>0 and c1>0 ):
                a,b,c,d=a1,b1,c1,d1              
                continue           
              else:
@@ -461,8 +463,8 @@ def segment_patch(segmentor, refiner,empty_fluor,empty_bright,centroid,coord, ce
          ensemble_output[ensemble_output!=0]=255
          ##########
          im2, contours, hierarchy = cv2.findContours(ensemble_output,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
-         if len(contours)!=0:
-             area=cv2.contourArea(contours[0])
+         #if len(contours)!=0:
+             #area=cv2.contourArea(contours[0])
              #print("area=", area)
          #cv2.imwrite("C:\\Desktop\\before\\segmented_output_before.tif", ensemble_output) 
          ###########if the output patch is black draw small circle instead (otherwise algorithm will get stuck)
@@ -485,7 +487,7 @@ def segment_patch(segmentor, refiner,empty_fluor,empty_bright,centroid,coord, ce
          return cleaned_output,a,b,c,d  
 ################ Segment all cells in current frame  
 def segment_and_clean(dict_of_divisions,cells,count,coords,text,segmentor, refiner,empty_fluor,empty_bright,centroids,frame_number, edit_id_indicator,mother_number, out_folders, cell_radius, frame_size, colours, patch_size, flag, bordersize):
-   kernel= np.ones((3,3),np.uint8)
+   #kernel= np.ones((3,3),np.uint8)
    #bordersize=int(round(patch_size/2)) 
    segmented_outputs=[]# list of all segmented patches (with 1 or2 contours) in frame     
    for p in range(len(centroids)):# Step-1: segment based on tracking results
@@ -573,13 +575,15 @@ def segment_and_clean(dict_of_divisions,cells,count,coords,text,segmentor, refin
        else:
          ensemble_output=refined_output
        ###############################################################
-
+       ###### fix cells stuck to edges
+       
        result,test_image=check_if_cell_stuck_to_edge(big_patch)
-       cv2.imwrite(r"C:\Users\helina\Desktop\test_images\test_image_before_%s_cell_%s.tif" % (frame_number,number), test_image)
+       #cv2.imwrite(r"C:\Users\helina\Desktop\test_images\test_image_before_%s_cell_%s.tif" % (frame_number,number), test_image)
        if result==True:
            step_size=determine_which_edge(big_patch,test_image)
            ensenble_output,mask,a,b,c,d, test_image=unstick_cell_from_edge(segmentor, refiner,empty_fluor,empty_bright,step_size, cell_radius, frame_size, patch_size, centroid,mask,number, bordersize)
-           cv2.imwrite(r"C:\Users\helina\Desktop\test_images\test_image_after_%s_cell_%s.tif" % (frame_number,number), test_image)
+           #cv2.imwrite(r"C:\Users\helina\Desktop\test_images\test_image_after_%s_cell_%s.tif" % (frame_number,number), test_image)
+       
        ###########################################################
        #dilation=cv2.copyMakeBorder(dilation, top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize, borderType= cv2.BORDER_CONSTANT, value = 0 )                            
        #ensemble_output= dilation[c:d,a:b]    
@@ -1089,6 +1093,7 @@ def find_closest_contour(contour_centroids,coord):
 #########################################################
 
 ################################
+"""
 def find_all_distances_to_center(im):# finds all centroids of contours present in image im   
     distances=[]
     if im.dtype!='uint8':
@@ -1101,7 +1106,8 @@ def find_all_distances_to_center(im):# finds all centroids of contours present i
       cX = int(M["m10"] / M["m00"])
       cY = int(M["m01"] / M["m00"])
       centroids_list.append([cX,cY])
-    return distances 
+    return distances
+""" 
 ###############################
 def find_distance_to_centre(cnt, centre):
     #centre=(int(round(im.shape[1]/2)),int(round(im.shape[0]/2)))

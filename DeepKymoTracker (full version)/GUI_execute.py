@@ -61,6 +61,12 @@ def go_to_page(num):# num (1,2,3,4,5)= the page you want to go to
         else:    
            new_page=pages[num-1]
            new_page.deiconify()
+        if ii==1:
+           activate_buttons(all_buttons_page2,[button_choose_folder]) 
+        if ii==3:
+            activate_buttons(all_buttons_page4,[button_load])
+        if ii==4:
+            activate_buttons(all_buttons_page5,[button_load_p5])
           
     #print("page_number exiting go_to_page=", num) 
 ################################################      
@@ -216,6 +222,7 @@ def explore_folder():# check which movies are inside the folder and create menu 
    movies_menu["menu"].config(bg=label_color,activebackground="red") 
    update_flash([movies_menu])  
    button_choose_folder.config(bg=button_color)
+   activate_buttons(all_buttons_page2,[movies_menu]) 
 #######################################
 def display_frame_count(text_new,ii, count):# print frame count while loading
      shift=0
@@ -374,7 +381,8 @@ def slide_p2(value):# display image even when it is missing (in this case it is 
 l_page_name=tk.Label(frame1_page2,text= "STEP 1: EXTRACT MOVIE FROM FOLDER", bg="yellow", fg="red", font=("Times", "24")).pack()
 button_choose_folder=tk.Button(frame3_page2,text="1. Choose folder with movies",bg='#9ACD32',activebackground="red",font='TkDefaultFont 10 bold' , command=lambda: explore_folder())
 button_choose_folder.grid(row=0,column=0, padx=100,pady=20)
-button_save_movie=tk.Button(frame11_page2,text="3. Save processed movie",bg='#9ACD32',activebackground="red",font=all_font , command=lambda: [save_images_page2(movie_name,feedback_var_p2,bright_names,fluor_names,red_names, bright_images, fluor_images, red_images, instruct_var_p2), update_flash([])]).pack()
+button_save_movie=tk.Button(frame11_page2,text="3. Save processed movie",bg='#9ACD32',activebackground="red",font=all_font , command=lambda: [save_images_page2(movie_name,feedback_var_p2,bright_names,fluor_names,red_names, bright_images, fluor_images, red_images, instruct_var_p2), update_flash([])])
+button_save_movie.pack()
 l_instr_name_p2=tk.Label(frame7_page2,text="INSTRUCTIONS FOR USER :" ,bg="black", font=all_font, fg="red").pack() 
 l_feedback_p2=tk.Label(frame2_page2,textvariable=feedback_var_p2,bg="black", fg=result_color, font=all_font, height=8)
 l_feedback_p2.pack(fill=BOTH) 
@@ -385,8 +393,16 @@ l_bright_announce_p2=tk.Label(frame4_page2,text="Brightfield" ,bg=label_color, f
 l_red_announce_p2=tk.Label(frame9_page2,text="Red" ,bg=label_color, font=all_font).pack() 
 l_fluor_name_p2=tk.Label(frame5_page2,textvariable=fl_name_p2,bg="black", fg=result_color, font=all_font, height=2).pack() 
 l_bright_name_p2=tk.Label(frame4_page2,textvariable=br_name_p2 ,bg="black", fg=result_color, font=all_font, height=2).pack() 
-l_red_name_p2=tk.Label(frame9_page2,textvariable=red_name_p2,bg="black", fg=result_color, font=all_font, height=2).pack() 
-
+l_red_name_p2=tk.Label(frame9_page2,textvariable=red_name_p2,bg="black", fg=result_color, font=all_font, height=2).pack()
+###################### 
+#global movies_menu
+#movie_names=[]
+#print("menu_variable=", menu_variable.get())
+#movies_menu = OptionMenu(frame3_page2,menu_variable, *movie_names, command=create_movie_for_display)
+#movies_menu.grid(row=0, column=2, padx=100,pady=20)
+#movies_menu.grid_forget()
+global all_buttons_page2
+all_buttons_page2=[button_choose_folder,button_save_movie]
 ###########################################################################
 ############################   PAGE 3 : CUT WELL  ##############################
 ###############################################################################
@@ -1141,10 +1157,13 @@ manual_IDs,  manual_centroids, mother_name, daughter_indicators=[], [], None, []
 #################
 def activate_buttons(all_buttons_list,active_buttons_list):
     for button in all_buttons_list:
+        #print("button=", button)
         if button in active_buttons_list:
             button.config(state=NORMAL)
+            print("button ACTIVE=", button)
         else:
             button.config(state=DISABLED)
+            print("button DISABLED=", button)
 #######################
 def load_helper_functions():
     os.chdir(software_folder)
@@ -1172,13 +1191,18 @@ def load_helper_functions():
     from keras.optimizers import Adam
 ###########################################    
 global models, models_directory,tracker,segmentor,refiner
-
+from helpers_for_PAGE_4 import load_models_p5
 
 models_directory = os.path.join(software_folder, "TRAINED MODELS")
 models,tracker,segmentor,refiner=[], None, None, None
 
 load_helper_functions()
 models,models_directory=create_models(software_folder)
+
+if segmentor==None and refiner==None:      
+        software_folder = os.getcwd() 
+        segmentor, refiner= load_models_p5(software_folder)
+        #dialog_label_5.config(text="Loaded models")
 #######################
 
 
@@ -1932,7 +1956,7 @@ def record_const_movie_parameters():# record cell_size and other parameters in p
 import time
 ########################################################
 def execute():
-
+ activate_buttons(all_buttons_page4,[button_execute])
  button_execute.configure(background = 'red') 
  instruct_var_p4.set("Execution in progress...")
  global start_frame
@@ -2144,7 +2168,7 @@ def stop_execution_manually():
     global variable_stop
     variable_stop = "Stop"
     button_pause.configure(background = "red")
-    activate_buttons(all_buttons_page4,[button_display])
+    #activate_buttons(all_buttons_page4,[button_display])
     #print("START_FRAME after pushing pause=", start_frame)
     print("dict_of_divisions after execution inside stop_exec_manually=", dict_of_divisions)
 #################################################################    
@@ -2647,20 +2671,20 @@ global window_p5_size
 window_p5_size =600
 
 
-frame1_page5 = tk.Frame(master=page5, width=1528, height=5, bg="yellow")
+frame1_page5 = tk.Frame(master=page5, width=1528, height=5, bg=bg_color)
 frame1_page5.grid(row=0, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
 
-frame2_page5 = tk.Frame(master=page5, width=1528, height=50, bg="blue")
+frame2_page5 = tk.Frame(master=page5, width=1528, height=50, bg=bg_color)
 frame2_page5.grid(row=1, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
 
-frame3_page5 = tk.Frame(master=page5, width=1528, height=30, bg="green")
+frame3_page5 = tk.Frame(master=page5, width=1528, height=30, bg=bg_color)
 frame3_page5.grid(row=2, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
 ################################################
-frame3a_page5 = tk.Frame(master=page5, width=window_p5_size, height=30, bg="white")
+frame3a_page5 = tk.Frame(master=page5, width=window_p5_size, height=30, bg=bg_color)
 frame3a_page5.grid(row=3, column=0, rowspan=1, columnspan=1, sticky=W+E+N+S)
-frame3b_page5 = tk.Frame(master=page5, width=window_p5_size, height=30, bg="red")
+frame3b_page5 = tk.Frame(master=page5, width=window_p5_size, height=30, bg=bg_color)
 frame3b_page5.grid(row=3, column=1, rowspan=1, columnspan=1, sticky=W+E+N+S)
-frame3c_page5 = tk.Frame(master=page5, width=window_p5_size, height=30, bg="cyan")
+frame3c_page5 = tk.Frame(master=page5, width=window_p5_size, height=30, bg=bg_color)
 frame3c_page5.grid(row=3, column=2, rowspan=1, columnspan=1, sticky=W+E+N+S)
 
 
@@ -2669,39 +2693,39 @@ frame3c_page5.grid(row=3, column=2, rowspan=1, columnspan=1, sticky=W+E+N+S)
 #frame4_page5 = tk.Frame(master=page5, width=1528, height=50, bg="grey")
 #frame4_page5.grid(row=4, column=0, rowspan=1, columnspan=3,sticky=W+E+N+S)
 ############################################################################
-frame5_page5 = tk.Frame(master=page5, width=window_p5_size, height=window_p5_size, bg="white")
+frame5_page5 = tk.Frame(master=page5, width=window_p5_size, height=window_p5_size, bg=bg_color)
 frame5_page5.grid(row=4, column=0,rowspan=1,columnspan=1, sticky=W)
 
-frame6_page5 = tk.Frame(master=page5, width=window_p5_size, height=window_p5_size , bg="orange")
+frame6_page5 = tk.Frame(master=page5, width=window_p5_size, height=window_p5_size , bg=bg_color)
 frame6_page5.grid(row=4, column=1,rowspan=1,columnspan=1, sticky=W)
 
-frame7_page5 = tk.Frame(master=page5, width=100 , height=window_p5_size , bg="cyan")
+frame7_page5 = tk.Frame(master=page5, width=100 , height=window_p5_size , bg=bg_color)
 frame7_page5.grid(row=4,column=2,rowspan=1,columnspan=1, sticky=W)
 #################################################################
-frame7c_page5 = tk.Frame(master=page5, width=50, height=50, bg="blue")
+frame7c_page5 = tk.Frame(master=page5, width=50, height=50, bg=bg_color)
 frame7c_page5.grid(row=5, column=0, rowspan=1, columnspan=3,sticky=W+E+N+S)
 
-frame7b_page5 = tk.Frame(master=page5, width=50, height=50, bg="green")
+frame7b_page5 = tk.Frame(master=page5, width=50, height=50, bg=bg_color)
 frame7b_page5.grid(row=6, column=0, rowspan=1, columnspan=3,sticky=W+E+N+S)
 
-frame7a_page5 = tk.Frame(master=page5, width=50, height=50, bg="yellow")
+frame7a_page5 = tk.Frame(master=page5, width=50, height=50, bg=bg_color)
 frame7a_page5.grid(row=7, column=0, rowspan=1, columnspan=3,sticky=W+E+N+S)
 
 ###################################################
 
-frame8_page5 = tk.Frame(master=page5, width=50, height=50, bg="magenta")
+frame8_page5 = tk.Frame(master=page5, width=50, height=50, bg=bg_color)
 frame8_page5.grid(row=8, column=0, rowspan=1, columnspan=3,sticky=W+E+N+S)
 
 ######### POPULATE WITH WIDGETS
 
 global canvas_fluor_p5
-canvas_fluor_p5 = Canvas(frame6_page5, bg="black", height=window_p5_size, width=window_p5_size)
+canvas_fluor_p5 = Canvas(frame6_page5, bg=bg_color, height=window_p5_size, width=window_p5_size)
 canvas_fluor_p5.pack(anchor='nw', fill='both', expand=True)
 label_fluor_name=tk.Label(frame6_page5, text="                       ",
               bg="black", fg="cyan", font=all_font)
 label_fluor_name.pack()
 global canvas_bright_p5
-canvas_bright_p5 = Canvas(frame5_page5, bg="green", height=window_p5_size, width=window_p5_size)
+canvas_bright_p5 = Canvas(frame5_page5, bg=bg_color, height=window_p5_size, width=window_p5_size)
 canvas_bright_p5.pack(anchor='nw', fill='both', expand=True)
 label_bright_name=tk.Label(frame5_page5, text="                  ",
               bg="black", fg="cyan", font=all_font)
@@ -2729,14 +2753,20 @@ l_instr_name_p5=tk.Label(frame7b_page5,text="INSTRUCTIONS FOR USER :" ,bg="black
 ###################################################
 number_of_slides_p5=[]# for slide_bar flashing
 def slide_frames_p5(value):
-    #number_of_slides_p5.append(value)
-    if len(number_of_slides_p5)==1:
-        update_flash([button_frame_info])
-        print("update_flash")
-    image_number = int(value)    
-    label_fluor_name.config(text=os.path.basename(path_filled_fluors[image_number-1]))
-    label_bright_name.config(text=os.path.basename(path_filled_brights[image_number-1])) 
-    show_2_canvases(canvas_bright_p5,canvas_fluor_p5,photo_filled_brights,photo_filled_fluors,image_number, window_p5_size) 
+    number_of_slides_p5.append(value)
+    #if len(number_of_slides_p5)==1:
+        #update_flash([])
+        #activate_buttons(all_buttons_page5,[button_final_movie])
+    image_number = int(value)
+    print(" image_number=", image_number)
+    #global internal_frame_number_p5
+    internal_frame_number_for_slider=image_number-first_frame_number_p5
+    print(" internal_frame_number=", internal_frame_number_for_slider)
+    #label_fluor_name.config(text=os.path.basename(path_filled_fluors[image_number-1]))
+    label_fluor_name.config(text=os.path.basename(path_filled_fluors[internal_frame_number_for_slider]))
+     
+    label_bright_name.config(text=os.path.basename(path_filled_brights[internal_frame_number_for_slider])) 
+    show_2_canvases(canvas_bright_p5,canvas_fluor_p5,photo_filled_brights,photo_filled_fluors,internal_frame_number_for_slider, window_p5_size) 
 ############################# load all mecessary images
 def choose_and_load_tracked_movie():
     global edits_indicator
@@ -2789,10 +2819,12 @@ def choose_and_load_tracked_movie():
     global canvas_fluor_p5, canvas_bright_p5
     image_number=1    
     show_2_canvases(canvas_bright_p5,canvas_fluor_p5,photo_filled_brights,photo_filled_fluors,image_number, window_p5_size)        
-    view_slider_p5.configure(to=len(masks))    
+    #view_slider_p5.configure(to=len(masks))
+    view_slider_p5.configure(from_=first_frame_number_p5,to=first_frame_number_p5+len(masks)-1)
     ################################################
     button_load_p5.configure(background = button_color)
     update_flash([view_slider_p5])
+    activate_buttons(all_buttons_page5,[view_slider_p5, button_final_movie])
     ######################### new addtion for click_one_cell
     global mode_variable,zoom_status# used in radio buttons for editing,indicates which canvas is used for IDs extraction, value = "Current" or "Previous"
     mode_variable,zoom_status = StringVar(),StringVar()
@@ -2822,7 +2854,7 @@ def activate_fast_edit_mode():#enter fast segmentation mode
    button_activate_fast_edit_mode.configure(background = 'red')
    button_activate_slow_edit_mode.configure(background = button_color)   
    dialog_label_5.config(text="\nIn the right image, right-click on the cell you want to correct.")
-   
+             
    canvas_fluor_p5.unbind_all("<Button-1>")
    #canvas_fluor_p5.unbind_all("<Button-1>")   
    canvas_fluor_p5.bind("<Button-1>", edit_by_clicking)
@@ -2887,39 +2919,48 @@ def activate_slow_edit_mode():
 #############################################
 def right_click_one_cell(event):# extract info about clicked celland take action
     mode=mode_variable.get()# after right-clicking cell, extract mode, frame_number and cell_number
-    global frame_number, previous_frame_number, previous_cell_number,internal_frame_number, canvas_fluor_p5, canvas_bright_p5
+    global frame_number, previous_frame_number, previous_cell_number, canvas_fluor_p5, canvas_bright_p5
     global clicked_cell_position_marker, cell_number_in_frame, filled_fluor, filled_bright, filled_red
     global oval, cell_color, cell_ID
     global oval_x_init,oval_y_init, oval_x,oval_y
     ############################################
-    global edits_indicator
+    global edits_indicator, internal_frame_number_p5
     edits_indicator="yes"
     #############################################
-    frame_number=view_slider_p5.get()
-    print("frame_number, previous_frame_number=", frame_number, previous_frame_number)    
-    #internal_frame_number=frame_number-first_frame_number_p5    
+    global all_buttons_page5,button_activate_fast_edit_mode,button_activate_slow_edit_mode,start_zoom_button
+    activate_buttons(all_buttons_page5,[button_activate_fast_edit_mode,button_activate_slow_edit_mode,start_zoom_button])
+    ##############################################    
+    frame_number=view_slider_p5.get()    
+    
     ###################################################
     print("mode=", mode)    
     if mode=="fast":# the fast editing (by clicking)   
        if frame_number!=previous_frame_number:# if you are in a new frame
           if previous_frame_number!=-2:# at least 1 frame is edited already
-             print("entered new frame in fast mode")
-             print("internal_frame_number inside right_click=", internal_frame_number)
-             save_edits_for_frame()# save ed, i.e. not edited yet         
+             print("entered new frame in fast mode")         
+             print("internal_frame_number inside right_click=", internal_frame_number_p5)
+             save_edits_for_frame()# save ed, i.e. not edited yet
+             #frame_number=view_slider_p5.get()    
+             #internal_frame_number_p5=frame_number-first_frame_number_p5
+             print("internal_frame_number_p5 INSIDE RIGHT_CLICK=",internal_frame_number_p5)    
           ################# first of all, get frame info          
           else:# if this is the very 1st frame
               print("in the very first frame, fast mode")
+             
           previous_cell_number=-2# if you are in a new frame
           previous_frame_number=frame_number
           #internal_frame_number=frame_number-first_frame_number_p5
-          internal_frame_number=frame_number-1
-          get_frame_info(internal_frame_number)
+          #internal_frame_number=frame_number-1
+          internal_frame_number_p5=frame_number-first_frame_number_p5
+          print("internal_frame_number_p5 INSIDE RIGHT_CLICK=",internal_frame_number_p5)    
+          get_frame_info(internal_frame_number_p5)
        else:# if it is still the same frame
             print("in the same frame, fast mode")    
     ##########################################      
        clicked_cell_position_marker=[int(round((event.x-image_origin_x)/resize_coeff)),int(round((event.y-image_origin_y)/resize_coeff))]# position marker in image of original size!!!
        print("clicked_cell_position_marker=",clicked_cell_position_marker)
-       mask=masks[internal_frame_number]
+       print("internal_frame_number NO ZOOM =", internal_frame_number_p5)
+       mask=masks[internal_frame_number_p5]
        #cell_number=mask[clicked_cell_position_marker[1],clicked_cell_position_marker[0]]-1
        ##################################################
        cell_number_in_mask=mask[clicked_cell_position_marker[1],clicked_cell_position_marker[0]]
@@ -2977,7 +3018,7 @@ def right_click_one_cell(event):# extract info about clicked celland take action
        else:# you hit background, i.e. cell_number=-1
               print("clicked on  background, fast mode")         
               print("do nothing")
-    
+      
     ######################################
     if mode=="slow":# the slow editing (by hand-drawing)     
          print("slow mode")
@@ -2993,8 +3034,11 @@ def right_click_one_cell(event):# extract info about clicked celland take action
                print("have not started editing yet")
             previous_cell_number=-2
             previous_frame_number=frame_number
-            internal_frame_number=frame_number-first_frame_number_p5
-            get_frame_info(internal_frame_number)
+            #internal_frame_number=frame_number-first_frame_number_p5
+            #internal_frame_number=frame_number-1
+            internal_frame_number_p5=frame_number-first_frame_number_p5
+            print("internal_frame_number_p5 INSIDE SLOW=",internal_frame_number_p5)    
+            get_frame_info(internal_frame_number_p5)
          else:# if it is still the same frame
               print("in the same frame")
          ##################################################       
@@ -3002,7 +3046,8 @@ def right_click_one_cell(event):# extract info about clicked celland take action
          #clicked_cell_positon_marker=[int(round((event.x/zoom_coeff-image_origin_x)/(resize_coeff))),int(round((event.y/zoom_coeff-image_origin_y)/(resize_coeff)))]
          clicked_cell_position_marker=[int(round((event.x-image_origin_x)/resize_coeff)),int(round((event.y-image_origin_y)/resize_coeff))]
          print("clicked_cel_position_marker=", clicked_cell_position_marker)
-         mask=masks[internal_frame_number]
+         print("internal_frame_number ZOOM=",internal_frame_number_p5)
+         mask=masks[internal_frame_number_p5]
          #cell_number=mask[clicked_cell_position_marker[1],clicked_cell_position_marker[0]]-1
          #cell_number_scaled=mask[clicked_cell_position_marker[1],clicked_cell_position_marker[0]]
          #cell_number=int(math.log(cell_number_scaled*1000000,2)) 
@@ -3051,7 +3096,8 @@ def right_click_one_cell(event):# extract info about clicked celland take action
                      #save_hand_drawing_for_one_cell()
                      save_one_edited_cell()
                      activate_fast_edit_mode()                     
-         previous_cell_number=cell_number_in_frame          
+         previous_cell_number=cell_number_in_frame
+        
 ################################################
 
 def get_x_and_y(event):
@@ -3090,11 +3136,12 @@ def erase_line():# in case you are not happy with your hand contour and want to 
 ###############################################
 def start_zoom():
     zoom_status.set("on")
+    activate_buttons(all_buttons_page5,[button_activate_fast_edit_mode,button_activate_slow_edit_mode,start_pan_button])
     #button_activate_fast_edit_mode.configure(background =button_color)
     global my_image_fl, my_image_br, points, canvas_fluor_p5, canvas_bright_p5,photo_fluor, photo_bright, internal_frame_number,x0,y0
     points=[]
     frame_number=view_slider_p5.get()
-    internal_frame_number=frame_number-first_frame_number_p5
+    internal_frame_number_p5=frame_number-first_frame_number_p5
     ##########
 
     canvas_fluor_p5.delete("all")
@@ -3124,11 +3171,12 @@ def start_pan():
     canvas_fluor_p5.bind( "<ButtonPress-1>", drag_start)
     canvas_fluor_p5.bind("token<ButtonRelease-1>", drag_stop)
     canvas_fluor_p5.bind("<B1-Motion>", drag)
+    activate_buttons(all_buttons_page5,[stop_pan_button])
 #######################################
 def stop_pan():
     canvas_fluor_p5.unbind_all("<Button-1>")  
     canvas_fluor_p5.bind("<Button-1>", edit_by_clicking)
-        
+    activate_buttons(all_buttons_page5,[button_activate_fast_edit_mode,button_activate_slow_edit_mode])   
 ###############################################               
 def drag_start(event):
         # start drag of an object
@@ -3228,8 +3276,8 @@ def wheel(event):
           new_shape=my_image_fl_resized.shape[0]
           #x0_new_in, y0_new_in=x0*factor_in,y0*factor_in
           x0_new_in, y0_new_in=oval_x_init*factor_in,oval_y_init*factor_in
-          photo_fluor =  turn_image_into_tkinter(my_image_fl_resized,new_shape)
-          photo_bright =  turn_image_into_tkinter(my_image_br_resized,new_shape)            
+          photo_fluor =  turn_image_into_tkinter(my_image_fl_resized,new_shape,[])
+          photo_bright =  turn_image_into_tkinter(my_image_br_resized,new_shape,[])            
           canvas_fluor_p5.delete("all")
           canvas_bright_p5.delete("all")
           image_origin_x, image_origin_y= cell_center_visual_x-x0_new_in, cell_center_visual_y-y0_new_in
@@ -3291,7 +3339,8 @@ def stop_zoom():
     cell_center_visual_x,cell_center_visual_y=300,300
     print("cell_centre_visual_x,cell_center_visual_y AFTER=",cell_center_visual_x,cell_center_visual_y)
 ################################################
-def save_one_edited_cell():   
+def save_one_edited_cell():
+    activate_buttons(all_buttons_page5,[view_slider_p5, button_final_movie])
     #button_activate_hand_drawing_mode_for_one_cell.configure(background = button_color)
     update_flash([view_slider_p5])
     button_activate_slow_edit_mode.configure(background = button_color) 
@@ -3300,8 +3349,8 @@ def save_one_edited_cell():
        ctr = np.array(points_for_original).reshape((-1,1,2)).astype(np.int32)# turn drawn points into contour (ctr)
        #ctr = np.array(points).reshape((-1,1,2)).astype(np.int8)# turn drawn points into contour (ctr)
        cell_number_in_mask=2**cell_number_in_frame
-       print("cell_number_in_frame in SAVE_ONE_CELL=", cell_number_in_frame)
-       print("cell_number_in_mask in SAVE_ONE_CEWLL=", cell_number_in_mask)
+       #print("cell_number_in_frame in SAVE_ONE_CELL=", cell_number_in_frame)
+       #print("cell_number_in_mask in SAVE_ONE_CEWLL=", cell_number_in_mask)
        #final_mask[final_mask==cell_number+1]=0
        global final_mask
        #final_mask=remove_cell_from_mask(cell_number_in_frame, final_mask, intensity_dictionary_for_frame)
@@ -3310,18 +3359,18 @@ def save_one_edited_cell():
        mask_hand=np.zeros((frame_p5_size,frame_p5_size),np.uint8)
       
        cv2.drawContours(mask_hand,[ctr],0,(255,255,255),-1)
-       print("np.max(mask_hand)=",np.max(mask_hand))
+       #print("np.max(mask_hand)=",np.max(mask_hand))
        
        #################################
        mask_hand_uint64= mask_hand.astype(np.uint64)
-       print("np.max(mask_hand) before=",np.max(mask_hand_uint64))
+       #print("np.max(mask_hand) before=",np.max(mask_hand_uint64))
        mask_hand_uint64[mask_hand_uint64==255]=cell_number_in_mask
-       print("np.max(mask_hand) after=",np.max(mask_hand_uint64))
+       #print("np.max(mask_hand) after=",np.max(mask_hand_uint64))
        #final_mask[mask_hand==255]=cell_number+1
        
        #final_mask[mask_hand==255]=cell_number_scaled
        final_mask+=mask_hand_uint64
-       print("np.max(final_mask)=",np.max(final_mask))
+       #print("np.max(final_mask)=",np.max(final_mask))
        #final_mask[mask_hand==255]=cell_indicator+1
        ######### need to get segmented_frame and segmented_patch here to pass to modified_cell_IDs                     
        segmented_frame= np.zeros((frame_p5_size+2*bordersize,frame_p5_size+2*bordersize),dtype="uint8")
@@ -3382,8 +3431,8 @@ def edit_by_clicking(event):
       #manually_clicked_centroid=[event.x/window_p5_size*frame_p5_size,event.y/window_p5_size*frame_p5_size]
       #manually_clicked_centroid=[int(round((event.x/zoom_coeff-image_origin_x)/(resize_coeff))),int(round((event.y/zoom_coeff-image_origin_y)/(resize_coeff)))]
       manually_clicked_centroid=[int(round((event.x-image_origin_x)/resize_coeff)),int(round((event.y-image_origin_y)/resize_coeff))]
-      print("manually_clicked_centroid=", manually_clicked_centroid)
-      print("clicked_cell_positon_marker=", clicked_cell_position_marker)
+      #print("manually_clicked_centroid=", manually_clicked_centroid)
+      #print("clicked_cell_positon_marker=", clicked_cell_position_marker)
       #print("centroid[0].dtype=",centroid[0].dtype)
       dialog_label_5.config(text=str(manually_clicked_centroid))
       number_of_clicks.append(manually_clicked_centroid)
@@ -3394,8 +3443,8 @@ def edit_by_clicking(event):
       ############## modify mask for frame
       new_cX, new_cY=new_centroid[0],new_centroid[1]
       mask_with_current_cell=paste_benchmark_patch(segmented_patch,a,b,c,d,cell_number_in_frame, frame_p5_size, bordersize)
-      print("cell_number_in_frame=", cell_number_in_frame)
-      print("np.max(mask_with_current_cell)=",np.max(mask_with_current_cell))
+      #print("cell_number_in_frame=", cell_number_in_frame)
+      #print("np.max(mask_with_current_cell)=",np.max(mask_with_current_cell))
       cell_number_in_mask=2**cell_number_in_frame
       #final_mask[final_mask==cell_number_in_mask]=0
       final_mask=remove_cell_from_mask(cell_number_in_frame, final_mask, intensity_dictionary_for_frame)
@@ -3429,20 +3478,12 @@ def edit_by_clicking(event):
 #################################################
 
 ###################################################
-def get_frame_info(internal_frame_number):# for manual segmentation correction
-    #button_frame_info.configure(background = 'red')
-    
-    global segmentor, refiner
-    if segmentor==None and refiner==None:      
-        software_folder = os.getcwd() 
-        segmentor, refiner= load_models_p5(software_folder)
-        dialog_label_5.config(text="Loaded models") 
-    
+def get_frame_info(internal_frame_number_p5):# for manual segmentation correction    
     print("frame_number inside get_frame_info=", frame_number)
     #internal_frame_number=frame_number-first_frame_number_p5
-    print("internal_frame_number=", internal_frame_number)
+    print("internal_frame_number INSIDE GET_FRAME_INFO=", internal_frame_number_p5)
     global frame_dictionary
-    frame_dictionary=lineage_per_frame_p5[internal_frame_number]
+    frame_dictionary=lineage_per_frame_p5[internal_frame_number_p5]
     keys=list(frame_dictionary.keys())
     global intensity_dictionary_for_frame
     intensity_dictionary_for_frame=create_intensity_dictionary(len(keys))
@@ -3461,18 +3502,18 @@ def get_frame_info(internal_frame_number):# for manual segmentation correction
     global modified_cell_IDs
     modified_cell_IDs={}
     global mask, empty_fluor, empty_bright, empty_red
-    mask=masks[internal_frame_number]
-    empty_fluor=empty_fluors[internal_frame_number]
-    empty_bright=empty_brights[internal_frame_number]
-    empty_red=empty_reds[internal_frame_number]
+    mask=masks[internal_frame_number_p5]
+    empty_fluor=empty_fluors[internal_frame_number_p5]
+    empty_bright=empty_brights[internal_frame_number_p5]
+    empty_red=empty_reds[internal_frame_number_p5]
     ###################################
     
     global path_filled_bright, path_filled_fluor,path_filled_red,path_mask
-    path_filled_bright, path_filled_fluor,path_filled_red,path_mask= path_filled_brights[internal_frame_number],path_filled_fluors[internal_frame_number],path_filled_reds[internal_frame_number],path_masks[internal_frame_number]
+    path_filled_bright, path_filled_fluor,path_filled_red,path_mask= path_filled_brights[internal_frame_number_p5],path_filled_fluors[internal_frame_number_p5],path_filled_reds[internal_frame_number_p5],path_masks[internal_frame_number_p5]
     global final_mask,filled_fluor,filled_bright, filled_red
-    filled_fluor=filled_fluors[internal_frame_number]
-    filled_bright=filled_brights[internal_frame_number]
-    filled_red=filled_reds[internal_frame_number]
+    filled_fluor=filled_fluors[internal_frame_number_p5]
+    filled_bright=filled_brights[internal_frame_number_p5]
+    filled_red=filled_reds[internal_frame_number_p5]
     final_mask=copy.deepcopy(mask)
       
     update_flash([])
@@ -3486,16 +3527,16 @@ def save_edits_for_frame(): #saves all eduts in current frame and modifies linag
     global   frame_dictionary
     #number_of_slides_p5=[]    
     update_flash([view_slider_p5])
-    print("internal_frame_number inside save_edits_for_frame=", internal_frame_number)
+    print("internal_frame_number inside save_edits_for_frame=", internal_frame_number_p5)
     #button_frame_info.configure(background = button_color)     
     #button_save_frame.configure(background = 'red')
     ###################################
-    frame_dictionary= lineage_per_frame_p5[internal_frame_number]
-    debug_item=lineage_per_frame_p5[internal_frame_number]["cell_0"][3]
+    frame_dictionary= lineage_per_frame_p5[internal_frame_number_p5]
+    debug_item=lineage_per_frame_p5[internal_frame_number_p5]["cell_0"][3]
     #cv2.imwrite(r"C:\Users\helina\Desktop\patch_before.tif",debug_item)
     modified_frame_dictionary=update_frame_dictionary_after_manual_segm_correction(final_mask, filled_fluor,filled_bright,modified_cell_IDs,frame_dictionary,frame_p5_size, patch_size_p5, bordersize)    
-    lineage_per_frame_p5[internal_frame_number]=modified_frame_dictionary
-    debug_item_after=lineage_per_frame_p5[internal_frame_number]["cell_0"][3]
+    lineage_per_frame_p5[internal_frame_number_p5]=modified_frame_dictionary
+    debug_item_after=lineage_per_frame_p5[internal_frame_number_p5]["cell_0"][3]
     #cv2.imwrite(r"C:\Users\helina\Desktop\patch_after.tif",debug_item_after)
     ##################################################    
     modified_cells_keys=list(modified_cell_IDs.keys())
@@ -3516,7 +3557,7 @@ def save_edits_for_frame(): #saves all eduts in current frame and modifies linag
     ################### rewrite CLEANED_PATCHES
     cell_numbers=list(modified_cell_IDs.keys())
     for cell_number in cell_numbers:
-       patch_path=create_name_for_cleaned_patch(path_filled_brights[internal_frame_number], cell_number)
+       patch_path=create_name_for_cleaned_patch(path_filled_brights[internal_frame_number_p5], cell_number)
        print("patch_path=", patch_path)
        patch=modified_cell_IDs[cell_number][2]
        cv2.imwrite(os.path.join(output_dir,"HELPERS_(NOT_FOR_USER)","CLEANED_PATCHES",patch_path), patch)          
@@ -3524,12 +3565,12 @@ def save_edits_for_frame(): #saves all eduts in current frame and modifies linag
     global photo_fluor, photo_bright, canvas_bright_p5,canvas_fluor_p5     
     canvas_bright_p5,canvas_fluor_p5,photo_fluor, photo_bright=display_both_channels(filled_fluor,filled_bright,canvas_fluor_p5,canvas_bright_p5,window_p5_size,image_origin_x,image_origin_y)         
     global photo_filled_fluors, photo_filled_brights, filled_fluors, filled_brights# update frames on the screen
-    photo_filled_fluors[ internal_frame_number]=photo_fluor
-    photo_filled_brights[ internal_frame_number]=photo_bright
-    filled_fluors[ internal_frame_number]=filled_fluor
-    filled_brights[ internal_frame_number]=filled_bright
-    filled_reds[ internal_frame_number]=filled_red
-    masks[ internal_frame_number]=final_mask
+    photo_filled_fluors[ internal_frame_number_p5]=photo_fluor
+    photo_filled_brights[ internal_frame_number_p5]=photo_bright
+    filled_fluors[ internal_frame_number_p5]=filled_fluor
+    filled_brights[ internal_frame_number_p5]=filled_bright
+    filled_reds[ internal_frame_number_p5]=filled_red
+    masks[ internal_frame_number_p5]=final_mask
     
     canvas_fluor_p5.delete(oval)
     #button_save_frame.configure(background = button_color)
@@ -3559,34 +3600,34 @@ def create_final_movie():# create final movie + pedigree_per_cell (simplified, i
                           "\nFinal movie is in  " + str(os.path.join(output_dir,"lineage_movie.avi")))
 ############### widgets in Page 5
 
-
+global button_load_p5,button_activate_fast_edit_mode, button_activate_slow_edit_mode,\
+                   start_zoom_button, start_pan_button,stop_pan_button,\
+                   button_final_movie,view_slider_p5
+    
 button_load_p5 = Button(frame3_page5, text="1. Click to open file menu and choose OUTPUT folder", command=lambda:threading.Thread(target=choose_and_load_tracked_movie).start(), bg=button_color, font=all_font,activebackground="orange")
 button_load_p5.pack(pady=5)
-
-
-#button_frame_info = Button(frame7_page5, text="2. Click to extract current frame info", command=get_frame_info,bg=button_color, font=all_font,activebackground="red")
-#button_frame_info.pack(pady=5)
 
 edit_label_fast = tk.Label(frame3a_page5, text=" FAST edit mode: by clicking",
                           fg="black",bg=label_color, font='TkDefaultFont 10 bold').pack(pady=5)
    
-
 button_activate_fast_edit_mode = Button(frame3a_page5, text="3. Activate fast mode", command=activate_fast_edit_mode,bg=button_color, font=all_font,activebackground="red")
 button_activate_fast_edit_mode.pack(pady=5)
 
 #########################################################
-
 edit_label_slow = tk.Label(frame3b_page5, text=" SLOW edit mode: by hand drawing",
                           fg="black",bg=label_color, font='TkDefaultFont 10 bold').pack(pady=5)
 button_activate_slow_edit_mode = Button(frame3b_page5, text="4. Activate slow mode",  command=activate_slow_edit_mode,bg=button_color, font=all_font,activebackground="red")
 button_activate_slow_edit_mode.pack(side=tk.LEFT, padx=10,pady=5)
 
 ###########################################
-start_zoom_button = tk.Button(frame3b_page5, text="Start zoom", command=start_zoom).pack(side=tk.LEFT)
-stop_zoom_button = tk.Button(frame3b_page5, text="Stop zoom", command=stop_zoom).pack(side=tk.LEFT)
-start_pan_button = tk.Button(frame3b_page5, text="Start pan", command=start_pan).pack(side=tk.LEFT)
-stop_pan_button = tk.Button(frame3b_page5, text="Stop pan", command=stop_pan).pack(side=tk.LEFT)
-
+start_zoom_button = tk.Button(frame3b_page5, text="Start zoom", command=start_zoom,bg=button_color, font=all_font,activebackground="red")
+start_zoom_button.pack(side=tk.LEFT)
+#stop_zoom_button = tk.Button(frame3b_page5, text="Stop zoom", command=stop_zoom,bg=button_color, font=all_font,activebackground="red")
+#stop_zoom_button.pack(side=tk.LEFT)
+start_pan_button = tk.Button(frame3b_page5, text="Start pan", command=start_pan,bg=button_color, font=all_font,activebackground="red")
+start_pan_button.pack(side=tk.LEFT)
+stop_pan_button = tk.Button(frame3b_page5, text="Stop pan", command=stop_pan,bg=button_color, font=all_font,activebackground="red")
+stop_pan_button.pack(side=tk.LEFT)
 #############################################
 
 global button_final_movie
@@ -3597,6 +3638,12 @@ global view_slider_p5
 view_slider_p5 = Scale(frame7c_page5, from_=1, to=1,orient=HORIZONTAL, troughcolor="green", command=slide_frames_p5, length=370)      
 view_slider_p5.pack(pady=5)    
 ############################################
+global all_buttons_page5
+#label_edit = tk.Label(frame3_page4, text=" ", font='TkDefaultFont 10 bold',  bg="black", fg="yellow", width=50, height=4)
+all_buttons_page5=[button_load_p5,button_activate_fast_edit_mode, button_activate_slow_edit_mode,\
+                   start_zoom_button, start_pan_button,stop_pan_button,\
+                   button_final_movie,view_slider_p5]
+
 
 ################################################################################
 #####################################   PAGE 6: VISUALIZE RESULTS  #########################
@@ -3965,7 +4012,7 @@ page_numbers=[page1,page2,page3,page4,page5, page6]
 locations=[frame3_page1,frame8_page2,frame15_page3,frame11_page4,frame8_page5,frame13_page6]
 x_back,x_exit,x_next=700,750,800
 
-######## make initial_buttons flash and create back, exit, next buttons             
+######## make initial_buttons on each page flash and create back, exit, next buttons             
 for i in range(0,6):
     
     if i==5:
@@ -3979,9 +4026,11 @@ for i in range(0,6):
           flash_buttons=[]
       else:
           flash_buttons=initial_buttons[i-2]
-          if i==2:
-            #activate_buttons(all_buttons_page4,[initial_buttons[i-2]])
-            activate_buttons(all_buttons_page4,[button_load])
+          #if i==2:
+            #activate_buttons(all_buttons_page5,[button_load_p5])
+            #activate_buttons(all_buttons_page4,[button_load])
+          
+             
       g_back=partial(update_flash,flash_buttons) 
       Button(location, text="Back",bg="orange",font=all_font, command=combine_funcs(f_back,g_back)).place(x=x_back,y=0)
             

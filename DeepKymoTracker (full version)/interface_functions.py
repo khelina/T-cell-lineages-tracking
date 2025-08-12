@@ -91,12 +91,12 @@ def turn_image_into_tkinter(image, window_size, lin_image_widths): # if image is
   return  photo_image 
 ###############################################
 ######### Page-5(Correct segmentaion); for sliding frames
-def show_2_canvases(canvas_bright,canvas_fluor,photo_filled_brights,photo_filled_fluors,image_number, window_size):
+def show_2_canvases(canvas_bright,canvas_fluor,photo_filled_brights,photo_filled_fluors,internal_image_number, window_size):
     canvas_bright.delete('all')
     canvas_fluor.delete('all')
    
-    canvas_bright.create_image(0, 0, anchor=NW, image=photo_filled_brights[image_number-1])    
-    canvas_fluor.create_image(0, 0, anchor=NW, image=photo_filled_fluors[image_number-1])
+    canvas_bright.create_image(0, 0, anchor=NW, image=photo_filled_brights[internal_image_number])    
+    canvas_fluor.create_image(0, 0, anchor=NW, image=photo_filled_fluors[internal_image_number])
     
 ########### Page-5(Correct segmentaion); for correcting one current frame
 def display_both_channels(filled_fluor,filled_bright,canvas_fluor,canvas_bright,target_size,image_origin_x,image_origin_y):      
