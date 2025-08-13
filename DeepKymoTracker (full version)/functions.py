@@ -618,7 +618,7 @@ def determine_which_edge(frame_with_one_cell,test_image):
     rows, cols = coordinates[0],coordinates[1]
     print("rows, cols=", rows, cols )
     ##############################################
-    if 1 in rows:
+    if 0 in rows:
         edges.append(["top",[0,1]])
     if  frame_with_one_cell.shape[0]-1 in rows:
         edges.append(["bottom",[0,-1]])

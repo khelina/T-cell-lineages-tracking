@@ -1,9 +1,10 @@
 import os
 import re
 import time
-import tifffile as tiff
+#import tifffile as tiff
 import numpy as np
 import cv2
+from PIL import Image
 
 
 #####################################
@@ -12,19 +13,25 @@ def sorted_aphanumeric(data):
     alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
     return sorted(data, key=alphanum_key)
 ##############################################
-def process_tif(tif_image): # add stacks of tiff image together  
-    sh = tif_image.shape
-    if len(sh)==3:
-           processed_tif =np.zeros((sh[1], sh[2]), dtype=np.uint16)
-           for ii in range(sh[0]):
-              processed_tif+=tif_image[ii,:,:]           
+def process_tif(tif_image_path):
+    tif_image = Image.open(tif_image_path)
+    n_slices=tif_image.n_frames
+    if n_slices>1:
+        multi_np_image=np.zeros((tif_image.size[0],tif_image.size[1],n_slices), np.uint16)
+        for i in range(tif_image.n_frames):
+            #print("i=", i)
+            tif_image.seek(i)
+            numpy_array = np.array(tif_image)
+            #print("numpy_array.shape=",numpy_array.shape)
+            multi_np_image[:,:,i]=numpy_array
+        result_max=np.max(multi_np_image, axis=2)        
     else:
-          processed_tif=tif_image
-    normalised=(processed_tif/processed_tif.max())*255.    
-    final=np.uint8(normalised)
-    
-    return final
-################### if frame is absent show black image
+        result_max=np.array(tif_image)
+    #print("result_max.shape=", result_max.shape)    
+    normalised=(result_max/result_max.max())*255.    
+    final_max_tif=np.uint8(normalised)
+    return final_max_tif, n_slices
+###########################################
 
 ##############################
 def display_image_p2(slide_frame_number, channel_names_dictionary, channel_code,n_digits,canvas_size_p2):

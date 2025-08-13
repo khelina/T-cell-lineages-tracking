@@ -21,7 +21,7 @@ import pickle
 from threading import Thread
 from functools import partial
 import copy
-import tifffile as tiff
+#import tifffile as tiff
 #import imagecodecs
 import math
 import shutil
@@ -219,12 +219,13 @@ def explore_folder():# check which movies are inside the folder and create menu 
    movies_menu.grid(row=0, column=2, padx=100,pady=20)
    movies_menu.config(bg=button_color, font=all_font, activebackground="red")
    movies_menu.config(width=20)
-   movies_menu["menu"].config(bg=label_color,activebackground="red") 
+   movies_menu["menu"].config(bg=label_color,activebackground="red")
+   all_buttons_page2.append(movies_menu)
    update_flash([movies_menu])  
    button_choose_folder.config(bg=button_color)
    activate_buttons(all_buttons_page2,[movies_menu]) 
 #######################################
-def display_frame_count(text_new,ii, count):# print frame count while loading
+def display_frame_count(text_new,ii, count):# print frame count dynamically while loading
      shift=0
      previous_text=feedback_var_p2.get()     
      if ii!=1 and ii!=0:                 
@@ -261,29 +262,32 @@ def load_and_process_page2(path,total_number_of_frames,movie_name):
           bright_names.append(filename)
           br_name_p2.set("Original name:   "+str(filename))
           old_name=os.path.join(path,filename)
-          a = tiff.imread(old_name)
-          c=process_tif(a)
+          #a = tiff.imread(old_name)
+          #a = (old_name)
+          c, n_bright_slices=process_tif(old_name)
           bright_images.append(c)
           global photo_bright
           photo_bright=turn_image_into_tkinter(c, canvas_size_p2,[])
           canvas_bright_p2.create_image(0,0,anchor=NW,image=photo_bright)
           ##############                  
-          text_br="\n  Number of brightfield frames:  "
+          text_br="\n Brightfield channel: Slices = "+str(n_bright_slices)+",  Number of frames =   "
           br_count=display_frame_count(text_br,i_br, br_count)
-          print("br_count=", br_count)
+          #print("br_count=", br_count)
         elif ("_w2FITC_" in filename) or ("_w3Multi600_" in filename):# process fluorescent          
           i_fl+=1
           instruct_var_p2.set("Processing fluorescent frames...")              
           fluor_names.append(filename)
           fl_name_p2.set("Original name:   "+str(filename))
           old_name=os.path.join(path,filename)
-          b = tiff.imread(old_name)         
-          b=process_tif(b)
+          #b = tiff.imread(old_name)
+          #b = Image.open(old_name)
+          b,n_fluor_slices=process_tif(old_name)
           fluor_images.append(b)
           global photo_fluor
           photo_fluor=turn_image_into_tkinter(b, canvas_size_p2,[])
           canvas_fluor_p2.create_image(0,0,anchor=NW,image=photo_fluor)
-          text_fl="\n  Number of fluorescent frames:  "
+          #text_fl="\n  Number of fluorescent frames:  "
+          text_fl="\n Fluorescent channel: Slices = "+str(n_fluor_slices)+",  Number of frames =   "
           fl_count=display_frame_count(text_fl,i_fl, fl_count)               
         elif ("_w3TRITC_" in filename):# process red channel
           i_red+=1
@@ -291,14 +295,16 @@ def load_and_process_page2(path,total_number_of_frames,movie_name):
           red_names.append(filename)
           red_name_p2.set("Original name:   "+str(filename))
           old_name=os.path.join(path,filename)         
-          r = tiff.imread(old_name)          
-          r=process_tif(r)         
+          #r = tiff.imread(old_name)
+          #r = Image.open(old_name)          
+          r,n_red_slices=process_tif(old_name)         
           red_images.append(r)
           global photo_red
           photo_red=turn_image_into_tkinter(r, canvas_size_p2,[])
           canvas_red_p2.create_image(0,0,anchor=NW,image=photo_red)
           ###############################
-          text_red="\n  Number of red frames:  "
+          #text_red="\n  Number of red frames:  "
+          text_red="\n          Red channel: Slices = "+str(n_red_slices)+",     Number of frames =   "
           red_count=display_frame_count(text_red,i_red, red_count)
   if len(bright_names)==0:     
       text_br="\n  Number of bright frames:  "
@@ -344,15 +350,16 @@ def create_movie_for_display(value):
     global fluor_images, bright_images,red_images,fluor_names, bright_names, red_names    
     fluor_images, bright_images,red_images,fluor_names, bright_names, red_names=load_and_process_page2(path,total_number_of_frames,movie_name)   
     global frame_slider
-    frame_slider=Scale(frame6_page2,from_=1,to=max_number_of_frames,orient=HORIZONTAL,troughcolor="#513B1C",bg=label_color,font=all_font,activebackground="red",label="Frame "+str(1), command=slide_p2, length=150, showvalue=0)
+    frame_slider=Scale(frame6_page2,from_=1,to=max_number_of_frames,orient=HORIZONTAL,troughcolor="#513B1C",bg=label_color,font=all_font,activebackground="red",label="Frame "+str(1), command=slide_p2, length=300, showvalue=0)
     frame_slider.pack() 
     frame_slider.set(1)
     slide_p2("1")
     movies_menu.config(bg="black", fg="cyan")   
-    instruct_var_p2.set("All frames have been processed.\nNow, you can scroll through them by using slider.\n\nAfter you are finished, press Button 3 to save the processed movie.")      
+    instruct_var_p2.set("All frames have been processed.\nNow, you can scroll through them by using slider.\n\nAfter you are finished, press Button 3 to save the processed movie.")
+    activate_buttons(all_buttons_page2,[button_save_movie])       
 ###############################
 def slide_p2(value):# display image even when it is missing (in this case it is black)
-    print("value=", value)
+    #print("value=", value)
     canvas_bright_p2.delete("all")
     canvas_fluor_p2.delete("all")
     canvas_red_p2.delete("all")
@@ -377,11 +384,11 @@ def slide_p2(value):# display image even when it is missing (in this case it is 
     canvas_red_p2.create_image(0,0, anchor=NW, image=red_tk)                   
     red_name_p2.set("Original name:   "+old_red_name+"\nNew name:   "+new_red_name)
 ############################################################
-################## buttons and labels page 2 ############
 l_page_name=tk.Label(frame1_page2,text= "STEP 1: EXTRACT MOVIE FROM FOLDER", bg="yellow", fg="red", font=("Times", "24")).pack()
 button_choose_folder=tk.Button(frame3_page2,text="1. Choose folder with movies",bg='#9ACD32',activebackground="red",font='TkDefaultFont 10 bold' , command=lambda: explore_folder())
 button_choose_folder.grid(row=0,column=0, padx=100,pady=20)
-button_save_movie=tk.Button(frame11_page2,text="3. Save processed movie",bg='#9ACD32',activebackground="red",font=all_font , command=lambda: [save_images_page2(movie_name,feedback_var_p2,bright_names,fluor_names,red_names, bright_images, fluor_images, red_images, instruct_var_p2), update_flash([])])
+button_save_movie=tk.Button(frame11_page2,text="3. Save processed movie",bg='#9ACD32',activebackground="red",font=all_font , command=lambda: [save_images_page2(movie_name,feedback_var_p2,bright_names,fluor_names,red_names, bright_images, fluor_images, red_images, instruct_var_p2),\
+        update_flash([]) ])
 button_save_movie.pack()
 l_instr_name_p2=tk.Label(frame7_page2,text="INSTRUCTIONS FOR USER :" ,bg="black", font=all_font, fg="red").pack() 
 l_feedback_p2=tk.Label(frame2_page2,textvariable=feedback_var_p2,bg="black", fg=result_color, font=all_font, height=8)
@@ -395,12 +402,6 @@ l_fluor_name_p2=tk.Label(frame5_page2,textvariable=fl_name_p2,bg="black", fg=res
 l_bright_name_p2=tk.Label(frame4_page2,textvariable=br_name_p2 ,bg="black", fg=result_color, font=all_font, height=2).pack() 
 l_red_name_p2=tk.Label(frame9_page2,textvariable=red_name_p2,bg="black", fg=result_color, font=all_font, height=2).pack()
 ###################### 
-#global movies_menu
-#movie_names=[]
-#print("menu_variable=", menu_variable.get())
-#movies_menu = OptionMenu(frame3_page2,menu_variable, *movie_names, command=create_movie_for_display)
-#movies_menu.grid(row=0, column=2, padx=100,pady=20)
-#movies_menu.grid_forget()
 global all_buttons_page2
 all_buttons_page2=[button_choose_folder,button_save_movie]
 ###########################################################################
@@ -1159,11 +1160,9 @@ def activate_buttons(all_buttons_list,active_buttons_list):
     for button in all_buttons_list:
         #print("button=", button)
         if button in active_buttons_list:
-            button.config(state=NORMAL)
-            print("button ACTIVE=", button)
+            button.config(state=NORMAL)                        
         else:
             button.config(state=DISABLED)
-            print("button DISABLED=", button)
 #######################
 def load_helper_functions():
     os.chdir(software_folder)
