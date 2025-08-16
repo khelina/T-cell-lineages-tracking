@@ -34,7 +34,7 @@ def process_tif(tif_image_path):
 ###########################################
 
 ##############################
-def display_image_p2(slide_frame_number, channel_names_dictionary, channel_code,n_digits,canvas_size_p2):
+def display_image_p2_fix_missing(slide_frame_number, channel_names_dictionary, channel_code,n_digits,canvas_size_p2):
     channel_keys=list(channel_names_dictionary.keys())
     if slide_frame_number in channel_keys:
         old_name=channel_names_dictionary[slide_frame_number][0]

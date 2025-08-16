@@ -319,30 +319,7 @@ def refine_segmentation(segmentor, refiner,empty_fluor,empty_bright,centroid,cel
       segmented_frame = segmented_frame.astype(np.uint8)                       
       return segmented_frame, segmented_patch,a,b,c,d, final_mask
           
-#############
-"""
-def check_marker(segmented_patch,marker, frame_size, a,b,c,d):
-    x0,y0=int(round(marker[0])), int(round(marker[1]))
-    if segmented_patch.dtype!='uint8':
-         segmented_patch = segmented_patch.astype('uint8')
-    im2, contours, hierarchy = cv2.findContours(segmented_patch,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
-    counter=0
-    for cnt in contours:# choose contour which contains (x0,y0)
-         big=np.zeros((frame_size+bordersize*2,frame_size+bordersize*2),dtype="uint8")
-         one=np.zeros((segmented_patch.shape),dtype="uint8")
-         one=cv2.drawContours(one,[cnt],0,255, -1)
-         big[c:d,a:b]=one
-         test_image=big[bordersize:frame_size+bordersize,bordersize:frame_size+bordersize]
-         if test_image[y0,x0]==255:
-             cleaned_patch=one
-             counter+=1
-             break
-    if counter==0:# replace segmented cell with small circle if none contains (x0,y0)
-        image_with_circle_border=np.zeros((frame_size+bordersize*2,frame_size+bordersize*2),dtype="uint8")        
-        cv2.circle(image_with_circle_border, (x0+bordersize,y0+bordersize), 3, cell_number+1, -1)
-        cleaned_patch= image_with_circle_border[c:d,a:b]
-    return cleaned_patch
-"""
+
 #####################This function is used in manual segmentation correction and in def refine_segmentation
 def clean_manual_patch(output_raw,marker,a,b,c,d,frame_size, final_mask,cell_number,bordersize):# leave only the contour which contains marker when correcting 
 # segmentation manually; otherwise, output empty patch
@@ -596,11 +573,7 @@ def segment_and_clean(dict_of_divisions,cells,count,coords,text,segmentor, refin
        division_indicator="no division"       
        sum_clean=ensemble_output 
        cells["cell_%s" % number]=[[],[],bounding_box,sum_clean,empty_fluor_base,empty_bright_base,[cX,cY],a,b,c,d,ext_cell_name, frame_number, mask, coords, colour, division_indicator, number, area,perimeter,circularity]                                                                                    
-   coords=final_centroids
-   #print("coords=", coords)
-   #print("coords.shape=", coords.shape)
-   #cv2.imwrite("C:\\Users\\kfedorchuk\\Desktop\\new_masks\\frame_%s.tif" % (frame_number), mask*50)                   
-       
+   coords=final_centroids       
    return count,cells, coords, text, olds
 #######################################################
 def check_if_cell_stuck_to_edge(frame_with_one_cell):
@@ -622,7 +595,7 @@ def determine_which_edge(frame_with_one_cell,test_image):
         edges.append(["top",[0,1]])
     if  frame_with_one_cell.shape[0]-1 in rows:
         edges.append(["bottom",[0,-1]])
-    if 1 in cols:
+    if 0 in cols:
         edges.append(["left",[1,0]])
     if  frame_with_one_cell.shape[1]-1 in cols:
         edges.append(["right",[-1,0]])
@@ -633,7 +606,7 @@ def determine_which_edge(frame_with_one_cell,test_image):
     elif len(edges)==2:
            delta=[edges[0][1][0]+edges[1][1][0],edges[0][1][1]+edges[1][1][1]]
     else:
-           print("Error:len(edges)>2")
+           print("Error:len(edges)>2 or =0")
            delta=0
     print("delta=", delta)
     return delta

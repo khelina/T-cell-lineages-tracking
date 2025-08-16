@@ -171,8 +171,9 @@ def create_name_dictionary_p4(filenames):# available frame names (some might be 
      name_dictionary[internal_number]=filename
   return  name_dictionary 
 #################### this function is used for displaying all 3 types of images
+################### It tackles missing frames
 ########### especially if red channel is missing - in this case image is zero
-def display_image_p4(slide_frame_number, channel_names_dictionary, channel_code,canvas_size_p4):
+def display_image_p4_fix_missing(slide_frame_number, channel_names_dictionary, canvas_size):
     channel_keys=list(channel_names_dictionary.keys())
     if slide_frame_number in channel_keys:
         file_name=channel_names_dictionary[slide_frame_number]
@@ -180,11 +181,11 @@ def display_image_p4(slide_frame_number, channel_names_dictionary, channel_code,
         image=cv2.imread(file_name,0)
        
     else:
-         image=np.zeros((canvas_size_p4, canvas_size_p4,3), dtype=np.uint8)
-         cv2.putText(image,"NO IMAGE",((canvas_size_p4-200)//2,canvas_size_p4//2),cv2.FONT_HERSHEY_PLAIN,3.0,(238,238,0),2) 
+         image=np.zeros((canvas_size, canvas_size,3), dtype=np.uint8)
+         cv2.putText(image,"NO IMAGE",((canvas_size-200)//2,canvas_size//2),cv2.FONT_HERSHEY_PLAIN,3.0,(238,238,0),2) 
          #name= "No image available"
          name_for_display="               "
-    image_for_display=turn_image_into_tkinter(image, canvas_size_p4,[])         
+    image_for_display=turn_image_into_tkinter(image, canvas_size,[])         
     return  image_for_display, name_for_display
 ###############################################
 def calculate_angle(rect):
@@ -255,12 +256,12 @@ def cut_well_from_image(im_bright,seed,well_size, first_x0,delta_x, delta_y, fir
  global x_min, y_min
  
  x_min, y_min=min(xs),min(ys)
- print(" x_min before, y_min before=", x_min," , ", y_min)
- print("delta_x, delta_y=",delta_x, delta_y)
+ #print(" x_min before, y_min before=", x_min," , ", y_min)
+ #print("delta_x, delta_y=",delta_x, delta_y)
  #x_min, y_min=box_final[1][0],box_final[1][1] 
  x_min=x_min+delta_x
  y_min=y_min+delta_y
- print(" x_min after, y_min after=", x_min," , ", y_min)
+ #print(" x_min after, y_min after=", x_min," , ", y_min)
  #print(" x_min after, y_min after=", x_min," , ", y_min)
 ############################################# 
  #width=x_max-x_min

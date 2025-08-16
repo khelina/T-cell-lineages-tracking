@@ -148,6 +148,7 @@ def load_weights(models):
 def characters(x): # in most cases it is [-13:-9] (for names like t0001_ch02.tif)
     return(x[-14:-9])# if it is t00001_ch02.tif it should be changed to [-14:-9]
                      # if t001_ch02.tif it is [-12:-9]
+################ for step-2: when loading initial movie
 def load_image_names(source):
  #global bright_names_sorted,fluor_names_sorted
  bright_names,fluor_names, red_names=[], [], []
@@ -165,6 +166,7 @@ def load_image_names(source):
  fluor_names_sorted=sorted(fluor_names,key=characters)
  red_names_sorted =sorted(red_names,key=characters)
  print("len(bright_names_sorted INSIDE)=",len(bright_names_sorted))
+ print("len(red_names_sorted INSIDE)=",len(red_names_sorted))
  return bright_names_sorted,fluor_names_sorted, red_names_sorted
 ##################################################
 #this is the teatx for feedback window (execytion step)
