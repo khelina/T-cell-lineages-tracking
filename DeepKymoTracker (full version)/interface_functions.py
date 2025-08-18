@@ -201,7 +201,7 @@ def calculate_angle(rect):
        #first_x0=first_box[0][0] 
        angle=rect[2]
     return angle, box
-################################################
+################## automatic well cutting from each bright frame
 def cut_well_from_image(im_bright,seed,well_size, first_x0,delta_x, delta_y, first_rect):
  mask=None
  rot_indicator="no"# shows if you need to rotate final image or not
@@ -292,6 +292,12 @@ def cut_well_from_image(im_bright,seed,well_size, first_x0,delta_x, delta_y, fir
  
  return final_bright,M,x_min,y_min, rows, cols, rot_indicator, rot_bright
 ##################################################################
+def cut_well_in_manual_shift(im_bright,x_min,y_min,well_size, M, cols, rows):
+    rot_bright = cv2.warpAffine(im_bright,M,(cols,rows))
+    cut_bright_init=rot_bright[y_min:y_min+well_size,x_min:x_min+well_size]
+    final_bright=cut_bright_init
+    return final_bright, rot_bright
+#####################################################
 ############### this is for Step 1
 def cut_all(file_names,progressbar,tk_frame,label,M, cols,rows,Margin, x_min,x_max,y_min,y_max, destin, window_size):
   new_names=[]
