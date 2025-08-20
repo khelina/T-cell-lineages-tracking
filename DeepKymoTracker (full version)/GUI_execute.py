@@ -36,7 +36,7 @@ hs = win.winfo_screenheight() # height of the screen
 
 #win.geometry('1530x2000')
 
-bg_color,all_font,button_color,result_color,label_color="#A52A2A",'TkDefaultFont 10 bold','#9ACD32',"#00FFFF","#87CEFA"
+bg_color,all_font,button_color,result_color,label_color, slide_trough_color="#A52A2A",'TkDefaultFont 10 bold','#9ACD32',"#00FFFF","#87CEFA","#513B1C"
 
 win.config(bg=bg_color)
 page_titles=["PAGE 1: TITLE PAGE","PAGE 2: PROCESS MULTIPAGE TIFF", "PAGE 3: CUT ONE WELL",
@@ -434,17 +434,17 @@ frame6_page3.grid(row=3,column=0,rowspan = 1, columnspan = 1,sticky = W)
 frame7_page3 = tk.Frame(master=page3, width=canvas_size_p3, height=canvas_size_p3, bg=bg_color)
 frame7_page3.grid(row=3, column=1,rowspan = 1, columnspan = 1,sticky = W)
 
-frame8_page3 = tk.Frame(master=page3, width=canvas_size_p3, height=canvas_size_p3, bg=bg_color)
+frame8_page3 = tk.Frame(master=page3, width=canvas_size_p3, height=canvas_size_p3, bg="orange")
 frame8_page3.grid(row=3, column=2,rowspan = 1, columnspan = 1,sticky = W)
 
-frame9_page3 = tk.Frame(master=page3, width=canvas_size_p3, height=100, bg=bg_color)
+frame9_page3 = tk.Frame(master=page3, width=canvas_size_p3, height=200, bg=bg_color)
 frame9_page3.grid(row=4, column=0,rowspan = 1, columnspan = 1,sticky = W+E+N+S)
 
-frame10_page3 = tk.Frame(master=page3, width=canvas_size_p3, height=100, bg=bg_color)
+frame10_page3 = tk.Frame(master=page3, width=canvas_size_p3, height=200, bg=bg_color)
 frame10_page3.grid(row=4, column=1,rowspan = 1, columnspan = 1,sticky = W+E+N+S)
 
-frame11_page3 = tk.Frame(master=page3, width=canvas_size_p3, height=100, bg=bg_color)
-frame11_page3.grid(row=4, column=2,rowspan = 1, columnspan = 2,sticky = W+E+N+S)
+frame11_page3 = tk.Frame(master=page3, width=canvas_size_p3, height=200, bg=bg_color)
+frame11_page3.grid(row=4, column=2,rowspan = 1, columnspan = 1,sticky = W+E+N+S)
 
 frame12_page3 = tk.Frame(master=page3, width=1530, height=30, bg=bg_color)
 frame12_page3.grid(row=5, column=0,rowspan = 1, columnspan = 3,sticky = W+E+N+S)
@@ -464,10 +464,10 @@ canvas_left.pack(anchor='nw', fill='both', expand=True)
 canvas_mid = Canvas(frame7_page3, bg=bg_color, height=canvas_size_p3, width=canvas_size_p3)
 canvas_mid.pack(anchor='nw', fill='both', expand=True)
 canvas_right = Canvas(frame8_page3, bg=bg_color, height=canvas_size_p3, width=canvas_size_p3)
-canvas_right.pack(anchor='nw', fill='both', expand=True)
+canvas_right.pack(anchor='nw', fill=None, expand=False)
 ###################################################
-global popup_mid, popup_right,popup_size_p3
-popup_mid, popup_right, popup_size_p3=None, None, 800
+global popup_mid, popup_right,popup_canvas_size_p3
+popup_mid, popup_right, popup_canvas_size_p3=None, None, 800
 #################################################
 global low,high 
 low,high=0,255
@@ -489,22 +489,38 @@ feedback_var_p3.set(feedback_text)
 instruct_var_p3.set(" Step 2 allows you to cut out a well of interest out of initial cell movie. \n\nTo choose raw movie , press Button 1."
                     "\nThen, navigate to your raw movie, open it and click on ANY BRIGHT field image")
 ##############################################
+def prepare_file_name_for_show(old_name):
+    name =os.path.basename(old_name)
+    index_t =name.find("_t")        
+    split_name =name[:index_t+1]+" \n"+name[index_t+1:]
+    return split_name
+##################################################
 def select_one_bright():# load all frames,display clicked bright frame    
     global my_path, my_destin, bright_names_sorted,fluor_names_sorted, red_names_sorted,clicked_number 
     my_path=filedialog.askopenfilename()
-    l_left_canvas.config(text=os.path.basename(my_path))    
+    #############################################
+    first_filename_for_show=prepare_file_name_for_show(my_path)
+    l_left_canvas.config(text=first_filename_for_show)
+    #l_left_canvas.config(text=os.path.basename(my_path)) 
+    ####################################################    
     movie_dir=os.path.dirname(my_path)
     feedback_dict["s"]=movie_dir
     
     bright_names_sorted,fluor_names_sorted, red_names_sorted =load_image_names(movie_dir)
     feedback_dict["fl"],feedback_dict["br"],feedback_dict["red"]=str(len(fluor_names_sorted)),str(len(bright_names_sorted)),str(len(red_names_sorted))
-    global n_digits
+    ##########################################
+    """
+    global n_digits_p3
     base =os.path.basename(fluor_names_sorted[-1])
     name =os.path.splitext(base)[0]
     index_t =name.find("_t")
     index_ch=name.find("_ch")
-    n_digits = index_ch-index_t-2
-             
+    n_digits_p3 = index_ch-index_t-2
+    """
+    #####################################
+    global n_digits_p3,first_frame_number_p3
+    full_core_fluor_name_p3, n_digits_p3, first_frame_number_p3= extract_file_name(fluor_names_sorted[0])
+    ###################################################         
     global list_of_red_frame_numbers
     list_of_red_frame_numbers =extract_red_frame_numbers(red_names_sorted)
     #print("list_of_red_frame_numbers=", list_of_red_frame_numbers) 
@@ -538,7 +554,7 @@ def select_one_bright():# load all frames,display clicked bright frame
 def measure_intensities(event):# draw red circles on well borders to measure intensities
     global red_point_coords
     global intensities
-    canvas_left.create_oval(event.x-1,event.y-1,event.x+1,event.y+1,outline = "red",fill = "red",width = 2)
+    canvas_left.create_oval(event.x-2,event.y-2,event.x+2,event.y+2,outline = "red",fill = "red",width = 2)
     red_point_coords.append([event.x, event.y])    
     intensity=clicked_bright[int(event.y*image_size_p3[1]/canvas_size_p3),int(image_size_p3[0]/canvas_size_p3)]
     intensities.append(intensity)
@@ -564,10 +580,10 @@ def apply_thresh():# threshold the clicked image (aftre measuring well border in
     update_flash([threshold_slider])
     activate_buttons(all_buttons_page3,[threshold_slider])    
     canvas_mid.bind("<Button-1>", choose_well)
-    l_mid_canvas.config(text=os.path.basename(my_path))
+    first_filename_for_show=prepare_file_name_for_show(my_path)
+    l_mid_canvas.config(text=first_filename_for_show)
     threshold_slider.set(low)
 ############################################################
-
 def change_threshold(value): # change threshold     
     low=float(value)        
     global thresh,thr_image
@@ -597,9 +613,7 @@ def choose_well(event):# click on the well of interest, get green circle and red
     cnt=contours[0]    
     global first_rect,first_x0, first_box, angle  
     first_rect = cv2.minAreaRect(cnt)
-    angle, first_box=calculate_angle(first_rect)
-    
-    #print("first_box=", first_box)    
+    angle, first_box=calculate_angle(first_rect)      
     first_x0=first_box[0][0]    
     global  well_size, popup_image_size_p3   
     x0,y0,x1,y1,x2,y2,x3,y3=first_box[0][0],first_box[0][1],first_box[1][0],first_box[1][1],\
@@ -607,7 +621,7 @@ def choose_well(event):# click on the well of interest, get green circle and red
     size_1=math.sqrt(((x1-x0)**2+(y1-y0)**2))
     size_2=math.sqrt(((x2-x1)**2+(y2-y1)**2))
     well_size=int(round(max(size_1,size_2)))
-    popup_image_size_p3=int(round(image_size_p3[0]*popup_size_p3/well_size))
+    popup_image_size_p3=int(round(image_size_p3[0]*popup_canvas_size_p3/well_size))  
     feedback_dict["w"]= str(well_size)+" x "+str(well_size)
     feedback_text=update_feedback_text(feedback_dict)
     feedback_var_p3.set(feedback_text)
@@ -624,8 +638,7 @@ def choose_well(event):# click on the well of interest, get green circle and red
     photo_im_red=turn_image_into_tkinter(im_red, canvas_size_p3,[])   
     canvas_left.create_image(0,0, anchor=NW, image=photo_im_red)    
     rows,cols = clicked_bright.shape 
-    M_first = cv2.getRotationMatrix2D((int(round(cols/2)),int(round(rows/2))),angle,1)   
-    
+    M_first = cv2.getRotationMatrix2D((int(round(cols/2)),int(round(rows/2))),angle,1)       
     instruct_var_p3.set("Check that the well has been detected correctly: a red frame should appear around the well.\nIf it is not correct go back to sliding bar."
                        "\nFinally, push Button 3 to check the result.")
     update_flash([button_cut_well, threshold_slider])
@@ -635,10 +648,8 @@ def cut_first_well():# cut well in the first image and display it in canvas_mid
  instruct_var_p3.set("It is important to manually correct shift in Frame 1. Push Button 4 and drag the image with mouse to eliminate the shift."
                        "\nFinally, push Button 5 to check the results.")
  global canvas_mid 
- canvas_mid.delete("all")
- 
+ canvas_mid.delete("all") 
 #################### draw temp image (binary) to rotate it and find rect_new
- #print("first box=", first_box)
  temp=np.zeros(clicked_bright.shape, np.uint8)
  cv2.drawContours(temp,[first_box],0,255,-1)
  dst = cv2.warpAffine(temp,M_first,(cols,rows))
@@ -648,14 +659,12 @@ def cut_first_well():# cut well in the first image and display it in canvas_mid
  rect_new = cv2.minAreaRect(cnt_new)             
  box_final = cv2.boxPoints(rect_new)# horisontal well    
  box_final = np.int0(np.round(box_final))
- #print("first box_final=", box_final)
  xs=[box_final[k][0] for k in range(4)]
  ys=[box_final[k][1] for k in range(4)]
  global x_min_first, y_min_first, x0,y0,x1,y1
  x_min_first, y_min_first=min(xs),min(ys)
  ###########################
- #x0,y0=x_min_first, y_min_first# x0,y0- image coord system; x1,y1 - popup canvas coord system
- x1,y1=int(round(x_min_first*popup_size_p3/well_size)),int(round(y_min_first*popup_size_p3/well_size))
+ x_min_popup,y_min_popup=int(round(x_min_first*popup_canvas_size_p3/well_size)),int(round(y_min_first*popup_canvas_size_p3/well_size))
  #############################
  global rot_bright
  rot_bright = cv2.warpAffine(clicked_bright,M_first,(cols,rows))
@@ -663,64 +672,38 @@ def cut_first_well():# cut well in the first image and display it in canvas_mid
  cut_bright=rot_bright[y_min_first:y_min_first+well_size, x_min_first:x_min_first+well_size]
  global final_s, finalImage_small
  final_s=turn_image_into_tkinter(cut_bright, canvas_size_p3,[]) 
- finalImage_small=canvas_mid.create_image(0,0, anchor=NW, image=final_s)
- #########################
- 
- #global delta_x, delta_y
- #delta_x, delta_y=0,0
+ finalImage_small=canvas_mid.create_image(0,0, anchor=NW, image=final_s) 
  canvas_mid.unbind("<Button-1>")
  update_flash([button_first_shift_edit])
- activate_buttons(all_buttons_page3,[button_first_shift_edit ])   
-######################################################
-"""
-def drag_image_old(event, canvas,imageFinal):# drag image with mouse
-    global x_img,y_img, points, x_last,y_last,dx,dy, delta_x,delta_y    
-    x, y = event.x, event.y   
-    points.append([x,y])
-    if len(points)==1:
-      print("TOUCHED THE MOUSE BUTTON")             
-    if len(points)>1:         
-         dx, dy=x-x_img,y-y_img
-         canvas.move(imageFinal, dx,dy)
-         canvas.update()
-         x_last-=dx
-         y_last-=dy                
-    x_img = x
-    y_img = y
-    delta_x, delta_y=int(round((x_last-x1)*image_size_p3[0]/popup_image_size_p3)),int(round((y_last-y1)*image_size_p3[1]/popup_image_size_p3))
-"""    
-
+ activate_buttons(all_buttons_page3,[button_first_shift_edit ])
+ threshold_slider.config(troughcolor=label_color, bg=label_color)   
 ###############################################              
 def drag_start_p2(event):              
         global x_mouse,y_mouse
         x_mouse = event.x
         y_mouse = event.y       
 #############################################
-################################################
-def drag_image_p2(event,canvas,imageFinal):        
-        global x_mouse,y_mouse, x_last,y_last
-        #print("x,y= inside drag_image", x,y)
+def drag_image_p2(event,canvas,imageObject):        
+        global x_mouse,y_mouse, x_last,y_last     
         dx = event.x - x_mouse
         dy = event.y - y_mouse
-        canvas.move(imageFinal, dx,dy)
+        canvas.move(imageObject, dx,dy)
         canvas.update()      
         # record the new position
         x_mouse = event.x
         y_mouse= event.y
         x_last-=dx
-        y_last-=dy  
-        #delta_x, delta_y=int(round((x_last-x1)*image_size_p3[0]/popup_image_size_p3)),int(round((y_last-y1)*image_size_p3[1]/popup_image_size_p3))    
-        
+        y_last-=dy               
 ######################################################
 def edit_first_frame_shift():  
     global popup_mid, canvas_popup_mid   
     popup_mid = tk.Toplevel(master=page3,  bg=bg_color)
-    popup_mid.geometry('%dx%d+%d+%d' % (popup_size_p3, popup_size_p3+50, 0, 0))
-    frame1 = tk.Frame(master=popup_mid, width=popup_size_p3, height=popup_size_p3)
+    popup_mid.geometry('%dx%d+%d+%d' % (popup_canvas_size_p3, popup_canvas_size_p3+50, 0, 0))
+    frame1 = tk.Frame(master=popup_mid, width=popup_canvas_size_p3, height=popup_canvas_size_p3)
     frame1.pack()
-    frame2 = tk.Frame(master=popup_mid, width=popup_size_p3, height=50)
+    frame2 = tk.Frame(master=popup_mid, width=popup_canvas_size_p3, height=50)
     frame2.pack()
-    canvas_popup_mid = Canvas(frame1, height=popup_size_p3, width=popup_size_p3, bg=bg_color)
+    canvas_popup_mid = Canvas(frame1, height=popup_canvas_size_p3, width=popup_canvas_size_p3, bg=bg_color)
     canvas_popup_mid.pack(anchor='nw', fill='both', expand=True)
     def close_and_flash():
         update_flash([button_bright])
@@ -730,14 +713,11 @@ def edit_first_frame_shift():
     button_close=tk.Button(frame2,text="Close",bg='#9ACD32',activebackground="red",font='TkDefaultFont 10 bold' , command=close_and_flash)
     button_close.pack()
    
-    global  x_last,y_last, br_image, x1,y1#, #delta_x,delta_y
-    #x0,y0=x_min_first, y_min_first# x0,y0- image coord system; x1,y1 - popup canvas coord system
-    x1,y1=int(round(x_min_first*popup_size_p3/well_size)),int(round(y_min_first*popup_size_p3/well_size))
-   
-    x_last,y_last= x1,y1
-    #delta_x, delta_y=int(round((x_last-x1)*image_size_p3[0]/popup_image_size_p3)),int(round((y_last-y1)*image_size_p3[1]/popup_image_size_p3))
-    #can_delta_x,can_delta_y=x_last-x1,y_last-y1    
-    
+    global  x_last,y_last, br_image,  x_min_popup, y_min_popup,delta_x,delta_y  
+    x_min_popup, y_min_popup=int(round(x_min_first*popup_canvas_size_p3/well_size)),int(round(y_min_first*popup_canvas_size_p3/well_size))   
+    x_last,y_last=  x_min_popup, y_min_popup
+    delta_x, delta_y=0,0
+       
     global new_name
     head, tail=os.path.split(my_path)
     new_name=os.path.join(my_destin,tail)
@@ -747,7 +727,7 @@ def edit_first_frame_shift():
     global image1,imageFinal_big   
     canvas_popup_mid.delete("all")
     image1=turn_image_into_tkinter(br_image, popup_image_size_p3,[])
-    imageFinal_big = canvas_popup_mid.create_image(-x1, -y1, image = image1,anchor='nw')
+    imageFinal_big = canvas_popup_mid.create_image(- x_min_popup, - y_min_popup, image = image1,anchor='nw')
     ##################################################
     global drag_start_p2,drag_image,drag_stop_p2 , cut_and_save_patch
     canvas_popup_mid.unbind_all("<ButtonRelease-1>")
@@ -757,21 +737,22 @@ def edit_first_frame_shift():
     update_flash([button_close])    
 ##################################################
 def cut_and_save_patch(event):
-    global br_image, new_name,x_last, y_last, x1,y1, delta_x, delta_y
+    global br_image, new_name,x_last, y_last,  x_min_popup, y_min_popup, delta_x, delta_y
     global canvas_mid, canvas_popup_mid
     xx,yy=int(round(x_last*image_size_p3[0]/popup_image_size_p3)),int(round(y_last*image_size_p3[1]/popup_image_size_p3))    
     patch=br_image[yy:yy+well_size, xx:xx+well_size]
     patch_1=patch.copy()       
     cv2.imwrite(new_name, patch)# save in INPUT folder
     global tk_patch, image2, imageFinal_big 
-    tk_patch=turn_image_into_tkinter(patch, popup_size_p3,[])      
+    tk_patch=turn_image_into_tkinter(patch, popup_canvas_size_p3,[])      
     canvas_popup_mid.delete("all")
     imageFinal_big=canvas_popup_mid.create_image(0,0, image = tk_patch,anchor='nw')
 
     image2=turn_image_into_tkinter(patch_1, canvas_size_p3,[])    
     canvas_mid.create_image(0, 0, image = image2,anchor='nw')
+    # the whole point of correcting shift in Frame 1 was to obtain delta_x, delta_y
     # delta_x, delta_y take into account shift in Frame 1 when cutting all bright wells 
-    delta_x, delta_y=int(round((x_last-x1)*image_size_p3[0]/popup_image_size_p3)),int(round((y_last-y1)*image_size_p3[1]/popup_image_size_p3))    
+    delta_x, delta_y=int(round((x_last- x_min_popup)*image_size_p3[0]/popup_image_size_p3)),int(round((y_last- y_min_popup)*image_size_p3[1]/popup_image_size_p3))    
 ##################################
 def cut_bright_wells():# Button 5. Apply to all bright
   update_flash([])
@@ -783,7 +764,8 @@ def cut_bright_wells():# Button 5. Apply to all bright
 
   for k in range(len(bright_names_sorted)): 
     bright_name=bright_names_sorted[k]
-    l_right_canvas.config(text=os.path.basename(bright_name))
+    bright_name_for_show=prepare_file_name_for_show(bright_name)
+    l_right_canvas.config(text=bright_name_for_show)
     bright_image=cv2.imread(bright_name,-1)  
     final_bright,M,x_min,y_min, rows, cols, rot_indicator, rot_bright=cut_well_from_image(bright_image,seed,well_size,first_x0, delta_x, delta_y, first_rect)
     #print("final_bright.shape,final_bright.dtype=",final_bright.shape,final_bright.dtype)
@@ -802,15 +784,11 @@ def cut_bright_wells():# Button 5. Apply to all bright
         first=final_bright       
         first_tk=turn_image_into_tkinter(first, canvas_size_p3,[])
   global frame_slider    
-  frame_slider=Scale(frame11_page3,from_=1,to=len(bright_names_sorted),orient=HORIZONTAL,troughcolor="#513B1C",bg=label_color,font=all_font,activebackground="red",label="Frame "+str(1), command=slide_p3, length=250, showvalue=0)
-  frame_slider.pack()
-  frame_slider.set(1)
-  #slide_frames_p3(1)
+  frame_slider=Scale(frame11_page3,from_=first_frame_number_p3,to=len(bright_names_sorted)+first_frame_number_p3-1,orient=HORIZONTAL,troughcolor=slide_trough_color,bg=label_color,font=all_font,activebackground="red",label="Frame "+str(first_frame_number_p3), command=slide_p3, length=canvas_size_p3, showvalue=0)
+  frame_slider.pack(side=tk.TOP)
   #######################
-  global  bright_dictionary_p2
-  
-  bright_dictionary_p2=create_name_dictionary_p4(new_br_names)
-  
+  global  bright_dictionary_p2 
+  bright_dictionary_p2=create_name_dictionary_p4(new_br_names)  
   threshold_slider.config(bg=label_color) 
   instruct_var_p3.set("Scroll through frames to ensure that the well fits completely into each frame.\nIf you want to corect shift in some frames, push Button 6 to launch editing window."
                  "\nOtherwise, push Button 7 to apply to ALL FLUORESCENT images")
@@ -819,33 +797,29 @@ def cut_bright_wells():# Button 5. Apply to all bright
   activate_buttons(all_buttons_page3,[button_shift_edit ])          
   canvas_right.delete("all")
   canvas_right.create_image(0,0, anchor=NW, image=first_tk)
-  l_right_canvas.config(text=os.path.basename(bright_names_sorted[0]))           
-
+  first_bright_name_for_show=prepare_file_name_for_show(bright_names_sorted[0])
+  l_right_canvas.config(text=first_bright_name_for_show)           
 ##########################################
 def start_editing_frames():#   
     global popup_right, canvas_popup_right, l_popup_canvas    
     popup_right = tk.Toplevel(master=page3,  bg=bg_color)
-    popup_right.geometry('%dx%d+%d+%d' % (popup_size_p3, popup_size_p3+210, 0, 0))
-    #frame3 = tk.Frame(master=popup_right, width=popup_size_p3, height=50)
-    #frame3.pack()
-    frame1 = tk.Frame(master=popup_right, width=popup_size_p3, height=popup_size_p3, bg=bg_color)
+    popup_right.geometry('%dx%d+%d+%d' % (popup_canvas_size_p3, popup_canvas_size_p3+210, 0, 0))   
+    frame1 = tk.Frame(master=popup_right, width=popup_canvas_size_p3, height=popup_canvas_size_p3, bg=bg_color)
     frame1.pack()
-    frame2 = tk.Frame(master=popup_right, width=popup_size_p3, height=50, bg=bg_color)
+    frame2 = tk.Frame(master=popup_right, width=popup_canvas_size_p3, height=50, bg=bg_color)
     frame2.pack()
-    canvas_popup_right = Canvas(frame1, height=popup_size_p3, width=popup_size_p3, bg="black")
+    canvas_popup_right = Canvas(frame1, height=popup_canvas_size_p3, width=popup_canvas_size_p3, bg="black")
     canvas_popup_right.pack(anchor='nw', fill='both', expand=True)
-     
-    #button_current_edit=tk.Button(frame3,text="6a. Edit well shift in current frame",bg=button_color,activebackground="red",font=all_font, command=edit_current_frame_shift)
-    #button_current_edit.pack()
     
     l_popup_canvas=tk.Label(frame2,text= "bright frame", bg="black", fg="cyan", font=("Times", "12"))
     l_popup_canvas.pack()  
     
     global frame_pop_slider, first_tk_pop    
-    frame_pop_slider=Scale(frame2,from_=1,to=len(bright_names_sorted),orient=HORIZONTAL,troughcolor="#513B1C",bg=label_color,font=all_font,activebackground="red",label="Frame "+str(1), command=slide_p3, length=250, showvalue=0)
+    frame_pop_slider=Scale(frame2,from_=first_frame_number_p3,to=len(bright_names_sorted)+first_frame_number_p3-1,orient=HORIZONTAL,troughcolor="#513B1C",bg=label_color,font=all_font,activebackground="red",label="Frame "+str(first_frame_number_p3), command=slide_p3, length=popup_canvas_size_p3, showvalue=0)
     frame_pop_slider.pack()
-    frame_pop_slider.set(1)
-    slide_p3(1)
+    frame_pop_slider.set(first_frame_number_p3)
+    frame_slider.set(first_frame_number_p3)
+    slide_p3(first_frame_number_p3)
     
     l_instruct_popup=tk.Label(frame2,text="Scroll through frames to ensure that the well fits completely into each frame.\nIf it does not push Button 6a and correct shift in the current frame.Do it for as many frames as necessary."
                  "\nFinally, close the popup window" ,bg="black", fg="yellow", font=all_font, height=5)
@@ -858,135 +832,108 @@ def start_editing_frames():#
         popup_right=None
        
     button_close=tk.Button(frame2,text="Close",bg='#9ACD32',activebackground="red",font='TkDefaultFont 10 bold' , command= destroy_popup)
-    button_close.pack()
-    
-    #first_tk_pop=turn_image_into_tkinter(first, popup_size_p3,[])
-    #canvas_popup_right.create_image(0,0, anchor=NW, image=first_tk_pop)
+    button_close.pack()    
     l_popup_canvas.config(text=os.path.basename(bright_names_sorted[0]))
-    #update_flash([button_current_edit])
-    #############################################
-
+    
     global image1, new_name, imageFinal_curr
     new_name=new_br_names[0]
     br_image= rotated_images[0]
-    item=rotation_matrices[0]
-    #print("item=", item)
-    M,x_min,y_min,row,cols, rotation_indicator=item[0],item[1],item[2],item[3],item[4], item[5]    
-    size=int(round(image_size_p3[0]*popup_size_p3/well_size))   
-    image1=turn_image_into_tkinter(br_image, size,[])      
-    imageFinal_curr = canvas_popup_right.create_image(-x_min, -y_min, image = image1,anchor='nw')
-    #canvas_popup_right.bind('<B1-Motion>', lambda event: drag_image( event,canvas_popup_right, imageFinal))
-    #canvas_popup_right.bind("<ButtonRelease>", lambda event: cut_and_save_current(event,canvas_popup_right, canvas_right))
+    item=rotation_matrices[0]  
+    M,x_min,y_min,row,cols, rotation_indicator=item[0],item[1],item[2],item[3],item[4], item[5]       
+    x_min_popup, y_min_popup=int(round(x_min*popup_canvas_size_p3/well_size)),int(round(y_min*popup_canvas_size_p3/well_size))
+    image1=turn_image_into_tkinter(br_image, popup_image_size_p3,[])      
+    imageFinal_curr = canvas_popup_right.create_image(- x_min_popup, - y_min_popup, image = image1,anchor='nw')    
     canvas_popup_right.bind( "<ButtonPress-1>", drag_start_p2)
-    canvas_popup_right.bind("<ButtonRelease-1>", lambda event: cut_and_save_current(event))
-    #@canvas_popup_right.bind("<ButtonRelease-1>", lambda event: drag_stop_p2, add="+")
+    canvas_popup_right.bind("<ButtonRelease-1>", lambda event: cut_and_save_current(event))   
     canvas_popup_right.bind("<B1-Motion>", lambda event: drag_image_p2( event,canvas_popup_right, imageFinal_curr))           
  ###########################################################
-######## "<ButtonRelease>"
-def cut_and_save_current(event):   
+def cut_and_save_current(event):#"<ButtonRelease>"   
     # cut and save bright well in INPUT folder
     global  br_image, new_name, x_last, y_last
     xx,yy=int(round(x_last*image_size_p3[0]/popup_image_size_p3)),int(round(y_last*image_size_p3[1]/popup_image_size_p3))    
     patch=br_image[yy:yy+well_size, xx:xx+well_size]
-    cv2.imwrite(new_name, patch)# save in INPUT folder
-   
+    cv2.imwrite(new_name, patch)# save in INPUT folder   
     ###############################################
-    # modify rotation_matrices for current frame    
-    #new_x_min, new_y_min=x_last,y_last
+    # modify and save rotation_matrix for current frame       
     current_frame_number=frame_pop_slider.get()
     print("current_frame_number=", current_frame_number)
-    item=rotation_matrices[current_frame_number-1]
-    #print("item=", item)
+    item=rotation_matrices[current_frame_number-1] 
     M,x_min,y_min,row,cols, rotation_indicator=item[0],item[1],item[2],item[3],item[4], item[5]
-    new_item=(M, xx,yy,rows,cols, rotation_indicator)
-    #print("new_item=", new_item)
+    new_item=(M, xx,yy,rows,cols, rotation_indicator)  
     rotation_matrices[current_frame_number-1]=new_item
     #######################################
     #  display modified frame in both canvases
     global tk_patch, image2, canvas_popup_right, canvas_right, imageFinal_curr 
-    tk_patch=turn_image_into_tkinter(patch, popup_size_p3,[])      
+    tk_patch=turn_image_into_tkinter(patch, popup_canvas_size_p3,[])      
     canvas_popup_right.delete("all")
     canvas_popup_right.create_image(0,0, image = tk_patch,anchor='nw')
     patch_1=patch.copy()
     image2=turn_image_into_tkinter(patch_1, canvas_size_p3,[])    
-    imageFinal_curr=canvas_right.create_image(0, 0, image = image2,anchor='nw')
- 
+    imageFinal_curr=canvas_right.create_image(0, 0, image = image2,anchor='nw') 
 ###################################### 
 global new_fl_names, new_red_names
 new_fl_names,new_red_names= None, None
-#################################   
-
-#########################
 global frame_pop_slider
 frame_pop_slider=None
 ######################### scroll through all images
 def slide_p3(value): 
        image_number = int(value)# without 0 digits on slider
        frame_slider.config(label="Frame "+str(value))
-       image_number_zfill=str(value).zfill(n_digits)       
-       ##############################################         
-       canvas_right.delete("all")           
-       ###########################################
-       global br_final
-       ####################################
-       br_path=new_br_names[image_number-1]
+       image_number_zfill=str(value).zfill(n_digits_p3)                    
+       canvas_right.delete("all")
+       ################################################                 
+       global br_final      
+       br_path=new_br_names[image_number-first_frame_number_p3-1]
        br_final, br_name=display_image_p4_fix_missing(image_number_zfill,bright_dictionary_p2, canvas_size_p3)                           
-       canvas_right.create_image(0,0, anchor=NW, image=br_final)      
-       l_right_canvas.config(text=br_name)
+       canvas_right.create_image(0,0, anchor=NW, image=br_final)
+       br_name_for_show=prepare_file_name_for_show(br_name)
+       l_right_canvas.config(text=br_name_for_show)
        ##############################################
        if new_fl_names:
           canvas_mid.delete("all")
           global fl_final
-          fl_path=new_fl_names[image_number-1]          
+          fl_path=new_fl_names[image_number-first_frame_number_p3]          
           fl_final, fl_name=display_image_p4_fix_missing(image_number_zfill,fluor_dictionary_p2, canvas_size_p3)                           
-          canvas_mid.create_image(0,0, anchor=NW, image=fl_final)      
-          l_mid_canvas.config(text=fl_name)
+          canvas_mid.create_image(0,0, anchor=NW, image=fl_final)
+          fl_name_for_show=prepare_file_name_for_show(fl_name)
+          l_mid_canvas.config(text=fl_name_for_show)
        ##############################################
        if new_red_names:
           canvas_left.delete("all")
           global red_final
-          red_path=new_red_names[image_number-1]         
+          red_path=new_red_names[image_number-first_frame_number_p3]         
           red_final, red_name=display_image_p4_fix_missing(image_number_zfill,red_dictionary_p2, canvas_size_p3)                           
-          canvas_left.create_image(0,0, anchor=NW, image=red_final)      
-          l_left_canvas.config(text=red_name)
+          canvas_left.create_image(0,0, anchor=NW, image=red_final)
+          red_name_for_show=prepare_file_name_for_show(red_name)
+          l_left_canvas.config(text=red_name_for_show)
        if popup_right:
           canvas_popup_right.delete("all") 
-          item=rotation_matrices[image_number-1]
+          item=rotation_matrices[image_number-first_frame_number_p3]
           x_min,y_min=item[1],item[2]       
           global  x_last,y_last, rotated_images, br_image
           #x0,y0=x_min, y_min
-          x1,y1=int(round(x_min*popup_size_p3/well_size)),int(round(y_min*popup_size_p3/well_size))   
-          x_last,y_last= x1,y1
+          x_min_popup, y_min_popup=int(round(x_min*popup_canvas_size_p3/well_size)),int(round(y_min*popup_canvas_size_p3/well_size))   
+          x_last,y_last=  x_min_popup, y_min_popup
           global image1, new_name, imageFinal_curr
-          new_name=new_br_names[image_number-1]
-          br_image= rotated_images[image_number-1]    
-          size=int(round(image_size_p3[0]*popup_size_p3/well_size))   
-          image1=turn_image_into_tkinter(br_image, size,[])      
-          imageFinal_curr = canvas_popup_right.create_image(-x1, -y1, image = image1,anchor='nw')
-          ####################################
-          #br_image_copy=cv2.imread(br_path,0)
-          frame_pop_slider.config(label="Frame "+str(value))
-         
-          l_popup_canvas.config(text=os.path.basename(bright_names_sorted[image_number-1]))
-##################### activate editing frame shift for current frame in canvas_right
-  
+          new_name=new_br_names[image_number-first_frame_number_p3]
+          br_image= rotated_images[image_number-first_frame_number_p3]             
+          image1=turn_image_into_tkinter(br_image, popup_image_size_p3,[])      
+          imageFinal_curr = canvas_popup_right.create_image(- x_min_popup, - y_min_popup, image = image1,anchor='nw')         
+          frame_pop_slider.config(label="Frame "+str(value))         
+          l_popup_canvas.config(text=os.path.basename(bright_names_sorted[image_number-first_frame_number_p3]))
+##################### activate editing frame shift for current frame in canvas_right  
 def cut_fluor_wells():#cut fluor and red wells
  instruct_var_p3.set("Processing fluorescent and red frames....") 
- update_flash([])
- 
+ update_flash([]) 
  button_fluor.config(bg="red")
  progressbar_fluor = ttk.Progressbar(frame10_page3, orient='horizontal',mode='determinate',length=280)
  progressbar_fluor.pack()
- 
- #list_of_red_frame_numbers =extract_red_frame_numbers(red_names_sorted)
- #print("list_of_red_frame_numbers=", list_of_red_frame_numbers)    
- global rotation_matrices,new_fl_names,new_red_names, first_tk_fl
- 
+    
+ global rotation_matrices,new_fl_names,new_red_names, first_tk_fl 
  new_fl_names, new_red_names = [], []
  for k in range(len(fluor_names_sorted)):   
     info=rotation_matrices[k] 
-    M,x_min,y_min,rows, cols, rot_indicator=info[0], info[1],info[2],info[3],info[4], info[5]    
-    
+    M,x_min,y_min,rows, cols, rot_indicator=info[0], info[1],info[2],info[3],info[4], info[5]        
     fluor_name=fluor_names_sorted[k]   
     fluor_image=cv2.imread(fluor_name,-1)        
     rot_fluor = cv2.warpAffine(fluor_image,M,(cols,rows))      
@@ -1025,10 +972,7 @@ def cut_fluor_wells():#cut fluor and red wells
     final_red_tk=turn_image_into_tkinter(final_red, canvas_size_p3,[])
     canvas_left.delete("all")
     canvas_left.create_image(0,0, anchor=NW, image=final_red_tk)
-    l_left_canvas.config(text=red_text)
-    #print("new_red_names=", new_red_names)
- #######################
-    
+    l_left_canvas.config(text=red_text)       
  global  red_dictionary_p2,fluor_dictionary_p2
  red_dictionary_p2=create_name_dictionary_p4( new_red_names)
  fluor_dictionary_p2=create_name_dictionary_p4( new_fl_names)
@@ -1036,8 +980,8 @@ def cut_fluor_wells():#cut fluor and red wells
  canvas_left.delete("all")
  canvas_mid.delete("all")
  canvas_right.delete("all")
- frame_slider.set(1)
- slide_p3(1)
+ frame_slider.set(first_frame_number_p3)
+ slide_p3(first_frame_number_p3)
  feedback_dict["dest"]=my_destin# print destination folder in feedback panel
  feedback_text=update_feedback_text(feedback_dict)
  feedback_var_p3.set(feedback_text)
@@ -1047,23 +991,21 @@ def cut_fluor_wells():#cut fluor and red wells
  activate_buttons(all_buttons_page3,[]) 
 ##################################################
 l_title=tk.Label(frame1_page3,text= "STEP-2: CUT WELL", bg="yellow", fg="red", font=("Times", "24")).pack()
-
 l_feedback_p3=tk.Label(frame2_page3,textvariable=feedback_var_p3 ,bg="black", fg=result_color, font=all_font, height=5)
 l_feedback_p3.pack(fill=BOTH)   
-
-l_instr_name_p3=tk.Label(frame13_page3,text="INSTRUCTIONS FOR USER :" ,bg="black", font=all_font, fg="red").pack()
+l_instr_name_p3=tk.Label(frame13_page3,text="INSTRUCTIONS FOR USER :" ,bg="black", font=all_font, fg="white").pack()
 l_instruct_p3=tk.Label(frame14_page3,textvariable=instruct_var_p3 ,bg="black", fg="yellow", font=all_font, height=5)
 l_instruct_p3.pack(fill=BOTH)   
 ############################################################
-l_left_canvas=tk.Label(frame9_page3,text= "         ", bg="black", fg="cyan", font=("Times", "12"))
-l_left_canvas.pack()
-l_mid_canvas=tk.Label(frame10_page3,text= "         ", bg="black", fg="cyan", font=("Times", "12"))
-l_mid_canvas.pack()
-l_right_canvas=tk.Label(frame11_page3,text= "          ", bg="black", fg="cyan", font=("Times", "12"))
-l_right_canvas.pack()    
+l_left_canvas=tk.Label(frame9_page3,text= "         ", bg="black", fg="cyan", font=("Times", "12"), width=45, height=2)
+l_left_canvas.pack(side=tk.LEFT, fill=None, expand=False)
+l_mid_canvas=tk.Label(frame10_page3,text= "         ", bg="black", fg="cyan", font=("Times", "12"), width=45, height=2)
+l_mid_canvas.pack(side=tk.LEFT, fill=None, expand=False)
+l_right_canvas=tk.Label(frame11_page3,text= "          ", bg="black", fg="cyan", font=("Times", "12"), width=45, height=2)
+l_right_canvas.pack(side=tk.TOP, fill=None, expand=False)    
 ####################################
 threshold_slider=Scale(frame4_page3, from_=0,to=255,orient=HORIZONTAL,variable=low,length=150,bg=label_color,	
-    showvalue=0,troughcolor="#513B1C",label="Threshold = "+str(None), command=change_threshold,
+    showvalue=0,troughcolor=slide_trough_color,label="Threshold = "+str(None), command=change_threshold,
     activebackground="red", font=all_font)
 threshold_slider.grid(row=0, column=0,padx=10,pady=5)
 #######################################################
@@ -1567,18 +1509,18 @@ def prepare_for_first_go():
        #frame_slider.config(label="Frame "+str(value))
        ###########################################
        global br_tk,fl_tk,red_tk        
-       br_tk, br_name=display_image_p4_fix_missing(image_number_zfill, bright_dictionary,"ch02", canvas_size_p4)              
+       br_tk, br_name=display_image_p4_fix_missing(image_number_zfill, bright_dictionary, canvas_size_p4)              
        canvas_left_pop.create_image(0,0, anchor=NW, image=br_tk)
        l_bright.config(text= "Bright \n"+br_name)
        #br_name_p2.set("Original name:   "+old_br_name+"\nNew name:   "+new_br_name)    
        ################################    
-       fl_tk, fl_name=display_image_p4_fix_missing(image_number_zfill, fluor_dictionary,"ch00", canvas_size_p4)     
+       fl_tk, fl_name=display_image_p4_fix_missing(image_number_zfill, fluor_dictionary, canvas_size_p4)     
              
        canvas_mid_pop.create_image(0,0, anchor=NW, image=fl_tk)
        l_fluor.config(text= "Fluor \n"+fl_name)
        #fl_name_p2.set("Original name:   "+old_fl_name+"\nNew name:   "+new_fl_name)    
        ###############################################
-       red_tk, red_name=display_image_p4_fix_missing(image_number_zfill, red_dictionary,"ch01",canvas_size_p4)          
+       red_tk, red_name=display_image_p4_fix_missing(image_number_zfill, red_dictionary,canvas_size_p4)          
            
        canvas_right_pop.create_image(0,0, anchor=NW, image=red_tk)
        l_red.config(text= "Red \n"+red_name)                   
