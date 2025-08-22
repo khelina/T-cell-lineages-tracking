@@ -1294,16 +1294,17 @@ def initiate_tracking_page():
                   global out_folders
                   out_folders = create_output_folders(outpath)# creates names only  
     
-                  global true_cell_radius, patch_size,basic_naive_names,  xs, full_core_bright_name,curr_frame_cell_names,flag,edit_id_indicator, \
+                  global true_cell_radius, true_patch_size,basic_naive_names,  xs, full_core_bright_name,curr_frame_cell_names,flag,edit_id_indicator, \
                   base_colours,colour_counter,colour_dictionary,basic_naive_names, contrast_value, dict_of_divisions,naive_names_counter,number_in_first_frame,full_core_red_name, red_dictionary, bordersize, init_delta
-                  true_cell_radius, edit_id_indicator=IntVar(),StringVar()
+                  true_cell_radius, true_patch_size,edit_id_indicator=IntVar(),IntVar(),StringVar()
    
-                  (frame_size, true_cell_radius_pickle, patch_size,basic_naive_names,
+                  (frame_size, true_cell_radius_pickle, true_patch_size_pickle,basic_naive_names,
                   num_frames, full_core_fluor_name, n_digits, full_core_bright_name, first_frame_number,
                   base_colours, contrast_value, number_in_first_frame,full_core_red_name, red_dictionary, bordersize, init_delta)= extract_const_movie_parameters(outpath)
                   
     
                   true_cell_radius.set(true_cell_radius_pickle)
+                  true_patch_size.set(true_patch_size_pickle)
                   ###################################
 
                    ########################################################
@@ -1313,7 +1314,7 @@ def initiate_tracking_page():
                   #################################
                   feedback_dict_p4["cell diameter"]=str(2*true_cell_radius.get())
                   feedback_dict_p4["frame size"]=str(frame_size)+"x"+str(frame_size)
-                  feedback_dict_p4["patch size"]=str(2*patch_size)+" x "+str(2*patch_size)
+                  feedback_dict_p4["patch size"]=str(2*true_patch_size.get())+" x "+str(2*true_patch_size.get())
                   feedback_dict_p4["initial number of cells"]=str(number_in_first_frame)
                   #feedback_dict_p4["max number"]=str(basic_naive_names)
                   
@@ -1601,39 +1602,72 @@ button_load.pack()
 ################################
 ######### measure cell radius in cell_measure_popup window (Bitton 2b)
 ############################
-def draw_first_circles(event):# draw green circles to measure cell diameter
+def draw_first_circles(event):# draw red circles to measure cell diameter
+    frame_number_measure=str(measure_cell_slider.get())    
+    
     rad=scaled_cell_radius.get()
     circle=canvas_for_radius.create_oval(event.x-rad,event.y-rad,event.x+rad,event.y+rad,outline = "red",width = 2)
-    centres.append([int(round(event.x)), int(round(event.y))])
+    global scaled_patch_size  
+    p_size=scaled_patch_size.get()    
+    square=canvas_for_radius.create_rectangle(event.x-p_size,event.y-p_size , event.x+p_size,event.y+p_size ,width=2, outline="yellow")
+    #centres.append([int(round(event.x)), int(round(event.y))])
+    frame_object_dictionary[frame_number_measure].append([int(round(event.x)), int(round(event.y))])  
     circles.append(circle)
+    squares.append(square)
     if len(circles)==1:
-           update_flash([radius_slider])
+           #update_flash([radius_slider])
            activate_buttons(radius_popup_buttons,[radius_slider]) 
-##############################################              
-def change_radius(value):# change cell radius manually  
+##############################################
+def draw_previous_circles():
+    #frame_number_measure=str(measure_cell_slider.get())
+    #centres=frame_object_dictionary[frame_number_measure]
+    global centres, circles, squares
+    circles, squares=[],[]
+    canvas_for_radius.delete("all")
+    for k in range(len(centres)):            
+       circle=canvas_for_radius.create_oval(centres[k][0]-scaled_cell_radius,centres[k][1]-scaled_cell_radius,centres[k][0]+scaled_cell_radius,centres[k][1]+scaled_cell_radius,outline = "red",width = 2)       
+       square=canvas_for_radius.create_rectangle(centres[k][0]-scaled_patch_size,centres[k][1]-scaled_patch_size,centres[k][0]+scaled_patch_size,centres[k][1]+scaled_patch_size ,width=2, outline="yellow")
+       circles.append(circle)
+       squares.append(square)       
+########################################
+def change_patch_size(value):
+  frame_number_measure=str(measure_cell_slider.get())
+  centres=frame_object_dictionary[frame_number_measure]
+  new_squares=[]  
+  scaled_patch_size=int(value)
+  true_patch_size.set(int(round(scaled_patch_size*frame_size/popup_window_size)))
+  patch_size_slider.config(label="Patch size =  "+str(true_patch_size.get()))   
+  global  squares
+  for k in range(len(centres)):     
+       canvas_for_radius.delete(squares[k])
+       #new_circle=canvas_for_radius.create_oval(centres[k][0]-scaled_cell_radius,centres[k][1]-scaled_cell_radius,centres[k][0]+scaled_cell_radius,centres[k][1]+scaled_cell_radius,outline = "red",width = 2)       
+       new_square=canvas_for_radius.create_rectangle(centres[k][0]-scaled_patch_size,centres[k][1]-scaled_patch_size,centres[k][0]+scaled_patch_size,centres[k][1]+scaled_patch_size ,width=2, outline="yellow")       
+       new_squares.append(new_square)       
+  squares=new_squares      
+###############################################              
+def change_radius(value):# change cell radius manually
+  frame_number_measure=str(measure_cell_slider.get())
+  centres=frame_object_dictionary[frame_number_measure]  
   new_circles=[]  
   scaled_cell_radius=int(value)
   true_cell_radius.set(int(round(scaled_cell_radius*frame_size/popup_window_size)))
   radius_slider.config(label="Cell radius =  "+str(true_cell_radius.get()))
-  
-  #radius_slider.set(cell_radius)
   global circles
   for k in range(len(centres)):
-       canvas_for_radius.delete(circles[k])
-       new_circle=canvas_for_radius.create_oval(centres[k][0]-scaled_cell_radius,centres[k][1]-scaled_cell_radius,centres[k][0]+scaled_cell_radius,centres[k][1]+scaled_cell_radius,outline = "red",width = 2) 
-       #canvas.create_oval(event.x-value,event.y-value,event.x+value,event.y+value,outline = "red",width = 2)
-       #coords.append([event.x, event.y])
-       new_circles.append(new_circle)
+       canvas_for_radius.delete(circles[k])     
+       new_circle=canvas_for_radius.create_oval(centres[k][0]-scaled_cell_radius,centres[k][1]-scaled_cell_radius,centres[k][0]+scaled_cell_radius,centres[k][1]+scaled_cell_radius,outline = "red",width = 2)
+       #new_square=canvas_for_radius.create_rectangle(centres[k][0]-scaled_patch_size,centres[k][1]-scaled_patch_size,centres[k][0]+scaled_patch_size,centres[k][1]+scaled_patch_size ,width=2, outline="yellow")              
+       new_circles.append(new_circle)     
        if len(new_circles)==1:
              update_flash([button_save_radius])
              activate_buttons(radius_popup_buttons,[button_save_radius, radius_slider])
   circles=new_circles
 ###################################################
 def save_cell_radius():
-    global patch_size, bordersize
+    global true_patch_size, bordersize
     update_flash([button_assign_positions])
-    patch_size=int(round(true_cell_radius.get()*2.4))# it is actually HALF on the square side
-    bordersize=patch_size 
+    #patch_size=int(round(true_cell_radius.get()*2.4))# it is actually HALF on the square side
+    bordersize=true_patch_size.get() 
     #patch_size=int(round(true_cell_radius.get()*2.4))
     instruct_label_popup_p4.configure(text="Cell diameter has been measured. \nNow, go to Button 2c to assign initial cells` positions.")     
     activate_buttons(radius_popup_buttons,[ button_assign_positions]) 
@@ -1643,7 +1677,7 @@ def save_cell_radius():
                            #fg="#00FFFF", bg="black")
      #################################    
     feedback_dict_p4["cell diameter"]=str(2*true_cell_radius.get())
-    feedback_dict_p4["patch size"]=str(2*patch_size)+" x "+str(2*patch_size)
+    feedback_dict_p4["patch size"]=str(2*true_patch_size.get())+" x "+str(2*true_patch_size.get())
     feedback_text_p4=update_feedback_text_p4(feedback_dict_p4)
     feedback_var_p4.set(feedback_text_p4)
      ###################################
@@ -1652,10 +1686,7 @@ def save_cell_radius():
 def create_cell_measure_popup():
     update_flash([])
     global popup_for_radius, canvas_for_radius, photo_image
-    instruct_label_popup_p4.configure(text="Measuring cell diameter is in progress....")     
-    #global cliplimit
-    #cliplimit=IntVar()
-    #cliplimit.set(0.)
+    instruct_label_popup_p4.configure(text="Measuring cell diameter is in progress....")         
     popup_for_radius = tk.Toplevel(master=popup_first_preview, bg=bg_color)
     popup_for_radius.title("PAGE 4 POPUP WINDOW: MEASURE CELL DIAMETER")       
     popup_for_radius.geometry('%dx%d+%d+%d' % (popup_window_size, popup_window_size+200, 0, 0))
@@ -1677,15 +1708,50 @@ def create_cell_measure_popup():
     photo_image=turn_image_into_tkinter(init_image,popup_window_size,[])     
     canvas_for_radius.create_image(0,0, anchor=NW, image=photo_image)
 
-    global centres, circles,scaled_cell_radius, true_cell_radius
-    centres, circles,scaled_cell_radius, true_cell_radius =[],[],IntVar(),IntVar()
+    global centres, circles,squares,scaled_cell_radius,scaled_patch_size, true_cell_radius,true_patch_size 
+    centres, circles,squares,scaled_cell_radius, true_cell_radius,scaled_patch_size, true_patch_size =[],[],[],IntVar(),IntVar(),IntVar(),IntVar()
 
     scaled_cell_radius.set(20)
+    init_p_size=int(round(20*2.4))
+    scaled_patch_size.set(init_p_size)
+    print("initiaL scaled_patch_size=", scaled_patch_size.get())
     true_cell_radius.set(int(round(scaled_cell_radius.get()*frame_size/popup_window_size)))
-    print("initial_true_radius=",true_cell_radius.get())
+    print("true_cell_radius=",true_cell_radius.get())   
+    true_patch_size.set(int(round(scaled_patch_size.get()*frame_size/popup_window_size)))    
+    print("true_patch_size=",true_patch_size.get())
     global radius_slider, button_save_radius   
     radius_slider=Scale(frame2,from_=1,to=100,orient=HORIZONTAL,troughcolor="green",activebackground="red",label="Cell radius = "+str(int(true_cell_radius.get())),variable=scaled_cell_radius, command=change_radius, length=150, showvalue=0)
     radius_slider.pack()
+    global patch_size_slider   
+    patch_size_slider=Scale(frame2,from_=1,to=100,orient=HORIZONTAL,troughcolor="green",activebackground="red",label="Patch_size = "+str(int(true_patch_size.get())),variable=scaled_patch_size, command=change_patch_size, length=150, showvalue=0)
+    patch_size_slider.pack()
+    #############################
+    def slide_frames_measure_cell(value): 
+       image_number = int(value)
+       image_number_zfill=str(value).zfill(n_digits)
+       print("image_number=", image_number)
+       print("image_number_zfill=", image_number_zfill)     
+       canvas_for_radius.delete("all")              
+       global fl_measure_tk                 
+       fl_measure_tk, fl_name=display_image_p4_fix_missing(image_number_zfill, fluor_dictionary, popup_window_size)                  
+       canvas_for_radius.create_image(0,0, anchor=NW, image=fl_measure_tk)
+       frame_number_measure=str(image_number)
+       centres=frame_object_dictionary[frame_number_measure]
+       if len(centres)!=0:
+           draw_previous_circles()
+    ######################################
+    global frame_object_dictionary
+    frame_object_dictionary={}
+    keys=list(fluor_dictionary.keys())
+    print("keys=", keys)
+    for key in keys: 
+        frame_object_dictionary[key]=[]
+       
+    ##########################################
+    global measure_cell_slider
+    measure_cell_slider = Scale(frame2, from_=first_frame_number, to=first_frame_number+len(all_names_fluor)-1, orient=HORIZONTAL, troughcolor="green", command=slide_frames_measure_cell, length=370)      
+    measure_cell_slider.pack()
+    
     radius_label_p4=tk.Label(frame2,text="To measure cell radius, left click on a cell (make sure to click on the centroid) and then \nuse the slide bar to change radius.\nThe cell should be entirely enclosed inside green circle."\
                              "\nTo check,you can also click on all cells in frame",bg="black", fg="yellow", font=all_font,width=popup_window_size, height=5)
     radius_label_p4.pack(fill=BOTH) 
@@ -1938,7 +2004,7 @@ def clear_memory_of_previous_clip(fluor_images, fluor_images_compressed,bright_i
      
 #############################################
 def record_const_movie_parameters():# record cell_size and other parameters in pickle file to be used at Step 4 and in retrieve mode
-    list_of_const_movie_params=[frame_size, true_cell_radius.get(), patch_size,basic_naive_names,
+    list_of_const_movie_params=[frame_size, true_cell_radius.get(), true_patch_size.get(),basic_naive_names,
                           num_frames, full_core_fluor_name, n_digits,full_core_bright_name, first_frame_number,
                           base_colours, contrast_value, number_in_first_frame,full_core_red_name, red_dictionary, bordersize, init_delta]
     const_parameters_path=os.path.join(outpath,"constant_movie_parameters.pkl")  
@@ -1963,7 +2029,8 @@ def execute():
  print("xs in EXECUTE=",xs) 
  try:
    
-    cell_radius=true_cell_radius.get()   
+    cell_radius=true_cell_radius.get()
+    patch_size=true_patch_size.get()
     canvas_previous.delete("all")
     canvas_current.delete("all")
     canvas_lineage_exec.delete("all")
