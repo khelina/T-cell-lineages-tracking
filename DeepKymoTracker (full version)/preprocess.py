@@ -21,27 +21,34 @@ def extract_red_frame_numbers(red_frame_names):
         list_of_frame_numbers.append(first_frame_in_name)
     return  list_of_frame_numbers 
 #########################################################
-def extract_file_name(full_image_name):
+def extract_file_name(full_image_name):# for STEP-2
+  #print("full_image_name=", full_image_name)
   base =os.path.basename(full_image_name)
-  name =os.path.splitext(base)[0] 
+  name =os.path.splitext(base)[0]
+  #print("name=", name)
   dirr=os.path.dirname(full_image_name)
   core_name = name
   while True:
     if core_name[-1]!="t":
         core_name=core_name[:-1]        
     else:
-        break   
+        break
+  #print("core_name =", core_name )
   n_digits = len(name[:-5])-len(core_name)
-  digits_string=name[len(core_name):-5] 
+  #print(" n_digits =",  n_digits )
+  digits_string=name[len(core_name):-5]
+  #print("digits_string=",digits_string)
   first=digits_string
   while True:
     if first[0] =="0":
         first =first[1:]
     else:
         break
+  #print("first=", first)
   full_core_name =os.path.join(dirr,core_name) 
   #first_frame_in_name=int(first)-1
   first_frame_in_name=int(first)
+  #print(" first_frame_in_name=",  first_frame_in_name)
   return full_core_name, n_digits, first_frame_in_name
 ###################################################
 def load_clip(first_number_in_clip,full_core_fluor_name,full_core_bright_name,n_digits, num_frames, first_frame_number,full_core_red_name, red_dictionary):
@@ -149,7 +156,7 @@ def characters(x): # in most cases it is [-13:-9] (for names like t0001_ch02.tif
     return(x[-14:-9])# if it is t00001_ch02.tif it should be changed to [-14:-9]
                      # if t001_ch02.tif it is [-12:-9]
 ################ for step-2: when loading initial movie
-def load_image_names(source):
+def load_image_names(source):# fpr STEP-2: cut well
  #global bright_names_sorted,fluor_names_sorted
  bright_names,fluor_names, red_names=[], [], []
  for filename in os.listdir(source):
@@ -175,21 +182,22 @@ def update_feedback_text_p4(feedback_dict_p4):
          "\nFrame size :  "+feedback_dict_p4["frame size"]+\
          "                  Cell diameter : "+feedback_dict_p4["cell diameter"]+\
          "                  Patch size : "+feedback_dict_p4["patch size"]+\
-         "\nNumber of cells in Frame 1 : "+feedback_dict_p4["number in frame 1"]+\
+         "\nInitial number of cells : "+feedback_dict_p4["number in frame 1"]+\
          "                  Maximum number of cells : "+feedback_dict_p4["max number"]+\
          "\nFluorescent frames :  "+feedback_dict_p4["fluor frames"]+"    Brightfield frames :  "+feedback_dict_p4["bright frames"]+"    Red frames :  "+feedback_dict_p4["red frames"]+\
          "\nNumber of processed frames :  "+ feedback_dict_p4["number of processed"]
          
     return text
-################# 
+################# for page 3
 def update_feedback_text(feedback_dict):
     text="Source :"+feedback_dict["s"]+\
          "\nDestination :"+feedback_dict["dest"]+\
          "\nNumber of fluorescent frames : "+feedback_dict["fl"]+\
          "            Number of bright frames : "+feedback_dict["br"]+\
          "            Number of red frames : "+feedback_dict["red"]+\
+         "\nFrame numbers:  from    "+feedback_dict["first"]+"    to"+"   "+feedback_dict["last"]+\
          "\nFrame size : "+feedback_dict["im"]+\
-         "\nWell size : "+feedback_dict["w"]
+         "         Well size : "+feedback_dict["w"]
          
     return text
 ############################################
