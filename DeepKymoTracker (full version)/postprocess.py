@@ -237,7 +237,7 @@ def plot_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progres
        init=still_lineage.copy()# plot red points               
        for k in range(len(points)):
           if points[k][0]==frame_number-first_frame_number_p6:        
-              cv2.circle(init,(points[k][1], points[k][0]), 1,[255,0,0],-1)
+              cv2.circle(init,(points[k][1], points[k][0]), 1,[0,0,255],-1)
        name =os.path.join(red_patches_path,cell_name +"_red_frame_%s" % frame_number)
        cv2.imwrite(name +".tif",init)
        red_patches.append(init)        

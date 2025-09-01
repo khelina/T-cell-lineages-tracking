@@ -69,6 +69,8 @@ def go_to_page(num):# num (1,2,3,4,5)= the page you want to go to
             activate_buttons(all_buttons_page4,[button_load])
         if ii==4:
             activate_buttons(all_buttons_page5,[button_load_p5])
+        if ii==5:
+            activate_buttons(all_buttons_page6,[button_upload_p6])   
           
     #print("page_number exiting go_to_page=", num) 
 ################################################      
@@ -1182,10 +1184,13 @@ manual_IDs,  manual_centroids, mother_name, daughter_indicators=[], [], None, []
 #################
 def activate_buttons(all_buttons_list,active_buttons_list):
     for button in all_buttons_list:
+        print("all_buttons_list,active_buttons_list,",all_buttons_list,active_buttons_list)
         if button in active_buttons_list:
+            print("ACTIVE button=", button)
             button.config(state=NORMAL)                        
         else:
             button.config(state=DISABLED)
+            print("DISABLED button=", button)
 #######################
 def load_helper_functions():
     os.chdir(software_folder)
@@ -3839,15 +3844,20 @@ def retrieve_display_images_p6():# If display iamges were created before, upload
         load_display_images_p6()
  ######################################################
 def load_display_images_p6():# load images for display that have already been created before 
-      global keys,menu_cell_ID, progress_bar   
+      global keys,menu_cell_ID, progress_bar,retrieve_popup_buttons    
       keys=list(pedigree.keys())
       print("keys=", keys)
-      #############      
-      menu_cell_ID.destroy()
+    
+      #############
+      all_buttons_page6.remove(menu_cell_ID_old)      
+      menu_cell_ID_old.destroy()
+     
       menu_cell_ID = OptionMenu(frame3b_page6, cell_ID, *keys,  command= load_cell_info)
       menu_cell_ID.pack()
       menu_cell_ID.config(bg = button_color,font=all_font,activebackground="red")
-      menu_cell_ID["menu"].config(bg=label_color,activebackground="red")        
+      menu_cell_ID["menu"].config(bg=label_color,activebackground="red")
+      #retrieve_popup_buttons.append(menu_cell_ID)
+      all_buttons_page6.append(menu_cell_ID )        
       ####################
       global red_patches, one_cell_patches, plots, bright_names
       label_instruct_p6.config(text="\nLoading results ...\n\n\n") 
@@ -3857,15 +3867,18 @@ def load_display_images_p6():# load images for display that have already been cr
                     "\nNUMBER OF FRAMES: "+ str(num_frames)+"                   FRAME SIZE: "+str(frame_size_p6)+" x "+str(frame_size_p6)+ "\nCELLS: "+str(list_of_cell_names))
       label_instruct_p6.config(text="1. Choose cell ID,\n2. Then choose cell property (Area, Perimeter, or Circularity."+
                           "\n3. Use scrollbar to explore results.")
-      button_create.config(bg=button_color)
+      button_upload_p6.config(bg=button_color)
       global col_dict
       col_dict={"Area":["red", "yellow", "yellow"],"Perimeter":["yellow", "red", "yellow"],"Circularity":["yellow", "yellow", "red"]}
       update_flash([menu_cell_ID])
+      #activate_buttons(retrieve_popup_buttons,[menu_cell_ID])
+      activate_buttons(all_buttons_page6,[menu_cell_ID])
 #############################################
 def upload_processed_movie():# look if display images exist. If so, load them, if not - create them first and then load them.
     update_flash([])
+    #global retrieve_popup_buttons
     global progress_bar
-    button_create.config(bg="red")
+    button_upload_p6.config(bg="red")
     global my_dir,out_folders, outpath, software_folder, options_cells, menu_cell_ID,input_movie_folder    
     my_dir = filedialog.askdirectory()# input movie folder (full path) 
     input_movie_folder = os.path.basename(my_dir)
@@ -3896,7 +3909,10 @@ def upload_processed_movie():# look if display images exist. If so, load them, i
       button_create_p6 = Button(popup_create_display_images, text="OK",
       #bg=button_color,font='TkDefaultFont 14 bold', command=lambda:[popup_create_display_images.destroy(),create_display_images_p6()  ])
       bg=button_color,font='TkDefaultFont 14 bold',command=lambda:[ popup_create_display_images.destroy(), Thread(target=create_display_images_p6).start()])
-      button_create_p6.pack()      
+      button_create_p6.pack()
+    
+      #retrieve_popup_buttons=[button_upload_p6, button_create_p6 ]
+      #activate_buttons(retrieve_popup_buttons,[ button_create_p6])      
       ###########################      
     else:
       print("RETRIEVE")# diplay images are already there, just upload them
@@ -3906,10 +3922,15 @@ def upload_processed_movie():# look if display images exist. If so, load them, i
       popup_retrieve_display_images = tk.Toplevel(master=page6, bg=label_color)                        
       popup_retrieve_display_images.geometry('%dx%d+%d+%d' % (400, 159, (ws/2) - (w/2), (hs/2) - (h/2)))
       label_retrieve = tk.Label(popup_retrieve_display_images, text="Display images are already prepared.\nIt should not take long to load them.\nPress OK to proceed.",width=450, height=5, bg=label_color, fg="black", font='TkDefaultFont 14 bold' )
-      label_retrieve.pack()                     
+      label_retrieve.pack()
+      global button_retrieve_p6                      
       button_retrieve_p6 = Button(popup_retrieve_display_images, text="OK",
       bg=button_color,font='TkDefaultFont 14 bold', command=lambda:[popup_retrieve_display_images.destroy(),Thread(target=retrieve_display_images_p6).start()])
-      button_retrieve_p6.pack()      
+      button_retrieve_p6.pack()
+    
+      #retrieve_popup_buttons=[button_upload_p6, button_retrieve_p6]
+                            
+      #activate_buttons(retrieve_popup_buttons,[ button_retrieve_p6])       
 ############################################
 def slide_patch(value):  # value=frame number from patch_slider          
     canvas_bright.delete('all')
@@ -3926,15 +3947,16 @@ def slide_patch(value):  # value=frame number from patch_slider
     print("one_cell_patches.keys()=",one_cell_patches.keys())
     patch=one_cell_patches[cell_ID.get()][internal_frame_number][0]
   
-    patch_rgb = cv2.cvtColor(patch, cv2.COLOR_BGR2RGB)
+    #patch_rgb = cv2.cvtColor(patch, cv2.COLOR_BGR2RGB)
+    
     global im_pil
-    im_pil=turn_image_into_tkinter(patch_rgb, 382,[])    
+    im_pil=turn_image_into_tkinter(patch, 382,[])    
     canvas_patch.create_image(0, 0, anchor=NW, image=im_pil)
     
     red_patch=red_patches[cell_ID.get()][internal_frame_number][0]
     global red_im_pil
-    red_patch_rgb = cv2.cvtColor(red_patch, cv2.COLOR_BGR2RGB)   
-    red_im_pil=turn_image_into_tkinter(red_patch_rgb, 382,[])
+    #red_patch_rgb = cv2.cvtColor(red_patch, cv2.COLOR_BGR2RGB)   
+    red_im_pil=turn_image_into_tkinter(red_patch, 382,[])
     canvas_lineage.create_image(0, 0, anchor=NW, image=red_im_pil)
     
     plott_pil=plots[cell_ID.get()][cell_property.get()][ internal_frame_number][0]
@@ -3948,9 +3970,9 @@ def slide_patch(value):  # value=frame number from patch_slider
     label_file_name.configure(text=os.path.basename(bright_name))
     bright_image=cv2.imread(bright_name, -1)
 
-    bright_image_rgb = cv2.cvtColor(bright_image, cv2.COLOR_BGR2RGB)
+    #bright_image_rgb = cv2.cvtColor(bright_image, cv2.COLOR_BGR2RGB)
     global bright_pil  
-    bright_pil=turn_image_into_tkinter(bright_image_rgb, 382,[])
+    bright_pil=turn_image_into_tkinter(bright_image, 382,[])
     canvas_bright.create_image(0, 0, anchor=NW, image=bright_pil)
     
    
@@ -3969,6 +3991,7 @@ def slide_patch(value):  # value=frame number from patch_slider
 ###########################################
 def load_cell_info(value):
   update_flash([])
+  global all_buttons_page6
   menu_cell_ID.config(fg=result_color,bg="black")
   print("Entering create_patch_slider")
   cell_property.set("Choose cell property")
@@ -3980,7 +4003,7 @@ def load_cell_info(value):
   cell_ID.set(value)
   key=cell_ID.get()
   print("key=", key)
-  menu_cell_ID.config( bg="black",fg = result_color,font=all_font,activebackground="red")
+  menu_cell_ID.config( bg="black",fg = result_color)
   if key!="Choose cell ID":
     global ffrom, tto
     ffrom=pedigree[key][0][1]
@@ -3988,36 +4011,45 @@ def load_cell_info(value):
     #ffrom, tto = pedigree[key][0][1], pedigree[key][-1][1]
     print("ffrom=", ffrom)
     print("tto=", tto)
-    global patch_slider
-    patch_slider.destroy()
-    patch_slider=Scale(frame10_page6,from_=ffrom,to=tto,orient=HORIZONTAL,troughcolor="#513B1C",label="Frame "+str(ffrom), command=slide_patch,
+   
+    if patch_slider_old in all_buttons_page6:
+        all_buttons_page6.remove(patch_slider_old)
+        patch_slider_old.destroy()
+        global patch_slider
+        patch_slider=Scale(frame10_page6,from_=ffrom,to=tto,orient=HORIZONTAL,troughcolor="#513B1C",label="Frame "+str(ffrom), command=slide_patch,
                  activebackground="red", bg=label_color,showvalue=0, font=all_font, length=380)    
-    patch_slider.pack()
+        patch_slider.pack()
+        all_buttons_page6.append(patch_slider)
     
-  update_flash([menu_cell_property])    
+  update_flash([menu_cell_property])
+  activate_buttons(all_buttons_page6,[menu_cell_property])    
 ###########################################################
 def load_cell_property(value):
+    update_flash([])
+    global all_buttons_page6
     cell_property.set(str(value))
-    menu_cell_property.config( bg="black",fg = result_color)
+    print("inside load_cell_property(value)")
+    menu_cell_property.config( fg = result_color,bg="black")
     ffrom_1=str(ffrom)
     print("ffrom_1=", ffrom_1)    
     slide_patch(ffrom_1)
-    patch_slider.set(ffrom_1)
-    print("inside display_first_patch(value)")   
+    patch_slider.set(ffrom_1)      
     update_flash([patch_slider])
+    activate_buttons(all_buttons_page6,[menu_cell_property, menu_cell_ID,patch_slider]) 
 ######################################################
 ################### poplulate page-6 with widgets #########
 label_title_p6 = tk.Label(frame1_page6, text="STEP 5: VISUALISE RESULTS",
               bg="yellow", fg="red", font=("Times", "24")).pack()
 label_instr_name_p6=tk.Label(frame11_page6,text="INSTRUCTIONS FOR USER :" ,bg="black", font=all_font, fg="white").pack(pady=5)
-button_create = tk.Button(frame3a_page6, text=" Upload_processed_movie",
+global button_upload_p6
+button_upload_p6 = tk.Button(frame3a_page6, text=" Upload_processed_movie",
                 bg=button_color, font=all_font,command=upload_processed_movie)
-button_create.pack()
+button_upload_p6.pack()
 #########################
-global patch_slider    
-patch_slider=Scale(frame10_page6,from_=ffrom,to=ffrom,orient=HORIZONTAL,troughcolor="#513B1C",label="Frame "+str(ffrom), command=slide_patch,
+global patch_slider_old    
+patch_slider_old=Scale(frame10_page6,from_=ffrom,to=ffrom,orient=HORIZONTAL,troughcolor="#513B1C",label="Frame "+str(ffrom), command=slide_patch,
                  activebackground="red", bg=label_color,showvalue=0, font=all_font, length=370)
-patch_slider.pack(side=tk.TOP)
+patch_slider_old.pack(side=tk.TOP)
 ########################################### 
 global progress_bar
 s = ttk.Style()
@@ -4026,11 +4058,11 @@ s.configure("red.Horizontal.TProgressbar", foreground='green', background='green
 progress_bar=ttk.Progressbar(frame10_page6, style="red.Horizontal.TProgressbar", orient="horizontal", length=280, mode="determinate")
 progress_bar.pack(side=tk.BOTTOM, pady=20)
 ##################################################
-global menu_cell_ID,menu_cell_property
-menu_cell_ID = OptionMenu(frame3b_page6, cell_ID, *options_cells,  command= load_cell_info)
-menu_cell_ID.pack()
-menu_cell_ID.config(bg = button_color,font=all_font,activebackground="red")
-menu_cell_ID["menu"].config(bg=label_color,activebackground="red")
+global menu_cell_ID_old,menu_cell_property
+menu_cell_ID_old = OptionMenu(frame3b_page6, cell_ID, *options_cells,  command= load_cell_info)
+menu_cell_ID_old.pack()
+menu_cell_ID_old.config(bg = button_color,font=all_font,activebackground="red")
+menu_cell_ID_old["menu"].config(bg=label_color,activebackground="red")
 ###############################################
 options_properties = ["Area", "Perimeter", "Circularity"]
 menu_cell_property = OptionMenu(frame3c_page6, cell_property, *options_properties, command=load_cell_property)
@@ -4050,7 +4082,11 @@ label_area.pack(side=tk.TOP, pady=2)
 label_perim = tk.Label(frame9_page6, text="Perimeter:", bg = "black", fg="yellow",font=("Times", "16"))
 label_perim.pack(side=tk.TOP, pady=2)
 label_circ = tk.Label(frame9_page6, text="Circularity:", bg = "black", fg="yellow",font=("Times", "16"))
-label_circ.pack(side=tk.TOP, pady=2)  
+label_circ.pack(side=tk.TOP, pady=2) 
+
+global all_buttons_page6 
+all_buttons_page6=[button_upload_p6,patch_slider_old,menu_cell_ID_old,menu_cell_property]
+
 ######################### This is the end of Page-6 #############
 ###########################################################
 ############## Navigation between pages: buttons Back, Exit, Next plus buttons on title page
@@ -4095,7 +4131,7 @@ def combine_funcs(*funcs):
 ##################################################
 page_titles=["PAGE 1: TITLE PAGE","PAGE 2: EXTRACT MOVIE FROM FOLDER", "PAGE 3: CUT ONE WELL",
              "PAGE 4: EXECUTE AND CORRECT TRACKING", "PAGE 5: CORRECT SEGMENTATION","PAGE 6: VISUALISE RESULTS" ]
-initial_buttons=[[button_choose_folder],[button_select],[button_load],[button_load_p5],[button_create]]
+initial_buttons=[[button_choose_folder],[button_select],[button_load],[button_load_p5],[button_upload_p6]]
 page_numbers=[page1,page2,page3,page4,page5, page6]
 ######## make initial_buttons on each page flash and create BACK, EXIT, NEXT buttons
 locations=[frame3_page1,frame8_page2,frame15_page3,frame11_page4,frame8_page5,frame13_page6]  
