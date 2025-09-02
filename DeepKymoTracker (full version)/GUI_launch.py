@@ -42,7 +42,10 @@ win.config(bg=bg_color)
 page_titles=["PAGE 1: TITLE PAGE","PAGE 2: PROCESS MULTIPAGE TIFF", "PAGE 3: CUT ONE WELL",
              "PAGE 4: EXECUTE AND CORRECT TRACKING","PAGE 5: CORRECT SEGMENTATION", "PAGE 6: VISUALISE RESULTS"]
 global page_number, software_folder
-software_folder = os.getcwd()
+source_code_folder = os.getcwd()
+print("source_code_folder=",source_code_folder)
+software_folder=os. path. dirname(source_code_folder)
+print("software_folder=",software_folder)
 page_number = tk.IntVar(master=win, value=1)
 num = page_number.get()
 #print("page_number=", num)
@@ -391,7 +394,7 @@ def slide_p2(value):# display image even when it is missing (in this case it is 
 l_page_name=tk.Label(frame1_page2,text= "STEP 1: EXTRACT MOVIE FROM FOLDER", bg="yellow", fg="red", font=("Times", "24")).pack()
 button_choose_folder=tk.Button(frame3_page2,text="1. Choose folder with movies",bg='#9ACD32',activebackground="red",font='TkDefaultFont 10 bold' , command=lambda: explore_folder())
 button_choose_folder.grid(row=0,column=0, padx=100,pady=20)
-button_save_movie=tk.Button(frame11_page2,text="3. Save processed movie",bg='#9ACD32',activebackground="red",font=all_font , command=lambda: [save_images_page2(movie_name,feedback_var_p2,bright_names,fluor_names,red_names, bright_images, fluor_images, red_images, instruct_var_p2),\
+button_save_movie=tk.Button(frame11_page2,text="3. Save processed movie",bg='#9ACD32',activebackground="red",font=all_font , command=lambda: [save_images_page2(movie_name,feedback_var_p2,bright_names,fluor_names,red_names, bright_images, fluor_images, red_images, instruct_var_p2, software_folder),\
         update_flash([]) ])
 button_save_movie.pack()
 l_instr_name_p2=tk.Label(frame7_page2,text="INSTRUCTIONS FOR USER :" ,bg="black", font=all_font, fg="white").pack() 
@@ -502,31 +505,36 @@ def select_one_bright():# load all frames,display clicked bright frame
     my_path=filedialog.askopenfilename()
     #############################################
     first_filename_for_show=prepare_file_name_for_show(my_path)
+    print(" first_filename_for_show=", first_filename_for_show)
     l_left_canvas.config(text=first_filename_for_show)
     #l_left_canvas.config(text=os.path.basename(my_path)) 
     ####################################################    
-    movie_dir=os.path.dirname(my_path)
-    feedback_dict["s"]=movie_dir
+    raw_movie_dir=os.path.dirname(my_path)
+    feedback_dict["s"]=raw_movie_dir
     
-    bright_names_sorted,fluor_names_sorted, red_names_sorted =load_image_names(movie_dir)
+    bright_names_sorted,fluor_names_sorted, red_names_sorted =load_image_names(raw_movie_dir)
     
     
     feedback_dict["fl"],feedback_dict["br"],feedback_dict["red"]=str(len(fluor_names_sorted)),str(len(bright_names_sorted)),str(len(red_names_sorted))
     ##########################################
     global n_digits_p3,first_frame_number_p3
     full_core_fluor_name_p3, n_digits_p3, first_frame_number_p3= extract_file_name(fluor_names_sorted[0])
-    print("first_frame_number_p3=",first_frame_number_p3)
+   
     feedback_dict["first"]=str(first_frame_number_p3)
     feedback_dict["last"]=str(first_frame_number_p3+len(fluor_names_sorted)-1)
     ###################################################         
     global list_of_red_frame_numbers
     list_of_red_frame_numbers =extract_red_frame_numbers(red_names_sorted)
-    print("list_of_red_frame_numbers=", list_of_red_frame_numbers) 
+    #print("list_of_red_frame_numbers=", list_of_red_frame_numbers) 
+    ##############################################
+    general_movie_folder=os.path.dirname(raw_movie_dir)
+   
+    movie_name=os.path.basename(general_movie_folder)
+    my_destin=os.path.join( general_movie_folder ,"ONE_WELL_MOVIE_ "+movie_name)
     
-    my_destin=os.path.join(os.getcwd() ,"INPUT_MOVIE "+os.path.basename(movie_dir))
-      
     if not os.path.exists(my_destin):
       os.mkdir(my_destin)
+    #############################################
     else:# delete previous version of INPUT_MOVIE_...
            shutil.rmtree(my_destin)
            os.mkdir(my_destin)    
@@ -1184,16 +1192,16 @@ manual_IDs,  manual_centroids, mother_name, daughter_indicators=[], [], None, []
 #################
 def activate_buttons(all_buttons_list,active_buttons_list):
     for button in all_buttons_list:
-        print("all_buttons_list,active_buttons_list,",all_buttons_list,active_buttons_list)
+        #print("all_buttons_list,active_buttons_list,",all_buttons_list,active_buttons_list)
         if button in active_buttons_list:
-            print("ACTIVE button=", button)
+            #print("ACTIVE button=", button)
             button.config(state=NORMAL)                        
         else:
             button.config(state=DISABLED)
-            print("DISABLED button=", button)
+            #print("DISABLED button=", button)
 #######################
 def load_helper_functions():
-    os.chdir(software_folder)
+    os.chdir(source_code_folder)
     global predict_first_frame, create_output_folders,\
         detect_division, update_dictionary_after_division, check_division_frame_number, predict_tracking, predict_tracking_general, backup_track, predict_first_frame, segment_and_clean,\
          plot_frame, create_first_color_dictionary,\
@@ -1235,12 +1243,18 @@ def initiate_tracking_page():
      global my_dir, input_movie_folder
      my_dir = filedialog.askdirectory()# input movie folder
      #input_info_label.config(text= "INPUT MOVIE:"+ "\n"+str(my_dir)+"\n")
+     print("my_dir=", my_dir)
      #################################
      feedback_dict_p4["movie name"]=str(my_dir)     
      input_movie_folder = os.path.basename(my_dir)
+     current_movie_dir=os.path.dirname(my_dir)
+     print("current_movie_dir=", current_movie_dir)
+     current_movie_name=os.path.basename(current_movie_dir)
+     print("current_movie_name=", current_movie_name)
      global outpath
      #load_helper_functions()
-     outpath = os.path.join(software_folder, "OUTPUT_"+input_movie_folder)
+     #outpath = os.path.join(software_folder, "OUTPUT_"+input_movie_folder)
+     outpath = os.path.join(current_movie_dir, "TRACKED_MOVIE_"+current_movie_name)
      global init_image,last_image, frame_size, num_frames,  all_names_fluor
      all_names_fluor=[]
      number_of_brights, number_of_reds=0,0
@@ -2884,12 +2898,17 @@ def choose_and_load_tracked_movie():
     button_load_p5.configure(background = 'red')
     global output_dir, input_dir,software_folder
     output_dir = filedialog.askdirectory()
-          
+    print("output_dir =", output_dir)
+    ##################################      
     head_tail=os.path.split(output_dir)
     head =head_tail[0]
     tail =head_tail[1]
+    print("head, tail=", head,tail)
     input_movie_name=tail[7:]
-    input_dir  =os.path.join(head,input_movie_name)    
+    input_dir  =os.path.join(head,input_movie_name)
+    ####################################################
+    
+    #######################################################
     global path_filled_brights,path_filled_fluors,path_filled_reds,path_masks
     global empty_fluors, empty_brights, empty_reds,filled_fluors, filled_brights,filled_reds, masks
     global lineage_per_frame_p5
@@ -3759,6 +3778,8 @@ all_buttons_page5=[button_load_p5,button_activate_fast_edit_mode, button_activat
 page6=pages[5]
 page6.title("5. VISUALISE RESULTS")
 page6.config(bg=bg_color)
+global  canvas_size_p6
+canvas_size_p6=400
 ######################################
 frame1_page6 = tk.Frame(master=page6, width=1530, height=50, bg=bg_color)
 frame1_page6.grid(row=0, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
@@ -3766,32 +3787,32 @@ frame1_page6.grid(row=0, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
 frame2_page6 = tk.Frame(master=page6, width=1530, height=200, bg="blue")
 frame2_page6.grid(row=1, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
 ########################################################
-frame3a_page6 = tk.Frame(master=page6, bg=bg_color)
-frame3a_page6.grid(row=2, column=0, rowspan=1, columnspan=1, sticky=W+E+N+S)
+frame3a_page6 = tk.Frame(master=page6,width=canvas_size_p6, height=100,  bg=bg_color)
+frame3a_page6.grid(row=2, column=0, rowspan=1, columnspan=1, sticky=W)
 
-frame3b_page6 = tk.Frame(master=page6, bg=bg_color)
-frame3b_page6.grid(row=2, column=1, rowspan=1, columnspan=1, sticky=W+E+N+S)
+frame3b_page6 = tk.Frame(master=page6,width=canvas_size_p6, height=100,  bg=bg_color)
+frame3b_page6.grid(row=2, column=1, rowspan=1, columnspan=1, sticky=W)
 
-frame3c_page6 = tk.Frame(master=page6,  bg=bg_color)
-frame3c_page6.grid(row=2, column=2, rowspan=1, columnspan=1, sticky=W+E+N+S)
+frame3c_page6 = tk.Frame(master=page6,width=canvas_size_p6, height=100,   bg=bg_color)
+frame3c_page6.grid(row=2, column=2, rowspan=1, columnspan=1, sticky=W)
 ########################################################
-frame4_page6 = tk.Frame(master=page6, bg="blue")
-frame4_page6.grid(row=3, column=0, rowspan=1, columnspan=1,sticky =  W+E+N+S)
+frame4_page6 = tk.Frame(master=page6,width=canvas_size_p6, height=canvas_size_p6, bg="blue")
+frame4_page6.grid(row=3, column=0, rowspan=1, columnspan=1,sticky =  W)
 
-frame5_page6 = tk.Frame(master=page6, bg="yellow")
-frame5_page6.grid(row=3, column=1, rowspan=1, columnspan=1,sticky =  W+E+N+S)
+frame5_page6 = tk.Frame(master=page6,width=canvas_size_p6, height=canvas_size_p6,  bg="yellow")
+frame5_page6.grid(row=3, column=1, rowspan=1, columnspan=1,sticky =  W)
 
-frame6_page6 = tk.Frame(master=page6, bg="green")
-frame6_page6.grid(row=3, column=2, rowspan=1, columnspan=1,sticky =  W+E+N+S)
+frame6_page6 = tk.Frame(master=page6,width=canvas_size_p6, height=canvas_size_p6,  bg="green")
+frame6_page6.grid(row=3, column=2, rowspan=1, columnspan=1,sticky =  W)
 ##############################################################
-frame8_page6 = tk.Frame(master=page6, width=382, height=250, bg=bg_color)
-frame8_page6.grid(row=4, column=0, rowspan=1, columnspan=1,sticky =  W+E+N+S)
+frame8_page6 = tk.Frame(master=page6, width=canvas_size_p6, height=250, bg=bg_color)
+frame8_page6.grid(row=4, column=0, rowspan=1, columnspan=1,sticky =  W)
 
-frame9_page6 = tk.Frame(master=page6, width=382, height=250, bg=bg_color)
-frame9_page6.grid(row=4, column=1, rowspan=1, columnspan=1,sticky =  W+E+N+S)
+frame9_page6 = tk.Frame(master=page6, width=canvas_size_p6, height=250, bg=bg_color)
+frame9_page6.grid(row=4, column=1, rowspan=1, columnspan=1,sticky =  W)
 
-frame10_page6 = tk.Frame(master=page6, width=382, height=250, bg=bg_color)
-frame10_page6.grid(row=4, column=2, rowspan=1, columnspan=1,sticky =  W+E+N+S)
+frame10_page6 = tk.Frame(master=page6, width=canvas_size_p6, height=250, bg=bg_color)
+frame10_page6.grid(row=4, column=2, rowspan=1, columnspan=1,sticky =  W)
 ###################################################################
 frame11_page6 = tk.Frame(master=page6, width=1530, height=20, bg=bg_color)
 frame11_page6.grid(row=5, column=0, rowspan=1, columnspan=3,sticky =  W+E+N+S)
@@ -3802,19 +3823,19 @@ frame12_page6.grid(row=6, column=0, rowspan=1, columnspan=3,sticky =  W+E+N+S)
 frame13_page6 = tk.Frame(master=page6, width=1530, height=20, bg=bg_color)
 frame13_page6.grid(row=7, column=0, rowspan=1, columnspan=3,sticky =  W+E+N+S)
 ######################################################
-canvas_bright = Canvas(frame4_page6, bg=bg_color, height=382, width=382)
-canvas_bright.pack(side=tk.TOP, fill=None, expand=False)
+canvas_bright = Canvas(frame4_page6, bg=bg_color, height=canvas_size_p6, width=canvas_size_p6)
+canvas_bright.pack(anchor='nw')
 label_file_name=tk.Label(frame4_page6, text="this is label file_name", bg="black", fg="cyan")
-label_file_name.pack(fill='both')
+label_file_name.pack(anchor='nw')
 
-canvas_lineage = Canvas(frame5_page6, bg=bg_color, height=382, width=382)
-canvas_lineage.pack(side=tk.TOP, fill=None, expand=False)
+canvas_lineage = Canvas(frame5_page6, bg=bg_color, height=canvas_size_p6, width=canvas_size_p6)
+canvas_lineage.pack(anchor='nw')
 
-canvas_patch = Canvas(frame6_page6, bg=bg_color, height=382, width=382)
-canvas_patch.pack(side=tk.TOP, fill=None, expand=False)
+canvas_patch = Canvas(frame6_page6, bg=bg_color, height=canvas_size_p6, width=canvas_size_p6)
+canvas_patch.pack(anchor='nw')
 
-canvas_graph = Canvas(frame8_page6, bg=bg_color, height=250, width=382)
-canvas_graph.pack(side=tk.TOP, fill=None, expand=False)
+canvas_graph = Canvas(frame8_page6, bg=bg_color, height=250, width=canvas_size_p6)
+canvas_graph.pack(anchor='nw')
 
 ############################## sub2 #####################
 options_cells = [""]
@@ -3950,19 +3971,19 @@ def slide_patch(value):  # value=frame number from patch_slider
     #patch_rgb = cv2.cvtColor(patch, cv2.COLOR_BGR2RGB)
     
     global im_pil
-    im_pil=turn_image_into_tkinter(patch, 382,[])    
+    im_pil=turn_image_into_tkinter(patch, canvas_size_p6,[])    
     canvas_patch.create_image(0, 0, anchor=NW, image=im_pil)
     
     red_patch=red_patches[cell_ID.get()][internal_frame_number][0]
     global red_im_pil
     #red_patch_rgb = cv2.cvtColor(red_patch, cv2.COLOR_BGR2RGB)   
-    red_im_pil=turn_image_into_tkinter(red_patch, 382,[])
+    red_im_pil=turn_image_into_tkinter(red_patch, canvas_size_p6,[])
     canvas_lineage.create_image(0, 0, anchor=NW, image=red_im_pil)
     
     plott_pil=plots[cell_ID.get()][cell_property.get()][ internal_frame_number][0]
     global pl_pil
     pl_pil = Image.fromarray(plott_pil)
-    pl_pil.thumbnail((382,382), Image.ANTIALIAS)
+    pl_pil.thumbnail((canvas_size_p6,canvas_size_p6), Image.ANTIALIAS)
     pl_pil = ImageTk.PhotoImage(pl_pil)
     canvas_graph.create_image(0, 0, anchor=NW, image=pl_pil)    
     ######################################
@@ -3972,7 +3993,7 @@ def slide_patch(value):  # value=frame number from patch_slider
 
     #bright_image_rgb = cv2.cvtColor(bright_image, cv2.COLOR_BGR2RGB)
     global bright_pil  
-    bright_pil=turn_image_into_tkinter(bright_image, 382,[])
+    bright_pil=turn_image_into_tkinter(bright_image, canvas_size_p6,[])
     canvas_bright.create_image(0, 0, anchor=NW, image=bright_pil)
     
    

@@ -76,15 +76,26 @@ def create_name_dictionary(filenames, images):# available frame names (some migh
      name_dictionary[internal_number]=(filename, image)
   return  name_dictionary  
 ########################################
-def save_images_page2(movie_name,feedback_var_p2,bright_names,fluor_names, red_names,bright_images, fluor_images, red_images, instruct_var_p2):       
-    software_folder =os. getcwd() 
-    destination=os.path.join(software_folder, movie_name)
-    print("destination=", destination)
-    n_digits=calculate_n_digits_in_name(fluor_names[-1])
+def save_images_page2(movie_name,feedback_var_p2,bright_names,fluor_names, red_names,bright_images, fluor_images, red_images, instruct_var_p2, software_folder):
+    #software_folder= os. getcwd()
+    
+    MOVIES_folder=os.path.join(software_folder,"MOVIES")
+    print("MOVIES_folder=",MOVIES_folder)
+    if not os.path.exists(MOVIES_folder):  
+            os.makedirs(MOVIES_folder)
+    current_movie_general_folder=os.path.join( MOVIES_folder, movie_name)
+    print(" current_movie_general_folder=", current_movie_general_folder)
+    if not os.path.exists(current_movie_general_folder):  
+            os.makedirs(current_movie_general_folder)
+    destination=os.path.join(current_movie_general_folder,"RAW_MOVIE_"+ movie_name)
     
     if not os.path.exists(destination):  
             os.makedirs(destination)
             print("The new directory is created!", destination)
+    
+    n_digits=calculate_n_digits_in_name(fluor_names[-1])
+    
+    
     if len(bright_names)!=0:       
            zfill_file_name("ch02",bright_names,bright_images, n_digits, destination)
     else:
