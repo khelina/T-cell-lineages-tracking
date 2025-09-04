@@ -78,10 +78,10 @@ def create_output_movie(outpath,frame_size):
 
  ###########
  print("Creating images for movie and saving in TEMPORARY_FOR_MOVIE folder")
- images_out_path=os.path.join(outpath,"HELPERS_(NOT_FOR_USER)" ,"IMAGES_FOR_FINAL_MOVIE")
- images_seg=load_files(os.path.join(outpath,"BRIGHT_MOVIE_RESULTS"))# was [9]
+ images_out_path=os.path.join(outpath,"HELPER_FOLDERS_(NOT FOR USER)" ,"IMAGES_FOR_FINAL_MOVIE")
+ images_seg=load_files(os.path.join(outpath,"TRACKED_BRIGHTFIELD_CHANNEL"))# was [9]
  print("len(images_seg)=", len(images_seg)) 
- images_lin=load_files(os.path.join(outpath,"HELPERS_(NOT_FOR_USER)" ,"LINEAGE_IMAGES"))# was [5]
+ images_lin=load_files(os.path.join(outpath,"HELPER_FOLDERS_(NOT FOR USER)" ,"LINEAGE_IMAGES"))# was [5]
  print("len(images_lin)=", len(images_lin))
  images=[]
  for i in range(len(images_lin)):
@@ -132,12 +132,13 @@ def extract_info_from_file_name(file_name):
 #############################################################
 ### for the last step (visualise results): prepare images for display
 def load_and_prepare_result_images(outpath, keys,progress_bar):
+   
     names, names_1=[],[]     
-    bright_images_path=os.path.join(outpath, "BRIGHT_MOVIE_RESULTS")
+    bright_images_path=os.path.join(outpath, "TRACKED_BRIGHTFIELD_CHANNEL")
     for filename in os.listdir(bright_images_path):       
           names.append(filename)
     total=len(names)
-    patches_path=os.path.join(outpath,"HELPERS_(NOT_FOR_USER)","VISUALISATION_HELPERS" ,"PATCHES_FOR_RESULTS")
+    patches_path=os.path.join(outpath,"HELPER_FOLDERS_(NOT FOR USER)","VISUALISATION_HELPERS" ,"PATCHES_FOR_RESULTS")
     for filename in os.listdir(patches_path):       
           names_1.append(filename)
     total_frames_1=len(names_1)
@@ -150,9 +151,12 @@ def load_and_prepare_result_images(outpath, keys,progress_bar):
     plots = {key:dictt for key in keys}
     #bright_images_dict={key:[] for key in keys}    
     #bright_images_path=os.path.join(outpath, "RESULT_BRIGHT")
-    red_patches_path=os.path.join(outpath,"HELPERS_(NOT_FOR_USER)","VISUALISATION_HELPERS" ,"RED_LINEAGE_PATCHES")
-    one_cell_patches_path =os.path.join(outpath,"HELPERS_(NOT_FOR_USER)","VISUALISATION_HELPERS" ,"PATCHES_FOR_RESULTS")
-    plots_path =os.path.join(outpath,"HELPERS_(NOT_FOR_USER)","VISUALISATION_HELPERS" ,"PLOTS")
+    red_patches_path=os.path.join(outpath,"HELPER_FOLDERS_(NOT FOR USER)","VISUALISATION_HELPERS" ,"RED_LINEAGE_PATCHES")
+    print("red_patches_path=", red_patches_path)
+   
+    one_cell_patches_path =os.path.join(outpath,"HELPER_FOLDERS_(NOT FOR USER)","VISUALISATION_HELPERS" ,"PATCHES_FOR_RESULTS")
+    print("one_cell_patches_path=", one_cell_patches_path) 
+    plots_path =os.path.join(outpath,"HELPER_FOLDERS_(NOT FOR USER)","VISUALISATION_HELPERS" ,"PLOTS")
     p=0
     #bright_unsorted=[]
     bright_names=[]
@@ -186,26 +190,34 @@ def load_and_prepare_result_images(outpath, keys,progress_bar):
                               
         else:                     
             plots=change_dict(plots, cell_property, cell_key, item)
-    print("len(red_patches)=", len(red_patches))        
+    
+    
+   
     return red_patches, one_cell_patches, plots, bright_names 
 ################################################################### 
 ######### This is for Step-5: creates VISUALISATION_HELPERS folder
 
 def plot_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progress_bar, first_frame_number_p6):
-   #global progress_bar
-   dirr=os.path.join(outpath,"PER_CELL_RESULTS")
-   red_patches_path=os.path.join(outpath,"HELPERS_(NOT_FOR_USER)","VISUALISATION_HELPERS" ,"RED_LINEAGE_PATCHES")
+   print("INSIDE plot_oer_cell_info")
+   print("outpath=", outpath)
+   
+   #dirr=os.path.join(outpath,"PER_CELL_RESULTS")
+   red_patches_path=os.path.join(outpath,"HELPER_FOLDERS_(NOT FOR USER)","VISUALISATION_HELPERS" ,"RED_LINEAGE_PATCHES")
    #red_patches_path=outfolders[2] #"RED_PATCHES"
-   plots_path= os.path.join(outpath,"HELPERS_(NOT_FOR_USER)","VISUALISATION_HELPERS" ,"PLOTS")
+   plots_path= os.path.join(outpath,"HELPER_FOLDERS_(NOT FOR USER)","VISUALISATION_HELPERS" ,"PLOTS")
    #plots_path=outfolders[6]#"PLOTS"
-   one_cell_patches_path=os.path.join(outpath,"HELPERS_(NOT_FOR_USER)","VISUALISATION_HELPERS" ,"PATCHES_FOR_RESULTS")
+   one_cell_patches_path=os.path.join(outpath,"HELPER_FOLDERS_(NOT FOR USER)","VISUALISATION_HELPERS" ,"PATCHES_FOR_RESULTS")
+   print("one_cell_patches_path=",one_cell_patches_path)
    #one_cell_patches_path=outfolders[7] # PARCHES_FOR_RESULTS
    #per_cell_dict={}
    list_of_cell_names =list(pedigree.keys())
    label_feedback.config(text="Cells discovered inside function:  " +str(list_of_cell_names))
    for cell_name in list_of_cell_names:# creatse folder for each cell in OUTPUT folder
      label_feedback.config(text="Cells discovered:  " +str(list_of_cell_names)+"\nCreating results for:  " +str(cell_name))
-     path=os.path.join(dirr,cell_name)
+     #path=os.path.join(dirr,cell_name)
+     specific_cell_dirr=os.path.join(outpath,'RESULTS_PER_CELL',cell_name)
+     
+     print("specific_cell_dirr=",specific_cell_dirr)
      one_cell_images=[]
      red_patches=[]
      area_plots=[]
@@ -265,13 +277,14 @@ def plot_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progres
        progress_bar["value"]=(i/total)*100 
        frame_number=frames[i]  
        #frame_number =cell_info[i][1]
-       plt.plot(x, areas, 'yo', linewidth=0.5)
-       plt.plot([frame_number],[areas[frame_number-first_frame_num]],'bo', linewidth=3.0)
+       plt.plot(x, areas, 'yo', markersize=5)
+       plt.plot([frame_number],[areas[frame_number-first_frame_num]],'bo', markersize=10)
        plt.xlabel('Frame')
        plt.ylabel('Area')
        plt.title('Area of '+cell_name)
-       plt.savefig('areas.png')
-       img = cv2.imread("areas.png")
+       areas_path=os.path.join(specific_cell_dirr,'areas.png')
+       plt.savefig(areas_path)
+       img = cv2.imread(areas_path)
        area_plot= Image.fromarray(img)
        #area_plots.append(area_plot)    
        name =os.path.join(plots_path,cell_name +"_Area_frame_%s" % frame_number)
@@ -279,42 +292,48 @@ def plot_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progres
        plt.close() 
        
        g = plt.figure()
-       plt.plot(x, areas, 'yo', linewidth=0.5)
+       plt.plot(x, areas, 'yo', markersize=5)
        plt.xlabel('Frame')
        plt.ylabel('Area')
        plt.title('Area of '+cell_name)
-       plt.savefig('areas_for_excel.png')
+       #plt.savefig('areas_for_excel.png')
        g.clear()
        plt.close(g)
 
        plt.plot(x, perimeters, 'go', linewidth=0.5)
-       plt.plot([frame_number],[perimeters[frame_number-first_frame_num]],'bo',linewidth=3.0)
+       plt.plot([frame_number],[perimeters[frame_number-first_frame_num]],'bo',markersize=10)
        plt.xlabel('Frame')
        plt.ylabel('Perimeter')
        plt.title('Perimeter '+cell_name)
-       plt.savefig('perimeters.png')
-       img = cv2.imread("perimeters.png")
+       perimeters_path=os.path.join(specific_cell_dirr,'perimeters.png')
+       plt.savefig(perimeters_path)
+       img = cv2.imread(perimeters_path)
+       #plt.savefig('perimeters.png')
+       #img = cv2.imread("perimeters.png")
        perimeter_plot= Image.fromarray(img)
        #perimeter_plots.append(perimeter_plot)    
        name =os.path.join(plots_path,cell_name +"_Perimeter_frame_%s" % frame_number)
        cv2.imwrite(name +".png",img)
        plt.close() 
        hh = plt.figure()
-       plt.plot(x, perimeters, 'go', linewidth=0.5)
+       plt.plot(x, perimeters, 'go', markersize=5)
        plt.xlabel('Frame')
        plt.ylabel('Perimeter')
        plt.title('Perimeter of '+cell_name)
-       plt.savefig('perimeters_for_excel.png')
+       #plt.savefig('perimeters_for_excel.png')
        hh.clear()
        plt.close(hh) 
 
        plt.plot(x, circularities, 'ro', linewidth=0.5)
-       plt.plot([frame_number],[circularities[frame_number-first_frame_num]],'bo', linewidth=3.0)
+       plt.plot([frame_number],[circularities[frame_number-first_frame_num]],'bo', markersize=10)
        plt.xlabel('Frame')
        plt.ylabel('Circularity')
        plt.title('Circularity '+cell_name)
-       plt.savefig('circularities.png')
-       img = cv2.imread("circularities.png")
+       circularities_path=os.path.join(specific_cell_dirr,'circularities.png')
+       plt.savefig(circularities_path)
+       img = cv2.imread(circularities_path)
+       #plt.savefig('circularities.png')
+       #img = cv2.imread("circularities.png")
        circ_plot= Image.fromarray(img)
        #circ_plots.append(circ_plot)    
        name =os.path.join(plots_path,cell_name +"_Circularity_frame_%s" % frame_number)
@@ -325,45 +344,15 @@ def plot_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progres
        plt.xlabel('Frame')
        plt.ylabel('Circularity')
        plt.title('Circularity of '+cell_name)
-       plt.savefig('circularities_for_excel.png')
+       #plt.savefig('circularities_for_excel.png')
        ggg.clear()
        plt.close(ggg)
-     os.remove('areas.png')
-     os.remove('areas_for_excel.png')
-     os.remove('perimeters.png')
-     os.remove('perimeters_for_excel.png')
-     os.remove("circularities.png")
-     os.remove('circularities_for_excel.png')    
+     os.remove(areas_path)
+     os.remove( perimeters_path)
+     os.remove( circularities_path)
+     #os.remove('perimeters_for_excel.png')
+     #os.remove("circularities.png")
+     #os.remove('circularities_for_excel.png')    
 ################### CREATE EXCEL FILE  #############
-     label_feedback.config(text="Cells discovered:  " +str(list_of_cell_names)+"\n\nSaving excel file for:  " +str(cell_name))
-     print("path for excel=", path)
-     workbook = xlsxwriter.Workbook(os.path.join(path,cell_name +".xlsx"))     
-     worksheet = workbook.add_worksheet()
-     worksheet.set_column('B:B',12)
-     worksheet.set_column('F:F',12)
-     worksheet.set_column('G:G',12)
-     worksheet.set_column('C:C',5)
-     worksheet.set_column('D:D',5)
-     worksheet.write('A1', 'Cell name')
-     worksheet.write('B1', 'Frame')
-     worksheet.write('C1', 'cX')
-     worksheet.write('D1', 'cY')
-     worksheet.write('E1', 'Area')
-     worksheet.write('F1', 'Perimeter')
-     worksheet.write('G1', 'Circularity') 
-     row = 1
-     x=pedigree[cell_name]
-     for i in range(len(x)): 
-      score = [cell_name, "Frame %s" % (x[i][1]), x[i][3][0],x[i][3][1],x[i][4],x[i][5],x[i][6]]
-      ['None' if v is None else v for v in score]
-      print("score=", score)
-    
-      for k in range(len(score)):
-         worksheet.write(row, k, score[k])
-      row+=1
-    
-     worksheet.insert_image('I1', 'areas_for_excel.png')
-     worksheet.insert_image('R1', 'perimeters_for_excel.png')
-     worksheet.insert_image('I21', 'circularities_for_excel.png')    
-     workbook.close()
+     
 ####################################################################

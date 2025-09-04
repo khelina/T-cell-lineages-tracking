@@ -38,7 +38,7 @@ def load_tracked_movie_p5(input_dir,output_dir):
            empty_reds.append(im_red)
            
     print("loaded empty images")       
-    dir_bright=os.path.join(output_dir,"BRIGHT_MOVIE_RESULTS")
+    dir_bright=os.path.join(output_dir,"TRACKED_BRIGHTFIELD_CHANNEL")
     for filename in sorted_aphanumeric(os.listdir(dir_bright)):
            path_im_bright=os.path.join(dir_bright, filename)
            im_bright_filled=cv2.imread(path_im_bright ,-1)
@@ -46,14 +46,14 @@ def load_tracked_movie_p5(input_dir,output_dir):
            filled_brights.append(im_bright_filled)
         
     print("loaded bright filled  images")        
-    dir_fluor=os.path.join(output_dir,"FLUORESCENT_MOVIE_RESULTS")
+    dir_fluor=os.path.join(output_dir,"TRACKED_GREEN_FL_CHANNEL")
     for filename in sorted_aphanumeric(os.listdir(dir_fluor)):
            path_im_fluor=os.path.join(dir_fluor, filename)
            im_fluor_filled=cv2.imread(path_im_fluor ,-1)
            path_filled_fluors.append(path_im_fluor)
            filled_fluors.append(im_fluor_filled)
            
-    dir_red=os.path.join(output_dir,"RED_MOVIE_RESULTS")
+    dir_red=os.path.join(output_dir,"TRACKED_RED_FL_CHANNEL")
     for filename in sorted_aphanumeric(os.listdir(dir_red)):
            path_im_red=os.path.join(dir_red, filename)
            im_red_filled=cv2.imread(path_im_red ,-1)
@@ -61,22 +61,22 @@ def load_tracked_movie_p5(input_dir,output_dir):
            filled_reds.append(im_red_filled)
           
     print("loaded fluor filled  images")        
-    dir_masks=os.path.join(output_dir, "HELPERS_(NOT_FOR_USER)","MASKS")
+    dir_masks=os.path.join(output_dir, "HELPER_FOLDERS_(NOT FOR USER)","MASKS")
     for filename in sorted_aphanumeric(os.listdir(dir_masks)):
            path_im_mask=os.path.join(dir_masks, filename)
            im_mask=cv2.imread(path_im_mask ,-1)
            
            #scaled_mask=scaled_mask.astype(np.float16)
-           print("im_mask.dtype=",im_mask.dtype)
-           print("np.max(im_mask)=",np.max(im_mask))
+           #print("im_mask.dtype=",im_mask.dtype)
+           #print("np.max(im_mask)=",np.max(im_mask))
            path_masks.append(path_im_mask)
            masks.append(im_mask)
            del im_mask
            
     print("loaded masks")        
            
-             
-    lineage_per_frame=extract_lineage(output_dir)
+    helper_dir_p5=os.path.join(output_dir,"HELPER_FOLDERS_(NOT FOR USER)")         
+    lineage_per_frame=extract_lineage(helper_dir_p5)
     print("loaded lineage_per_frame") 
     
     return path_filled_brights,path_filled_fluors,path_filled_reds,path_masks, empty_fluors, empty_brights,empty_reds, filled_fluors, filled_brights,filled_reds, masks, lineage_per_frame

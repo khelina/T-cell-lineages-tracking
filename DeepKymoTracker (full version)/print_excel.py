@@ -39,8 +39,8 @@ def update_lineage(llist,outpath, mode):# was cells
         for i in range(len(llist)):
            pickle.dump(llist[i], f,protocol=pickle.HIGHEST_PROTOCOL)
 ####################################
-def extract_const_movie_parameters(outpath):
-    parameters_path=os.path.join(outpath,"constant_movie_parameters.pkl")
+def extract_const_movie_parameters(path):
+    parameters_path=os.path.join(path,"constant_movie_parameters.pkl")
     list_of_const_movie_params = []
     with (open(parameters_path, "rb")) as openfile:
      while True:
@@ -88,9 +88,16 @@ def load_red_names(source):
 ########## 1. Create lineage_per_cell   2. Plot patches inside "cell-n" folders
 ######### 3. Empty contents of PER_CELL_RESULTS and VISUALISATION_RESULTS  
 
-def create_lineage_per_cell(lineage_per_frame,outpath, frame_size, bordersize,patch_size):
-  software_dir,output_dir=os.path.split(outpath)
-  origin= os.path.join(software_dir,output_dir[7:])
+def create_lineage_per_cell(lineage_per_frame,output_dir_p5, frame_size, bordersize,patch_size):
+  #############################################
+  #software_dir,output_dir=os.path.split(outpath)
+  #origin= os.path.join(software_dir,output_dir[7:])
+  current_movie_folder=os.path.dirname(output_dir_p5)
+  current_movie_name=os.path.basename( current_movie_folder)
+  print("current_movie_name INSIDE_PER_CELL=", current_movie_name)
+  origin= os.path.join(current_movie_folder,"ONE_WELL_MOVIE_"+current_movie_name)
+  print("origin=", origin)
+  #################################################
   red_names_sorted=load_red_names(origin)
   list_of_red_numbers =extract_red_frame_numbers(red_names_sorted)
   #print("len(red_names_sorted)=", len(red_names_sorted))
@@ -100,24 +107,25 @@ def create_lineage_per_cell(lineage_per_frame,outpath, frame_size, bordersize,pa
     keys =list(item.keys())
     names+=[item[key][11] for key in keys]
   cell_names =list(set(names))# all cell names encountered in movie
-  dirr=os.path.join(outpath,"PER_CELL_RESULTS")
+  general_per_cell_folder=os.path.join(output_dir_p5,"RESULTS_PER_CELL")
+  print("per_cell_folder=", general_per_cell_folder)
   ############ delete contents of PER_CELL_RESULTS
-  if  os.path.exists(dirr):
-       shutil.rmtree(dirr)
-  os.mkdir(dirr)  
+  if  os.path.exists(general_per_cell_folder):
+       shutil.rmtree(general_per_cell_folder)
+  os.mkdir(general_per_cell_folder)  
   ########################################
   for cell_name in cell_names:#
-      path=os.path.join(dirr,cell_name)# create folders "1", "10", etc. for segmented images of each cell  
+      specific_cell_folder=os.path.join(general_per_cell_folder,cell_name)# create folders "1", "10", etc. for segmented images of each cell  
       #if not os.path.exists(path):
-      os.mkdir(path)
+      os.mkdir( specific_cell_folder)
       subdirs=["Segmented frames", "Segmented patches","Fluor patches","Bright patches","Red patches"]
       for sub in subdirs:
-          subdir=os.path.join(path,sub)
+          subdir=os.path.join( specific_cell_folder,sub)
           #if not os.path.exists(subdir):
           os.mkdir(subdir)
   ###################################
   ############# delete contents of VISUALISATION_HELPERS
-  visualize_helper_folder=os.path.join(outpath,"HELPERS_(NOT_FOR_USER)","VISUALISATION_HELPERS")
+  visualize_helper_folder=os.path.join(output_dir_p5,"HELPER_FOLDERS_(NOT FOR USER)","VISUALISATION_HELPERS")
   if os.path.exists( visualize_helper_folder):
      shutil.rmtree( visualize_helper_folder)
   os.mkdir(visualize_helper_folder)
@@ -161,13 +169,13 @@ def create_lineage_per_cell(lineage_per_frame,outpath, frame_size, bordersize,pa
             big_patch_border[c:d,a:b]=item[key][3]
 
             big_one_cell_image=big_patch_border[bordersize:frame_size+bordersize,bordersize:frame_size+bordersize]
-            destin_big=os.path.join(dirr, cell_id,"Segmented frames")
+            destin_big=os.path.join( general_per_cell_folder, cell_id,"Segmented frames")
             big_name=os.path.join(destin_big,"segm_frame_cell_%s_frame_%s.tif" % (cell_id,frame_number))
             cv2.imwrite(big_name,big_one_cell_image)
             
             #######  create segmented patches for current cell
             segm_patch=item[key][3]
-            destin_segm=os.path.join(dirr, cell_id,"Segmented patches")
+            destin_segm=os.path.join( general_per_cell_folder, cell_id,"Segmented patches")
             segm_name=os.path.join(destin_segm,"segm_patch_cell_%s_frame_%s.tif" % (cell_id,frame_number))
             cv2.imwrite(segm_name,segm_patch)
             
@@ -177,7 +185,7 @@ def create_lineage_per_cell(lineage_per_frame,outpath, frame_size, bordersize,pa
             fl_border[big_patch_border==0]=0
             fl_patch= fl_border[c:d,a:b]
             av_fluor=np.round(np.ma.masked_equal(fl_patch, 0).mean(), 2)# average intensity of fluor cell                   
-            destin_fl_patch=os.path.join(dirr, cell_id,"Fluor patches")      
+            destin_fl_patch=os.path.join( general_per_cell_folder, cell_id,"Fluor patches")      
             fl_patch_name=os.path.join(destin_fl_patch,"fluor_patch_cell_%s_frame_%s.tif" % (cell_id,frame_number))
             cv2.imwrite(fl_patch_name,fl_patch)
             ############## create bright patches
@@ -186,7 +194,7 @@ def create_lineage_per_cell(lineage_per_frame,outpath, frame_size, bordersize,pa
             br_border[big_patch_border==0]=0
             br_patch= br_border[c:d,a:b]
             av_bright=np.round(np.ma.masked_equal(br_patch, 0).mean(), 2)# average intensity of bright cell                   
-            destin_br_patch=os.path.join(dirr, cell_id,"Bright patches")      
+            destin_br_patch=os.path.join( general_per_cell_folder, cell_id,"Bright patches")      
             br_patch_name=os.path.join(destin_br_patch,"bright_patch_cell_%s_frame_%s.tif" % (cell_id,frame_number))
             cv2.imwrite(br_patch_name,br_patch)
             ################# print red patches for each cell
@@ -197,7 +205,7 @@ def create_lineage_per_cell(lineage_per_frame,outpath, frame_size, bordersize,pa
                red_border=cv2.copyMakeBorder(red_image, top=bordersize, bottom=bordersize, left=bordersize, right=bordersize, borderType= cv2.BORDER_CONSTANT, value = np.mean(red_image))            
                red_border[big_patch_border==0]=0
                red_patch= red_border[c:d,a:b]            
-               destin_red_patch=os.path.join(dirr, cell_id,"Red patches")
+               destin_red_patch=os.path.join( general_per_cell_folder, cell_id,"Red patches")
                red_patch_name=os.path.join(destin_red_patch,"red_patch_cell_%s_frame_%s.tif" % (cell_id,frame_number))
                cv2.imwrite(red_patch_name,red_patch)
                av_red=np.round(np.ma.masked_equal(red_patch, 0).mean(), 2)
@@ -207,28 +215,39 @@ def create_lineage_per_cell(lineage_per_frame,outpath, frame_size, bordersize,pa
             
             add=[cell_name,frame_number, patch_color,[cX,cY],area,perimeter,circularity,coll, bounding_box, av_fluor, av_red, av_bright] 
             pedigree_per_cell[name].append(add)
-  print("  list_of_red_numbers=",   list_of_red_numbers)             
-  pedigree_path=os.path.join(outpath,"lineage_per_cell.pkl")
-  with open(pedigree_path, 'wb') as f:
-         pickle.dump(pedigree_per_cell, f)  
+  #print("  list_of_red_numbers=",   list_of_red_numbers)             
+  #pedigree_path=os.path.join(output_dir_p5,"lineage_per_cell.pkl")
+  #with open(pedigree_path, 'wb') as f:
+         #pickle.dump(pedigree_per_cell, f)  
   return pedigree_per_cell
 #############################################
-def print_excel_files(outpath, frame_size, lineage_per_frame_p5, bordersize,patch_size):
+def print_excel_files(output_dir_p5, frame_size, lineage_per_frame_p5, bordersize,patch_size):
     #print("outpath=", outpath)
     #lineage_per_frame=extract_lineage(outpath)
     #update_lineage(lineage_per_frame_p5,outpath, 'wb')
-    lineage_per_cell=create_lineage_per_cell(lineage_per_frame_p5,outpath, frame_size, bordersize,patch_size)
+    print("output_dir_p5 in print_Excel_files=", output_dir_p5)
+    lineage_per_cell=create_lineage_per_cell(lineage_per_frame_p5,output_dir_p5, frame_size, bordersize,patch_size)
     ##############################################
+    helper_dir_p5=os.path.join(output_dir_p5,"HELPER_FOLDERS_(NOT FOR USER)")
+    lineage_per_cell_path=os.path.join(helper_dir_p5,"lineage_per_cell.pkl")
+    with open(lineage_per_cell_path, 'wb') as f:
+         pickle.dump(lineage_per_cell, f) 
+         
     del lineage_per_frame_p5
+   
     ################### empty folder "PER_CELL_RESULTS" and its subfolders
-    dirr=os.path.join(outpath,"PER_CELL_RESULTS")
+    general_per_cell_folder=os.path.join(output_dir_p5,"RESULTS_PER_CELL")
+    print("general_per_cell_folder in print_Excel_files=", general_per_cell_folder)
     
     list_of_cell_names =list(lineage_per_cell.keys())
     print(" list_of_cell_names inside create_lineage_for_LOrenzo=", list_of_cell_names)
     for cell_name in list_of_cell_names:#
-       path=os.path.join(dirr,cell_name)# create folders "1", "10", etc. for segmented images of each cell        
+       specific_cell_folder=os.path.join(general_per_cell_folder,cell_name)# create folders "1", "10", etc. for segmented images of each cell
+       areas_plot_path=os.path.join( specific_cell_folder,cell_name +'_areas_for_excel.png')
+       perimeters_plot_path=os.path.join( specific_cell_folder,cell_name +'_perimeters_for_excel.png')
+       circularities_plot_path=os.path.join( specific_cell_folder,cell_name +'_cirlularities_for_excel.png')        
        x=lineage_per_cell[cell_name]
-       workbook = xlsxwriter.Workbook(os.path.join(path,cell_name +".xlsx"))     
+       workbook = xlsxwriter.Workbook(os.path.join(specific_cell_folder,cell_name +".xlsx"))     
        worksheet = workbook.add_worksheet()
        worksheet.set_column('B:B',10)
        worksheet.set_column('C:C',6)
@@ -295,7 +314,8 @@ def print_excel_files(outpath, frame_size, lineage_per_frame_p5, bordersize,patc
        plt.xlabel('Frame')
        plt.ylabel('Area')
        plt.title('Area of '+cell_name)
-       plt.savefig('areas_for_excel.png')
+       #plt.savefig('areas_for_excel.png')
+       plt.savefig(areas_plot_path)
        g.clear()
        plt.close(g)
 
@@ -305,7 +325,8 @@ def print_excel_files(outpath, frame_size, lineage_per_frame_p5, bordersize,patc
        plt.xlabel('Frame')
        plt.ylabel('Perimeter')
        plt.title('Perimeter of '+cell_name)
-       plt.savefig('perimeters_for_excel.png')
+       #plt.savefig('perimeters_for_excel.png')
+       plt.savefig(perimeters_plot_path)
        hh.clear()
        plt.close(hh) 
 
@@ -315,13 +336,14 @@ def print_excel_files(outpath, frame_size, lineage_per_frame_p5, bordersize,patc
        plt.xlabel('Frame')
        plt.ylabel('Circularity')
        plt.title('Circularity of '+cell_name)
-       plt.savefig('circularities_for_excel.png')
+       #plt.savefig('circularities_for_excel.png')
+       plt.savefig(circularities_plot_path)
        ggg.clear()
        plt.close(ggg) 
        ######################################
-       worksheet.insert_image('P1', 'areas_for_excel.png')
-       worksheet.insert_image('P20', 'perimeters_for_excel.png')
-       worksheet.insert_image('P40', 'circularities_for_excel.png') 
+       worksheet.insert_image('P1', areas_plot_path)
+       worksheet.insert_image('P20', perimeters_plot_path)
+       worksheet.insert_image('P40', circularities_plot_path) 
        workbook.close()
     return lineage_per_cell
 #####################################

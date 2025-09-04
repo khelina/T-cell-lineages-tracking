@@ -530,7 +530,7 @@ def select_one_bright():# load all frames,display clicked bright frame
     general_movie_folder=os.path.dirname(raw_movie_dir)
    
     movie_name=os.path.basename(general_movie_folder)
-    my_destin=os.path.join( general_movie_folder ,"ONE_WELL_MOVIE_ "+movie_name)
+    my_destin=os.path.join( general_movie_folder ,"ONE_WELL_MOVIE_"+movie_name)
     
     if not os.path.exists(my_destin):
       os.mkdir(my_destin)
@@ -1240,7 +1240,7 @@ segmentor, refiner= load_models_p5(software_folder)
 ################ by creating a popup option menu
 def initiate_tracking_page():
      button_load.configure(background = 'red')
-     global my_dir, input_movie_folder
+     global my_dir, input_movie_folder, current_movie_dir
      my_dir = filedialog.askdirectory()# input movie folder
      #input_info_label.config(text= "INPUT MOVIE:"+ "\n"+str(my_dir)+"\n")
      print("my_dir=", my_dir)
@@ -1251,10 +1251,12 @@ def initiate_tracking_page():
      print("current_movie_dir=", current_movie_dir)
      current_movie_name=os.path.basename(current_movie_dir)
      print("current_movie_name=", current_movie_name)
-     global outpath
+     global outpath, helper_dir_p4
      #load_helper_functions()
      #outpath = os.path.join(software_folder, "OUTPUT_"+input_movie_folder)
      outpath = os.path.join(current_movie_dir, "TRACKED_MOVIE_"+current_movie_name)
+     #helper_dir_p4=os.path.join(outpath,"HELPER_FOLDERS_(NOT FOR USER")
+     helper_dir_p4=os.path.join(outpath, "HELPER_FOLDERS_(NOT FOR USER)")
      global init_image,last_image, frame_size, num_frames,  all_names_fluor
      all_names_fluor=[]
      number_of_brights, number_of_reds=0,0
@@ -1295,7 +1297,7 @@ def initiate_tracking_page():
           
           prepare_for_first_go()
      else:# 1. if OUTPUT exists
-          output_fluor_folder=os.path.join(outpath,"FLUORESCENT_MOVIE_RESULTS")
+          output_fluor_folder=os.path.join(outpath,"TRACKED_GREEN_FL_CHANNEL")
           if  len(os.listdir( output_fluor_folder))==0:# 2. if OUTPUT is empty
               print("OUTPUT exists but empty")
               shutil.rmtree(outpath)# delete OUPUT if it exists
@@ -1337,7 +1339,7 @@ def initiate_tracking_page():
    
                   (frame_size, true_cell_radius_pickle, true_patch_size_pickle,basic_naive_names,
                   num_frames, full_core_fluor_name, n_digits, full_core_bright_name, first_frame_number,
-                  base_colours, contrast_value, number_in_first_frame,full_core_red_name, red_dictionary, bordersize, init_delta)= extract_const_movie_parameters(outpath)
+                  base_colours, contrast_value, number_in_first_frame,full_core_red_name, red_dictionary, bordersize, init_delta)= extract_const_movie_parameters(helper_dir_p4)
                   
     
                   true_cell_radius.set(true_cell_radius_pickle)
@@ -1360,7 +1362,7 @@ def initiate_tracking_page():
      ###################################
                  
                   
-                  lineage_per_frame = extract_lineage(outpath)
+                  lineage_per_frame = extract_lineage(helper_dir_p4)
                   last_frame_cell_dict=lineage_per_frame[-1]
                   n_cells=len(last_frame_cell_dict)    
                   internal_cell_names=list(last_frame_cell_dict.keys())
@@ -1371,7 +1373,7 @@ def initiate_tracking_page():
                   ##############################
                   global xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,\
                   dict_of_divisions,naive_names_counter, changable_params_history
-                  xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,dict_of_divisions,naive_names_counter,lin_image_widths,changable_params_history= extract_changeable_params_history(outpath, -1)
+                  xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,dict_of_divisions,naive_names_counter,lin_image_widths,changable_params_history= extract_changeable_params_history(helper_dir_p4, -1)
                   edit_id_indicator.set(edit_id_indicator_pickle)
                                     
                   print("lin_image_widths=", lin_image_widths)
@@ -1581,7 +1583,10 @@ def prepare_for_first_go():
     ###########################################   
     global  full_core_bright_name, out_folders,full_core_red_name
        
-    out_folders = create_output_folders(outpath)  
+    out_folders = create_output_folders(outpath)
+    
+    #helper_dir_p4=os.path.join(outpath, "HELPER_FOLDERS_(NOT FOR USER)")
+    
     full_core_bright_name, _, _= extract_file_name(all_names_bright[0])
     ############################## DEBUG
     if len(all_names_red)!=0:
@@ -2030,12 +2035,12 @@ def clear_memory_of_models(tracker, segmentor, refiner):
      tf.reset_default_graph() 
 ###########################################
 def cut_lineage(internal_start_frame): # after editing
-    lineage_per_frame_p4=extract_lineage(outpath)
+    lineage_per_frame_p4=extract_lineage( helper_dir_p4)
     print("CUT_LINEAGE")
     #print("len(lineage_per_frame_p4) BEFORE=", len(lineage_per_frame_p4))
     del lineage_per_frame_p4[(internal_start_frame)-1:]# was -1
     #print("len(lineage_per_frame_p4) AFTER=", len(lineage_per_frame_p4))   
-    update_lineage(lineage_per_frame_p4,outpath,'wb')# "wb" means delete previous lineage and write a new one
+    update_lineage(lineage_per_frame_p4, helper_dir_p4,'wb')# "wb" means delete previous lineage and write a new one
     global output_images,lineage_images_tk,lineage_images_cv2, output_names    
    
     del lineage_images_cv2[(internal_start_frame-1):] 
@@ -2043,9 +2048,9 @@ def cut_lineage(internal_start_frame): # after editing
     del output_images[(internal_start_frame):]# was start_frame:
     del output_names[(internal_start_frame):]
     del changeable_params_history[(internal_start_frame-1):]
-    update_changeable_params_history(changeable_params_history,outpath, "wb")
+    update_changeable_params_history(changeable_params_history, helper_dir_p4, "wb")
         
-    folders_to_truncate=[os.path.join("HELPERS_(NOT_FOR_USER)","MASKS"),"FLUORESCENT_MOVIE_RESULTS",os.path.join("HELPERS_(NOT_FOR_USER)","LINEAGE_IMAGES"),os.path.join("HELPERS_(NOT_FOR_USER)","CLEANED_PATCHES"), "BRIGHT_MOVIE_RESULTS"]
+    folders_to_truncate=[os.path.join("HELPER_FOLDERS_(NOT FOR USER)","MASKS"),"TRACKED_GREEN_FL_CHANNEL",os.path.join("HELPER_FOLDERS_(NOT FOR USER)","LINEAGE_IMAGES"),os.path.join("HELPER_FOLDERS_(NOT FOR USER)","CLEANED_PATCHES"), "TRACKED_BRIGHTFIELD_CHANNEL"]
     for folder in folders_to_truncate:
         #print("folder=", folder)
         full_path_to_folder=os.path.join(outpath,folder)
@@ -2080,7 +2085,7 @@ def record_const_movie_parameters():# record cell_size and other parameters in p
     list_of_const_movie_params=[frame_size, true_cell_radius.get(), true_patch_size.get(),basic_naive_names,
                           num_frames, full_core_fluor_name, n_digits,full_core_bright_name, first_frame_number,
                           base_colours, contrast_value, number_in_first_frame,full_core_red_name, red_dictionary, bordersize, init_delta]
-    const_parameters_path=os.path.join(outpath,"constant_movie_parameters.pkl")  
+    const_parameters_path=os.path.join( helper_dir_p4,"constant_movie_parameters.pkl")  
     with open(const_parameters_path, 'wb') as f:
         for i in range(len(list_of_const_movie_params)):
            pickle.dump(list_of_const_movie_params[i], f,protocol=pickle.HIGHEST_PROTOCOL)
@@ -2203,8 +2208,8 @@ def execute():
                  manual_division_indicator.set("no")
             #record_const_movie_parameters()
             print("curr_frame_cell_names after division=",curr_frame_cell_names) 
-            update_changeable_params_history([[xs,curr_frame_cell_names,flag,edit_id_indicator.get(),colour_counter,colour_dictionary,dict_of_divisions,naive_names_counter, lin_image_widths]],outpath, 'ab')
-            update_lineage([cells],outpath,'ab')# concatenates {cells}  to pickle 
+            update_changeable_params_history([[xs,curr_frame_cell_names,flag,edit_id_indicator.get(),colour_counter,colour_dictionary,dict_of_divisions,naive_names_counter, lin_image_widths]], helper_dir_p4, 'ab')
+            update_lineage([cells], helper_dir_p4,'ab')# concatenates {cells}  to pickle 
             #eedback_label.config(text="Execution in progress: \nFrame "+ str(first_number_in_clip+kk)+"\n - If you need to stop for editing, press Button 3a."
                             #"\n - Otherwise, wait until execution is finished.")
             #label_current.configure(text="Current frame: " +str(first_frame_number+k+kk+1), fg="red")           
@@ -2340,7 +2345,7 @@ def display_first_frame():# display all frames after pushing button "Display res
     slide_frames(first_frame_number)
     
     global  lineage_per_frame_p4
-    lineage_per_frame_p4=extract_lineage(outpath)
+    lineage_per_frame_p4=extract_lineage(helper_dir_p4)
     print("len(lineage_per_frame_p4)=", len(lineage_per_frame_p4))
     # creates and saves per cell pedigree in pickle file, but then it is deleted when you push button "Execute"  
     #pedigree = create_pedigree(lineage_per_frame_p4, outpath, frame_size) 
@@ -2431,7 +2436,7 @@ def stop_editing_IDs():
     previous_lineage_image=lineage_images_cv2[start_frame_internal-2]
     global xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,\
     dict_of_divisions,naive_names_counter,lin_image_widths,changeable_params_history
-    xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,dict_of_divisions,number_of_added_new_cells,lin_image_widths,changeable_params_history= extract_changeable_params_history(outpath, start_frame_internal)
+    xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,dict_of_divisions,number_of_added_new_cells,lin_image_widths,changeable_params_history= extract_changeable_params_history(helper_dir_p4, start_frame_internal)
     #edit_id_indicator.set(edit_id_indicator_pickle)
     edit_id_indicator.set("yes")
     ########################################################
@@ -2714,8 +2719,23 @@ def show_channel():# switcvh between fluorescent and bright channels in magnifie
         RR1.configure(bg=button_color, fg="black")
         RR2.configure(bg="black", fg="#00FFFF")
     photo=turn_image_into_tkinter(image, 800)
-    canvas_popup_current.create_image(0, 0, anchor=NW, image=photo)    
+    canvas_popup_current.create_image(0, 0, anchor=NW, image=photo)
+#################################################
+def create_final_movie_p4():# create final movie + pedigree_per_cell (simplified, i.e. only centroids and areas)
+  instruct_label_p4.config(text="Creating lineage and final movie...")
+  global outpath,frame_size, helper_dir_p4 
+  patch_size=true_patch_size.get()           
+  update_lineage(lineage_per_frame_p4,helper_dir_p4, 'wb')
+  instruct_label_p4.config(text="Lineage per cell is stored in" +str(helper_dir_p4))
+    
+  lineage_per_cell=print_excel_files(outpath, frame_size,lineage_per_frame_p4, bordersize,patch_size)
+  instruct_label_p4.config(text="Lineage per cell is stored in" +str(helper_dir_p4)+
+                          "Creating final movie...")
+  create_output_movie(outpath, frame_size)       
+  instruct_label_p4.config(text="Lineage per cell is stored in  " +str(os.path.join(helper_dir_p4,"lineage_per_cell.pkl"))+
+                          "\nFinal movie is in  " + str(os.path.join(outpath,"lineage_movie.avi")))    
 ################### Buttons and labels Page 4####################
+########################################################
 button_execute = Button(frame2_page4, text="3. Execute", font='TkDefaultFont 10 bold', 
                bg='#9ACD32', activebackground="red",command=lambda:[threading.Thread(target=execute).start(), update_flash([]), button_display.configure(bg=button_color)])               
 button_execute.grid(row=0, column=0, pady=20)
@@ -2723,6 +2743,10 @@ button_execute.grid(row=0, column=0, pady=20)
 button_display = Button(frame2_page4, text="4. Display result", font='TkDefaultFont 10 bold', 
                bg='#9ACD32',activebackground="red", command=lambda: [display_first_frame(), update_flash([])])
 button_display.grid(row=2, column=0, padx=20)
+
+
+button_create_excel = Button(frame2_page4, text="7. Create final movie\n and \nExcel files", command=create_final_movie_p4,bg=button_color, font=all_font,activebackground="red")
+button_create_excel.grid(row=4, column=0, padx=20)    
 ################################################
 
 l_instr_name_p4=tk.Label(frame9_page4,text="INSTRUCTIONS FOR USER :" ,bg="black", font=all_font, fg="red").pack()
@@ -2880,10 +2904,10 @@ def slide_frames_p5(value):
         #update_flash([])
         #activate_buttons(all_buttons_page5,[button_final_movie])
     image_number = int(value)
-    print(" image_number=", image_number)
+    #print(" image_number=", image_number)
     #global internal_frame_number_p5
     internal_frame_number_for_slider=image_number-first_frame_number_p5
-    print(" internal_frame_number=", internal_frame_number_for_slider)
+    #print(" internal_frame_number=", internal_frame_number_for_slider)
     #label_fluor_name.config(text=os.path.basename(path_filled_fluors[image_number-1]))
     label_fluor_name.config(text=os.path.basename(path_filled_fluors[internal_frame_number_for_slider]))
      
@@ -2896,16 +2920,19 @@ def choose_and_load_tracked_movie():
     global button_load_p5
     update_flash([])
     button_load_p5.configure(background = 'red')
-    global output_dir, input_dir,software_folder
-    output_dir = filedialog.askdirectory()
-    print("output_dir =", output_dir)
-    ##################################      
-    head_tail=os.path.split(output_dir)
+    global output_dir_p5, input_dir_p5,software_folder, helper_dir_p5
+    output_dir_p5 = filedialog.askdirectory()# \TRACKED_MOVIE_{movie name}
+    print("output_dir_p5 =", output_dir_p5)
+    ##################################
+    helper_dir_p5=os.path.join(output_dir_p5,"HELPER_FOLDERS_(NOT FOR USER)")               
+    head_tail=os.path.split(output_dir_p5)
     head =head_tail[0]
-    tail =head_tail[1]
-    print("head, tail=", head,tail)
-    input_movie_name=tail[7:]
-    input_dir  =os.path.join(head,input_movie_name)
+    #tail =head_tail[1]
+    #print("head, tail=", head,tail)
+    #input_movie_name=tail[7:]
+    input_movie_name="ONE_WELL_MOVIE_"+os.path.basename(head)
+    input_dir_p5  =os.path.join(head,input_movie_name)# \ONE_WELL_MOVIE_{movie name}
+    print(" input_dir_p5 =",  input_dir_p5 )
     ####################################################
     
     #######################################################
@@ -2913,12 +2940,12 @@ def choose_and_load_tracked_movie():
     global empty_fluors, empty_brights, empty_reds,filled_fluors, filled_brights,filled_reds, masks
     global lineage_per_frame_p5
     dialog_label_5.config(text="loading tracked movie...")
-    path_filled_brights,path_filled_fluors,path_filled_reds,path_masks, empty_fluors, empty_brights, empty_reds,filled_fluors, filled_brights,filled_reds, masks, lineage_per_frame_p5=load_tracked_movie_p5(input_dir,output_dir)
+    path_filled_brights,path_filled_fluors,path_filled_reds,path_masks, empty_fluors, empty_brights, empty_reds,filled_fluors, filled_brights,filled_reds, masks, lineage_per_frame_p5=load_tracked_movie_p5(input_dir_p5,output_dir_p5)
     global frame_p5_size,cell_radius_p5,patch_size_p5,full_core_red_name, first_frame_number_p5,red_dictionary, bordersize   
     #############
     frame_p5_size, cell_radius_p5, patch_size_p5,max_number_of_cells,\
            num_frames, full_core_fluor_name, n_digits, full_core_bright_name,  first_frame_number_p5,\
-           base_colours,contrast_value,number_cells_in_first_frame,full_core_red_name,red_dictionary, bordersize, delta=extract_const_movie_parameters(output_dir)
+           base_colours,contrast_value,number_cells_in_first_frame,full_core_red_name,red_dictionary, bordersize, delta=extract_const_movie_parameters(helper_dir_p5)
     #################################
     global resize_coeff, new_shape
     resize_coeff=window_p5_size /frame_p5_size
@@ -2931,7 +2958,7 @@ def choose_and_load_tracked_movie():
     cell_center_visual_x,cell_center_visual_y=300,300
     ############################
     print("frame_p5_size=",frame_p5_size)
-    feedback_label_5.configure(text="Movie : "+input_dir+"\nFluorescent frames: "+str(num_frames)+\
+    feedback_label_5.configure(text="Movie : "+input_dir_p5+"\nFluorescent frames: "+str(num_frames)+\
                                "   Bright frames: "+str(len(filled_brights))+"   Red frames:"+str(len(filled_reds))+\
                                    "\nFrame size = "+ str(frame_p5_size)+" x "+str(frame_p5_size)+"   Cell diameter = "+str(cell_radius_p5*2))
    
@@ -3687,7 +3714,7 @@ def save_edits_for_frame(): #saves all eduts in current frame and modifies linag
        patch_path=create_name_for_cleaned_patch(path_filled_brights[internal_frame_number_p5], cell_number)
        print("patch_path=", patch_path)
        patch=modified_cell_IDs[cell_number][2]
-       cv2.imwrite(os.path.join(output_dir,"HELPERS_(NOT_FOR_USER)","CLEANED_PATCHES",patch_path), patch)          
+       cv2.imwrite(os.path.join(output_dir_p5,"HELPER_FOLDERS_(NOT FOR USER)","CLEANED_PATCHES",patch_path), patch)          
     ############################################
     global photo_fluor, photo_bright, canvas_bright_p5,canvas_fluor_p5     
     canvas_bright_p5,canvas_fluor_p5,photo_fluor, photo_bright=display_both_channels(filled_fluor,filled_bright,canvas_fluor_p5,canvas_bright_p5,window_p5_size,image_origin_x,image_origin_y)         
@@ -3707,8 +3734,8 @@ def save_edits_for_frame(): #saves all eduts in current frame and modifies linag
 #######################################
 def create_final_movie():# create final movie + pedigree_per_cell (simplified, i.e. only centroids and areas)
   dialog_label_5.config(text="Creating lineage and final movie...")
-  global output_dir,frame_p5_size 
-  print("output_dir=", output_dir)  
+  global output_dir_p5,frame_p5_size 
+  print("output_dir_p5=", output_dir_p5)  
   if edits_indicator=="yes":
     mode=mode_variable.get()
     if mode=="slow":
@@ -3716,15 +3743,15 @@ def create_final_movie():# create final movie + pedigree_per_cell (simplified, i
         activate_fast_edit_mode()
     save_edits_for_frame()
              
-  update_lineage(lineage_per_frame_p5,output_dir, 'wb')
-  dialog_label_5.config(text="Lineage per cell is stored in" +str(output_dir))
+  update_lineage(lineage_per_frame_p5,helper_dir_p5, 'wb')
+  dialog_label_5.config(text="Lineage per cell is stored in" +str(helper_dir_p5))
     
-  lineage_per_cell=print_excel_files(output_dir, frame_p5_size,lineage_per_frame_p5, bordersize,patch_size_p5)
-  dialog_label_5.config(text="Lineage per cell is stored in" +str(output_dir)+
+  lineage_per_cell=print_excel_files(output_dir_p5, frame_p5_size,lineage_per_frame_p5, bordersize,patch_size_p5)
+  dialog_label_5.config(text="Lineage per cell is stored in" +str(helper_dir_p5)+
                           "Creating final movie...")
-  create_output_movie(output_dir, frame_p5_size)       
-  dialog_label_5.config(text="Lineage per cell is stored in  " +str(os.path.join(output_dir,"lineage_per_cell.pkl"))+
-                          "\nFinal movie is in  " + str(os.path.join(output_dir,"lineage_movie.avi")))
+  create_output_movie(output_dir_p5, frame_p5_size)       
+  dialog_label_5.config(text="Lineage per cell is stored in  " +str(os.path.join(helper_dir_p5,"lineage_per_cell.pkl"))+
+                          "\nFinal movie is in  " + str(os.path.join(output_dir_p5,"lineage_movie.avi")))
 ############### widgets in Page 5
 
 global button_load_p5,button_activate_fast_edit_mode, button_activate_slow_edit_mode,\
@@ -3883,6 +3910,8 @@ def load_display_images_p6():# load images for display that have already been cr
       global red_patches, one_cell_patches, plots, bright_names
       label_instruct_p6.config(text="\nLoading results ...\n\n\n") 
       red_patches, one_cell_patches, plots, bright_names=load_and_prepare_result_images(outpath, keys, progress_bar)
+      
+      
       label_feedback_p6.grid(row=0, column=1, padx=10)
       label_feedback_p6.config(text="MOVIE:  "+ os.path.join(software_folder, input_movie_folder)+
                     "\nNUMBER OF FRAMES: "+ str(num_frames)+"                   FRAME SIZE: "+str(frame_size_p6)+" x "+str(frame_size_p6)+ "\nCELLS: "+str(list_of_cell_names))
@@ -3895,30 +3924,39 @@ def load_display_images_p6():# load images for display that have already been cr
       #activate_buttons(retrieve_popup_buttons,[menu_cell_ID])
       activate_buttons(all_buttons_page6,[menu_cell_ID])
 #############################################
-def upload_processed_movie():# look if display images exist. If so, load them, if not - create them first and then load them.
+def upload_input_movie():# look if display images exist. If so, load them, if not - create them first and then load them.
     update_flash([])
-    #global retrieve_popup_buttons
+    #global retrieve_popup_buttons 
     global progress_bar
     button_upload_p6.config(bg="red")
-    global my_dir,out_folders, outpath, software_folder, options_cells, menu_cell_ID,input_movie_folder    
-    my_dir = filedialog.askdirectory()# input movie folder (full path) 
-    input_movie_folder = os.path.basename(my_dir)
-    software_folder = os.path.dirname(my_dir)     
-    outpath = os.path.join(software_folder, "OUTPUT_"+input_movie_folder)
+    global my_dir,out_folders, outpath, software_folder, options_cells, menu_cell_ID,input_movie_folder
+    ###################################    
+    outpath = filedialog.askdirectory()# TRACKED_MOVIE_{movie_name}
+    print("outpath = ", outpath )
+    current_movie_folder = os.path.dirname(outpath )
+    print(" current_cell_folder = ",  current_movie_folder)
+    #software_folder = os.path.dirname(my_dir)
+    current_movie_name=os.path.basename( current_movie_folder )       
+    #outpath = os.path.join( current_movie_folder, "TRACKED_MOVIE_"+ current_movie_name)
+    input_movie_folder = os.path.join( current_movie_folder, "ONE_WELL_MOVIE_"+ current_movie_name)
+    print( "outpath=", outpath)
+    print( "input_movie_folder =",  input_movie_folder )
+    ########################################################
     label_instruct_p6.config(text="\nCreating results ...\n\n\n")    
     ################### load lineage_per_cell and constant movie params
     global pedigree, frame_size_p6, first_frame_number_p6, num_frames, list_of_cell_names
-    pedigree_path=os.path.join(outpath,"lineage_per_cell.pkl")
+    helper_dir_p6=os.path.join(outpath,"HELPER_FOLDERS_(NOT FOR USER)")
+    pedigree_path=os.path.join(helper_dir_p6,"lineage_per_cell.pkl")
     with open(pedigree_path, 'rb') as handle:
          pedigree = pickle.load(handle)   
        
     frame_size_p6, true_cell_radius_pickle, patch_size,max_number_of_cells,\
            num_frames, full_core_fluor_name, n_digits, full_core_bright_name,  first_frame_number_p6,\
-           base_colours,contrast_value,number_cells_in_first_frame,full_core_red_name, red_dictionary_p5,bordersize_p5,delta_p5=extract_const_movie_parameters(outpath)
+           base_colours,contrast_value,number_cells_in_first_frame,full_core_red_name, red_dictionary_p5,bordersize_p5,delta_p5=extract_const_movie_parameters(helper_dir_p6)
     #############################################
     list_of_cell_names =list(pedigree.keys())
     w,h = 400,150 
-    cell_info_folder=os.path.join(outpath,"HELPERS_(NOT_FOR_USER)","VISUALISATION_HELPERS", "PLOTS")
+    cell_info_folder=os.path.join(outpath,"HELPER_FOLDERS_(NOT FOR USER)","VISUALISATION_HELPERS", "PLOTS")
     if  len(os.listdir(cell_info_folder))==0:# display images are not existent, need to be created
       print("CREATE")
       ############################
@@ -3974,7 +4012,9 @@ def slide_patch(value):  # value=frame number from patch_slider
     im_pil=turn_image_into_tkinter(patch, canvas_size_p6,[])    
     canvas_patch.create_image(0, 0, anchor=NW, image=im_pil)
     
+    
     red_patch=red_patches[cell_ID.get()][internal_frame_number][0]
+    cv2.imwrite(r"C:\Users\helina\Desktop\red_patch.tif",red_patch)    
     global red_im_pil
     #red_patch_rgb = cv2.cvtColor(red_patch, cv2.COLOR_BGR2RGB)   
     red_im_pil=turn_image_into_tkinter(red_patch, canvas_size_p6,[])
@@ -4063,8 +4103,8 @@ label_title_p6 = tk.Label(frame1_page6, text="STEP 5: VISUALISE RESULTS",
               bg="yellow", fg="red", font=("Times", "24")).pack()
 label_instr_name_p6=tk.Label(frame11_page6,text="INSTRUCTIONS FOR USER :" ,bg="black", font=all_font, fg="white").pack(pady=5)
 global button_upload_p6
-button_upload_p6 = tk.Button(frame3a_page6, text=" Upload_processed_movie",
-                bg=button_color, font=all_font,command=upload_processed_movie)
+button_upload_p6 = tk.Button(frame3a_page6, text=" Upload_TRACKED_movie",
+                bg=button_color, font=all_font,command=upload_input_movie)
 button_upload_p6.pack()
 #########################
 global patch_slider_old    

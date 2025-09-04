@@ -94,11 +94,11 @@ def load_clip(first_number_in_clip,full_core_fluor_name,full_core_bright_name,n_
 def create_output_folders(outpath):# creates only names if folders already exost. It is importnat when retrieving
    subfolders=[]
    ################################
-   subfolder_names=["BRIGHT_MOVIE_RESULTS",
-                    "FLUORESCENT_MOVIE_RESULTS",
-                    "RED_MOVIE_RESULTS",
-                    "PER_CELL_RESULTS",
-                    "HELPERS_(NOT_FOR_USER)", "FLUOR_BOREDRS"]
+   subfolder_names=["TRACKED_BRIGHTFIELD_CHANNEL",
+                    "TRACKED_GREEN_FL_CHANNEL",
+                    "TRACKED_RED_FL_CHANNEL",
+                    "RESULTS_PER_CELL",
+                    "HELPER_FOLDERS_(NOT FOR USER)"]
    ##########################################################                 
    for i in range(len(subfolder_names)):
        destination=os.path.join(outpath,subfolder_names[i])
@@ -108,7 +108,7 @@ def create_output_folders(outpath):# creates only names if folders already exost
    ######################################
    helper_subfolders=[ "CLEANED_PATCHES", "LINEAGE_IMAGES", "MASKS","IMAGES_FOR_FINAL_MOVIE"]
    for helper_subfolder in helper_subfolders:
-       destinn=os.path.join(outpath,"HELPERS_(NOT_FOR_USER)",helper_subfolder)
+       destinn=os.path.join(outpath,"HELPER_FOLDERS_(NOT FOR USER)",helper_subfolder)
        if not os.path.exists(destinn):
            os.mkdir(destinn)
    ###########################################

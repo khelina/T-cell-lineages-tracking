@@ -167,12 +167,12 @@ def prepare_contours(input_image):# input_image must be gray. binary 0,255
 #############################################################
 def paste_patch(destin_image,patch,a,b,c,d,color,alpha, frame_size, bordersize):
     destin_image_border=cv2.copyMakeBorder(destin_image, top=bordersize, bottom=bordersize, left=bordersize, right=bordersize,  borderType= cv2.BORDER_CONSTANT, value = float(np.mean(destin_image)) )
-    debug_destin_image =destin_image_border.copy()
-    debug_destin_image= cv2.cvtColor(debug_destin_image,cv2.COLOR_BGRA2GRAY)   
+    #debug_destin_image =destin_image_border.copy()
+    #debug_destin_image= cv2.cvtColor(debug_destin_image,cv2.COLOR_BGRA2GRAY)   
      #borderType= cv2.BORDER_CONSTANT, value = float(np.min(empty_fluor))
     patch=patch.astype(np.uint8)
-    debug_patch=deepcopy(patch)
-    debug_destin_image[c:d, a:b] = debug_patch      
+    #debug_patch=deepcopy(patch)
+    #debug_destin_image[c:d, a:b] = debug_patch      
     mask=patch.copy()  
     patch=cv2.cvtColor(patch, cv2.COLOR_GRAY2RGBA) 
     patch[mask==255]=color 
@@ -192,7 +192,7 @@ def paste_patch(destin_image,patch,a,b,c,d,color,alpha, frame_size, bordersize):
     #cv2.putText(destin_image_cropped,texxt,(int(xx)-5,int(yy)+5),cv2.FONT_HERSHEY_PLAIN,0.7,color,1) 
     #cv2.putText(destin_bright,texxt,(int(xx)-5,int(yy)+5),cv2.FONT_HERSHEY_PLAIN,0.7,collour,1)         
     #cv2.putText(destin_red,texxt,(int(xx)-5,int(yy)+5),cv2.FONT_HERSHEY_PLAIN,0.7,collour,1) 
-    return destin_image_cropped,  debug_destin_image
+    return destin_image_cropped
 ################### create mask image for MASKS folder
 def paste_benchmark_patch(patch,a,b,c,d,cell_number, frame_size, bordersize):    
     image_with_one_cell_border=np.zeros((frame_size+2*bordersize,frame_size+2*bordersize),dtype="uint64")     
@@ -226,7 +226,7 @@ def plot_frame(cells,clip_centr,k,kk,fluor_images,fluor_names,out_folders,coords
        full_lineage_name =os.path.join(out_folders[4],"LINEAGE_IMAGES",lineage_name)
        cv2.imwrite(full_lineage_name, current_lineage_image) 
        still_lineage=current_lineage_image
-       cv2.imwrite(os.path.join(os.path.dirname(out_folders[5]),"still_lineage.tif"), still_lineage)
+       cv2.imwrite(os.path.join(os.path.dirname(out_folders[0]),"still_lineage.tif"), still_lineage)
  
        #########################################
        
@@ -253,10 +253,10 @@ def plot_frame(cells,clip_centr,k,kk,fluor_images,fluor_names,out_folders,coords
          xx,yy=cells["cell_%s" % kkk][6][0],cells["cell_%s" % kkk][6][1]
          texxt=cells["cell_%s" % kkk][11]
          
-         destin_bright, debug_bright_image=paste_patch(destin_bright,patch_with_contours,a,b,c,d,collour,1.0, frame_size, bordersize)        
-         destin_fluor, debug_fluor_image=paste_patch(destin_fluor,patch_with_contours,a,b,c,d,collour,1.0, frame_size,bordersize)
+         destin_bright=paste_patch(destin_bright,patch_with_contours,a,b,c,d,collour,1.0, frame_size, bordersize)        
+         destin_fluor=paste_patch(destin_fluor,patch_with_contours,a,b,c,d,collour,1.0, frame_size,bordersize)
          if red_names[kk]!="0":
-             destin_red, debug_red_image=paste_patch(destin_red,patch_with_contours,a,b,c,d,collour,1.0, frame_size,bordersize)
+             destin_red=paste_patch(destin_red,patch_with_contours,a,b,c,d,collour,1.0, frame_size,bordersize)
          centroid=cells["cell_%s" % kkk][6]
          #print("centroid=", centroid)
          start_point, end_point=(int(centroid[0]-patch_size), int(centroid[1]-patch_size)), (int(centroid[0]+patch_size), int(centroid[1]+patch_size))
@@ -277,7 +277,7 @@ def plot_frame(cells,clip_centr,k,kk,fluor_images,fluor_names,out_folders,coords
          
                   
          coords[kkk,0],coords[kkk,1]=xx, yy
-       cv2.imwrite(rename_file(out_folders[5],fluor_names[kk]), debug_fluor_image)
+       #cv2.imwrite(rename_file(out_folders[5],fluor_names[kk]), debug_fluor_image)
        #print("check_fluor_destin   ",rename_file(out_folders[3],fluor_names[kk]))       
        cv2.imwrite(rename_file(out_folders[1],fluor_names[kk]),destin_fluor)# plot destin_fluor to RESULT FLUOR folder
        
