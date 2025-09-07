@@ -3811,35 +3811,35 @@ canvas_size_p6=400
 frame1_page6 = tk.Frame(master=page6, width=1530, height=50, bg=bg_color)
 frame1_page6.grid(row=0, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
 
-frame2_page6 = tk.Frame(master=page6, width=1530, height=200, bg="blue")
+frame2_page6 = tk.Frame(master=page6, width=1530, height=200, bg=bg_color)
 frame2_page6.grid(row=1, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
 ########################################################
 frame3a_page6 = tk.Frame(master=page6,width=canvas_size_p6, height=100,  bg=bg_color)
-frame3a_page6.grid(row=2, column=0, rowspan=1, columnspan=1, sticky=W)
+frame3a_page6.grid(row=2, column=0, rowspan=1, columnspan=1, sticky=W+E+N+S)
 
 frame3b_page6 = tk.Frame(master=page6,width=canvas_size_p6, height=100,  bg=bg_color)
-frame3b_page6.grid(row=2, column=1, rowspan=1, columnspan=1, sticky=W)
+frame3b_page6.grid(row=2, column=1, rowspan=1, columnspan=1, sticky=W+E+N+S)
 
 frame3c_page6 = tk.Frame(master=page6,width=canvas_size_p6, height=100,   bg=bg_color)
-frame3c_page6.grid(row=2, column=2, rowspan=1, columnspan=1, sticky=W)
+frame3c_page6.grid(row=2, column=2, rowspan=1, columnspan=1, sticky=W+E+N+S)
 ########################################################
-frame4_page6 = tk.Frame(master=page6,width=canvas_size_p6, height=canvas_size_p6, bg="blue")
-frame4_page6.grid(row=3, column=0, rowspan=1, columnspan=1,sticky =  W)
+frame4_page6 = tk.Frame(master=page6,width=canvas_size_p6, height=canvas_size_p6, bg=bg_color)
+frame4_page6.grid(row=3, column=0, rowspan=1, columnspan=1,sticky =  W+E+N+S)
 
-frame5_page6 = tk.Frame(master=page6,width=canvas_size_p6, height=canvas_size_p6,  bg="yellow")
-frame5_page6.grid(row=3, column=1, rowspan=1, columnspan=1,sticky =  W)
+frame5_page6 = tk.Frame(master=page6,width=canvas_size_p6, height=canvas_size_p6,  bg=bg_color)
+frame5_page6.grid(row=3, column=1, rowspan=1, columnspan=1,sticky =  W+E+N+S)
 
-frame6_page6 = tk.Frame(master=page6,width=canvas_size_p6, height=canvas_size_p6,  bg="green")
-frame6_page6.grid(row=3, column=2, rowspan=1, columnspan=1,sticky =  W)
+frame6_page6 = tk.Frame(master=page6,width=canvas_size_p6, height=canvas_size_p6,  bg=bg_color)
+frame6_page6.grid(row=3, column=2, rowspan=1, columnspan=1,sticky =  W+E+N+S)
 ##############################################################
 frame8_page6 = tk.Frame(master=page6, width=canvas_size_p6, height=250, bg=bg_color)
-frame8_page6.grid(row=4, column=0, rowspan=1, columnspan=1,sticky =  W)
+frame8_page6.grid(row=4, column=0, rowspan=1, columnspan=1,sticky =  W+E+N+S)
 
 frame9_page6 = tk.Frame(master=page6, width=canvas_size_p6, height=250, bg=bg_color)
-frame9_page6.grid(row=4, column=1, rowspan=1, columnspan=1,sticky =  W)
+frame9_page6.grid(row=4, column=1, rowspan=1, columnspan=1,sticky =  W+E+N+S)
 
 frame10_page6 = tk.Frame(master=page6, width=canvas_size_p6, height=250, bg=bg_color)
-frame10_page6.grid(row=4, column=2, rowspan=1, columnspan=1,sticky =  W)
+frame10_page6.grid(row=4, column=2, rowspan=1, columnspan=1,sticky =  W+E+N+S)
 ###################################################################
 frame11_page6 = tk.Frame(master=page6, width=1530, height=20, bg=bg_color)
 frame11_page6.grid(row=5, column=0, rowspan=1, columnspan=3,sticky =  W+E+N+S)
@@ -3847,24 +3847,26 @@ frame11_page6.grid(row=5, column=0, rowspan=1, columnspan=3,sticky =  W+E+N+S)
 frame12_page6 = tk.Frame(master=page6, width=1530, height=20)
 frame12_page6.grid(row=6, column=0, rowspan=1, columnspan=3,sticky =  W+E+N+S)
 
+gap_frame_page6 = tk.Frame(master=page6, width=1530, height=5, bg=bg_color)
+gap_frame_page6.grid(row=7, column=0, rowspan=1, columnspan=3,sticky =  W+E+N+S)
+
 frame13_page6 = tk.Frame(master=page6, width=1530, height=20, bg=bg_color)
-frame13_page6.grid(row=7, column=0, rowspan=1, columnspan=3,sticky =  W+E+N+S)
+frame13_page6.grid(row=8, column=0, rowspan=1, columnspan=3,sticky =  W+E+N+S)
 ######################################################
 canvas_bright = Canvas(frame4_page6, bg=bg_color, height=canvas_size_p6, width=canvas_size_p6)
-canvas_bright.pack(anchor='nw')
-label_file_name=tk.Label(frame4_page6, text="this is label file_name", bg="black", fg="cyan")
-label_file_name.pack(anchor='nw')
+canvas_bright.pack()
+label_file_name=tk.Label(frame4_page6, text=" ", bg="black", fg="cyan",width=58, height=2)
+label_file_name.pack()
 
 canvas_lineage = Canvas(frame5_page6, bg=bg_color, height=canvas_size_p6, width=canvas_size_p6)
-canvas_lineage.pack(anchor='nw')
+canvas_lineage.pack()
 
 canvas_patch = Canvas(frame6_page6, bg=bg_color, height=canvas_size_p6, width=canvas_size_p6)
-canvas_patch.pack(anchor='nw')
+canvas_patch.pack()
 
 canvas_graph = Canvas(frame8_page6, bg=bg_color, height=250, width=canvas_size_p6)
-canvas_graph.pack(anchor='nw')
-
-############################## sub2 #####################
+canvas_graph.pack()
+###################################################
 options_cells = [""]
 global cell_ID, cell_property
 cell_ID, cell_property = StringVar(page6),StringVar(page6)
@@ -3883,7 +3885,7 @@ from interface_functions import turn_image_into_tkinter
 def create_display_images_p6():# plot images necessary for display       
         label_instruct_p6.config(text="\nCreating results ...\n\n\n")   
         still_lineage=cv2.imread(os.path.join( outpath,"still_lineage.tif"), -1)
-        plot_per_cell_info(pedigree, outpath, still_lineage,label_instruct_p6, progress_bar,first_frame_number_p6)
+        plot_per_cell_info(pedigree, outpath, still_lineage,label_instruct_p6, progress_bar,first_frame_number_p6, label_create_p6)
         load_display_images_p6()        
 #######################################
 def retrieve_display_images_p6():# If display iamges were created before, upload them
@@ -3894,25 +3896,18 @@ def retrieve_display_images_p6():# If display iamges were created before, upload
 def load_display_images_p6():# load images for display that have already been created before 
       global keys,menu_cell_ID, progress_bar,retrieve_popup_buttons    
       keys=list(pedigree.keys())
-      print("keys=", keys)
-    
-      #############
+      ###########################################
       all_buttons_page6.remove(menu_cell_ID_old)      
-      menu_cell_ID_old.destroy()
-     
+      menu_cell_ID_old.destroy()     
       menu_cell_ID = OptionMenu(frame3b_page6, cell_ID, *keys,  command= load_cell_info)
       menu_cell_ID.pack()
       menu_cell_ID.config(bg = button_color,font=all_font,activebackground="red")
-      menu_cell_ID["menu"].config(bg=label_color,activebackground="red")
-      #retrieve_popup_buttons.append(menu_cell_ID)
+      menu_cell_ID["menu"].config(bg=label_color,activebackground="red")   
       all_buttons_page6.append(menu_cell_ID )        
-      ####################
+      ##################################################
       global red_patches, one_cell_patches, plots, bright_names
       label_instruct_p6.config(text="\nLoading results ...\n\n\n") 
       red_patches, one_cell_patches, plots, bright_names=load_and_prepare_result_images(outpath, keys, progress_bar)
-      
-      
-      label_feedback_p6.grid(row=0, column=1, padx=10)
       label_feedback_p6.config(text="MOVIE:  "+ os.path.join(software_folder, input_movie_folder)+
                     "\nNUMBER OF FRAMES: "+ str(num_frames)+"                   FRAME SIZE: "+str(frame_size_p6)+" x "+str(frame_size_p6)+ "\nCELLS: "+str(list_of_cell_names))
       label_instruct_p6.config(text="1. Choose cell ID,\n2. Then choose cell property (Area, Perimeter, or Circularity."+
@@ -3920,27 +3915,19 @@ def load_display_images_p6():# load images for display that have already been cr
       button_upload_p6.config(bg=button_color)
       global col_dict
       col_dict={"Area":["red", "yellow", "yellow"],"Perimeter":["yellow", "red", "yellow"],"Circularity":["yellow", "yellow", "red"]}
-      update_flash([menu_cell_ID])
-      #activate_buttons(retrieve_popup_buttons,[menu_cell_ID])
+      update_flash([menu_cell_ID])    
       activate_buttons(all_buttons_page6,[menu_cell_ID])
 #############################################
 def upload_input_movie():# look if display images exist. If so, load them, if not - create them first and then load them.
-    update_flash([])
-    #global retrieve_popup_buttons 
+    update_flash([])   
     global progress_bar
     button_upload_p6.config(bg="red")
     global my_dir,out_folders, outpath, software_folder, options_cells, menu_cell_ID,input_movie_folder
     ###################################    
-    outpath = filedialog.askdirectory()# TRACKED_MOVIE_{movie_name}
-    print("outpath = ", outpath )
+    outpath = filedialog.askdirectory()# TRACKED_MOVIE_{movie_name} 
     current_movie_folder = os.path.dirname(outpath )
-    print(" current_cell_folder = ",  current_movie_folder)
-    #software_folder = os.path.dirname(my_dir)
-    current_movie_name=os.path.basename( current_movie_folder )       
-    #outpath = os.path.join( current_movie_folder, "TRACKED_MOVIE_"+ current_movie_name)
-    input_movie_folder = os.path.join( current_movie_folder, "ONE_WELL_MOVIE_"+ current_movie_name)
-    print( "outpath=", outpath)
-    print( "input_movie_folder =",  input_movie_folder )
+    current_movie_name=os.path.basename( current_movie_folder )          
+    input_movie_folder = os.path.join( current_movie_folder, "ONE_WELL_MOVIE_"+ current_movie_name)    
     ########################################################
     label_instruct_p6.config(text="\nCreating results ...\n\n\n")    
     ################### load lineage_per_cell and constant movie params
@@ -3958,23 +3945,17 @@ def upload_input_movie():# look if display images exist. If so, load them, if no
     w,h = 400,150 
     cell_info_folder=os.path.join(outpath,"HELPER_FOLDERS_(NOT FOR USER)","VISUALISATION_HELPERS", "PLOTS")
     if  len(os.listdir(cell_info_folder))==0:# display images are not existent, need to be created
-      print("CREATE")
-      ############################
       global  popup_create_display_images
       popup_create_display_images = tk.Toplevel(master=page6, bg=label_color)                        
       popup_create_display_images.geometry('%dx%d+%d+%d' % (w, h, (ws/2) - (w/2), (hs/2) - (h/2)))
       label_create = tk.Label(popup_create_display_images, text="Display images have not been created yet.\nIt might take long to create them. \nPress OK to start.",width=500, height=5, bg=label_color, fg="black", font='TkDefaultFont 14 bold' )
       label_create.pack()                     
-      button_create_p6 = Button(popup_create_display_images, text="OK",
-      #bg=button_color,font='TkDefaultFont 14 bold', command=lambda:[popup_create_display_images.destroy(),create_display_images_p6()  ])
+      button_create_p6 = Button(popup_create_display_images, text="OK",     
       bg=button_color,font='TkDefaultFont 14 bold',command=lambda:[ popup_create_display_images.destroy(), Thread(target=create_display_images_p6).start()])
-      button_create_p6.pack()
-    
-      #retrieve_popup_buttons=[button_upload_p6, button_create_p6 ]
-      #activate_buttons(retrieve_popup_buttons,[ button_create_p6])      
+      button_create_p6.pack()      
       ###########################      
     else:
-      print("RETRIEVE")# diplay images are already there, just upload them
+      # diplay images are already there, just upload them
       global  popup_retrieve_display_images      
       label_instruct_p6.config(text="\nRetrieving results ...\n\n\n")        
       ############################
@@ -3985,38 +3966,21 @@ def upload_input_movie():# look if display images exist. If so, load them, if no
       global button_retrieve_p6                      
       button_retrieve_p6 = Button(popup_retrieve_display_images, text="OK",
       bg=button_color,font='TkDefaultFont 14 bold', command=lambda:[popup_retrieve_display_images.destroy(),Thread(target=retrieve_display_images_p6).start()])
-      button_retrieve_p6.pack()
-    
-      #retrieve_popup_buttons=[button_upload_p6, button_retrieve_p6]
-                            
-      #activate_buttons(retrieve_popup_buttons,[ button_retrieve_p6])       
+      button_retrieve_p6.pack()      
 ############################################
 def slide_patch(value):  # value=frame number from patch_slider          
     canvas_bright.delete('all')
     canvas_lineage.delete('all')
     canvas_patch.delete('all')
-    canvas_graph.delete('all')    
-    print("INSIDE SLIDE_PATCH")
-    
-    print("ffrom=", ffrom)
-    print("int(value)=",int(value))
-    #frame_number=one_cell_patches[cell_ID.get()][0][1]
-    internal_frame_number=int(value)-ffrom
-    print("internal_image_number=", internal_frame_number)
-    print("one_cell_patches.keys()=",one_cell_patches.keys())
-    patch=one_cell_patches[cell_ID.get()][internal_frame_number][0]
-  
-    #patch_rgb = cv2.cvtColor(patch, cv2.COLOR_BGR2RGB)
-    
+    canvas_graph.delete('all')        
+    internal_frame_number=int(value)-ffrom   
+    patch=one_cell_patches[cell_ID.get()][internal_frame_number][0]    
     global im_pil
     im_pil=turn_image_into_tkinter(patch, canvas_size_p6,[])    
     canvas_patch.create_image(0, 0, anchor=NW, image=im_pil)
-    
-    
-    red_patch=red_patches[cell_ID.get()][internal_frame_number][0]
-    cv2.imwrite(r"C:\Users\helina\Desktop\red_patch.tif",red_patch)    
-    global red_im_pil
-    #red_patch_rgb = cv2.cvtColor(red_patch, cv2.COLOR_BGR2RGB)   
+        
+    red_patch=red_patches[cell_ID.get()][internal_frame_number][0]   
+    global red_im_pil     
     red_im_pil=turn_image_into_tkinter(red_patch, canvas_size_p6,[])
     canvas_lineage.create_image(0, 0, anchor=NW, image=red_im_pil)
     
@@ -4031,18 +3995,14 @@ def slide_patch(value):  # value=frame number from patch_slider
     label_file_name.configure(text=os.path.basename(bright_name))
     bright_image=cv2.imread(bright_name, -1)
 
-    #bright_image_rgb = cv2.cvtColor(bright_image, cv2.COLOR_BGR2RGB)
     global bright_pil  
     bright_pil=turn_image_into_tkinter(bright_image, canvas_size_p6,[])
     canvas_bright.create_image(0, 0, anchor=NW, image=bright_pil)
-    
-   
-    patch_slider.config(label="Frame "+str(value))  
-        
+      
+    patch_slider.config(label="Frame "+str(value))          
     label_centr.config(text="Centroid: " +
               str(pedigree[cell_ID.get()][ internal_frame_number][3]))
-    combination=col_dict[cell_property.get()]
-    
+    combination=col_dict[cell_property.get()]    
     label_area.config(text="Area: " +
                str(pedigree[cell_ID.get()][internal_frame_number][4]), fg=combination[0])
     label_perim.config(text="Perimeter: " +
@@ -4053,26 +4013,19 @@ def slide_patch(value):  # value=frame number from patch_slider
 def load_cell_info(value):
   update_flash([])
   global all_buttons_page6
-  menu_cell_ID.config(fg=result_color,bg="black")
-  print("Entering create_patch_slider")
+  menu_cell_ID.config(fg=result_color,bg="black") 
   cell_property.set("Choose cell property")
   canvas_bright.delete('all')
   canvas_lineage.delete('all')
   canvas_patch.delete('all')
-  canvas_graph.delete('all')
-    
+  canvas_graph.delete('all')    
   cell_ID.set(value)
-  key=cell_ID.get()
-  print("key=", key)
+  key=cell_ID.get()  
   menu_cell_ID.config( bg="black",fg = result_color)
   if key!="Choose cell ID":
     global ffrom, tto
     ffrom=pedigree[key][0][1]
-    tto = pedigree[key][-1][1]
-    #ffrom, tto = pedigree[key][0][1], pedigree[key][-1][1]
-    print("ffrom=", ffrom)
-    print("tto=", tto)
-   
+    tto = pedigree[key][-1][1]   
     if patch_slider_old in all_buttons_page6:
         all_buttons_page6.remove(patch_slider_old)
         patch_slider_old.destroy()
@@ -4080,19 +4033,16 @@ def load_cell_info(value):
         patch_slider=Scale(frame10_page6,from_=ffrom,to=tto,orient=HORIZONTAL,troughcolor="#513B1C",label="Frame "+str(ffrom), command=slide_patch,
                  activebackground="red", bg=label_color,showvalue=0, font=all_font, length=380)    
         patch_slider.pack()
-        all_buttons_page6.append(patch_slider)
-    
+        all_buttons_page6.append(patch_slider)    
   update_flash([menu_cell_property])
   activate_buttons(all_buttons_page6,[menu_cell_property])    
 ###########################################################
 def load_cell_property(value):
     update_flash([])
     global all_buttons_page6
-    cell_property.set(str(value))
-    print("inside load_cell_property(value)")
+    cell_property.set(str(value))    
     menu_cell_property.config( fg = result_color,bg="black")
-    ffrom_1=str(ffrom)
-    print("ffrom_1=", ffrom_1)    
+    ffrom_1=str(ffrom)      
     slide_patch(ffrom_1)
     patch_slider.set(ffrom_1)      
     update_flash([patch_slider])
@@ -4101,7 +4051,7 @@ def load_cell_property(value):
 ################### poplulate page-6 with widgets #########
 label_title_p6 = tk.Label(frame1_page6, text="STEP 5: VISUALISE RESULTS",
               bg="yellow", fg="red", font=("Times", "24")).pack()
-label_instr_name_p6=tk.Label(frame11_page6,text="INSTRUCTIONS FOR USER :" ,bg="black", font=all_font, fg="white").pack(pady=5)
+label_instr_name_p6=tk.Label(frame11_page6,text="INSTRUCTIONS FOR USER :" ,bg="black", font=all_font, fg="white").pack()
 global button_upload_p6
 button_upload_p6 = tk.Button(frame3a_page6, text=" Upload_TRACKED_movie",
                 bg=button_color, font=all_font,command=upload_input_movie)
@@ -4109,15 +4059,20 @@ button_upload_p6.pack()
 #########################
 global patch_slider_old    
 patch_slider_old=Scale(frame10_page6,from_=ffrom,to=ffrom,orient=HORIZONTAL,troughcolor="#513B1C",label="Frame "+str(ffrom), command=slide_patch,
-                 activebackground="red", bg=label_color,showvalue=0, font=all_font, length=370)
+                 activebackground="red", bg=label_color,showvalue=0, font=all_font, length=400)
 patch_slider_old.pack(side=tk.TOP)
 ########################################### 
 global progress_bar
 s = ttk.Style()
 s.theme_use('clam')
 s.configure("red.Horizontal.TProgressbar", foreground='green', background='green')
-progress_bar=ttk.Progressbar(frame10_page6, style="red.Horizontal.TProgressbar", orient="horizontal", length=280, mode="determinate")
-progress_bar.pack(side=tk.BOTTOM, pady=20)
+progress_bar=ttk.Progressbar(frame10_page6, style="red.Horizontal.TProgressbar", orient="horizontal", length=400, mode="determinate")
+progress_bar.pack(pady=20)
+#############################
+global label_create_p6
+label_create_p6 = tk.Label(frame10_page6, text=" ",
+              bg="black", fg="cyan", font=all_font,width=50, height=2)
+label_create_p6.pack()
 ##################################################
 global menu_cell_ID_old,menu_cell_property
 menu_cell_ID_old = OptionMenu(frame3b_page6, cell_ID, *options_cells,  command= load_cell_info)
@@ -4131,7 +4086,7 @@ menu_cell_property.pack()
 menu_cell_property.config(bg = button_color, font=all_font,activebackground="red")
 menu_cell_property["menu"].config(bg=label_color,activebackground="red")
 ###################
-label_feedback_p6 = tk.Label(frame2_page6, text="\nWhen menue opens click on the INPUT movie.",bg="black", fg="cyan", font=all_font, height=1)
+label_feedback_p6 = tk.Label(frame2_page6, text="\nWhen menue opens click on the INPUT movie.",bg="black", fg="cyan", font=all_font, height=5)
 label_feedback_p6.pack(fill=BOTH)
 label_instruct_p6 = tk.Label(frame12_page6, text="Welcome to Step 5 of the pipeline!!!!\n\nIf you create result",bg="black", fg="yellow", font=all_font,  height=5)
 label_instruct_p6.pack(fill=BOTH)
@@ -4154,12 +4109,10 @@ all_buttons_page6=[button_upload_p6,patch_slider_old,menu_cell_ID_old,menu_cell_
 #########################################################################
 global update_flash
 def update_flash(buttons):# buttons are those which will start flashing
-    global flashers
-    #print("len(flashers)=", len(flashers))
+    global flashers   
     if flashers!={}:# stop flashing all previous buttons
         keys=list(flashers.keys())
-        for key in keys:
-            #print("key=", key)
+        for key in keys:           
             if isinstance(key, str)==False:
               key.config(bg=button_color)# old buttons become green again
             win.after_cancel(flashers[key])
@@ -4167,10 +4120,8 @@ def update_flash(buttons):# buttons are those which will start flashing
     
     flashers_names =[]
     if len(buttons)!=0:# it can be buttons=[]; in this case, update_flash just stops flashing all previous buttons, without switching new ones
-       for i in range(len(buttons)):
-          #button_name = str(buttons[i])
-          button_name = buttons[i]
-          
+       for i in range(len(buttons)):         
+          button_name = buttons[i]          
           flashers_names.append(button_name)         
        flasher_name ="additional_flasher"# need it for flash function
        flashers_names.append(flasher_name) 
@@ -4182,19 +4133,19 @@ def update_flash(buttons):# buttons are those which will start flashing
           old[iii]="red"
           colors_combinations.append(old)
        flashers=flash(colors_combinations, buttons,flashers_names, win, flashers)
-    #print("flashers_names after=", flashers_names)
 ##########################################################
 def combine_funcs(*funcs):    
     def inner_combined_func(*args, **kwargs): 
         for f in funcs: 
             f(*args, **kwargs)     
     return inner_combined_func 
-##################################################
+#################### Make buttons NEXT, EXIT, BACK
+######## make initial_buttons on each page flash 
 page_titles=["PAGE 1: TITLE PAGE","PAGE 2: EXTRACT MOVIE FROM FOLDER", "PAGE 3: CUT ONE WELL",
              "PAGE 4: EXECUTE AND CORRECT TRACKING", "PAGE 5: CORRECT SEGMENTATION","PAGE 6: VISUALISE RESULTS" ]
 initial_buttons=[[button_choose_folder],[button_select],[button_load],[button_load_p5],[button_upload_p6]]
 page_numbers=[page1,page2,page3,page4,page5, page6]
-######## make initial_buttons on each page flash and create BACK, EXIT, NEXT buttons
+
 locations=[frame3_page1,frame8_page2,frame15_page3,frame11_page4,frame8_page5,frame13_page6]  
 for i in range(0,6):        
     location=locations[i]
