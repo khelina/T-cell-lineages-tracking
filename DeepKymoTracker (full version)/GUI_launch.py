@@ -4031,8 +4031,9 @@ def load_cell_info(value):
         patch_slider_old.destroy()
         global patch_slider
         patch_slider=Scale(frame10_page6,from_=ffrom,to=tto,orient=HORIZONTAL,troughcolor="#513B1C",label="Frame "+str(ffrom), command=slide_patch,
-                 activebackground="red", bg=label_color,showvalue=0, font=all_font, length=380)    
-        patch_slider.pack()
+                 activebackground="red", bg=label_color,showvalue=0, font=all_font, length=400)    
+        patch_slider.pack(side=tk.TOP,pady=40)
+        #patch_slider.grid(row=0,column=0,padx=2,pady=5)
         all_buttons_page6.append(patch_slider)    
   update_flash([menu_cell_property])
   activate_buttons(all_buttons_page6,[menu_cell_property])    
@@ -4057,23 +4058,29 @@ button_upload_p6 = tk.Button(frame3a_page6, text=" Upload_TRACKED_movie",
                 bg=button_color, font=all_font,command=upload_input_movie)
 button_upload_p6.pack()
 #########################
-global patch_slider_old    
-patch_slider_old=Scale(frame10_page6,from_=ffrom,to=ffrom,orient=HORIZONTAL,troughcolor="#513B1C",label="Frame "+str(ffrom), command=slide_patch,
-                 activebackground="red", bg=label_color,showvalue=0, font=all_font, length=400)
-patch_slider_old.pack(side=tk.TOP)
+
 ########################################### 
 global progress_bar
 s = ttk.Style()
 s.theme_use('clam')
 s.configure("red.Horizontal.TProgressbar", foreground='green', background='green')
 progress_bar=ttk.Progressbar(frame10_page6, style="red.Horizontal.TProgressbar", orient="horizontal", length=400, mode="determinate")
-progress_bar.pack(pady=20)
+progress_bar.pack(pady=(20,5))
+#progress_bar.grid(row=1,column=0,padx=(30,30),pady=5)
 #############################
 global label_create_p6
 label_create_p6 = tk.Label(frame10_page6, text=" ",
               bg="black", fg="cyan", font=all_font,width=50, height=2)
-label_create_p6.pack()
+label_create_p6.pack(pady=5)
+#label_create_p6.grid(row=2,column=0,padx=2,pady=5)
 ##################################################
+global patch_slider_old    
+patch_slider_old=Scale(frame10_page6,from_=ffrom,to=ffrom,orient=HORIZONTAL,troughcolor="#513B1C",label="Frame "+str(ffrom), command=slide_patch,
+                 activebackground="red", bg=label_color,showvalue=0, font=all_font, length=400)
+patch_slider_old.pack(side=tk.TOP,pady=40)
+#patch_slider_old.grid(row=0,column=0,padx=20,pady=5)
+#############################################
+
 global menu_cell_ID_old,menu_cell_property
 menu_cell_ID_old = OptionMenu(frame3b_page6, cell_ID, *options_cells,  command= load_cell_info)
 menu_cell_ID_old.pack()
