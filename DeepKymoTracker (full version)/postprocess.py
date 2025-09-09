@@ -7,7 +7,7 @@ import os
 import pickle
 import re 
 from PIL import ImageTk, Image
-import tkinter
+import tkinter as tk
 from copy import deepcopy
 import shutil
 import time
@@ -168,175 +168,56 @@ def load_and_prepare_result_images(outpath, keys,progress_bar):
 ################################################################### 
 ######### This is for Step-5: creates VISUALISATION_HELPERS folder
 
-def plot_per_cell_info_old(pedigree, outpath, still_lineage, label_feedback, progress_bar, first_frame_number_p6,label_create_p6):
-   start_time = time.clock()
-   counter=0
-   red_patches_path=os.path.join(outpath,"HELPER_FOLDERS_(NOT FOR USER)","VISUALISATION_HELPERS" ,"RED_LINEAGE_PATCHES")  
-   plots_path= os.path.join(outpath,"HELPER_FOLDERS_(NOT FOR USER)","VISUALISATION_HELPERS" ,"PLOTS")  
-   one_cell_patches_path=os.path.join(outpath,"HELPER_FOLDERS_(NOT FOR USER)","VISUALISATION_HELPERS" ,"PATCHES_FOR_RESULTS")   
-   list_of_cell_names =list(pedigree.keys())
-   label_feedback.config(text="Cells discovered inside function:  " +str(list_of_cell_names))
-   for cell_name in list_of_cell_names:# creatse folder for each cell in OUTPUT folder
-     counter+=1
-     label_feedback.config(text="Cells discovered:  " +str(list_of_cell_names)+"\nCreating results for:  " +str(cell_name))
-     label_create_p6.config(text="Creating results for:  " +str(cell_name))
-     specific_cell_dirr=os.path.join(outpath,'RESULTS_PER_CELL',cell_name)    
-     one_cell_images=[]
-     red_patches=[]
-     area_plots=[]
-     perimeter_plots=[]
-     circ_plots=[]
-     cell_info=pedigree[cell_name]
-     total=len(cell_info)# total number of frames for this particular cell       
-     color=pedigree[cell_name][0][7]               
-     mask = (still_lineage == color).all(axis=-1)
-     x=np.zeros(still_lineage.shape,dtype = "uint8")
-     x[mask]=[255,255,255]
-     gray = cv2.cvtColor(x, cv2.COLOR_BGR2GRAY)
-     z=np.where(gray==255)
-     rows,cols =z[0], z[1]
-     points =[(rows[ii], cols[ii]) for ii in range(len(rows))]
-     ################## create red lineage plots     
-     for i in range(len(cell_info)):# it is the number of frames for this cell
-       im=cell_info[i][2]     
-       one_cell_images.append(im)
-       frame_number =cell_info[i][1]
-       name =os.path.join(one_cell_patches_path,cell_name +"_patch_frame_%s" % frame_number)
-       cv2.imwrite(name +".tif",im)
-
-       init=still_lineage.copy()# plot red points in lineage              
-       for k in range(len(points)):
-          if points[k][0]==frame_number-first_frame_number_p6:        
-              cv2.circle(init,(points[k][1], points[k][0]), 1,[0,0,255],-1)
-       name =os.path.join(red_patches_path,cell_name +"_red_frame_%s" % frame_number)
-       cv2.imwrite(name +".tif",init)
-       red_patches.append(init)        
-     #####################  plot diagrams
-     a=pedigree[cell_name]
-     first_frame_num=a[0][1]
-     areas=[]
-     perimeters=[]
-     circularities=[]
-     frames=[]
-     centroids=[]
-     #######################################################
-     for k in range(len(a)):# it is the number of frames for this cell
-        areas.append(a[k][4])
-        perimeters.append(a[k][5])
-        circularities.append(a[k][6])
-        frames.append(a[k][1])
-        centroids.append(a[k][3])
-     ########################################################             
-     area_plots=[] 
-     perimeter_plots=[]
-     circ_plots=[]
-     x=[frames[kk] for kk in range (len(frames))]
-     progress_bar["value"]=0 
-     ############################################
-     for i in range(len(cell_info)):
-       progress_bar["value"]=(i/total)*100 
-       frame_number=frames[i]        
-       plt.plot(x, areas, 'yo', markersize=5)
-       plt.plot([frame_number],[areas[frame_number-first_frame_num]],'bo', markersize=10)
-       plt.xlabel('Frame')
-       plt.ylabel('Area')
-       plt.title('Area of '+cell_name)
-       
-       areas_path=os.path.join(specific_cell_dirr,'areas.png')
-       plt.savefig(areas_path)
-       img = cv2.imread(areas_path)
-       area_plot= Image.fromarray(img)        
-       name =os.path.join(plots_path,cell_name +"_Area_frame_%s" % frame_number)
-       cv2.imwrite(name +".png",img)
-       plt.close() 
-       
-       g = plt.figure()
-       plt.plot(x, areas, 'yo', markersize=5)
-       plt.xlabel('Frame')
-       plt.ylabel('Area')
-       plt.title('Area of '+cell_name)       
-       g.clear()
-       plt.close(g)
-
-       plt.plot(x, perimeters, 'go', linewidth=0.5)
-       plt.plot([frame_number],[perimeters[frame_number-first_frame_num]],'bo',markersize=10)
-       plt.xlabel('Frame')
-       plt.ylabel('Perimeter')
-       plt.title('Perimeter '+cell_name)
-       perimeters_path=os.path.join(specific_cell_dirr,'perimeters.png')
-       plt.savefig(perimeters_path)
-       img = cv2.imread(perimeters_path)
-       
-       perimeter_plot= Image.fromarray(img)         
-       name =os.path.join(plots_path,cell_name +"_Perimeter_frame_%s" % frame_number)
-       cv2.imwrite(name +".png",img)
-       plt.close() 
-       hh = plt.figure()
-       plt.plot(x, perimeters, 'go', markersize=5)
-       plt.xlabel('Frame')
-       plt.ylabel('Perimeter')
-       plt.title('Perimeter of '+cell_name)      
-       hh.clear()
-       plt.close(hh) 
-
-       plt.plot(x, circularities, 'ro', linewidth=0.5)
-       plt.plot([frame_number],[circularities[frame_number-first_frame_num]],'bo', markersize=10)
-       plt.xlabel('Frame')
-       plt.ylabel('Circularity')
-       plt.title('Circularity '+cell_name)
-       circularities_path=os.path.join(specific_cell_dirr,'circularities.png')
-       plt.savefig(circularities_path)
-       img = cv2.imread(circularities_path)       
-       circ_plot= Image.fromarray(img)        
-       name =os.path.join(plots_path,cell_name +"_Circularity_frame_%s" % frame_number)
-       cv2.imwrite(name +".png",img)     
-       plt.close()
-       ggg = plt.figure()
-       plt.plot(x, circularities, 'ro', linewidth=0.5)
-       plt.xlabel('Frame')
-       plt.ylabel('Circularity')
-       plt.title('Circularity of '+cell_name)       
-       ggg.clear()
-       plt.close(ggg)     
-     os.remove(areas_path)
-     os.remove( perimeters_path)
-     os.remove( circularities_path)
-     total_time=time.clock() - start_time
-     print(total_time, "total time per cell")
-     print("total=", total)
-     if counter==1:
-        time_per_cell=total_time/total
-        print("time_per_cell=", time_per_cell)
-     else:
-        print("another cell") 
 #########################################
-def plot_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progress_bar, first_frame_number_p6,label_create_p6):
-   start_time = time.clock()
+def convert_time_to_format(sec):   
+   hour = sec // 3600
+   sec %= 3600   
+   minn = sec // 60
+   sec %= 60   
+   return "%02d:%02d:%02d" % (hour, minn, sec) 
+###########################################
+def create_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progress_bar, first_frame_number_p6,label_create_p6,container ):
+   
    counter=0
    time_lapsed=0
-   time_per_cell=0
+   time_per_cell_per_frame=0
    estimated_whole_time=0
-   time_remaining=100
+   time_remaining=0
    list_of_cell_names =list(pedigree.keys())
-   n_cells= len(list_of_cell_names)
-   added_n_frames=0
+   ##################### create packed labels for different colors
+   zero_label=tk.Label(container , text="Progress :   ", bg="black", fg="red")
+   zero_label.pack(side=tk.LEFT)
+          
+   list_of_labels=[]
+   for k in range(len(list_of_cell_names)):
+      new_label=tk.Label(container , text=list_of_cell_names[k], bg="black", fg="cyan")
+      new_label.pack(side=tk.LEFT)
+      list_of_labels.append(new_label)    
+   ###############################################
+   total_n_cells= len(list_of_cell_names)
+   total_n_frames=0
+   
+   lapsed_times, rem_times=[],[]
    for cell in  list_of_cell_names:
-            added_n_frames+=len(pedigree[cell])
-   print("added_n_frames=",added_n_frames)
+            total_n_frames+=len(pedigree[cell])
+   print("total_n_frames=",total_n_frames)
+   print("total_n_cells=",total_n_cells)
    red_patches_path=os.path.join(outpath,"HELPER_FOLDERS_(NOT FOR USER)","VISUALISATION_HELPERS" ,"RED_LINEAGE_PATCHES")  
    plots_path= os.path.join(outpath,"HELPER_FOLDERS_(NOT FOR USER)","VISUALISATION_HELPERS" ,"PLOTS")  
    one_cell_patches_path=os.path.join(outpath,"HELPER_FOLDERS_(NOT FOR USER)","VISUALISATION_HELPERS" ,"PATCHES_FOR_RESULTS")   
    
    label_feedback.config(text="Cells discovered inside function:  " +str(list_of_cell_names))
-   for cell_name in list_of_cell_names:# creatse folder for each cell in OUTPUT folder
+   start_time = time.clock()
+   for cell_name in list_of_cell_names:# creatse folder for each cell in OUTPUT folder         
      counter+=1
+              
      label_feedback.config(text="Cells discovered:  " +str(list_of_cell_names)+"\nCreating results for:  " +str(cell_name))
      
      specific_cell_dirr=os.path.join(outpath,'RESULTS_PER_CELL',cell_name)    
      one_cell_images,red_patches,area_plots,perimeter_plots,circ_plots=[],[],[],[],[]
      
      cell_info=pedigree[cell_name]
-     total=len(cell_info)# total number of frames for this particular cell       
+     cell_number_of_frames=len(cell_info)# total number of frames for this particular cell       
      color=pedigree[cell_name][0][7]               
      mask = (still_lineage == color).all(axis=-1)
      x=np.zeros(still_lineage.shape,dtype = "uint8")
@@ -352,17 +233,34 @@ def plot_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progres
      circularities=[cell_info[i][6] for i in range(len(cell_info))]
      frames=[cell_info[i][1] for i in range(len(cell_info))]
      centroids=[cell_info[i][3] for i in range(len(cell_info))]
-     x=[frames[kk] for kk in range (len(frames))]     
+     x=[frames[kk] for kk in range (len(frames))]
+     if counter==1:
+            preparation_time=time.clock() - start_time
+            print("preparation_time=", preparation_time)
+            time_lapsed+=preparation_time
+            lapsed_times.append(time_lapsed)
+            time_remaining= estimated_whole_time-time_lapsed
+            rem_times.append(time_remaining)
+     else:
+            time_lapsed+=preparation_time
+            lapsed_times.append(time_lapsed)
+            time_remaining= estimated_whole_time-time_lapsed
+            rem_times.append(time_remaining)
      ############################################
      for i in range(len(cell_info)):
-       progress_bar["value"]=(i/total)*100
-       time_lapsed+=time_per_cell
-       time_remaining= estimated_whole_time-time_lapsed
-    
-       if counter==1:
-         text_time="Unknown"
+       progress_bar["value"]=(i/cell_number_of_frames)*100
+       ##############################
+       if counter==1 and i==0:# if counter==1      
+           text_time="Unknown yet"
        else:
-          text_time=str(time_remaining)
+           time_lapsed+=time_per_cell_per_frame
+           lapsed_times.append(time_lapsed)
+           time_remaining= estimated_whole_time-time_lapsed
+           rem_times.append(time_remaining)
+           #time_format = time.strftime(":%H:%M:%S", time.gmtime(time_remaining))
+           time_format=convert_time_to_format(time_remaining)
+           text_time=str(time_format)
+              
        label_create_p6.config(text="Creating results for:  " +str(cell_name)+
                             "\nEstimated time remaining: "+text_time)
        ##################################
@@ -447,18 +345,18 @@ def plot_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progres
        plt.ylabel('Circularity')
        plt.title('Circularity of '+cell_name)       
        ggg.clear()
-       plt.close(ggg)     
+       plt.close(ggg)
+
+       if counter==1 and i==0:
+           time_per_cell_per_frame=time.clock() - start_time-preparation_time   
+           estimated_whole_time=total_n_frames*time_per_cell_per_frame+preparation_time*total_n_cells       
+           time_lapsed+=preparation_time+time_per_cell_per_frame       
+           time_remaining= estimated_whole_time-time_lapsed
      os.remove(areas_path)
      os.remove( perimeters_path)
      os.remove( circularities_path)
-     total_time=time.clock() - start_time
-     
-     if counter==1:
-        time_per_cell=total_time/total
-        
-        estimated_whole_time=added_n_frames*time_per_cell       
-        time_lapsed+=total_time
-        time_remaining= estimated_whole_time-time_lapsed
+     list_of_labels[counter-1].config(fg="red")
+   
      
      
          

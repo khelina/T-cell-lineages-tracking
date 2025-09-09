@@ -2526,7 +2526,7 @@ def stop_editing_division():
     ###################################
     global xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,\
     dict_of_divisions,naive_names_counter,lin_image_widths,changeable_params_history
-    xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,dict_of_divisions,number_of_added_new_cells,lin_image_widths,changeable_params_history= extract_changeable_params_history(outpath, start_frame_internal)
+    xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,dict_of_divisions,number_of_added_new_cells,lin_image_widths,changeable_params_history= extract_changeable_params_history(helper_dir_p4, start_frame_internal)
     #edit_id_indicator.set(edit_id_indicator_pickle)
     
     print("curr_frame_cell_names before=",curr_frame_cell_names)
@@ -2602,7 +2602,7 @@ def save_added_cell():
     ###################################
     global xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,\
     dict_of_divisions,naive_names_counter,lin_image_widths,changeable_params_history
-    xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,dict_of_divisions,number_of_added_new_cells,lin_image_widths,changeable_params_history= extract_changeable_params_history(outpath, internal_start_frame)
+    xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,dict_of_divisions,number_of_added_new_cells,lin_image_widths,changeable_params_history= extract_changeable_params_history(helper_dir_p4, internal_start_frame)
     #edit_id_indicator.set(edit_id_indicator_pickle)
     edit_id_indicator.set(edit_id_indicator_pickle)
      
@@ -2666,7 +2666,7 @@ def save_removed_cell():
     ###################################
     global xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,\
     dict_of_divisions,naive_names_counter,lin_image_widths,changeable_params_history
-    xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,dict_of_divisions,number_of_added_new_cells,lin_image_widths,changeable_params_history= extract_changeable_params_history(outpath, internal_start_frame)
+    xs,curr_frame_cell_names,flag,edit_id_indicator_pickle,colour_counter,colour_dictionary,dict_of_divisions,number_of_added_new_cells,lin_image_widths,changeable_params_history= extract_changeable_params_history(helper_dir_p4, internal_start_frame)
     #edit_id_indicator.set(edit_id_indicator_pickle)
     edit_id_indicator.set(edit_id_indicator_pickle)
      
@@ -3814,44 +3814,51 @@ frame1_page6.grid(row=0, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
 frame2_page6 = tk.Frame(master=page6, width=1530, height=200, bg=bg_color)
 frame2_page6.grid(row=1, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
 ########################################################
+frame_monitor_create_progress_p6 = tk.Frame(master=page6, width=1530, height=10, bg="black")
+frame_monitor_create_progress_p6.grid(row=2, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
+win.grid_rowconfigure(0, weight=1)
+win.grid_columnconfigure(0, weight=1)
+container = tk.Frame(frame_monitor_create_progress_p6 , bg="green")
+container.pack(expand=True)
+############################################################
 frame3a_page6 = tk.Frame(master=page6,width=canvas_size_p6, height=100,  bg=bg_color)
-frame3a_page6.grid(row=2, column=0, rowspan=1, columnspan=1, sticky=W+E+N+S)
+frame3a_page6.grid(row=3, column=0, rowspan=1, columnspan=1, sticky=W+E+N+S)
 
 frame3b_page6 = tk.Frame(master=page6,width=canvas_size_p6, height=100,  bg=bg_color)
-frame3b_page6.grid(row=2, column=1, rowspan=1, columnspan=1, sticky=W+E+N+S)
+frame3b_page6.grid(row=3, column=1, rowspan=1, columnspan=1, sticky=W+E+N+S)
 
 frame3c_page6 = tk.Frame(master=page6,width=canvas_size_p6, height=100,   bg=bg_color)
-frame3c_page6.grid(row=2, column=2, rowspan=1, columnspan=1, sticky=W+E+N+S)
+frame3c_page6.grid(row=3, column=2, rowspan=1, columnspan=1, sticky=W+E+N+S)
 ########################################################
 frame4_page6 = tk.Frame(master=page6,width=canvas_size_p6, height=canvas_size_p6, bg=bg_color)
-frame4_page6.grid(row=3, column=0, rowspan=1, columnspan=1,sticky =  W+E+N+S)
+frame4_page6.grid(row=4, column=0, rowspan=1, columnspan=1,sticky =  W+E+N+S)
 
 frame5_page6 = tk.Frame(master=page6,width=canvas_size_p6, height=canvas_size_p6,  bg=bg_color)
-frame5_page6.grid(row=3, column=1, rowspan=1, columnspan=1,sticky =  W+E+N+S)
+frame5_page6.grid(row=4, column=1, rowspan=1, columnspan=1,sticky =  W+E+N+S)
 
 frame6_page6 = tk.Frame(master=page6,width=canvas_size_p6, height=canvas_size_p6,  bg=bg_color)
-frame6_page6.grid(row=3, column=2, rowspan=1, columnspan=1,sticky =  W+E+N+S)
+frame6_page6.grid(row=4, column=2, rowspan=1, columnspan=1,sticky =  W+E+N+S)
 ##############################################################
 frame8_page6 = tk.Frame(master=page6, width=canvas_size_p6, height=250, bg=bg_color)
-frame8_page6.grid(row=4, column=0, rowspan=1, columnspan=1,sticky =  W+E+N+S)
+frame8_page6.grid(row=5, column=0, rowspan=1, columnspan=1,sticky =  W+E+N+S)
 
 frame9_page6 = tk.Frame(master=page6, width=canvas_size_p6, height=250, bg=bg_color)
-frame9_page6.grid(row=4, column=1, rowspan=1, columnspan=1,sticky =  W+E+N+S)
+frame9_page6.grid(row=5, column=1, rowspan=1, columnspan=1,sticky =  W+E+N+S)
 
-frame10_page6 = tk.Frame(master=page6, width=canvas_size_p6, height=250, bg=bg_color)
-frame10_page6.grid(row=4, column=2, rowspan=1, columnspan=1,sticky =  W+E+N+S)
+frame10_page6 = tk.Frame(master=page6, width=canvas_size_p6, height=250, bg="green")
+frame10_page6.grid(row=5, column=2, rowspan=1, columnspan=1,sticky =  W+E+N+S)
 ###################################################################
 frame11_page6 = tk.Frame(master=page6, width=1530, height=20, bg=bg_color)
-frame11_page6.grid(row=5, column=0, rowspan=1, columnspan=3,sticky =  W+E+N+S)
+frame11_page6.grid(row=6, column=0, rowspan=1, columnspan=3,sticky =  W+E+N+S)
 
 frame12_page6 = tk.Frame(master=page6, width=1530, height=20)
-frame12_page6.grid(row=6, column=0, rowspan=1, columnspan=3,sticky =  W+E+N+S)
+frame12_page6.grid(row=7, column=0, rowspan=1, columnspan=3,sticky =  W+E+N+S)
 
 gap_frame_page6 = tk.Frame(master=page6, width=1530, height=5, bg=bg_color)
-gap_frame_page6.grid(row=7, column=0, rowspan=1, columnspan=3,sticky =  W+E+N+S)
+gap_frame_page6.grid(row=8, column=0, rowspan=1, columnspan=3,sticky =  W+E+N+S)
 
 frame13_page6 = tk.Frame(master=page6, width=1530, height=20, bg=bg_color)
-frame13_page6.grid(row=8, column=0, rowspan=1, columnspan=3,sticky =  W+E+N+S)
+frame13_page6.grid(row=9, column=0, rowspan=1, columnspan=3,sticky =  W+E+N+S)
 ######################################################
 canvas_bright = Canvas(frame4_page6, bg=bg_color, height=canvas_size_p6, width=canvas_size_p6)
 canvas_bright.pack()
@@ -3877,7 +3884,7 @@ ffrom=1
 ##############################################################
 global extract_info_from_file_name
 
-from postprocess import (sorted_aphanumeric, change_dict,extract_info_from_file_name, plot_per_cell_info,
+from postprocess import (sorted_aphanumeric, change_dict,extract_info_from_file_name, create_per_cell_info,
               load_and_prepare_result_images)
 from print_excel import extract_lineage,extract_const_movie_parameters
 from interface_functions import turn_image_into_tkinter
@@ -3885,7 +3892,7 @@ from interface_functions import turn_image_into_tkinter
 def create_display_images_p6():# plot images necessary for display       
         label_instruct_p6.config(text="\nCreating results ...\n\n\n")   
         still_lineage=cv2.imread(os.path.join( outpath,"still_lineage.tif"), -1)
-        plot_per_cell_info(pedigree, outpath, still_lineage,label_instruct_p6, progress_bar,first_frame_number_p6, label_create_p6)
+        create_per_cell_info(pedigree, outpath, still_lineage,label_instruct_p6, progress_bar,first_frame_number_p6, label_create_p6,container )
         load_display_images_p6()        
 #######################################
 def retrieve_display_images_p6():# If display iamges were created before, upload them
@@ -3910,6 +3917,9 @@ def load_display_images_p6():# load images for display that have already been cr
       red_patches, one_cell_patches, plots, bright_names=load_and_prepare_result_images(outpath, keys, progress_bar)
       label_feedback_p6.config(text="MOVIE:  "+ os.path.join(software_folder, input_movie_folder)+
                     "\nNUMBER OF FRAMES: "+ str(num_frames)+"                   FRAME SIZE: "+str(frame_size_p6)+" x "+str(frame_size_p6)+ "\nCELLS: "+str(list_of_cell_names))
+      ################################################
+      
+      ##################################################
       label_instruct_p6.config(text="1. Choose cell ID,\n2. Then choose cell property (Area, Perimeter, or Circularity."+
                           "\n3. Use scrollbar to explore results.")
       button_upload_p6.config(bg=button_color)
@@ -4023,18 +4033,20 @@ def load_cell_info(value):
   key=cell_ID.get()  
   menu_cell_ID.config( bg="black",fg = result_color)
   if key!="Choose cell ID":
-    global ffrom, tto
+    global ffrom, tto, patch_slider_old
     ffrom=pedigree[key][0][1]
     tto = pedigree[key][-1][1]   
     if patch_slider_old in all_buttons_page6:
         all_buttons_page6.remove(patch_slider_old)
         patch_slider_old.destroy()
+        
         global patch_slider
         patch_slider=Scale(frame10_page6,from_=ffrom,to=tto,orient=HORIZONTAL,troughcolor="#513B1C",label="Frame "+str(ffrom), command=slide_patch,
                  activebackground="red", bg=label_color,showvalue=0, font=all_font, length=400)    
         patch_slider.pack(side=tk.TOP,pady=40)
+        patch_slider_old=patch_slider
         #patch_slider.grid(row=0,column=0,padx=2,pady=5)
-        all_buttons_page6.append(patch_slider)    
+        all_buttons_page6.append(patch_slider_old)    
   update_flash([menu_cell_property])
   activate_buttons(all_buttons_page6,[menu_cell_property])    
 ###########################################################
@@ -4070,7 +4082,7 @@ progress_bar.pack(pady=(20,5))
 #############################
 global label_create_p6
 label_create_p6 = tk.Label(frame10_page6, text=" ",
-              bg="black", fg="cyan", font=all_font,width=50, height=2)
+              bg="black", fg="cyan", font=all_font,width=50, height=2,  anchor="w",justify="left")
 label_create_p6.pack(pady=5)
 #label_create_p6.grid(row=2,column=0,padx=2,pady=5)
 ##################################################
@@ -4093,7 +4105,7 @@ menu_cell_property.pack()
 menu_cell_property.config(bg = button_color, font=all_font,activebackground="red")
 menu_cell_property["menu"].config(bg=label_color,activebackground="red")
 ###################
-label_feedback_p6 = tk.Label(frame2_page6, text="\nWhen menue opens click on the INPUT movie.",bg="black", fg="cyan", font=all_font, height=5)
+label_feedback_p6 = tk.Label(frame2_page6, text="\nWhen menue opens click on the INPUT movie.",bg="black", fg="cyan", font=all_font, height=3)
 label_feedback_p6.pack(fill=BOTH)
 label_instruct_p6 = tk.Label(frame12_page6, text="Welcome to Step 5 of the pipeline!!!!\n\nIf you create result",bg="black", fg="yellow", font=all_font,  height=5)
 label_instruct_p6.pack(fill=BOTH)
