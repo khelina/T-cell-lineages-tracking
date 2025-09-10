@@ -119,8 +119,8 @@ def extract_info_from_file_name(file_name):
     return cell_key, cell_property, int(frame_number)
 #############################################################
 ### for the last step (visualise results): prepare images for display
-def load_and_prepare_result_images(outpath, keys,progress_bar):
-   
+def load_and_prepare_result_images(outpath, keys,progress_bar,label_create_p6):
+    label_create_p6.config(text="Loading images for display...")
     names, names_1=[],[]     
     bright_images_path=os.path.join(outpath, "TRACKED_BRIGHTFIELD_CHANNEL")
     for filename in os.listdir(bright_images_path):       
@@ -163,7 +163,8 @@ def load_and_prepare_result_images(outpath, keys,progress_bar):
         elif cell_property=="patch":
              one_cell_patches[cell_key].append(item)                              
         else:                     
-            plots=change_dict(plots, cell_property, cell_key, item)   
+            plots=change_dict(plots, cell_property, cell_key, item)
+    label_create_p6.config(text="   ")
     return red_patches, one_cell_patches, plots, bright_names 
 ################################################################### 
 ######### This is for Step-5: creates VISUALISATION_HELPERS folder
@@ -185,12 +186,14 @@ def create_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progr
    time_remaining=0
    list_of_cell_names =list(pedigree.keys())
    ##################### create packed labels for different colors
-   zero_label=tk.Label(container , text="Progress :   ", bg="black", fg="red")
-   zero_label.pack(side=tk.LEFT)
-          
+   #zero_label=tk.Label(container , text="Progress :   ", bg="black", fg="cyan")
+   #zero_label.pack(side=tk.LEFT)
+   #list_of_cell_names=["1","10","11","100", "101", "110","111",
+                       #"1000","1001","1010","1011","1100","1101","1110","1111",
+                       #"10000","10001","10010","10011"]       
    list_of_labels=[]
    for k in range(len(list_of_cell_names)):
-      new_label=tk.Label(container , text=list_of_cell_names[k], bg="black", fg="cyan")
+      new_label=tk.Label(container , text=list_of_cell_names[k], bg="black", fg="red", font='TkDefaultFont 10 bold')
       new_label.pack(side=tk.LEFT)
       list_of_labels.append(new_label)    
    ###############################################
@@ -355,7 +358,7 @@ def create_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progr
      os.remove(areas_path)
      os.remove( perimeters_path)
      os.remove( circularities_path)
-     list_of_labels[counter-1].config(fg="red")
+     list_of_labels[counter-1].config(fg="cyan")
    
      
      

@@ -3814,51 +3814,63 @@ frame1_page6.grid(row=0, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
 frame2_page6 = tk.Frame(master=page6, width=1530, height=200, bg=bg_color)
 frame2_page6.grid(row=1, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
 ########################################################
-frame_monitor_create_progress_p6 = tk.Frame(master=page6, width=1530, height=10, bg="black")
-frame_monitor_create_progress_p6.grid(row=2, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
+#frame_monitor_create_progress_p6 = tk.Frame(master=page6, width=1530, height=10, bg=bg_color)
+#frame_monitor_create_progress_p6.grid(row=2, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
 win.grid_rowconfigure(0, weight=1)
 win.grid_columnconfigure(0, weight=1)
-container = tk.Frame(frame_monitor_create_progress_p6 , bg="green")
-container.pack(expand=True)
+#container = tk.Frame(frame_monitor_create_progress_p6 , bg=bg_color)
+#container.pack(expand=True)
 ############################################################
 frame3a_page6 = tk.Frame(master=page6,width=canvas_size_p6, height=100,  bg=bg_color)
-frame3a_page6.grid(row=3, column=0, rowspan=1, columnspan=1, sticky=W+E+N+S)
+frame3a_page6.grid(row=2, column=0, rowspan=1, columnspan=1, sticky=W+E+N+S)
 
 frame3b_page6 = tk.Frame(master=page6,width=canvas_size_p6, height=100,  bg=bg_color)
-frame3b_page6.grid(row=3, column=1, rowspan=1, columnspan=1, sticky=W+E+N+S)
+frame3b_page6.grid(row=2, column=1, rowspan=1, columnspan=1, sticky=W+E+N+S)
 
 frame3c_page6 = tk.Frame(master=page6,width=canvas_size_p6, height=100,   bg=bg_color)
-frame3c_page6.grid(row=3, column=2, rowspan=1, columnspan=1, sticky=W+E+N+S)
+frame3c_page6.grid(row=2, column=2, rowspan=1, columnspan=1, sticky=W+E+N+S)
 ########################################################
 frame4_page6 = tk.Frame(master=page6,width=canvas_size_p6, height=canvas_size_p6, bg=bg_color)
-frame4_page6.grid(row=4, column=0, rowspan=1, columnspan=1,sticky =  W+E+N+S)
+frame4_page6.grid(row=3, column=0, rowspan=1, columnspan=1,sticky =  W+E+N+S)
 
 frame5_page6 = tk.Frame(master=page6,width=canvas_size_p6, height=canvas_size_p6,  bg=bg_color)
-frame5_page6.grid(row=4, column=1, rowspan=1, columnspan=1,sticky =  W+E+N+S)
+frame5_page6.grid(row=3, column=1, rowspan=1, columnspan=1,sticky =  W+E+N+S)
 
 frame6_page6 = tk.Frame(master=page6,width=canvas_size_p6, height=canvas_size_p6,  bg=bg_color)
-frame6_page6.grid(row=4, column=2, rowspan=1, columnspan=1,sticky =  W+E+N+S)
+frame6_page6.grid(row=3, column=2, rowspan=1, columnspan=1,sticky =  W+E+N+S)
 ##############################################################
 frame8_page6 = tk.Frame(master=page6, width=canvas_size_p6, height=250, bg=bg_color)
-frame8_page6.grid(row=5, column=0, rowspan=1, columnspan=1,sticky =  W+E+N+S)
+frame8_page6.grid(row=4, column=0, rowspan=1, columnspan=1,sticky =  W+E+N+S)
 
 frame9_page6 = tk.Frame(master=page6, width=canvas_size_p6, height=250, bg=bg_color)
-frame9_page6.grid(row=5, column=1, rowspan=1, columnspan=1,sticky =  W+E+N+S)
+frame9_page6.grid(row=4, column=1, rowspan=1, columnspan=1,sticky =  W+E+N+S)
 
-frame10_page6 = tk.Frame(master=page6, width=canvas_size_p6, height=250, bg="green")
-frame10_page6.grid(row=5, column=2, rowspan=1, columnspan=1,sticky =  W+E+N+S)
+frame10_page6 = tk.Frame(master=page6, width=canvas_size_p6, height=250, bg=bg_color)
+frame10_page6.grid(row=4, column=2, rowspan=1, columnspan=1,sticky =  W+E+N+S)
+
+container_1_fr10_page6 = tk.Frame(master=frame10_page6, width=canvas_size_p6, height=120, bg=bg_color)
+#container_1_fr10_page6 .grid(row=0, column=0, rowspan=1, columnspan=1,sticky =  W+E+N+S)
+container_1_fr10_page6 .pack(expand=True)
+
+
+container_2_fr10_page6 = tk.Frame(master=frame10_page6, width=canvas_size_p6, height=120, bg=bg_color)
+#container_2_fr10_page6 .grid(row=1, column=0, rowspan=1, columnspan=1,sticky =  W+E+N+S)
+container_2_fr10_page6 .pack(expand=True)
+frame10_page6.grid_rowconfigure(0, weight=1)
+frame10_page6.grid_columnconfigure(0, weight=1)
+
 ###################################################################
 frame11_page6 = tk.Frame(master=page6, width=1530, height=20, bg=bg_color)
-frame11_page6.grid(row=6, column=0, rowspan=1, columnspan=3,sticky =  W+E+N+S)
+frame11_page6.grid(row=5, column=0, rowspan=1, columnspan=3,sticky =  W+E+N+S)
 
 frame12_page6 = tk.Frame(master=page6, width=1530, height=20)
-frame12_page6.grid(row=7, column=0, rowspan=1, columnspan=3,sticky =  W+E+N+S)
+frame12_page6.grid(row=6, column=0, rowspan=1, columnspan=3,sticky =  W+E+N+S)
 
 gap_frame_page6 = tk.Frame(master=page6, width=1530, height=5, bg=bg_color)
-gap_frame_page6.grid(row=8, column=0, rowspan=1, columnspan=3,sticky =  W+E+N+S)
+gap_frame_page6.grid(row=7, column=0, rowspan=1, columnspan=3,sticky =  W+E+N+S)
 
 frame13_page6 = tk.Frame(master=page6, width=1530, height=20, bg=bg_color)
-frame13_page6.grid(row=9, column=0, rowspan=1, columnspan=3,sticky =  W+E+N+S)
+frame13_page6.grid(row=8, column=0, rowspan=1, columnspan=3,sticky =  W+E+N+S)
 ######################################################
 canvas_bright = Canvas(frame4_page6, bg=bg_color, height=canvas_size_p6, width=canvas_size_p6)
 canvas_bright.pack()
@@ -3881,6 +3893,8 @@ cell_ID.set("Choose cell ID")
 cell_property.set("Choose cell property")
 global ffrom
 ffrom=1
+global clicks_count
+clicks_count=0 
 ##############################################################
 global extract_info_from_file_name
 
@@ -3892,7 +3906,7 @@ from interface_functions import turn_image_into_tkinter
 def create_display_images_p6():# plot images necessary for display       
         label_instruct_p6.config(text="\nCreating results ...\n\n\n")   
         still_lineage=cv2.imread(os.path.join( outpath,"still_lineage.tif"), -1)
-        create_per_cell_info(pedigree, outpath, still_lineage,label_instruct_p6, progress_bar,first_frame_number_p6, label_create_p6,container )
+        create_per_cell_info(pedigree, outpath, still_lineage,label_instruct_p6, progress_bar,first_frame_number_p6, label_create_p6,container_1_fr10_page6 )
         load_display_images_p6()        
 #######################################
 def retrieve_display_images_p6():# If display iamges were created before, upload them
@@ -3914,14 +3928,13 @@ def load_display_images_p6():# load images for display that have already been cr
       ##################################################
       global red_patches, one_cell_patches, plots, bright_names
       label_instruct_p6.config(text="\nLoading results ...\n\n\n") 
-      red_patches, one_cell_patches, plots, bright_names=load_and_prepare_result_images(outpath, keys, progress_bar)
+      red_patches, one_cell_patches, plots, bright_names=load_and_prepare_result_images(outpath, keys, progress_bar,label_create_p6)
       label_feedback_p6.config(text="MOVIE:  "+ os.path.join(software_folder, input_movie_folder)+
                     "\nNUMBER OF FRAMES: "+ str(num_frames)+"                   FRAME SIZE: "+str(frame_size_p6)+" x "+str(frame_size_p6)+ "\nCELLS: "+str(list_of_cell_names))
       ################################################
       
       ##################################################
-      label_instruct_p6.config(text="1. Choose cell ID,\n2. Then choose cell property (Area, Perimeter, or Circularity."+
-                          "\n3. Use scrollbar to explore results.")
+      label_instruct_p6.config(text="Choose cell ID from the dropdown menu.")
       button_upload_p6.config(bg=button_color)
       global col_dict
       col_dict={"Area":["red", "yellow", "yellow"],"Perimeter":["yellow", "red", "yellow"],"Circularity":["yellow", "yellow", "red"]}
@@ -3978,7 +3991,13 @@ def upload_input_movie():# look if display images exist. If so, load them, if no
       bg=button_color,font='TkDefaultFont 14 bold', command=lambda:[popup_retrieve_display_images.destroy(),Thread(target=retrieve_display_images_p6).start()])
       button_retrieve_p6.pack()      
 ############################################
-def slide_patch(value):  # value=frame number from patch_slider          
+def slide_patch(value):  # value=frame number from patch_slider
+    global clicks_count
+    print("clicks_count entering slide_patch =",clicks_count)
+    clicks_count+=1
+    print("clicks_count after slide_patch =",clicks_count)
+    if clicks_count>=3:
+       update_flash([])         
     canvas_bright.delete('all')
     canvas_lineage.delete('all')
     canvas_patch.delete('all')
@@ -4021,6 +4040,8 @@ def slide_patch(value):  # value=frame number from patch_slider
                str(pedigree[cell_ID.get()][internal_frame_number][6]), fg=combination[2])
 ###########################################
 def load_cell_info(value):
+  global clicks_count
+  clicks_count=0
   update_flash([])
   global all_buttons_page6
   menu_cell_ID.config(fg=result_color,bg="black") 
@@ -4041,32 +4062,40 @@ def load_cell_info(value):
         patch_slider_old.destroy()
         
         global patch_slider
-        patch_slider=Scale(frame10_page6,from_=ffrom,to=tto,orient=HORIZONTAL,troughcolor="#513B1C",label="Frame "+str(ffrom), command=slide_patch,
+        patch_slider=Scale(container_2_fr10_page6,from_=ffrom,to=tto,orient=HORIZONTAL,troughcolor="#513B1C",label="Frame "+str(ffrom), command=slide_patch,
                  activebackground="red", bg=label_color,showvalue=0, font=all_font, length=400)    
         patch_slider.pack(side=tk.TOP,pady=40)
         patch_slider_old=patch_slider
         #patch_slider.grid(row=0,column=0,padx=2,pady=5)
-        all_buttons_page6.append(patch_slider_old)    
+        all_buttons_page6.append(patch_slider_old)
+  #clicks_count=0
   update_flash([menu_cell_property])
-  activate_buttons(all_buttons_page6,[menu_cell_property])    
+  activate_buttons(all_buttons_page6,[menu_cell_property])
+  label_instruct_p6.config(text="Choose cell property (Area, Perimeter, or Circularity) \nfrom the dropdown menu.")    
 ###########################################################
 def load_cell_property(value):
+    global clicks_count
+    clicks_count=0
+    print("clicks_count inside load_cell_property 1=",clicks_count)
     update_flash([])
     global all_buttons_page6
     cell_property.set(str(value))    
     menu_cell_property.config( fg = result_color,bg="black")
     ffrom_1=str(ffrom)      
     slide_patch(ffrom_1)
-    patch_slider.set(ffrom_1)      
+    patch_slider.set(ffrom_1)
+    #clicks_count=0
+    print("clicks_count inside load_cell_property 2=",clicks_count)      
     update_flash([patch_slider])
-    activate_buttons(all_buttons_page6,[menu_cell_property, menu_cell_ID,patch_slider]) 
+    activate_buttons(all_buttons_page6,[menu_cell_property, menu_cell_ID,patch_slider])
+    label_instruct_p6.config(text="Use slider to move between frames.\nIf you want to switch to a different cell or a different property, use the dropdown menus again.")
 ######################################################
 ################### poplulate page-6 with widgets #########
 label_title_p6 = tk.Label(frame1_page6, text="STEP 5: VISUALISE RESULTS",
               bg="yellow", fg="red", font=("Times", "24")).pack()
 label_instr_name_p6=tk.Label(frame11_page6,text="INSTRUCTIONS FOR USER :" ,bg="black", font=all_font, fg="white").pack()
 global button_upload_p6
-button_upload_p6 = tk.Button(frame3a_page6, text=" Upload_TRACKED_movie",
+button_upload_p6 = tk.Button(frame3a_page6, text=" Upload TRACKED movie",
                 bg=button_color, font=all_font,command=upload_input_movie)
 button_upload_p6.pack()
 #########################
@@ -4076,19 +4105,19 @@ global progress_bar
 s = ttk.Style()
 s.theme_use('clam')
 s.configure("red.Horizontal.TProgressbar", foreground='green', background='green')
-progress_bar=ttk.Progressbar(frame10_page6, style="red.Horizontal.TProgressbar", orient="horizontal", length=400, mode="determinate")
+progress_bar=ttk.Progressbar(container_1_fr10_page6, style="red.Horizontal.TProgressbar", orient="horizontal", length=400, mode="determinate")
 progress_bar.pack(pady=(20,5))
 #progress_bar.grid(row=1,column=0,padx=(30,30),pady=5)
 #############################
 global label_create_p6
-label_create_p6 = tk.Label(frame10_page6, text=" ",
+label_create_p6 = tk.Label(container_1_fr10_page6, text=" ",
               bg="black", fg="cyan", font=all_font,width=50, height=2,  anchor="w",justify="left")
-label_create_p6.pack(pady=5)
+label_create_p6.pack()
 #label_create_p6.grid(row=2,column=0,padx=2,pady=5)
 ##################################################
 global patch_slider_old    
-patch_slider_old=Scale(frame10_page6,from_=ffrom,to=ffrom,orient=HORIZONTAL,troughcolor="#513B1C",label="Frame "+str(ffrom), command=slide_patch,
-                 activebackground="red", bg=label_color,showvalue=0, font=all_font, length=400)
+patch_slider_old=Scale(container_2_fr10_page6,from_=ffrom,to=ffrom,orient=HORIZONTAL,troughcolor="#513B1C",label="Frame "+str(ffrom), command=slide_patch,
+                 activebackground="red", bg=label_color,showvalue=0, font=all_font, length=canvas_size_p6)
 patch_slider_old.pack(side=tk.TOP,pady=40)
 #patch_slider_old.grid(row=0,column=0,padx=20,pady=5)
 #############################################
@@ -4107,7 +4136,7 @@ menu_cell_property["menu"].config(bg=label_color,activebackground="red")
 ###################
 label_feedback_p6 = tk.Label(frame2_page6, text="\nWhen menue opens click on the INPUT movie.",bg="black", fg="cyan", font=all_font, height=3)
 label_feedback_p6.pack(fill=BOTH)
-label_instruct_p6 = tk.Label(frame12_page6, text="Welcome to Step 5 of the pipeline!!!!\n\nIf you create result",bg="black", fg="yellow", font=all_font,  height=5)
+label_instruct_p6 = tk.Label(frame12_page6, text="Push button Upload TRACKED movie.\n\When menu opens,navigate to TRACKED movie folder and click (once, not twice!) on it.\nThen, push Select Folder.",bg="black", fg="yellow", font=all_font,  height=5)
 label_instruct_p6.pack(fill=BOTH)
 ###################################################################
 label_centr = tk.Label(frame9_page6, text="Centroid:",bg = "black", fg="yellow" , font=("Times", "16"))
