@@ -120,7 +120,7 @@ def extract_info_from_file_name(file_name):
 #############################################################
 ### for the last step (visualise results): prepare images for display
 def load_and_prepare_result_images(outpath, keys,progress_bar,label_create_p6):
-    label_create_p6.config(text="Loading images for display...")
+    label_create_p6.config(text="        Loading images for display...", bg="black")
     names, names_1=[],[]     
     bright_images_path=os.path.join(outpath, "TRACKED_BRIGHTFIELD_CHANNEL")
     for filename in os.listdir(bright_images_path):       
@@ -177,7 +177,7 @@ def convert_time_to_format(sec):
    sec %= 60   
    return "%02d:%02d:%02d" % (hour, minn, sec) 
 ###########################################
-def create_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progress_bar, first_frame_number_p6,label_create_p6,container ):
+def create_per_cell_info(pedigree, outpath, still_lineage, progress_bar, first_frame_number_p6,label_create_p6,container ):
    
    counter=0
    time_lapsed=0
@@ -185,6 +185,7 @@ def create_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progr
    estimated_whole_time=0
    time_remaining=0
    list_of_cell_names =list(pedigree.keys())
+   label_create_p6.config(bg="black")
    ##################### create packed labels for different colors
    #zero_label=tk.Label(container , text="Progress :   ", bg="black", fg="cyan")
    #zero_label.pack(side=tk.LEFT)
@@ -209,12 +210,12 @@ def create_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progr
    plots_path= os.path.join(outpath,"HELPER_FOLDERS_(NOT FOR USER)","VISUALISATION_HELPERS" ,"PLOTS")  
    one_cell_patches_path=os.path.join(outpath,"HELPER_FOLDERS_(NOT FOR USER)","VISUALISATION_HELPERS" ,"PATCHES_FOR_RESULTS")   
    
-   label_feedback.config(text="Cells discovered inside function:  " +str(list_of_cell_names))
+   #label_feedback.config(text="Cells discovered inside function:  " +str(list_of_cell_names))
    start_time = time.clock()
    for cell_name in list_of_cell_names:# creatse folder for each cell in OUTPUT folder         
      counter+=1
               
-     label_feedback.config(text="Cells discovered:  " +str(list_of_cell_names)+"\nCreating results for:  " +str(cell_name))
+     #label_feedback.config(text="Cells discovered:  " +str(list_of_cell_names)+"\nCreating r for:  " +str(cell_name))
      
      specific_cell_dirr=os.path.join(outpath,'RESULTS_PER_CELL',cell_name)    
      one_cell_images,red_patches,area_plots,perimeter_plots,circ_plots=[],[],[],[],[]
@@ -264,8 +265,8 @@ def create_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progr
            time_format=convert_time_to_format(time_remaining)
            text_time=str(time_format)
               
-       label_create_p6.config(text="Creating results for:  " +str(cell_name)+
-                            "\nEstimated time remaining: "+text_time)
+       label_create_p6.config(text="Creating display images for cell :  " +str(cell_name)+
+                            "\nEstimated time remaining : "+text_time)
        ##################################
        im=cell_info[i][2]     
        one_cell_images.append(im)
@@ -360,6 +361,9 @@ def create_per_cell_info(pedigree, outpath, still_lineage, label_feedback, progr
      os.remove( circularities_path)
      list_of_labels[counter-1].config(fg="cyan")
    
+   for label in list_of_labels:
+      label.destroy()
+###############################################
      
      
          

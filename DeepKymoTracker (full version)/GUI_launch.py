@@ -500,6 +500,8 @@ def prepare_file_name_for_show(old_name):
     split_name =name[:index_t+1]+" \n"+name[index_t+1:]
     return split_name
 ##################################################
+
+################################
 def select_one_bright():# load all frames,display clicked bright frame    
     global my_path, my_destin, bright_names_sorted,fluor_names_sorted, red_names_sorted,clicked_number, first_filename_for_show 
     my_path=filedialog.askopenfilename()
@@ -3874,7 +3876,7 @@ frame13_page6.grid(row=8, column=0, rowspan=1, columnspan=3,sticky =  W+E+N+S)
 ######################################################
 canvas_bright = Canvas(frame4_page6, bg=bg_color, height=canvas_size_p6, width=canvas_size_p6)
 canvas_bright.pack()
-label_file_name=tk.Label(frame4_page6, text=" ", bg="black", fg="cyan",width=58, height=2)
+label_file_name=tk.Label(frame4_page6, text=" ", bg="black", fg="cyan",font=all_font,width=50, height=2)
 label_file_name.pack()
 
 canvas_lineage = Canvas(frame5_page6, bg=bg_color, height=canvas_size_p6, width=canvas_size_p6)
@@ -3904,19 +3906,20 @@ from print_excel import extract_lineage,extract_const_movie_parameters
 from interface_functions import turn_image_into_tkinter
 ##########################################
 def create_display_images_p6():# plot images necessary for display       
-        label_instruct_p6.config(text="\nCreating results ...\n\n\n")   
+        label_instruct_p6.config(text="\nCreating display images ... \n\n\n")   
         still_lineage=cv2.imread(os.path.join( outpath,"still_lineage.tif"), -1)
-        create_per_cell_info(pedigree, outpath, still_lineage,label_instruct_p6, progress_bar,first_frame_number_p6, label_create_p6,container_1_fr10_page6 )
+        create_per_cell_info(pedigree, outpath, still_lineage, progress_bar,first_frame_number_p6, label_create_p6,container_1_fr10_page6 )
         load_display_images_p6()        
 #######################################
 def retrieve_display_images_p6():# If display iamges were created before, upload them
         print("INSIDE RETRIEVE")       
-        label_instruct_p6.config(text="\nRetrieving results ...\n\n\n")          
+        label_instruct_p6.config(text="\n\n\n\n")          
         load_display_images_p6()
  ######################################################
 def load_display_images_p6():# load images for display that have already been created before 
       global keys,menu_cell_ID, progress_bar,retrieve_popup_buttons    
       keys=list(pedigree.keys())
+      label_instruct_p6.config(text="\nLoading images for display ... \n\n\n")
       ###########################################
       all_buttons_page6.remove(menu_cell_ID_old)      
       menu_cell_ID_old.destroy()     
@@ -3927,10 +3930,15 @@ def load_display_images_p6():# load images for display that have already been cr
       all_buttons_page6.append(menu_cell_ID )        
       ##################################################
       global red_patches, one_cell_patches, plots, bright_names
-      label_instruct_p6.config(text="\nLoading results ...\n\n\n") 
+      #label_instruct_p6.config(text="\n\n\n\n") 
       red_patches, one_cell_patches, plots, bright_names=load_and_prepare_result_images(outpath, keys, progress_bar,label_create_p6)
-      label_feedback_p6.config(text="MOVIE:  "+ os.path.join(software_folder, input_movie_folder)+
-                    "\nNUMBER OF FRAMES: "+ str(num_frames)+"                   FRAME SIZE: "+str(frame_size_p6)+" x "+str(frame_size_p6)+ "\nCELLS: "+str(list_of_cell_names))
+      """
+      last_frame_number_p6=first_frame_number_p6+num_frames-1
+      label_feedback_p6.config(text="Movie:  "+ os.path.join(software_folder, input_movie_folder)+
+                    "\nNumber of frames: "+ str(num_frames)+"                   From   "+
+                    str(first_frame_number_p6)+"     to    "+str( last_frame_number_p6)+
+                    "\nCell names:      "+str(list_of_cell_names))
+      """
       ################################################
       
       ##################################################
@@ -3952,19 +3960,27 @@ def upload_input_movie():# look if display images exist. If so, load them, if no
     current_movie_name=os.path.basename( current_movie_folder )          
     input_movie_folder = os.path.join( current_movie_folder, "ONE_WELL_MOVIE_"+ current_movie_name)    
     ########################################################
-    label_instruct_p6.config(text="\nCreating results ...\n\n\n")    
+    label_instruct_p6.config(text="\n\n\n\n")    
     ################### load lineage_per_cell and constant movie params
     global pedigree, frame_size_p6, first_frame_number_p6, num_frames, list_of_cell_names
     helper_dir_p6=os.path.join(outpath,"HELPER_FOLDERS_(NOT FOR USER)")
     pedigree_path=os.path.join(helper_dir_p6,"lineage_per_cell.pkl")
     with open(pedigree_path, 'rb') as handle:
-         pedigree = pickle.load(handle)   
+         pedigree = pickle.load(handle)
+    list_of_cell_names =list(pedigree.keys())
        
     frame_size_p6, true_cell_radius_pickle, patch_size,max_number_of_cells,\
            num_frames, full_core_fluor_name, n_digits, full_core_bright_name,  first_frame_number_p6,\
            base_colours,contrast_value,number_cells_in_first_frame,full_core_red_name, red_dictionary_p5,bordersize_p5,delta_p5=extract_const_movie_parameters(helper_dir_p6)
     #############################################
-    list_of_cell_names =list(pedigree.keys())
+    last_frame_number_p6=first_frame_number_p6+num_frames-1
+    label_feedback_p6.config(text="Movie:  "+ os.path.join(software_folder, input_movie_folder)+
+                    "\nNumber of frames: "+ str(num_frames)+"                   From   "+
+                    str(first_frame_number_p6)+"     to    "+str( last_frame_number_p6)+
+                    "\nCell names:      "+str(list_of_cell_names))
+      ################################################
+    ##############################################
+   
     w,h = 400,150 
     cell_info_folder=os.path.join(outpath,"HELPER_FOLDERS_(NOT FOR USER)","VISUALISATION_HELPERS", "PLOTS")
     if  len(os.listdir(cell_info_folder))==0:# display images are not existent, need to be created
@@ -3980,7 +3996,7 @@ def upload_input_movie():# look if display images exist. If so, load them, if no
     else:
       # diplay images are already there, just upload them
       global  popup_retrieve_display_images      
-      label_instruct_p6.config(text="\nRetrieving results ...\n\n\n")        
+      label_instruct_p6.config(text="\n\n\n\n")        
       ############################
       popup_retrieve_display_images = tk.Toplevel(master=page6, bg=label_color)                        
       popup_retrieve_display_images.geometry('%dx%d+%d+%d' % (400, 159, (ws/2) - (w/2), (hs/2) - (h/2)))
@@ -4021,7 +4037,8 @@ def slide_patch(value):  # value=frame number from patch_slider
     canvas_graph.create_image(0, 0, anchor=NW, image=pl_pil)    
     ######################################
     bright_name=bright_names[ int(value)-first_frame_number_p6]
-    label_file_name.configure(text=os.path.basename(bright_name))
+    bright_name_for_show=prepare_file_name_for_show(bright_name)
+    label_file_name.configure(text=os.path.basename(bright_name_for_show))
     bright_image=cv2.imread(bright_name, -1)
 
     global bright_pil  
@@ -4071,6 +4088,7 @@ def load_cell_info(value):
   #clicks_count=0
   update_flash([menu_cell_property])
   activate_buttons(all_buttons_page6,[menu_cell_property])
+  label_create_p6 .config(text="Cell name  :   "+str(key)+"\nNumber of frames : "+str(tto-ffrom+1)+"\nFrom "+str(ffrom)+"  To  "+str(tto))
   label_instruct_p6.config(text="Choose cell property (Area, Perimeter, or Circularity) \nfrom the dropdown menu.")    
 ###########################################################
 def load_cell_property(value):
@@ -4098,20 +4116,19 @@ global button_upload_p6
 button_upload_p6 = tk.Button(frame3a_page6, text=" Upload TRACKED movie",
                 bg=button_color, font=all_font,command=upload_input_movie)
 button_upload_p6.pack()
-#########################
-
-########################################### 
+###########################################
 global progress_bar
 s = ttk.Style()
 s.theme_use('clam')
-s.configure("red.Horizontal.TProgressbar", foreground='green', background='green')
-progress_bar=ttk.Progressbar(container_1_fr10_page6, style="red.Horizontal.TProgressbar", orient="horizontal", length=400, mode="determinate")
+s.configure("bar.Horizontal.TProgressbar", troughcolor=bg_color, 
+                bordercolor="green", background="green", lightcolor="green", 
+                darkcolor="black")
+progress_bar = ttk.Progressbar(container_1_fr10_page6,style="bar.Horizontal.TProgressbar",orient='horizontal',mode='determinate',length=400)
 progress_bar.pack(pady=(20,5))
-#progress_bar.grid(row=1,column=0,padx=(30,30),pady=5)
 #############################
 global label_create_p6
 label_create_p6 = tk.Label(container_1_fr10_page6, text=" ",
-              bg="black", fg="cyan", font=all_font,width=50, height=2,  anchor="w",justify="left")
+              bg=bg_color, fg="cyan", font=all_font,width=50, height=3,  anchor="w",justify="left")
 label_create_p6.pack()
 #label_create_p6.grid(row=2,column=0,padx=2,pady=5)
 ##################################################
@@ -4134,7 +4151,10 @@ menu_cell_property.pack()
 menu_cell_property.config(bg = button_color, font=all_font,activebackground="red")
 menu_cell_property["menu"].config(bg=label_color,activebackground="red")
 ###################
-label_feedback_p6 = tk.Label(frame2_page6, text="\nWhen menue opens click on the INPUT movie.",bg="black", fg="cyan", font=all_font, height=3)
+text_for_label_feedback_p6="Movie:"+\
+                    "\nNumber of frames:"+\
+                    "\nCell names:"
+label_feedback_p6 = tk.Label(frame2_page6, text=text_for_label_feedback_p6,bg="black", fg="cyan", font=all_font, height=3)
 label_feedback_p6.pack(fill=BOTH)
 label_instruct_p6 = tk.Label(frame12_page6, text="Push button Upload TRACKED movie.\n\When menu opens,navigate to TRACKED movie folder and click (once, not twice!) on it.\nThen, push Select Folder.",bg="black", fg="yellow", font=all_font,  height=5)
 label_instruct_p6.pack(fill=BOTH)
