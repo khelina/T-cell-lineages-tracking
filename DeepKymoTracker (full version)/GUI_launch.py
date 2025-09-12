@@ -133,13 +133,13 @@ page2=pages[1]
 global  canvas_size_p2
 canvas_size_p2=400
 
-frame1_page2 = tk.Frame(master=page2, width=1530, height=50, bg=bg_color)
+frame1_page2 = tk.Frame(master=page2, width=1530, height=50, bg="green")
 frame1_page2.grid(row=0, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
 
-frame2_page2 = tk.Frame(master=page2, width=1530, height=30, bg=bg_color)
+frame2_page2 = tk.Frame(master=page2, width=1530, height=30, bg="orange")
 frame2_page2.grid(row=1, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
 
-frame3_page2 = tk.Frame(master=page2, width=1530, height=30, bg=bg_color)
+frame3_page2 = tk.Frame(master=page2, width=1530, height=30, bg="white")
 frame3_page2.grid(row=2, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
 
 frame4_page2 = tk.Frame(master=page2, width=canvas_size_p2, height=canvas_size_p2, bg="blue")
@@ -1077,16 +1077,29 @@ page4.config(bg=bg_color)
 global canvas_size_p4
 canvas_size_p4 =382
  
-
 frame1_page4 = tk.Frame(master=page4, width=1530, height=50, bg=bg_color)
-frame1_page4.grid(row=0, column=0, rowspan=1, columnspan=6, sticky=W+E+N+S)
+frame1_page4.grid(row=0, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
 
 frame2_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=30, bg=bg_color)
 frame2_page4.grid(row=1, column=0, rowspan=1, columnspan=1, sticky=W+E+N+S)
+###########################################################
+container_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=30)
+container_page4.grid(row=1, column=1, rowspan=1, columnspan=5, sticky=W+E+N+S)
+container_page4.grid_rowconfigure(0, weight=1)
+container_page4.grid_columnconfigure(0, weight=1)
+###################################################
+frame3a_page4 = tk.Frame(master=container_page4,width=canvas_size_p4, height=10, bg=bg_color)
+frame3a_page4.pack(fill = BOTH,expand=True)
 
-frame3_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=30, bg=bg_color)
-frame3_page4.grid(row=1, column=1, rowspan=1, columnspan=5, sticky=W+E+N+S)
+frame3b_page4 = tk.Frame(master=container_page4, width=canvas_size_p4, height=10, bg=label_color)
+frame3b_page4.pack( fill = BOTH,expand=True)
 
+frame3c_page4 = tk.Frame(master=container_page4,width=canvas_size_p4, height=10, bg=label_color)
+frame3c_page4.pack(fill = BOTH,expand=True)
+###################################################################
+frame4_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=30, bg=bg_color)
+frame4_page4.grid(row=1, column=2, rowspan=1, columnspan=1, sticky=W+E+N+S)
+############################################
 frame5_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=canvas_size_p4, bg=bg_color)
 frame5_page4.grid(row=2, column=0, rowspan=1, columnspan=1)
 
@@ -1095,7 +1108,7 @@ frame6_page4.grid(row=2, column=1, rowspan=1, columnspan=1)
 
 frame7_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=canvas_size_p4, bg=bg_color)
 frame7_page4.grid(row=2, column=2, rowspan=1, columnspan=1)
-
+######################################################################
 frame8_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=canvas_size_p4, bg=bg_color)
 frame8_page4.grid(row=3, column=0, rowspan=1, columnspan=1,sticky=W+E+N+S)
 
@@ -1104,50 +1117,35 @@ frame9_page4.grid(row=3, column=1, rowspan=1, columnspan=1, sticky=W+E+N+S)
 
 frame10_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=1538, bg=bg_color)
 frame10_page4.grid(row=3, column=2, rowspan=1, columnspan=1, sticky=W+E+N+S)
-
+####################################################################################
 frame12_page4 = tk.Frame(master=page4, width=1530, height=50, bg=bg_color)
-frame12_page4.grid(row=4, column=0, rowspan=1, columnspan=6, sticky=W+E+N+S)
+frame12_page4.grid(row=4, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
 
+gap_frame_page4 = tk.Frame(master=page4, width=1530, height=5, bg=bg_color)
+gap_frame_page4.grid(row=5, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
 
 frame11_page4 = tk.Frame(master=page4, width=1530, height=50, bg=bg_color)
-frame11_page4.grid(row=5, column=0, rowspan=1, columnspan=6, sticky=W+E+N+S)
-
+frame11_page4.grid(row=6, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
+################################################################
 canvas_previous = Canvas(frame5_page4, bg=bg_color, height=canvas_size_p4, width=canvas_size_p4)
-canvas_previous.pack(anchor='nw', fill='both', expand=True)
+canvas_previous.pack(anchor='nw')
 canvas_current = Canvas(frame6_page4, bg=bg_color, height=canvas_size_p4, width=canvas_size_p4)
-canvas_current.pack(anchor='nw', fill='both', expand=True)
+canvas_current.pack(anchor='nw')
 global canvas_lineage_exec
 canvas_lineage_exec = Canvas(frame7_page4, bg=bg_color, height=canvas_size_p4, width=canvas_size_p4)
-
 canvas_lineage_exec.pack(anchor='nw')
-
 ########################### These labels do not change
-
 title_label = tk.Label(frame1_page4, text="STEP 3: EXECUTE AND CORRECT TRACKING",
               bg="yellow", fg="red", font=("Times", "24")).pack()
-#title_label.grid(row=0, column=1, padx=2, sticky="n")
+label_previous = tk.Label(frame8_page4, text="Previous Frame", bg="#87CEFA", fg="black", font='TkDefaultFont 10 bold' ).pack()
+label_current = tk.Label(frame9_page4, text="Current Frame", bg="#87CEFA", fg="black", font='TkDefaultFont 10 bold' ).pack()
 
-label_previous = tk.Label(frame8_page4, text="Previous Frame", bg="#87CEFA", fg="black", font='TkDefaultFont 10 bold' )
-label_previous.grid(row=0, column=5, padx=100)
-
-label_current = tk.Label(frame9_page4, text="Current Frame", bg="#87CEFA", fg="black", font='TkDefaultFont 10 bold' )
-#label_current.grid(row=0, column=0,padx=100)
-label_current.pack()
-
-
-label_curr_frame_name = tk.Label(frame9_page4, text="           ", bg="black", fg="cyan", font='TkDefaultFont 10 bold' )
-#label_curr_frame_name.grid(row=1, column=0,padx=100)
-label_curr_frame_name.pack()
-
-label_lineage = tk.Label(frame10_page4, text="Lineage", bg="#87CEFA", fg="black", font='TkDefaultFont 10 bold' )
-label_lineage.grid(row=0, column=0, padx=100)
-
+label_lineage = tk.Label(frame10_page4, text="Lineage", bg="#87CEFA", fg="black", font='TkDefaultFont 10 bold' ).pack()
 ###################################################
 zero_image = Image.new('RGB', (canvas_size_p4, canvas_size_p4))
 zero_image = ImageTk.PhotoImage(zero_image)
 global lineage_images_tk, output_images, lineage_images_cv2, output_names
 lineage_images_tk, output_images, lineage_images_cv2, output_names=[], [zero_image],[], ["             "]
-
 ################################
 global popup_monitor
 popup_monitor=None
@@ -1162,10 +1160,8 @@ global  count, pedigree, flag
 pedigree,flag= None ," "
 count = np.zeros((100), dtype="uint8")# for division
 
-
 global my_dir
 my_dir= ''
-
 
 global per_cell_dict
 per_cell_dict = {}
@@ -1447,50 +1443,52 @@ def prepare_for_first_go():
     feedback_dict_p4["number of processed"]="0"
     instruct_var_p4.set("Input mivie is loaded. Setting up parameters of the movie in progress...")
     ##########
-    
+    popup_color ="#7A8F79"
+    global int_popup_color
+    int_popup_color="#B09D23"
     #########
     global popup_first_preview, canvas_popup_fluor_p4,canvas_popup_bright_p4,canvas_popup_red_p4
-    popup_first_preview = tk.Toplevel(master=page4, bg=bg_color)
+    popup_first_preview = tk.Toplevel(master=page4, bg=popup_color )
     popup_first_preview.title("PAGE 4 POPUP WINDOW: SETTING CONSTANT PARAMETERS OF INPUT MOVIE")                 
     popup_first_preview.geometry('%dx%d+%d+%d' % (1530, 2000-160, 0, 160))
     #popup_first_preview = tk.Toplevel(master=page4, width=1528, height=50, bg="blue")
     
-    frame1 = tk.Frame(master=popup_first_preview , width=1530, height=50, bg=bg_color)
+    frame1 = tk.Frame(master=popup_first_preview , width=1530, height=50, bg=popup_color )
     frame1.grid(row=0, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
     
-    frame2 = tk.Frame(master=popup_first_preview , width=canvas_size_p4, height=canvas_size_p4, bg=bg_color)
+    frame2 = tk.Frame(master=popup_first_preview , width=canvas_size_p4, height=canvas_size_p4, bg=popup_color)
     frame2.grid(row=1, column=0, rowspan=1, columnspan=1, sticky=W+E+N+S)
     
-    frame3 = tk.Frame(master=popup_first_preview , width=canvas_size_p4, height=canvas_size_p4, bg=bg_color)
+    frame3 = tk.Frame(master=popup_first_preview , width=canvas_size_p4, height=canvas_size_p4, bg=popup_color)
     frame3.grid(row=1, column=1, rowspan=1, columnspan=1, sticky=W+E+N+S)
     
-    frame4 = tk.Frame(master=popup_first_preview , width=canvas_size_p4, height=canvas_size_p4, bg=bg_color)
+    frame4 = tk.Frame(master=popup_first_preview , width=canvas_size_p4, height=canvas_size_p4, bg=popup_color)
     frame4.grid(row=1, column=2, rowspan=1, columnspan=1, sticky=W+E+N+S)
     
-    frame5 = tk.Frame(master=popup_first_preview , width=canvas_size_p4, height=canvas_size_p4, bg=bg_color)
+    frame5 = tk.Frame(master=popup_first_preview , width=canvas_size_p4, height=canvas_size_p4, bg=popup_color)
     frame5.grid(row=2, column=0, rowspan=1, columnspan=1, sticky=W+E+N+S)
     
-    frame6 = tk.Frame(master=popup_first_preview , width=canvas_size_p4, height=canvas_size_p4, bg=bg_color)
+    frame6 = tk.Frame(master=popup_first_preview , width=canvas_size_p4, height=canvas_size_p4, bg=popup_color)
     frame6.grid(row=2, column=1, rowspan=1, columnspan=1, sticky=W+E+N+S)
     
-    frame7 = tk.Frame(master=popup_first_preview , width=canvas_size_p4, height=canvas_size_p4, bg=bg_color)
+    frame7 = tk.Frame(master=popup_first_preview , width=canvas_size_p4, height=canvas_size_p4, bg=popup_color)
     frame7.grid(row=2, column=2, rowspan=1, columnspan=1, sticky=W+E+N+S)
     
-    frame8 = tk.Frame(master=popup_first_preview , width=1530, height=50,bg=bg_color)
+    frame8 = tk.Frame(master=popup_first_preview , width=1530, height=50,bg=popup_color)
     frame8.grid(row=3, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
     
-    frame9 = tk.Frame(master=popup_first_preview , width=1530, height=50,bg=bg_color)
+    frame9 = tk.Frame(master=popup_first_preview , width=1530, height=50,bg=popup_color)
     frame9.grid(row=4, column=0, rowspan=1, columnspan=3, sticky=W+E+N+S)
     ###########################################
     #l_feedback=tk.Label(frame1,text= "Input movie: ", bg="black", fg="cyan", font=("Times", "12"))
     #l_feedback.pack()
     
     global  canvas_left_pop, canvas_mid_pop, canvas_right_pop 
-    canvas_left_pop = Canvas(frame2, bg=bg_color, height=canvas_size_p4, width=canvas_size_p4)
+    canvas_left_pop = Canvas(frame2, bg=popup_color, height=canvas_size_p4, width=canvas_size_p4)
     canvas_left_pop.pack(anchor='nw', fill='both', expand=True)
-    canvas_mid_pop = Canvas(frame3, bg=bg_color, height=canvas_size_p4, width=canvas_size_p4)
+    canvas_mid_pop = Canvas(frame3, bg=popup_color, height=canvas_size_p4, width=canvas_size_p4)
     canvas_mid_pop.pack(anchor='nw', fill='both', expand=True)
-    canvas_right_pop = Canvas(frame4, bg="green", height=canvas_size_p4, width=canvas_size_p4)
+    canvas_right_pop = Canvas(frame4, bg=popup_color, height=canvas_size_p4, width=canvas_size_p4)
     canvas_right_pop.pack(anchor='nw',  expand=True)
     
     l_bright=tk.Label(frame5,text= "Bright ", bg="black", fg="cyan", font=("Times", "12"))
@@ -1758,15 +1756,15 @@ def create_cell_measure_popup():
     update_flash([])
     global popup_for_radius, canvas_for_radius, photo_image
     instruct_label_popup_p4.configure(text="Measuring cell diameter is in progress....")         
-    popup_for_radius = tk.Toplevel(master=popup_first_preview, bg=bg_color)
+    popup_for_radius = tk.Toplevel(master=popup_first_preview, bg=int_popup_color)
     popup_for_radius.title("PAGE 4 POPUP WINDOW: MEASURE CELL DIAMETER")       
     popup_for_radius.geometry('%dx%d+%d+%d' % (popup_window_size, popup_window_size+200, 0, 0))
     frame1 = tk.Frame(master=popup_for_radius, width=popup_window_size, height=popup_window_size)
     frame1.pack()
-    frame2 = tk.Frame(master=popup_for_radius, width=popup_window_size, height=50, bg=bg_color)
+    frame2 = tk.Frame(master=popup_for_radius, width=popup_window_size, height=50, bg=int_popup_color)
     frame2.pack()
 
-    canvas_for_radius = Canvas(frame1, height=popup_window_size, width=popup_window_size, bg=bg_color)
+    canvas_for_radius = Canvas(frame1, height=popup_window_size, width=popup_window_size, bg=int_popup_color)
     canvas_for_radius.pack(anchor='nw', fill='both', expand=True)
     #######################################
     if contrast_value!="0":
@@ -1859,13 +1857,13 @@ def create_contrast_popup():
     global cliplimit
     cliplimit=IntVar()
     cliplimit.set(0.)
-    popup_contrast = tk.Toplevel(master= popup_first_preview, bg=bg_color)
+    popup_contrast = tk.Toplevel(master= popup_first_preview, bg=int_popup_color)
     popup_contrast.title("PAGE 4 POPUP WINDOW: ADJUST CONTRAST") 
     popup_contrast.geometry('%dx%d+%d+%d' % (popup_window_size, popup_window_size+200, 0, 0))
     
-    frame1 = tk.Frame(master=popup_contrast, width=popup_window_size, height=popup_window_size, bg=bg_color)
+    frame1 = tk.Frame(master=popup_contrast, width=popup_window_size, height=popup_window_size, bg=int_popup_color)
     frame1.pack()
-    frame2 = tk.Frame(master=popup_contrast, width=popup_window_size, height=50, bg=bg_color)
+    frame2 = tk.Frame(master=popup_contrast, width=popup_window_size, height=50, bg=int_popup_color)
     frame2.pack()
 
     canvas_contrast = Canvas(frame1, height=popup_window_size, width=popup_window_size, bg="black")
@@ -1936,23 +1934,23 @@ def create_assign_cell_positions_popup():
     global popup_assign_pos,  cliplimit
     cliplimit=IntVar()
     cliplimit.set(0.)
-    popup_assign_pos = tk.Toplevel(master=popup_first_preview, bg=bg_color)
+    popup_assign_pos = tk.Toplevel(master=popup_first_preview, bg=int_popup_color)
     popup_assign_pos.title("PAGE 4 POPUP WINDOW: ASSIGN INITIAL CELL POSITIONS") 
     popup_assign_pos.geometry('%dx%d+%d+%d' % (popup_window_size, popup_window_size+400, 0, 0))
     
      
-    sub2 = tk.Frame(master=popup_assign_pos, width=popup_window_size, height=popup_window_size, bg=bg_color)
+    sub2 = tk.Frame(master=popup_assign_pos, width=popup_window_size, height=popup_window_size, bg=int_popup_color)
     #sub2.grid(row=1, column=0, rowspan=1, columnspan=1, sticky=W+E+N+S)
     sub2.pack()
     global canvas_assign_pos
     
     print("manual_init_positions inside create assign=",manual_init_positions)
-    canvas_assign_pos = Canvas(sub2,  height=popup_window_size, width=popup_window_size,bg=bg_color)
+    canvas_assign_pos = Canvas(sub2,  height=popup_window_size, width=popup_window_size,bg=int_popup_color)
     canvas_assign_pos.pack(anchor='nw', fill='both', expand=True)
     canvas_assign_pos.bind("<Button-1>", click_position)
     
       
-    sub3 = tk.Frame(master=popup_assign_pos, width=popup_window_size, height=300, bg=bg_color)
+    sub3 = tk.Frame(master=popup_assign_pos, width=popup_window_size, height=300, bg=int_popup_color)
     #sub3.grid(row=2, column=0, rowspan=1, columnspan=1, sticky=W+E+N+S)
     sub3.pack()
     ass_pos_label_p4=tk.Label(sub3,text="This is Frame 1 of the input movie.\nTo assign positions of cells of interest, click on centroids."\
@@ -2315,23 +2313,22 @@ def stop_execution_manually():
     #print("START_FRAME after pushing pause=", start_frame)
     print("dict_of_divisions after execution inside stop_exec_manually=", dict_of_divisions)
 #################################################################    
-button_pause = Button(frame2_page4, text="3a. Pause ",activebackground="red",
-               bg='#9ACD32', font='TkDefaultFont 10 bold', command=stop_execution_manually)
-button_pause.grid(row=0, column=2, padx=10, pady=20)  
+
 #############################
 def slide_frames(value):# view_slider (main screen)
     #print("len(lineage_images) inside SLIDE_FRAMES=",len(lineage_images))
     image_number = int(value)
     #print("image_number inside slide_frames=", image_number)    
-    internal_image_number=image_number-first_frame_number+1    
-    label_curr_frame_name.config(text=output_names[image_number-first_frame_number+1])
+    internal_image_number=image_number-first_frame_number+1
+    
+    curr_file_name=output_names[internal_frame_number]
+    curr_file_name_for_show=prepare_file_name_for_show(curr_file_name)
+    print("curr_file_name_for_show=",curr_file_name_for_show)
+    label_curr_frame_name.config(text=curr_file_name_for_show)
     label_current.configure(text="Current frame: " +str(image_number), fg="black")     
     show_3_canvases(canvas_previous,canvas_current,canvas_lineage_exec,output_images,lineage_images_tk,image_number, first_frame_number)
 ##############################################
-global view_slider# main screen
-view_slider = Scale(frame9_page4, from_=1, to=1, orient=HORIZONTAL, troughcolor="green", command=slide_frames, length=370)      
-#view_slider.grid(row=6, column=0, pady=5)
-view_slider.pack() 
+
 ###########################################
 def display_first_frame():# display all frames after pushing button "Display result"
     update_flash([])
@@ -2407,8 +2404,8 @@ def get_centroids_manually(event):
     manual_centroids.append([event.x/canvas_size_p4*frame_size, event.y/canvas_size_p4*frame_size])   
     instruct_var_p4.set("Centroids assigned in Current Frame:\n " + str(manual_centroids))
 ######################################
-def start_editing_IDs():
-    button_save_id.grid(row=3, column=0, columnspan=1)
+def start_editing_IDs():   
+    button_save_id.grid(row=3, column=0, padx=5)   
     R_edit_ID.configure(background = 'red')
     activate_buttons(all_buttons_page4,[button_save_id])
     update_flash([button_save_id])
@@ -2491,7 +2488,7 @@ def stop_editing_IDs():
 def start_editing_division():
     R_edit_division.configure(background = 'red')
     activate_buttons(all_buttons_page4,[ button_save_division])
-    button_save_division.grid(row=3, column=1, columnspan=1)
+    button_save_division.grid(row=3, column=1, padx=5)
     update_flash([button_save_division]) 
     
     #instruct_label_p4.set("Click on mother cell in Previous Frame.\nMake sure you click on the cell body!\nThen click on daughter cells in Current Frame \nMake sure you click on centroids!")
@@ -2504,8 +2501,7 @@ def start_editing_division():
     manual_centroids, manual_IDs, cell_names_external, daughter_indicators=[],[],[],[]
     
     canvas_previous.bind("<Button-1>", get_cell_IDs_manually) 
-    canvas_current.bind("<Button-1>", get_centroids_manually)
-    
+    canvas_current.bind("<Button-1>", get_centroids_manually)    
     R_edit_ID.configure(background = '#9ACD32')
    
 ########################################
@@ -2583,7 +2579,7 @@ def stop_editing_division():
 def add_new_cell():
   instruct_var_p4.set("To add a new cell/cells, click on their cetroids in Current Frame./Once finished, click Save added cells.")
   R_add_new_cell.configure(background="red")
-  button_save_added_cell.grid(row=3, column=2, columnspan=1)
+  button_save_added_cell.grid(row=3, column=2, padx=5)
   update_flash([button_save_added_cell])
   activate_buttons(all_buttons_page4,[button_save_added_cell])  
   global colour
@@ -2649,7 +2645,7 @@ def save_added_cell():
 #####################################
 def remove_died_cell():
   R_remove_dead_cell.configure(background="red")
-  button_save_removed_cell.grid(row=3, column=3, columnspan=1)
+  button_save_removed_cell.grid(row=3, column=3,padx=5)
   update_flash([button_save_removed_cell])
   activate_buttons(all_buttons_page4,[button_save_removed_cell])
   canvas_current.bind("<Button-1>", get_cell_IDs_manually) 
@@ -2738,65 +2734,75 @@ def create_final_movie_p4():# create final movie + pedigree_per_cell (simplified
                           "\nFinal movie is in  " + str(os.path.join(outpath,"lineage_movie.avi")))    
 ################### Buttons and labels Page 4####################
 ########################################################
-button_execute = Button(frame2_page4, text="3. Execute", font='TkDefaultFont 10 bold', 
-               bg='#9ACD32', activebackground="red",command=lambda:[threading.Thread(target=execute).start(), update_flash([]), button_display.configure(bg=button_color)])               
-button_execute.grid(row=0, column=0, pady=20)
-#global button_display
-button_display = Button(frame2_page4, text="4. Display result", font='TkDefaultFont 10 bold', 
-               bg='#9ACD32',activebackground="red", command=lambda: [display_first_frame(), update_flash([])])
-button_display.grid(row=2, column=0, padx=20)
+button_execute = Button(frame2_page4, text="2. Execute", font='TkDefaultFont 10 bold', 
+               bg=button_color, activebackground="red",command=lambda:[threading.Thread(target=execute).start(), update_flash([]), button_display.configure(bg=button_color)])               
+button_execute.pack(side=tk.TOP)
 
+button_display = Button(frame2_page4, text="3. Display result", font='TkDefaultFont 10 bold', 
+               bg=button_color,activebackground="red", command=lambda: [display_first_frame(), update_flash([])])
+button_display.pack(side=tk.BOTTOM)
 
-button_create_excel = Button(frame2_page4, text="7. Create final movie\n and \nExcel files", command=create_final_movie_p4,bg=button_color, font=all_font,activebackground="red")
-button_create_excel.grid(row=4, column=0, padx=20)    
+button_pause = Button(frame2_page4, text="2a. Pause ",activebackground="red",
+               bg=button_color, font='TkDefaultFont 10 bold', command=stop_execution_manually)
+button_pause.pack(side=tk.RIGHT, padx=45)   
 ################################################
 
-l_instr_name_p4=tk.Label(frame9_page4,text="INSTRUCTIONS FOR USER :" ,bg="black", font=all_font, fg="red").pack()
 instruct_label_p4=tk.Label(frame12_page4,textvariable=instruct_var_p4 ,bg="black", fg="yellow", font=all_font, height=5)
 instruct_label_p4.pack(fill=BOTH)
  
-button_save_id = Button(frame3_page4, text="Save ID edits", activebackground="red",font=all_font, 
+button_save_id = Button(frame3c_page4, text="Save ID edits", activebackground="red",font=all_font, 
               bg=button_color, command=lambda:stop_editing_IDs())
-button_save_id.grid(row=3, column=0)
+button_save_id.grid(row=3, column=0, padx=5)
 button_save_id.grid_forget()
 
-button_save_division = Button(frame3_page4, text="Save division edits",activebackground="red", font=all_font, 
+button_save_division = Button(frame3c_page4, text="Save division edits",activebackground="red", font=all_font, 
               bg=button_color, command=lambda:stop_editing_division())
-button_save_division.grid(row=3, column=1, columnspan=1)
+button_save_division.grid(row=3, column=1, padx=5)
 button_save_division.grid_forget()
 
-button_save_added_cell = Button(frame3_page4, text="Save added cell",activebackground="red", font=all_font, 
+button_save_added_cell = Button(frame3c_page4, text="Save added cell",activebackground="red", font=all_font, 
               bg=button_color, command=lambda:save_added_cell())
-button_save_added_cell.grid(row=3, column=2, columnspan=1)
+button_save_added_cell.grid(row=3, column=2, padx=5)
 button_save_added_cell.grid_forget()
 
-button_save_removed_cell = Button(frame3_page4, text="Save removed cell",activebackground="red", font=all_font, 
+button_save_removed_cell = Button(frame3c_page4, text="Save removed cell",activebackground="red", font=all_font, 
               bg=button_color, command=lambda:save_removed_cell())
-button_save_removed_cell.grid(row=3, column=3, columnspan=1)
+button_save_removed_cell.grid(row=3, column=3,padx=5)
 button_save_removed_cell.grid_forget()
-
+################################################################
 global R_edit_ID, R_edit_division, R_add_new_cell,R_remove_dead_cell
-edit_label_name=tk.Label(frame3_page4,text="Edit tools",bg=label_color,  font=("Times", "14")). grid(row=0, column=2, pady=5, padx=30)
-R_edit_ID = Radiobutton(frame3_page4, text="Edit IDs", value="Previous", font=all_font, variable=clicked, command=lambda:start_editing_IDs(), background=button_color, activebackground="red")
-R_edit_ID.grid(row=1, column=0, pady=10, padx=10)
 
-R_edit_division = Radiobutton(frame3_page4, text="Edit division",background=button_color, font=all_font,
+edit_label_name=tk.Label(frame3a_page4,text="Edit tools",bg=label_color,  font=("Times", "14")).pack(side=tk.LEFT, padx=200)
+
+R_edit_ID = Radiobutton(frame3b_page4, text="Edit IDs", value="Previous", font=all_font, variable=clicked, command=lambda:start_editing_IDs(), background=button_color, activebackground="red")
+R_edit_ID.pack(side=tk.LEFT, padx=15)
+
+R_edit_division = Radiobutton(frame3b_page4, text="Edit division",background=button_color, font=all_font,
                  value="Previous", activebackground="red",variable=clicked,  command=lambda:start_editing_division())
-R_edit_division.grid(row=1, column=1, pady=10, padx=10)
+R_edit_division.pack(side=tk.LEFT, padx=15)
 
-R_add_new_cell = Radiobutton(frame3_page4, text="Add new cell", value="Previous", font=all_font, variable=clicked, command=lambda:add_new_cell(), background=button_color, activebackground="red")
-R_add_new_cell.grid(row=1, column=2, pady=10, padx=10)
+R_add_new_cell = Radiobutton(frame3b_page4, text="Add cell", value="Previous", font=all_font, variable=clicked, command=lambda:add_new_cell(), background=button_color, activebackground="red")
+R_add_new_cell.pack(side=tk.LEFT, padx=20)
 
-R_remove_dead_cell = Radiobutton(frame3_page4, text="Remove dead cell",background=button_color, font=all_font,
+R_remove_dead_cell = Radiobutton(frame3b_page4, text="Remove cell",background=button_color, font=all_font,
                  value="Current", activebackground="red",variable=clicked, command=remove_died_cell)    
-R_remove_dead_cell.grid(row=1, column=3,pady=10, padx=10)
+R_remove_dead_cell.pack(side=tk.LEFT, padx=20)
+
+button_create_excel = Button(frame4_page4, text="4. Create final movie\n and \nExcel files", command=create_final_movie_p4,bg=button_color, font=all_font,activebackground="red")
+button_create_excel.pack(pady=20) 
 ################################################
+global label_curr_frame_name 
+label_curr_frame_name = tk.Label(frame9_page4, text="           ", bg="black", fg="cyan", font='TkDefaultFont 10 bold' , width=48, height=2)
+label_curr_frame_name.pack()
+global view_slider# main screen
+view_slider = Scale(frame9_page4, from_=1, to=1, orient=HORIZONTAL,bg=label_color, troughcolor="#513B1C", command=slide_frames, length=370)      
+view_slider.pack(pady=3)
+l_instr_name_p4=tk.Label(frame9_page4,text="INSTRUCTIONS FOR USER :" ,bg="black", font=all_font, fg="white").pack() 
+###############################################
 global all_buttons_page4
-#label_edit = tk.Label(frame3_page4, text=" ", font='TkDefaultFont 10 bold',  bg="black", fg="yellow", width=50, height=4)
 all_buttons_page4=[button_load,button_execute, button_pause,button_display,\
                    R_edit_ID,R_edit_division, R_add_new_cell,R_remove_dead_cell,\
                    button_save_id,button_save_division,button_save_added_cell,button_save_removed_cell]
-
 ###########################################################################
 ############################## PAGE-5 (STEP-4): CORRECT SEGMENTATION #######
 #############################################################################
@@ -2858,9 +2864,7 @@ frame7b_page5.grid(row=6, column=0, rowspan=1, columnspan=3,sticky=W+E+N+S)
 
 frame7a_page5 = tk.Frame(master=page5, width=50, height=50, bg=bg_color)
 frame7a_page5.grid(row=7, column=0, rowspan=1, columnspan=3,sticky=W+E+N+S)
-
 ###################################################
-
 frame8_page5 = tk.Frame(master=page5, width=50, height=50, bg=bg_color)
 frame8_page5.grid(row=8, column=0, rowspan=1, columnspan=3,sticky=W+E+N+S)
 
@@ -4130,15 +4134,12 @@ global label_create_p6
 label_create_p6 = tk.Label(container_1_fr10_page6, text=" ",
               bg=bg_color, fg="cyan", font=all_font,width=50, height=3,  anchor="w",justify="left")
 label_create_p6.pack()
-#label_create_p6.grid(row=2,column=0,padx=2,pady=5)
 ##################################################
 global patch_slider_old    
 patch_slider_old=Scale(container_2_fr10_page6,from_=ffrom,to=ffrom,orient=HORIZONTAL,troughcolor="#513B1C",label="Frame "+str(ffrom), command=slide_patch,
                  activebackground="red", bg=label_color,showvalue=0, font=all_font, length=canvas_size_p6)
 patch_slider_old.pack(side=tk.TOP,pady=40)
-#patch_slider_old.grid(row=0,column=0,padx=20,pady=5)
 #############################################
-
 global menu_cell_ID_old,menu_cell_property
 menu_cell_ID_old = OptionMenu(frame3b_page6, cell_ID, *options_cells,  command= load_cell_info)
 menu_cell_ID_old.pack()
