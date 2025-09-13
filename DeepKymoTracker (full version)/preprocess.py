@@ -182,8 +182,8 @@ def update_feedback_text_p4(feedback_dict_p4):
          "\nFrame size :  "+feedback_dict_p4["frame size"]+\
          "                  Cell diameter : "+feedback_dict_p4["cell diameter"]+\
          "                  Patch size : "+feedback_dict_p4["patch size"]+\
-         "\nInitial number of cells : "+feedback_dict_p4["number in frame 1"]+\
-         "                  Maximum number of cells : "+feedback_dict_p4["max number"]+\
+         "\nInitial number of cells : "+feedback_dict_p4["initial number of cells"]+\
+         "\nFrame numbers in this section of movie : from  "+feedback_dict_p4["from"]+"   to  "+feedback_dict_p4["to"]+\
          "\nFluorescent frames :  "+feedback_dict_p4["fluor frames"]+"    Brightfield frames :  "+feedback_dict_p4["bright frames"]+"    Red frames :  "+feedback_dict_p4["red frames"]+\
          "\nNumber of processed frames :  "+ feedback_dict_p4["number of processed"]
          
