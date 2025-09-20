@@ -111,10 +111,7 @@ def create_models_for_segmentation_correction(models):
     refiner.compile(Adam(lr=0.003), loss='mse',metrics=['mae'])
     return segmentor, refiner
 ############################################
-  
-#############################################
-
-##########################################################
+################# works for colorues text as well - removes it
 def delete_contour_with_specific_colour(filled_image, empty_image,color):
     lower_thresh = np.array(color, dtype = "uint8")
     upper_thresh= np.array(color, dtype = "uint8")
@@ -193,3 +190,24 @@ def update_frame_dictionary_after_manual_segm_correction(mask, filled_fluor,fill
        cv2.imwrite(r"C:\Users\helina\Desktop\final_patch.tif",final_patch)
     return frame_dictionary  
 ###########################################
+def update_cheatsheet(cheatsheets,mode,bg_color,label_color):
+    if mode=="neutral":
+        for k in range(8):
+            cheatsheets[k].config(text=" ", bg=bg_color)
+    else:
+        cheatsheets[0].config(text="Choose cell:",bg=label_color, fg="black")
+        cheatsheets[1].config(text="Right-click",bg=label_color, fg="red")
+        cheatsheets[2].config(text="CREATE contour:",bg=label_color, fg="black")
+       
+        cheatsheets[4].config(text="SAVE contour:",bg=label_color, fg="black")
+        cheatsheets[5].config(text="Right-click\ninside magenta circle",bg=label_color, fg="red")
+        cheatsheets[6].config(text="DELETE contour:",bg=label_color, fg="black")
+        cheatsheets[7].config(text="Right-click\nanywhere on background",bg=label_color, fg="red")
+        if mode=="fast":
+            cheatsheets[3].config(text="Left-click",bg=label_color, fg="red")
+            cheatsheets[6].config(text=" ",bg=bg_color, fg="black")
+            cheatsheets[7].config(text=" ",bg=bg_color, fg="black")
+        else:
+            cheatsheets[3].config(text="Draw with mouse",bg=label_color, fg="red")
+            cheatsheets[6].config(text="DELETE contour:",bg=label_color, fg="black")
+            cheatsheets[7].config(text="Right-click\nanywhere on background",bg=label_color, fg="red")

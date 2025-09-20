@@ -643,24 +643,24 @@ def remove_stuck_cell_from_mask(bad_cell_number_in_frame, init_image):
 def remove_cell_from_mask(bad_cell_number_in_frame, init_image, intensity_dictionary_for_frame):
     print("INSIDE REMOVE_CELL_FROM_MASK:")
     keys=list(intensity_dictionary_for_frame.keys())
-    cv2.imwrite(r"C:\Users\helina\Desktop\init_image_before.tif",init_image*20)
-    print("keys=", keys)
+    #cv2.imwrite(r"C:\Users\helina\Desktop\init_image_before.tif",init_image*20)
+    #print("keys=", keys)
     if init_image.dtype!="uint64":
         init_image=init_image.astype("uint64")
     bad_cell_number_in_mask=2**bad_cell_number_in_frame
     cell_mask_to_delete=np.zeros(init_image.shape,init_image.dtype)
-    print("cell_mask_to_delete.dtype=",cell_mask_to_delete.dtype)
-    print(" bad_cell_number_in_mask=",  bad_cell_number_in_mask)
-    print(" np.max(init_image)=", np.max(init_image))
+    #print("cell_mask_to_delete.dtype=",cell_mask_to_delete.dtype)
+    #print(" bad_cell_number_in_mask=",  bad_cell_number_in_mask)
+    #print(" np.max(init_image)=", np.max(init_image))
     for key in keys:
         item=intensity_dictionary_for_frame[key]# list of cell numbers for key
-        print("item=", item)
+        #print("item=", item)
         if bad_cell_number_in_frame in item:                                   
               cell_mask_to_delete[init_image==int(key)]=bad_cell_number_in_mask
     cell_mask_to_delete[cell_mask_to_delete!=0]=bad_cell_number_in_mask
-    cv2.imwrite(r"C:\Users\helina\Desktop\cell_mask_to_delete.tif",cell_mask_to_delete*20)
+    #cv2.imwrite(r"C:\Users\helina\Desktop\cell_mask_to_delete.tif",cell_mask_to_delete*20)
     init_image = np.subtract(init_image,cell_mask_to_delete)
-    cv2.imwrite(r"C:\Users\helina\Desktop\init_image_after.tif",init_image*20)
+    #cv2.imwrite(r"C:\Users\helina\Desktop\init_image_after.tif",init_image*20)
     return init_image
 ########################################
 def dilate_cell(ensemble_output,a,b,c,d,mask, cell_number,frame_size):
