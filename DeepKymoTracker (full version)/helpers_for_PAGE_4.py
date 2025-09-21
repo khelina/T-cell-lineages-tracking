@@ -167,7 +167,7 @@ def update_frame_dictionary_after_manual_segm_correction(mask, filled_fluor,fill
        #new_path=os.path.join(path,"new_cell_%s.tif" %(cell_name))
        #cv2.imwrite(old_path,old_patch)
        #cv2.imwrite(new_path, new_patch )
-       colour=frame_dictionary[ "cell_%s" % cell_ID][15]
+       colour=frame_dictionary[ "cell_%s" % cell_ID][15][0]
        cv2.putText(filled_fluor,cell_name,(int(new_cX)-10,int(new_cY)+5),cv2.FONT_HERSHEY_PLAIN,1,colour,1)
        cv2.putText(filled_bright,cell_name,(int(new_cX)-10,int(new_cY)+5),cv2.FONT_HERSHEY_PLAIN,1,colour,1)
        

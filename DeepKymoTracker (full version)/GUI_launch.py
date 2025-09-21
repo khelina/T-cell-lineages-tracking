@@ -2742,6 +2742,21 @@ label_bright_name.pack(fill=BOTH)
 label_fluor_name=tk.Label(frame5b_page5, text=" ",bg="black", fg="cyan", font=all_font, height=1)
 label_fluor_name.pack(fill=BOTH)
 #####################################################
+status_name_label=tk.Label(frame4c_page5 , text="STATUS ", height=1, bg="green", fg="black", font='TkDefaultFont 14 bold' )
+status_name_label.pack(fill=BOTH)
+
+cell_monitor_label=tk.Label(frame4c_page5 , text="No movie loaded yet ", height=1, bg="black", fg="cyan", font='TkDefaultFont 14 bold' )
+cell_monitor_label.pack(fill=BOTH)
+mode_monitor_label=tk.Label(frame4c_page5 , text=" ", height=1, bg="black", fg="cyan", font='TkDefaultFont 14 bold' )
+mode_monitor_label.pack(fill=BOTH)
+zoom_monitor_label=tk.Label(frame4c_page5 , text=" ", height=1, bg="black", fg="cyan", font='TkDefaultFont 14 bold' )
+zoom_monitor_label.pack(fill=BOTH)
+pan_monitor_label=tk.Label(frame4c_page5 , text=" ", height=1, bg="black", fg="cyan", font='TkDefaultFont 14 bold' )
+pan_monitor_label.pack(fill=BOTH)
+###########################################
+cheat_sheet_label=tk.Label(frame4c_page5 , text="CHEAT SHEET ", height=1, bg="green", fg="black", font='TkDefaultFont 14 bold' )
+cheat_sheet_label.pack(fill=BOTH)
+############################
 global cheatsheets
 cheatsheets=[]
 for k in range(8):
@@ -2851,8 +2866,7 @@ def choose_and_load_tracked_movie():
     global previous_frame_number, previous_cell_number
     previous_frame_number, previous_cell_number=-2, -2
     print("previous_frame_number=",previous_frame_number)
-    canvas_fluor_p5.unbind_all("<Button-3>")
-    
+    canvas_fluor_p5.unbind("<Button-3>")   
     canvas_fluor_p5.bind("<Button-3>", right_click_one_cell)
     global oval,oval_x,oval_y
     oval_x,oval_y=1,1
@@ -2861,6 +2875,8 @@ def choose_and_load_tracked_movie():
     global points
     points=[]
     enable_frame()
+    global zoom_counter
+    zoom_counter=0
                               
 ########################################
 def activate_fast_edit_mode():#enter fast segmentation mode
@@ -2868,7 +2884,7 @@ def activate_fast_edit_mode():#enter fast segmentation mode
    button_activate_fast_edit_mode.configure(background = 'red')
    button_activate_slow_edit_mode.configure(background = button_color)   
    dialog_label_5.config(text="\nIn the right image, right-click on the cell you want to correct.")
-             
+   mode_monitor_label.config(text="Fast mode", fg="cyan")          
    #canvas_fluor_p5.unbind_all("<Button-1>")
    #canvas_fluor_p5.unbind_all("<Button-1>")   
    #canvas_fluor_p5.bind("<Button-1>", edit_by_clicking)
@@ -2889,6 +2905,7 @@ def activate_hand_drawing_mode_for_one_cell():
 ###########################################  
 def activate_slow_edit_mode():
     print("SLOW MODE ACTIVATED")
+    mode_monitor_label.config(text="Slow mode", fg="red") 
     update_cheatsheet(cheatsheets,"slow",bg_color,label_color)
     mode_variable.set("slow")
     button_activate_slow_edit_mode.configure(background = 'red')
@@ -2901,8 +2918,9 @@ def activate_slow_edit_mode():
     canvas_fluor_p5.unbind("<B1-Motion>")
     canvas_fluor_p5.unbind( "<ButtonPress-1>")
     canvas_fluor_p5.unbind("token<ButtonRelease-1>")
-    #canvas_fluor_p5.bind("<B1-Motion>", drag)
+    canvas_fluor_p5.bind("<B1-Motion>", drag)
     canvas_fluor_p5.unbind("<MouseWheel>")
+    
     canvas_fluor_p5.bind("<Button-1>", get_x_and_y)    
     #canvas_fluor_p5.bind("<B1-Motion>",draw_with_mouse, add="+")
     canvas_fluor_p5.bind("<B1-Motion>",draw_with_mouse)             
@@ -2934,7 +2952,7 @@ def right_click_one_cell(event):# extract info about clicked celland take action
     mode=mode_variable.get()# after right-clicking cell, extract mode, frame_number and cell_number
     global frame_number, previous_frame_number, previous_cell_number, canvas_fluor_p5, canvas_bright_p5
     global clicked_cell_position_marker, cell_number_in_frame, filled_fluor, filled_bright, filled_red
-    global oval, cell_color, cell_ID
+    global oval, cell_color, cell_ID, zoom_counter
     global oval_x_init,oval_y_init, oval_x,oval_y
     ############################################
     global  internal_frame_number_p5,save_frame_edits_alert
@@ -2976,9 +2994,11 @@ def right_click_one_cell(event):# extract info about clicked celland take action
        #cell_number=mask[clicked_cell_position_marker[1],clicked_cell_position_marker[0]]-1
        ##################################################
        cell_number_in_mask=mask[clicked_cell_position_marker[1],clicked_cell_position_marker[0]]
-       #cell_number_for_mask=round(cell_number_scaled)# for plotting masks (visualisation purpose only)
-       cell_number_in_frame=int(math.log(round(cell_number_in_mask),2)) 
-       
+       print("CELL_NUMBER_IN_MASK=", cell_number_in_mask)
+       if cell_number_in_mask==0:           
+           cell_number_in_frame=-1
+       else:
+           cell_number_in_frame=int(math.log(round(cell_number_in_mask),2))      
        ###################################################
        #print("cell_number_in_mask, cell_number_in_frame", cell_number_in_mask, cell_number_in_frame)
     ##### Now, check cell number"  
@@ -2986,12 +3006,15 @@ def right_click_one_cell(event):# extract info about clicked celland take action
        if cell_number_in_frame!=-1:# if you hit a cell body, not background (accidentally)
           if cell_number_in_frame!=previous_cell_number:# you clicked on a new cell, same frame, fast mode
                      print("clicked on new cell, farme doesnt matter,fast mode")
+                     cell_monitor_label.config(text="You clicked on new cell")
+                     #global zoom_counter
+                     #zoom_counter=0
                      disable_frame()
                      canvas_fluor_p5.bind("<Button-1>", edit_by_clicking)                                            
                      #saving previous cell
                      canvas_fluor_p5.delete(oval)# delete magenta oval on previous cell
                      #print("cells_in_current_frame_sorted=",cells_in_current_frame_sorted)
-                     cell_color=cells_in_current_frame_sorted[cell_number_in_frame][1]
+                     cell_color=cells_in_current_frame_sorted[cell_number_in_frame][1][0]
                      cell_ID=cells_in_current_frame_sorted[cell_number_in_frame][0]
                      ########################################
                      #global init_x,init_y# create magenta oval on clicked cell
@@ -3024,15 +3047,19 @@ def right_click_one_cell(event):# extract info about clicked celland take action
                      #previous_cell_number=cell_number
           else:# if you hit cell with the same number             
                     print("I hit the cell with the same numvber to save edits")
-                    #print("frame number=",frame_number)
+                    cell_monitor_label.config(text="Saved cell")
                     save_one_edited_cell()
                     save_frame_edits_alert=True 
                     enable_frame()
                     canvas_fluor_p5.unbind("<Button-1>")
+                    if zoom_counter!=0:
+                         zoom_counter=0
+                         zoom_monitor_label.config(text="Zoom disabled", fg="cyan")
           previous_cell_number=cell_number_in_frame          
        else:# you hit background accidentally, i.e. cell_number=-1
               print("clicked on  background, fast mode")         
               print("do nothing")
+              cell_monitor_label.config(text="You clicked on background")
       
     ######################################
     if mode=="slow":# the slow editing (by hand-drawing)     
@@ -3068,15 +3095,18 @@ def right_click_one_cell(event):# extract info about clicked celland take action
          #cell_number=int(math.log(cell_number_scaled*1000000,2)) 
          #############################
          # it is mask, not final_mask - very important!!!
-         cell_number_in_mask=mask[clicked_cell_position_marker[1],clicked_cell_position_marker[0]]
-         print("cell_number-in_mask=", cell_number_in_mask)
+         cell_number_in_mask=mask[clicked_cell_position_marker[1],clicked_cell_position_marker[0]]        
+         print("CELL_NUMBER_IN_MASK=", cell_number_in_mask)
          if cell_number_in_mask==0:# if you clicked on background
-             erase_line()  
+             erase_line()
+             cell_monitor_label.config(text="You deleted contour")
          else:
              cell_number_in_frame=int(math.log(round(cell_number_in_mask),2))          
          ##################################                                
              if cell_number_in_frame!= previous_cell_number:# you clicked on a new cell
-                     print("clicked on new cell")
+                     cell_monitor_label.config(text="You clicked on new cell")
+                     #global zoom_counter
+                     #zoom_counter=0
                      disable_frame()
                      ###############################
                      if  previous_cell_number!=-2:                     
@@ -3108,12 +3138,20 @@ def right_click_one_cell(event):# extract info about clicked celland take action
                      activate_hand_drawing_mode_for_one_cell()
                      ##############################################                    
              else:# you clicked on the same cell,slow mode
-                     print("clicked on  same cell")
-                     #save_hand_drawing_for_one_cell()
+                     print("clicked on  same cell to save it")
+                     cell_monitor_label.config(text="Saved cell")
                      save_one_edited_cell()
                      activate_fast_edit_mode()
                      enable_frame()
-                     save_frame_edits_alert=True                      
+                     save_frame_edits_alert=True 
+                     canvas_fluor_p5.unbind("<Button-1>")
+                     canvas_fluor_p5.unbind("<B1-Motion>")
+                     canvas_fluor_p5.unbind( "<ButtonPress-1>")
+                     canvas_fluor_p5.unbind("token<ButtonRelease-1>")
+                     if zoom_counter!=0:
+                         zoom_counter=0
+                         zoom_monitor_label.config(text="Zoom disabled", fg="cyan")
+                     #canvas_fluor_p5.bind("<Button-1>", edit_by_clicking)                                                                 
          previous_cell_number=cell_number_in_frame        
 ################################################
 def get_x_and_y(event):
@@ -3150,7 +3188,8 @@ def erase_line():# in case you are not happy with your hand contour and want to 
 ###############################################
 def start_zoom():
     zoom_status.set("on")
-    activate_buttons(all_buttons_page5,[button_activate_fast_edit_mode,button_activate_slow_edit_mode,start_pan_button])
+    zoom_monitor_label.config(text="Zoom activated", fg="red")
+    activate_buttons(all_buttons_page5,[button_activate_fast_edit_mode,button_activate_slow_edit_mode])
     #button_activate_fast_edit_mode.configure(background =button_color)
     global my_image_fl, my_image_br, points, canvas_fluor_p5, canvas_bright_p5,photo_fluor, photo_bright, internal_frame_number,x0,y0
     points=[]
@@ -3167,6 +3206,8 @@ def start_zoom():
     x0, y0=clicked_cell_position_marker[0],clicked_cell_position_marker[1]#x0, y0 - for original photo  
     image_origin_x,image_origin_y= cell_center_visual_x-oval_x, cell_center_visual_y-oval_y
     #x0, y0=(300-image_origin_x)/zoom_coeff,(300-image_origin_y)/zoom_coeff#x0, y0 - for original photo
+    global zoom_counter
+    zoom_counter=0
     #################################
     
     print("x0, yo=", x0, y0)
@@ -3181,15 +3222,27 @@ def start_zoom():
     canvas_fluor_p5.bind('<MouseWheel>', wheel)
 ##############################################
 def start_pan():
-    canvas_fluor_p5.unbind_all("<Button-1>")
+    pan_monitor_label.config(text="Pan activated", fg="red")
+    canvas_fluor_p5.unbind("<Button-1>")
+    canvas_fluor_p5.unbind("<Button-3>")
+    
     canvas_fluor_p5.bind( "<ButtonPress-1>", drag_start)
     canvas_fluor_p5.bind("token<ButtonRelease-1>", drag_stop)
     canvas_fluor_p5.bind("<B1-Motion>", drag)
     activate_buttons(all_buttons_page5,[stop_pan_button])
 #######################################
 def stop_pan():
-    canvas_fluor_p5.unbind_all("<Button-1>")  
-    canvas_fluor_p5.bind("<Button-1>", edit_by_clicking)
+    pan_monitor_label.config(text="Pan disabled", fg="cyan")
+    canvas_fluor_p5.unbind("<Button-1>")
+    canvas_fluor_p5.unbind("token<ButtonRelease-1>")
+    canvas_fluor_p5.unbind("<B1-Motion>")
+    mode=mode_variable.get()
+    if mode=="fast":
+       canvas_fluor_p5.bind("<Button-1>", edit_by_clicking)        
+    else:
+       canvas_fluor_p5.bind("<Button-1>", get_x_and_y)        
+       canvas_fluor_p5.bind("<B1-Motion>",draw_with_mouse)  
+    canvas_fluor_p5.bind("<Button-3>", right_click_one_cell)      
     activate_buttons(all_buttons_page5,[button_activate_fast_edit_mode,button_activate_slow_edit_mode])   
 ###############################################               
 def drag_start(event):
@@ -3242,6 +3295,12 @@ def drag(event):
 ##################################
 def wheel(event):
         ''' Zoom with mouse wheel '''
+        global zoom_counter
+        zoom_counter+=1
+        if zoom_counter==1:
+            activate_buttons(all_buttons_page5,[button_activate_fast_edit_mode,button_activate_slow_edit_mode,start_pan_button])
+        activate_buttons(all_buttons_page5,[button_activate_fast_edit_mode,button_activate_slow_edit_mode,start_pan_button])
+        print("ZOOM_COUNTER=", zoom_counter)
         global  photo_fluor, my_image_fl,photo_bright, my_image_fl_resized, x0, y0,image_object, factor_in, factor_out, zoom_coeff, image_origin_x, image_origin_y, resize_coeff, new_shape 
         global oval_x_init, oval_y_init, oval_x,oval_y, factor
         if  event.delta == -120:  # scroll down
@@ -3260,8 +3319,8 @@ def wheel(event):
           #############################################################         
         
           x0_new_out, y0_new_out=oval_x_init*factor_out,oval_y_init*factor_out
-          photo_fluor =  turn_image_into_tkinter(my_image_fl_resized,new_shape)
-          photo_bright =  turn_image_into_tkinter(my_image_br_resized,new_shape)            
+          photo_fluor =  turn_image_into_tkinter(my_image_fl_resized,new_shape,[])
+          photo_bright =  turn_image_into_tkinter(my_image_br_resized,new_shape,[])            
           image_origin_x, image_origin_y= cell_center_visual_x-x0_new_out, cell_center_visual_y-y0_new_out
           canvas_fluor_p5.delete("all")
           canvas_bright_p5.delete("all")
@@ -3352,6 +3411,7 @@ def stop_zoom():
     print("cell_centre_visual_x,cell_center_visual_y BEFORE=",cell_center_visual_x,cell_center_visual_y)
     cell_center_visual_x,cell_center_visual_y=300,300
     print("cell_centre_visual_x,cell_center_visual_y AFTER=",cell_center_visual_x,cell_center_visual_y)
+    canvas_fluor_p5.unbind("<MouseWheel>")
 ################################################
 def save_one_edited_cell():
     activate_buttons(all_buttons_page5,[view_slider_p5, button_final_movie])

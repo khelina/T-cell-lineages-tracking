@@ -57,6 +57,33 @@ def update_xs_after_new_cells(xs,new_names,previous_lineage_image, canvas_lineag
        return xs, previous_lineage_image,lin_image_widths
 ###################################
 def create_first_color_dictionary(init_number_of_cells, num_frames): 
+  base_colours = [
+    ([255, 0, 0, 255], "Bright Red"),             # Bright Red
+    ([255, 165, 0, 255], "Bright Orange"),        # Bright Orange
+    ([255, 255, 0, 255], "Bright Yellow"),        # Bright Yellow
+    ([0, 255, 0, 255], "Bright Lime"),            # Bright Lime Green
+    ([0, 255, 255, 255], "Bright Cyan"),          # Bright Cyan
+    ([0, 0, 255, 255], "Bright Blue"),            # Bright Blue
+    ([255, 0, 255, 255], "Bright Magenta"),       # Bright Magenta
+    ([255, 69, 0, 255], "Vivid OrangeRed"),       # Vivid Orange-Red
+    ([173, 255, 47, 255], "Vivid GreenYellow"),   # Vivid GreenYellow
+    ([238, 130, 238, 255], "Vivid Violet")]       # Vivid Violet
+  import string  
+  basic_naive_names=list(string.ascii_lowercase)  
+  #naive_names_counter=init_number_of_cells-1 
+  
+  if init_number_of_cells==1:
+      new_naive_names=["1"]
+      naive_names_counter=0    
+  else:
+      new_naive_names,naive_names_counter= update_naive_names_list(basic_naive_names,init_number_of_cells,0)  
+  #colour_dictionary, colour_counter ={},0
+  colour_dictionary, colour_counter=update_color_dictionary({},new_naive_names,base_colours, 0)
+  xs, init_delta=create_first_dictionary_of_xs(new_naive_names, num_frames)    
+   
+  return colour_dictionary, new_naive_names, base_colours, colour_counter, basic_naive_names, xs, init_delta,naive_names_counter
+###############################
+def create_first_color_dictionary_old(init_number_of_cells, num_frames): 
   base_colours=[[255,0,0,255],#blue 1  
         [0,255,255,255],#yellow 10
         [0,255,127,255],#spring green 11
@@ -248,7 +275,7 @@ def plot_frame(cells,clip_centr,k,kk,fluor_images,fluor_names,out_folders,coords
          patch_with_contours=prepare_contours(output_patch)
          a,b,c,d=cells["cell_%s" % kkk][7],cells["cell_%s" % kkk][8],cells["cell_%s" % kkk][9],cells["cell_%s" % kkk][10]        
          
-         collour=cells["cell_%s" % kkk][15]
+         collour=cells["cell_%s" % kkk][15][0]
          
          xx,yy=cells["cell_%s" % kkk][6][0],cells["cell_%s" % kkk][6][1]
          texxt=cells["cell_%s" % kkk][11]

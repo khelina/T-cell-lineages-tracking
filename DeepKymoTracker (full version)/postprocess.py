@@ -33,7 +33,7 @@ def create_lineage_image_one_frame(cells, previous_lineage_image, xs, frame, fir
    x=xs[cell_name]
    y = item[12]# y=frame_number
    y_internal=y-first_frame_number
-   colour=item[15][:-1]   
+   colour=item[15][0][:-1]   
    if size <=382:# for very short movies (otherwise the lines in current_linage_image will be too thick)    
        point_radius=1      
    points.append(((x,y_internal),colour)) 

@@ -152,7 +152,7 @@ def create_lineage_per_cell(lineage_per_frame,output_dir_p5, frame_size, borders
             #patch_after=base[int(cY)-48+bordersize:int(cY)+48+bordersize,int(cX)-48+bordersize:int(cX)+48+bordersize]
             patch_after=base[int(cY)-patch_size+bordersize:int(cY)+patch_size+bordersize,int(cX)-patch_size+bordersize:int(cX)+patch_size+bordersize]
             patch_color=np.zeros((patch_after.shape[0], patch_after.shape[1],3), np.uint8)           
-            coll=item[key][15][:-1]
+            coll=item[key][15][0][:-1]
             patch_color[patch_after==255]=coll
             ###################### create big frames with current cell only segmented
             big_patch_border=np.zeros((frame_size+2*bordersize, frame_size+2*bordersize), np.uint8)
