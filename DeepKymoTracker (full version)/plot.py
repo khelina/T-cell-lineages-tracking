@@ -58,16 +58,16 @@ def update_xs_after_new_cells(xs,new_names,previous_lineage_image, canvas_lineag
 ###################################
 def create_first_color_dictionary(init_number_of_cells, num_frames): 
   base_colours = [
-    ([255, 0, 0, 255], "Bright Red"),             # Bright Red
-    ([255, 165, 0, 255], "Bright Orange"),        # Bright Orange
-    ([255, 255, 0, 255], "Bright Yellow"),        # Bright Yellow
-    ([0, 255, 0, 255], "Bright Lime"),            # Bright Lime Green
-    ([0, 255, 255, 255], "Bright Cyan"),          # Bright Cyan
-    ([0, 0, 255, 255], "Bright Blue"),            # Bright Blue
-    ([255, 0, 255, 255], "Bright Magenta"),       # Bright Magenta
-    ([255, 69, 0, 255], "Vivid OrangeRed"),       # Vivid Orange-Red
-    ([173, 255, 47, 255], "Vivid GreenYellow"),   # Vivid GreenYellow
-    ([238, 130, 238, 255], "Vivid Violet")]       # Vivid Violet
+    ([255, 0, 255, 255], "magenta"),             # Bright Red
+    ([0, 165, 255, 255], "orange"),        # Bright Orange
+    ([0, 255, 255, 255], "yellow"),        # Bright Yellow
+    ([0, 255, 0, 255], "lime"),            # Bright Lime Green
+    ([255, 255, 0, 255], "cyan"),          # Bright Cyan
+    ([255, 0, 0, 255], "blue"),            # Bright Blue
+    ([0, 0, 255, 255], "red"),       # Bright Magenta
+    ([0, 69, 255, 255], "orange red"),       # Vivid Orange-Red
+    ([47, 255, 173, 255], "green"),   # Vivid GreenYellow
+    ([238, 130, 238, 255], "violet")]       # Vivid Violet
   import string  
   basic_naive_names=list(string.ascii_lowercase)  
   #naive_names_counter=init_number_of_cells-1 

@@ -2681,7 +2681,7 @@ frame3a_page5 = tk.Frame(master=page5, width=window_p5_size, height=30, bg=bg_co
 frame3a_page5.grid(row=3, column=0, rowspan=1, columnspan=1, sticky=W+E+N+S)
 frame3b_page5 = tk.Frame(master=page5, width=window_p5_size, height=30, bg=bg_color)
 frame3b_page5.grid(row=3, column=1, rowspan=1, columnspan=1, sticky=W+E+N+S)
-frame3c_page5 = tk.Frame(master=page5, width=1530-2*window_p5_size, height=30, bg=bg_color)
+frame3c_page5 = tk.Frame(master=page5, width=1530-2*window_p5_size, height=20, bg=bg_color)
 frame3c_page5.grid(row=3, column=2, rowspan=1, columnspan=1, sticky=W+E+N+S)
 ############################################################################
 frame4a_page5 = tk.Frame(master=page5, width=window_p5_size, height=window_p5_size, bg=bg_color)
@@ -2693,32 +2693,39 @@ frame4b_page5.grid(row=4, column=1,rowspan=1,columnspan=1, sticky=W+E+N+S)
 frame4c_page5 = tk.Frame(master=page5,width=1530-2*window_p5_size, bg=bg_color)
 frame4c_page5.grid(row=4,column=2,rowspan=1,columnspan=1, sticky=W+N+S)
 #################################################################
-frame5a_page5 = tk.Frame(master=page5, width=window_p5_size, height=70, bg=bg_color)
+frame5a_page5 = tk.Frame(master=page5, width=window_p5_size, height=15, bg=bg_color)
 frame5a_page5.grid(row=5, column=0, rowspan=1, columnspan=1,sticky=W+E+N+S)
 
-frame5b_page5 = tk.Frame(master=page5, width=window_p5_size, height=70, bg=bg_color)
+frame5b_page5 = tk.Frame(master=page5, width=window_p5_size, height=15, bg=bg_color)
 #location=(row=5, column=1, rowspan=1, columnspan=1,sticky=W+E+N+S]
 frame5b_page5.grid(row=5, column=1, rowspan=1, columnspan=1,sticky=W+E+N+S)
-overlay = tk.Frame(page5, bg=bg_color, bd=0)
-overlay.grid(row=5, column=1, rowspan=1, columnspan=1,sticky=W+E+N+S)
+#overlay = tk.Frame(page5, bg="yellow", bd=0)
+#overlay.grid(row=5, column=1, rowspan=1, columnspan=1,sticky=W+E+N+S)
 
-overlay.lift() 
+#overlay.lift() 
  
-frame5c_page5 = tk.Frame(master=page5, width=window_p5_size, height=70, bg=bg_color)
+frame5c_page5 = tk.Frame(master=page5, width=window_p5_size, height=15, bg=bg_color)
 frame5c_page5.grid(row=5, column=2, rowspan=1, columnspan=1,sticky=W+E+N+S)
-############################################################
+########################################################
+frame_slider_page5 = tk.Frame(master=page5, width=50, height=50, bg=bg_color)
+frame_slider_page5.grid(row=6, column=0, rowspan=1, columnspan=3,sticky=W+E+N+S)
+####################################
+overlay = tk.Frame(page5, bg=bg_color, bd=0)
+overlay.grid(row=6, column=0, rowspan=1, columnspan=3,sticky=W+E+N+S)
+overlay.lift() 
+#####################################
 frame6_page5 = tk.Frame(master=page5, width=50, height=50, bg=bg_color)
-frame6_page5.grid(row=6, column=0, rowspan=1, columnspan=3,sticky=W+E+N+S)
+frame6_page5.grid(row=7, column=0, rowspan=1, columnspan=3,sticky=W+E+N+S)
 
 frame7_page5 = tk.Frame(master=page5, width=50, height=50, bg=bg_color)
-frame7_page5.grid(row=7, column=0, rowspan=1, columnspan=3,sticky=W+E+N+S)
+frame7_page5.grid(row=8, column=0, rowspan=1, columnspan=3,sticky=W+E+N+S)
 ###################################################
 gap_frame_page5 = tk.Frame(master=page5, width=50, height=5, bg=bg_color)
-gap_frame_page5.grid(row=8, column=0, rowspan=1, columnspan=3,sticky=W+E+N+S)
+gap_frame_page5.grid(row=9, column=0, rowspan=1, columnspan=3,sticky=W+E+N+S)
 
 
 frame8_page5 = tk.Frame(master=page5, width=50, height=50, bg=bg_color)
-frame8_page5.grid(row=9, column=0, rowspan=1, columnspan=3,sticky=W+E+N+S)
+frame8_page5.grid(row=10, column=0, rowspan=1, columnspan=3,sticky=W+E+N+S)
 ######### POPULATE WITH LABELS
 l_title = tk.Label(frame1_page5, text="STEP 4: CORRECT SEGMENTATION",
               bg="yellow", fg="red", font=("Times", "24"))
@@ -2754,11 +2761,12 @@ zoom_monitor_label.pack(fill=BOTH)
 pan_monitor_label=tk.Label(frame4c_page5 , text=" ", height=1, bg="black", fg="cyan", font='TkDefaultFont 14 bold' )
 pan_monitor_label.pack(fill=BOTH)
 ###########################################
-cheat_sheet_label=tk.Label(frame4c_page5 , text="CHEAT SHEET ", height=1, bg="green", fg="black", font='TkDefaultFont 14 bold' )
-cheat_sheet_label.pack(fill=BOTH)
-############################
 global cheatsheets
 cheatsheets=[]
+cheat_sheet_label=tk.Label(frame4c_page5 , text=" ", height=1, bg=bg_color, fg="black", font='TkDefaultFont 14 bold' )
+cheat_sheet_label.pack(fill=BOTH)
+cheatsheets.append(cheat_sheet_label)
+############################
 for k in range(8):
         if k==5 or k==7:
             label_height=2
@@ -2777,7 +2785,7 @@ dialog_label_5.grid(row=0, column=0, sticky="w")
 ###################################################
 def disable_frame():
     #location=[row=3, column=1, rowspan=1, columnspan=1, sticky=W+E+N+S]
-    overlay.grid(row=5, column=1, rowspan=1, columnspan=1,sticky=W+E+N+S)
+    overlay.grid(row=6, column=0, rowspan=1, columnspan=3,sticky=W+E+N+S)
     overlay.lift()  # Ensure overlay is on top
 ###################################################
 def enable_frame():
@@ -2785,6 +2793,7 @@ def enable_frame():
 #################################################
 #number_of_slides_p5=[]# for slide_bar flashing
 def slide_frames_p5(value):
+    cell_monitor_label.config(text="No cell chosen yet")
     global save_frame_edits_alert
     print("ALERT =",save_frame_edits_alert )   
     if save_frame_edits_alert ==True:
@@ -2884,14 +2893,14 @@ def activate_fast_edit_mode():#enter fast segmentation mode
    button_activate_fast_edit_mode.configure(background = 'red')
    button_activate_slow_edit_mode.configure(background = button_color)   
    dialog_label_5.config(text="\nIn the right image, right-click on the cell you want to correct.")
-   mode_monitor_label.config(text="Fast mode", fg="cyan")          
+   #mode_monitor_label.config(text="Fast mode", fg="cyan")          
    #canvas_fluor_p5.unbind_all("<Button-1>")
    #canvas_fluor_p5.unbind_all("<Button-1>")   
    #canvas_fluor_p5.bind("<Button-1>", edit_by_clicking)
    mode_variable.set("fast")
    #print("mode_variable=", mode_variable)
   
-   update_cheatsheet(cheatsheets,"fast",bg_color,label_color)
+   #update_cheatsheet(cheatsheets,"fast",bg_color,label_color)
 #########################################################
 ##############################################
 def activate_hand_drawing_mode_for_one_cell():    
@@ -2905,13 +2914,14 @@ def activate_hand_drawing_mode_for_one_cell():
 ###########################################  
 def activate_slow_edit_mode():
     print("SLOW MODE ACTIVATED")
+    
     mode_monitor_label.config(text="Slow mode", fg="red") 
     update_cheatsheet(cheatsheets,"slow",bg_color,label_color)
     mode_variable.set("slow")
     button_activate_slow_edit_mode.configure(background = 'red')
     button_activate_fast_edit_mode.configure(background = button_color)
     dialog_label_5.config(text="Right-click on the cell you want to correct. Its contours should disappear.")
-    #update_flash([button_activate_hand_drawing_mode_for_one_cell])
+    activate_buttons(all_buttons_page5,[button_activate_slow_edit_mode,start_zoom_button])
     ########################## delete contour of the clicked ce;;
     global canvas_fluor_p5,canvas_bright_p5
     canvas_fluor_p5.unbind("<Button-1>")
@@ -2958,7 +2968,7 @@ def right_click_one_cell(event):# extract info about clicked celland take action
     global  internal_frame_number_p5,save_frame_edits_alert
     #############################################
     global all_buttons_page5,button_activate_fast_edit_mode,button_activate_slow_edit_mode,start_zoom_button
-    activate_buttons(all_buttons_page5,[button_activate_fast_edit_mode,button_activate_slow_edit_mode,start_zoom_button])
+    activate_buttons(all_buttons_page5,[button_activate_slow_edit_mode,start_zoom_button])
     ##############################################    
     frame_number=view_slider_p5.get()        
     ###################################################
@@ -2967,13 +2977,10 @@ def right_click_one_cell(event):# extract info about clicked celland take action
        if frame_number!=previous_frame_number:# if you are in a new frame
           if previous_frame_number!=-2:# at least 1 frame is edited already
              print("entered new frame in fast mode")
-                   
-             #save_edits_for_frame()# save ed, i.e. not edited yet
-             #print("SAVED EDITS FOR FRAME")
              
           ################# first of all, get frame info          
           else:# if this is the very 1st frame
-              print("entered the very first frame, fast mode")
+              print("entered the very first frame, fast mode") 
          
           print("INSIDE RIGHT CLICK:save_frame_edits_alert=",save_frame_edits_alert)   
           previous_cell_number=-2# if you are in a new frame
@@ -2998,15 +3005,22 @@ def right_click_one_cell(event):# extract info about clicked celland take action
        if cell_number_in_mask==0:           
            cell_number_in_frame=-1
        else:
-           cell_number_in_frame=int(math.log(round(cell_number_in_mask),2))      
+           cell_number_in_frame =int(math.log(round(cell_number_in_mask),2))
+           global cell_name_to_screen, cell_color_to_screen
+           cell_color_to_screen=cells_in_current_frame_sorted[cell_number_in_frame][1][1]
+           cell_name_to_screen=cells_in_current_frame_sorted[cell_number_in_frame][0]
+           
        ###################################################
-       #print("cell_number_in_mask, cell_number_in_frame", cell_number_in_mask, cell_number_in_frame)
-    ##### Now, check cell number"  
+       
     ##################################################    
        if cell_number_in_frame!=-1:# if you hit a cell body, not background (accidentally)
           if cell_number_in_frame!=previous_cell_number:# you clicked on a new cell, same frame, fast mode
                      print("clicked on new cell, farme doesnt matter,fast mode")
-                     cell_monitor_label.config(text="You clicked on new cell")
+                     #cell_color=cells_in_current_frame_sorted[cell_number_in_frame][1][1]
+                     #cell_name=cells_in_current_frame_sorted[cell_number_in_frame][1][0]
+                     cell_monitor_label.config(text="Edit Cell "+ str(cell_name_to_screen)+" ( "+cell_color_to_screen+" )", fg="cyan")
+                     mode_monitor_label.config(text="Fast mode", fg="cyan")
+                     update_cheatsheet(cheatsheets,"fast",bg_color,label_color)
                      #global zoom_counter
                      #zoom_counter=0
                      disable_frame()
@@ -3047,19 +3061,21 @@ def right_click_one_cell(event):# extract info about clicked celland take action
                      #previous_cell_number=cell_number
           else:# if you hit cell with the same number             
                     print("I hit the cell with the same numvber to save edits")
-                    cell_monitor_label.config(text="Saved cell")
+                    update_cheatsheet(cheatsheets,"neutral",bg_color,label_color)
                     save_one_edited_cell()
                     save_frame_edits_alert=True 
                     enable_frame()
                     canvas_fluor_p5.unbind("<Button-1>")
+                    mode_monitor_label.config(text=" ")
+                    #cell_monitor_label.config(text="Saved Cell "+ cell_name+" ( "+cell_color_to_screen+" )", fg="cyan")
                     if zoom_counter!=0:
                          zoom_counter=0
-                         zoom_monitor_label.config(text="Zoom disabled", fg="cyan")
+                         zoom_monitor_label.config(text=" ")
           previous_cell_number=cell_number_in_frame          
        else:# you hit background accidentally, i.e. cell_number=-1
               print("clicked on  background, fast mode")         
               print("do nothing")
-              cell_monitor_label.config(text="You clicked on background")
+              cell_monitor_label.config(text="You clicked on background", fg="red")
       
     ######################################
     if mode=="slow":# the slow editing (by hand-drawing)     
@@ -3099,12 +3115,15 @@ def right_click_one_cell(event):# extract info about clicked celland take action
          print("CELL_NUMBER_IN_MASK=", cell_number_in_mask)
          if cell_number_in_mask==0:# if you clicked on background
              erase_line()
-             cell_monitor_label.config(text="You deleted contour")
+             mode_monitor_label.config(text="You deleted contour", fg="cyan")
          else:
              cell_number_in_frame=int(math.log(round(cell_number_in_mask),2))          
          ##################################                                
              if cell_number_in_frame!= previous_cell_number:# you clicked on a new cell
-                     cell_monitor_label.config(text="You clicked on new cell")
+                     #cell_monitor_label.config(text="You clicked on new cell")
+                     #cell_monitor_label.config(text="Cell "+ str(cell_name)+" ( "+cell_color_to_screen+" )", fg="cyan")
+                     #mode_monitor_label.config(text="Slow mode", fg="red")
+                     #update_cheatsheet(cheatsheets,"slow",bg_color,label_color)
                      #global zoom_counter
                      #zoom_counter=0
                      disable_frame()
@@ -3139,7 +3158,8 @@ def right_click_one_cell(event):# extract info about clicked celland take action
                      ##############################################                    
              else:# you clicked on the same cell,slow mode
                      print("clicked on  same cell to save it")
-                     cell_monitor_label.config(text="Saved cell")
+                     mode_monitor_label.config(text=" ")
+                     update_cheatsheet(cheatsheets,"neutral",bg_color,label_color)
                      save_one_edited_cell()
                      activate_fast_edit_mode()
                      enable_frame()
@@ -3150,7 +3170,7 @@ def right_click_one_cell(event):# extract info about clicked celland take action
                      canvas_fluor_p5.unbind("token<ButtonRelease-1>")
                      if zoom_counter!=0:
                          zoom_counter=0
-                         zoom_monitor_label.config(text="Zoom disabled", fg="cyan")
+                         zoom_monitor_label.config(text=" ")
                      #canvas_fluor_p5.bind("<Button-1>", edit_by_clicking)                                                                 
          previous_cell_number=cell_number_in_frame        
 ################################################
@@ -3159,12 +3179,13 @@ def get_x_and_y(event):
     lasx,lasy=event.x,event.y         
 #########################################   
 def draw_with_mouse(event):
+    mode_monitor_label.config(text="Hand drawing...", fg="red")
     global coeff
     global lasx,lasy, line_fl, line_br 
     xx,yy=event.x,event.y
-    line_fl=canvas_fluor_p5.create_line((lasx,lasy,xx,yy), fill="red", width=5)
-    get_x_and_y(event)
+    line_fl=canvas_fluor_p5.create_line((lasx,lasy,xx,yy), fill="red", width=5)   
     line_br=canvas_bright_p5.create_line((lasx,lasy,xx,yy), fill="red", width=5)
+    get_x_and_y(event)
     cell_contour_fl.append(line_fl)
     cell_contour_br.append(line_br)   
     #lasx,lasy=event.x,event.y
@@ -3232,7 +3253,7 @@ def start_pan():
     activate_buttons(all_buttons_page5,[stop_pan_button])
 #######################################
 def stop_pan():
-    pan_monitor_label.config(text="Pan disabled", fg="cyan")
+    pan_monitor_label.config(text=" ")
     canvas_fluor_p5.unbind("<Button-1>")
     canvas_fluor_p5.unbind("token<ButtonRelease-1>")
     canvas_fluor_p5.unbind("<B1-Motion>")
@@ -3293,6 +3314,32 @@ def drag(event):
         oval=canvas_fluor_p5.create_oval(oval_x-5*factor, oval_y-5*factor, oval_x+5*factor,
                        oval_y+5*factor, outline="magenta", width=1)
 ##################################
+def apply_zoom(factor_A, factor_out):
+    my_image_fl_resized=filled_fluor_copy.copy()
+    my_image_fl_resized= cv2.resize(my_image_fl_resized,(window_p5_size,window_p5_size), cv2.INTER_LINEAR)      
+    my_image_fl_resized = cv2.resize(my_image_fl_resized,(int(my_image_fl_resized.shape[0] * factor_B ), int(my_image_fl_resized.shape[1] * factor_B)), cv2.INTER_LINEAR)      
+              
+    my_image_br_resized=filled_bright_copy.copy()
+    my_image_br_resized= cv2.resize(my_image_br_resized,(window_p5_size,window_p5_size), cv2.INTER_LINEAR)
+    my_image_br_resized = cv2.resize(my_image_br_resized,(int(my_image_br_resized.shape[0] * factor_B ), int(my_image_br_resized.shape[1] * factor_B)), cv2.INTER_LINEAR)   
+    new_shape=my_image_fl_resized.shape[0]
+   
+    x0_new_B, y0_new_B=oval_x_init*factor_B,oval_y_init*factor_B
+    photo_fluor =  turn_image_into_tkinter(my_image_fl_resized,new_shape,[])
+    photo_bright =  turn_image_into_tkinter(my_image_br_resized,new_shape,[])            
+    image_origin_x, image_origin_y= cell_center_visual_x-x0_new_B, cell_center_visual_y-y0_new_B
+    canvas_fluor_p5.delete("all")
+    canvas_bright_p5.delete("all")
+    image_object=canvas_fluor_p5.create_image(image_origin_x, image_origin_y, anchor="nw", image=photo_fluor)
+    canvas_bright_p5.create_image(image_origin_x,image_origin_y, anchor="nw", image=photo_bright)
+    resize_coeff=new_shape/frame_p5_size
+    zoom_coeff=new_shape/window_p5_size
+    oval_x, oval_y= cell_center_visual_x, cell_center_visual_y
+         
+    factor=factor_out
+    oval=canvas_fluor_p5.create_oval(oval_x-5*factor_B, oval_y-5*factor_B, oval_x+5*factor_B,
+                       oval_y+5*factor_B, outline="magenta", width=1)
+################################
 def wheel(event):
         ''' Zoom with mouse wheel '''
         global zoom_counter
@@ -3306,7 +3353,7 @@ def wheel(event):
         if  event.delta == -120:  # scroll down
           factor_out*=0.8
           factor_in*=0.8
-                  
+          ####################################        
           my_image_fl_resized=filled_fluor_copy.copy()
           my_image_fl_resized= cv2.resize(my_image_fl_resized,(window_p5_size,window_p5_size), cv2.INTER_LINEAR)      
           my_image_fl_resized = cv2.resize(my_image_fl_resized,(int(my_image_fl_resized.shape[0] * factor_out ), int(my_image_fl_resized.shape[1] * factor_out)), cv2.INTER_LINEAR)      
@@ -3317,7 +3364,6 @@ def wheel(event):
           new_shape=my_image_fl_resized.shape[0]
    
           #############################################################         
-        
           x0_new_out, y0_new_out=oval_x_init*factor_out,oval_y_init*factor_out
           photo_fluor =  turn_image_into_tkinter(my_image_fl_resized,new_shape,[])
           photo_bright =  turn_image_into_tkinter(my_image_br_resized,new_shape,[])            
@@ -3333,10 +3379,11 @@ def wheel(event):
           factor=factor_out
           oval=canvas_fluor_p5.create_oval(oval_x-5*factor_out, oval_y-5*factor_out, oval_x+5*factor_out,
                        oval_y+5*factor_out, outline="magenta", width=1)
+          #####################################################
         if   event.delta == 120:  # scroll up
           factor_in*=1.2
           factor_out*=1.2
-              
+          ##############################################    
           my_image_fl_resized=filled_fluor_copy.copy()
           my_image_fl_resized= cv2.resize(my_image_fl_resized,(window_p5_size,window_p5_size), cv2.INTER_LINEAR)      
           my_image_fl_resized = cv2.resize(my_image_fl_resized,(int(my_image_fl_resized.shape[0] * factor_out ), int(my_image_fl_resized.shape[1] * factor_out)), cv2.INTER_LINEAR)      
@@ -3358,8 +3405,7 @@ def wheel(event):
           canvas_bright_p5.create_image(image_origin_x,image_origin_y, anchor="nw", image=photo_bright)
           zoom_coeff=new_shape/window_p5_size
           resize_coeff=new_shape/frame_p5_size
-          #oval_x, oval_y=300-oval_x*factor_out,300-oval_y*factor_out 
-          #new_oval_x,new_oval_y= x0*factor_in+image_origin_x,y0*factor_in+image_origin_y
+          
           oval_x,oval_y= cell_center_visual_x, cell_center_visual_y
           oval=canvas_fluor_p5.create_oval(oval_x-5*factor_in, oval_y-5*factor_in, oval_x+5*factor_in,
                        oval_y+5*factor_in, outline="magenta", width=1)        
@@ -3415,6 +3461,8 @@ def stop_zoom():
 ################################################
 def save_one_edited_cell():
     activate_buttons(all_buttons_page5,[view_slider_p5, button_final_movie])
+    #cell_monitor_label.config(text="Saved cell", fg="cyan")
+    cell_monitor_label.config(text="Saved Cell  "+ str(cell_name_to_screen)+" ( "+cell_color_to_screen+" )", fg="cyan")
     #button_activate_hand_drawing_mode_for_one_cell.configure(background = button_color)
     #update_flash([view_slider_p5])
     button_activate_slow_edit_mode.configure(background = button_color) 
@@ -3494,6 +3542,7 @@ def save_one_edited_cell():
           stop_zoom()                    
 #################################################
 def edit_by_clicking(event):
+      mode_monitor_label.config(text="Editing by clicking...", fg="red")
       number_of_clicks=[]# this is for flashing only
       #global segmentor, refiner     
       global manually_clicked_centroid, final_mask, a,b,c,d 
@@ -3641,6 +3690,7 @@ def save_edits_for_frame(): #saves all eduts in current frame and modifies linag
 def create_final_movie():# create final movie + pedigree_per_cell (simplified, i.e. only centroids and areas)
   #update_cheatsheet(cheatsheets,"neutral",bg_color,label_color)
   dialog_label_5.config(text="Creating lineage and final movie...")
+  cell_monitor_label.config(text="Creating excel files...", fg="red")
   global output_dir_p5,frame_p5_size,save_frame_edits_alert 
   print("output_dir_p5=", output_dir_p5) 
   if save_frame_edits_alert==True:
@@ -3658,6 +3708,7 @@ def create_final_movie():# create final movie + pedigree_per_cell (simplified, i
   create_output_movie(output_dir_p5, frame_p5_size)       
   dialog_label_5.config(text="Lineage per cell is stored in  " +str(os.path.join(helper_dir_p5,"lineage_per_cell.pkl"))+
                           "\nFinal movie is in  " + str(os.path.join(output_dir_p5,"lineage_movie.avi")))
+  cell_monitor_label.config(text="Excel files created", fg="cyan")
 ############### POPUPLATE WUTH BUTTONS
 global button_load_p5,button_activate_fast_edit_mode, button_activate_slow_edit_mode,\
                    start_zoom_button, start_pan_button,stop_pan_button,\
@@ -3689,8 +3740,8 @@ button_final_movie = Button(frame4c_page5, text="4. Create final movie\n and \nE
 button_final_movie.pack(side=tk.BOTTOM, padx=100)    
 ##################################
 global view_slider_p5
-view_slider_p5 = Scale(frame5b_page5, from_=1, to=1,orient=HORIZONTAL, troughcolor="green", command=slide_frames_p5, length=window_p5_size)      
-view_slider_p5.pack()    
+view_slider_p5 = Scale(frame_slider_page5, from_=1, to=1,orient=HORIZONTAL, troughcolor="green", command=slide_frames_p5, length=window_p5_size)      
+view_slider_p5.pack(pady=10)    
 ############################################
 global all_buttons_page5
 #label_edit = tk.Label(frame3_page4, text=" ", font='TkDefaultFont 10 bold',  bg="black", fg="yellow", width=50, height=4)

@@ -192,22 +192,23 @@ def update_frame_dictionary_after_manual_segm_correction(mask, filled_fluor,fill
 ###########################################
 def update_cheatsheet(cheatsheets,mode,bg_color,label_color):
     if mode=="neutral":
-        for k in range(8):
+        for k in range(9):
             cheatsheets[k].config(text=" ", bg=bg_color)
     else:
-        cheatsheets[0].config(text="Choose cell:",bg=label_color, fg="black")
-        cheatsheets[1].config(text="Right-click",bg=label_color, fg="red")
-        cheatsheets[2].config(text="CREATE contour:",bg=label_color, fg="black")
+        cheatsheets[0].config(text="CHEAT SHEET",bg="green", fg="black")
+        cheatsheets[1].config(text="Choose cell:",bg=label_color, fg="black")
+        cheatsheets[2].config(text="Right-click",bg=label_color, fg="red")
+        cheatsheets[3].config(text="CREATE contour:",bg=label_color, fg="black")
        
-        cheatsheets[4].config(text="SAVE contour:",bg=label_color, fg="black")
-        cheatsheets[5].config(text="Right-click\ninside magenta circle",bg=label_color, fg="red")
-        cheatsheets[6].config(text="DELETE contour:",bg=label_color, fg="black")
-        cheatsheets[7].config(text="Right-click\nanywhere on background",bg=label_color, fg="red")
+        cheatsheets[5].config(text="SAVE contour:",bg=label_color, fg="black")
+        cheatsheets[6].config(text="Right-click\ninside magenta circle",bg=label_color, fg="red")
+        cheatsheets[7].config(text="DELETE contour:",bg=label_color, fg="black")
+        cheatsheets[8].config(text="Right-click\nanywhere on background",bg=label_color, fg="red")
         if mode=="fast":
-            cheatsheets[3].config(text="Left-click",bg=label_color, fg="red")
-            cheatsheets[6].config(text=" ",bg=bg_color, fg="black")
+            cheatsheets[4].config(text="Left-click",bg=label_color, fg="red")
             cheatsheets[7].config(text=" ",bg=bg_color, fg="black")
+            cheatsheets[8].config(text=" ",bg=bg_color, fg="black")
         else:
-            cheatsheets[3].config(text="Draw with mouse",bg=label_color, fg="red")
-            cheatsheets[6].config(text="DELETE contour:",bg=label_color, fg="black")
-            cheatsheets[7].config(text="Right-click\nanywhere on background",bg=label_color, fg="red")
+            cheatsheets[4].config(text="Draw with mouse",bg=label_color, fg="red")
+            cheatsheets[7].config(text="DELETE contour:",bg=label_color, fg="black")
+            cheatsheets[8].config(text="Right-click\nanywhere on background",bg=label_color, fg="red")
