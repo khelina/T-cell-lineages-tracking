@@ -2174,8 +2174,7 @@ def execute():
                 print("division occured in frame ", first_number_in_clip+kk)              
                 dict_of_divisions[existing_cell_names[-1][:-1]] = first_number_in_clip+kk
                 break 
-            
-       
+                   
         print("BROKE OUT OF BIG LOOP")
         if variable_stop=="Stop":
             #first_number_in_clip = first_number_in_clip+kk
@@ -2206,8 +2205,7 @@ def execute():
  button_execute.configure(background = button_color)
  button_pause.configure(background = button_color)
  update_flash([button_display])
- activate_buttons(all_buttons_page4,[button_display])
- 
+ activate_buttons(all_buttons_page4,[button_display]) 
 ###############################################
 def stop_execution_manually():
     print("STOPPED MANUALLY!!!!")
@@ -2697,23 +2695,24 @@ frame5a_page5 = tk.Frame(master=page5, width=window_p5_size, height=15, bg=bg_co
 frame5a_page5.grid(row=5, column=0, rowspan=1, columnspan=1,sticky=W+E+N+S)
 
 frame5b_page5 = tk.Frame(master=page5, width=window_p5_size, height=15, bg=bg_color)
-#location=(row=5, column=1, rowspan=1, columnspan=1,sticky=W+E+N+S]
 frame5b_page5.grid(row=5, column=1, rowspan=1, columnspan=1,sticky=W+E+N+S)
-#overlay = tk.Frame(page5, bg="yellow", bd=0)
-#overlay.grid(row=5, column=1, rowspan=1, columnspan=1,sticky=W+E+N+S)
-
-#overlay.lift() 
  
 frame5c_page5 = tk.Frame(master=page5, width=window_p5_size, height=15, bg=bg_color)
 frame5c_page5.grid(row=5, column=2, rowspan=1, columnspan=1,sticky=W+E+N+S)
+#########################################
+frame_radio_page5 = tk.Frame(master=page5, width=50, height=50, bg=bg_color)
+frame_radio_page5.grid(row=6, column=0, rowspan=1, columnspan=1,sticky=W+E+N+S)
 ########################################################
 frame_slider_page5 = tk.Frame(master=page5, width=50, height=50, bg=bg_color)
-frame_slider_page5.grid(row=6, column=0, rowspan=1, columnspan=3,sticky=W+E+N+S)
+frame_slider_page5.grid(row=6, column=1, rowspan=1, columnspan=1,sticky=W+E+N+S)
 ####################################
 overlay = tk.Frame(page5, bg=bg_color, bd=0)
-overlay.grid(row=6, column=0, rowspan=1, columnspan=3,sticky=W+E+N+S)
+overlay.grid(row=6, column=1, rowspan=1, columnspan=1,sticky=W+E+N+S)
 overlay.lift() 
 #####################################
+frame_excel_page5 = tk.Frame(master=page5, width=50, height=50, bg=bg_color)
+frame_excel_page5.grid(row=6, column=2, rowspan=1, columnspan=1,sticky=W+E+N+S)
+##############################
 frame6_page5 = tk.Frame(master=page5, width=50, height=50, bg=bg_color)
 frame6_page5.grid(row=7, column=0, rowspan=1, columnspan=3,sticky=W+E+N+S)
 
@@ -2729,7 +2728,6 @@ frame8_page5.grid(row=10, column=0, rowspan=1, columnspan=3,sticky=W+E+N+S)
 ######### POPULATE WITH LABELS
 l_title = tk.Label(frame1_page5, text="STEP 4: CORRECT SEGMENTATION",
               bg="yellow", fg="red", font=("Times", "24"))
-#l_title.grid(row=0, column=3, padx=500, sticky="n")
 l_title.pack()
 
 feedback_label_5 = tk.Label(frame2_page5, text="Movie:      \nFluorescent frames:    Bright frames:       Red frames:       \nFrame size:       Cell diameter: ",
@@ -2783,26 +2781,37 @@ dialog_label_5 = tk.Label(frame7_page5, text="Step-4 allows you to manually corr
                           fg="yellow",bg="black", font='TkDefaultFont 10 bold', width=200,height=2)
 dialog_label_5.grid(row=0, column=0, sticky="w")
 ###################################################
-def disable_frame():
-    #location=[row=3, column=1, rowspan=1, columnspan=1, sticky=W+E+N+S]
+def disable_frame():#overlay slidebar to prevent from touching accidentally   
     overlay.grid(row=6, column=0, rowspan=1, columnspan=3,sticky=W+E+N+S)
     overlay.lift()  # Ensure overlay is on top
 ###################################################
 def enable_frame():
     overlay.grid_forget()
 #################################################
-#number_of_slides_p5=[]# for slide_bar flashing
 def slide_frames_p5(value):
     cell_monitor_label.config(text="No cell chosen yet")
     global save_frame_edits_alert
-    print("ALERT =",save_frame_edits_alert )   
+       
     if save_frame_edits_alert ==True:
           save_edits_for_frame()       
     image_number = int(value)    
-    internal_frame_number_for_slider=image_number-first_frame_number_p5    
-    label_fluor_name.config(text=os.path.basename(path_filled_fluors[internal_frame_number_for_slider]))     
-    label_bright_name.config(text=os.path.basename(path_filled_brights[internal_frame_number_for_slider])) 
-    show_2_canvases(canvas_bright_p5,canvas_fluor_p5,photo_filled_brights,photo_filled_fluors,internal_frame_number_for_slider, window_p5_size) 
+    internal_frame_number_for_slider=image_number-first_frame_number_p5
+    ###########################################
+    activated_channel=active_channel_var.get()
+    if activated_channel=="fluor":
+        activated_names=path_filled_fluors
+        disabled_names=path_filled_brights
+        activated_photos=photo_filled_fluors
+        disabled_photos=photo_filled_brights
+    else:
+        activated_names=path_filled_brights
+        disabled_names=path_filled_fluors
+        activated_photos=photo_filled_brights
+        disabled_photos=photo_filled_fluors
+        
+    label_fluor_name.config(text=os.path.basename(activated_names[internal_frame_number_for_slider]))     
+    label_bright_name.config(text=os.path.basename(disabled_names[internal_frame_number_for_slider])) 
+    show_2_canvases(canvas_bright_p5,canvas_fluor_p5,disabled_photos,activated_photos,internal_frame_number_for_slider, window_p5_size) 
 ############################# load all mecessary images
 def choose_and_load_tracked_movie():
     global edits_indicator
@@ -2843,6 +2852,9 @@ def choose_and_load_tracked_movie():
     new_shape=window_p5_size
     cell_center_visual_x,cell_center_visual_y=300,300
     ############################
+    #global active_channel_var
+    #active_channel_var=StringVar()
+    #active_channel_var.set("fluor")
     print("frame_p5_size=",frame_p5_size)
     feedback_label_5.configure(text="Movie : "+input_dir_p5+"\nFluorescent frames: "+str(num_frames)+\
                                "   Bright frames: "+str(len(filled_brights))+"   Red frames:"+str(len(filled_reds))+\
@@ -2863,8 +2875,7 @@ def choose_and_load_tracked_movie():
     save_frame_edits_alert=False   
     view_slider_p5.configure(from_=first_frame_number_p5,to=first_frame_number_p5+len(masks)-1)
     ################################################
-    button_load_p5.configure(background = button_color)
-    #update_flash([view_slider_p5])
+    button_load_p5.configure(background = button_color)  
     activate_buttons(all_buttons_page5,[view_slider_p5, button_final_movie])
     ######################### new addtion for click_one_cell
     global mode_variable,zoom_status# used in radio buttons for editing,indicates which canvas is used for IDs extraction, value = "Current" or "Previous"
@@ -2885,24 +2896,15 @@ def choose_and_load_tracked_movie():
     points=[]
     enable_frame()
     global zoom_counter
-    zoom_counter=0
-                              
+    zoom_counter=0                              
 ########################################
 def activate_fast_edit_mode():#enter fast segmentation mode
    print("FAST MODE ACTIVATED")
    button_activate_fast_edit_mode.configure(background = 'red')
    button_activate_slow_edit_mode.configure(background = button_color)   
-   dialog_label_5.config(text="\nIn the right image, right-click on the cell you want to correct.")
-   #mode_monitor_label.config(text="Fast mode", fg="cyan")          
-   #canvas_fluor_p5.unbind_all("<Button-1>")
-   #canvas_fluor_p5.unbind_all("<Button-1>")   
-   #canvas_fluor_p5.bind("<Button-1>", edit_by_clicking)
-   mode_variable.set("fast")
-   #print("mode_variable=", mode_variable)
-  
-   #update_cheatsheet(cheatsheets,"fast",bg_color,label_color)
+   dialog_label_5.config(text="\nIn the right image, right-click on the cell you want to correct.")   
+   mode_variable.set("fast")   
 #########################################################
-##############################################
 def activate_hand_drawing_mode_for_one_cell():    
     dialog_label_5.config(text="Draw the contour of the cell with the left mouse. Warning:  Be careful not to draw on neughbouring close cells!\n If you want to undo right-click the mouse anywhere in the image.\nOnce you are finished, push Button 4b.")    
     
@@ -2931,16 +2933,12 @@ def activate_slow_edit_mode():
     canvas_fluor_p5.bind("<B1-Motion>", drag)
     canvas_fluor_p5.unbind("<MouseWheel>")
     
-    canvas_fluor_p5.bind("<Button-1>", get_x_and_y)    
-    #canvas_fluor_p5.bind("<B1-Motion>",draw_with_mouse, add="+")
+    canvas_fluor_p5.bind("<Button-1>", get_x_and_y)      
     canvas_fluor_p5.bind("<B1-Motion>",draw_with_mouse)             
     activate_hand_drawing_mode_for_one_cell()       
-    ################################
-    # delete contour of the hit cell
+    ################################  
     global   filled_fluor, filled_bright, filled_red, empty_fluor, empty_bright, empty_red, cell_color, photo_fluor,photo_bright, filled_fluor_copy, filled_bright_copy
     global final_mask,cell_number_in_frame,intensity_dictionary_for_frame
-    print("cell-color=", cell_color)
-    print("cell_number inside activate slow mode=", cell_number_in_frame)
     
     filled_fluor_copy=delete_contour_with_specific_colour(filled_fluor, empty_fluor,cell_color)
     filled_bright_copy=delete_contour_with_specific_colour(filled_bright, empty_bright,cell_color)
@@ -2951,8 +2949,7 @@ def activate_slow_edit_mode():
     filled_red=delete_contour_with_specific_colour(filled_red, empty_red,cell_color)
     
     final_mask=remove_cell_from_mask(cell_number_in_frame, final_mask, intensity_dictionary_for_frame)
-    # display frames with erased cell    
-    cv2.imwrite("C:\\Users\\helina\\Desktop\\filled_fluor.tif", filled_fluor)  
+    # display frames with erased cell     
     canvas_bright_p5,canvas_fluor_p5,photo_fluor, photo_bright=display_both_channels(filled_fluor_copy,filled_bright_copy,canvas_fluor_p5,canvas_bright_p5,new_shape,image_origin_x,image_origin_y)
     global oval_x,oval_y, factor# create magenta oval on clicked cell
     oval=canvas_fluor_p5.create_oval(oval_x-5*factor, oval_y-5*factor, oval_x+5*factor,
@@ -2971,37 +2968,24 @@ def right_click_one_cell(event):# extract info about clicked celland take action
     activate_buttons(all_buttons_page5,[button_activate_slow_edit_mode,start_zoom_button])
     ##############################################    
     frame_number=view_slider_p5.get()        
-    ###################################################
-    #print("mode=", mode)    
+    ###################################################      
     if mode=="fast":# the fast editing (by clicking)   
        if frame_number!=previous_frame_number:# if you are in a new frame
           if previous_frame_number!=-2:# at least 1 frame is edited already
-             print("entered new frame in fast mode")
-             
+             print("entered new frame in fast mode")             
           ################# first of all, get frame info          
           else:# if this is the very 1st frame
-              print("entered the very first frame, fast mode") 
-         
-          print("INSIDE RIGHT CLICK:save_frame_edits_alert=",save_frame_edits_alert)   
+              print("entered the very first frame, fast mode")                  
           previous_cell_number=-2# if you are in a new frame
-          previous_frame_number=frame_number# if you are in a new frame
-          #internal_frame_number=frame_number-first_frame_number_p5
-          #internal_frame_number=frame_number-1
-          internal_frame_number_p5=frame_number-first_frame_number_p5
-          #print("internal_frame_number_p5 INSIDE RIGHT_CLICK=",internal_frame_number_p5)    
+          previous_frame_number=frame_number# if you are in a new frame         
+          internal_frame_number_p5=frame_number-first_frame_number_p5        
           get_frame_info(internal_frame_number_p5)
        else:# if it is still the same frame
-            print(" I am in the same frame, fast mode")
-           
+            print(" I am in the same frame, fast mode")           
     ##########################################      
-       clicked_cell_position_marker=[int(round((event.x-image_origin_x)/resize_coeff)),int(round((event.y-image_origin_y)/resize_coeff))]# position marker in image of original size!!!
-       #print("clicked_cell_position_marker=",clicked_cell_position_marker)
-       #print("internal_frame_number NO ZOOM =", internal_frame_number_p5)
-       mask=masks[internal_frame_number_p5]
-       #cell_number=mask[clicked_cell_position_marker[1],clicked_cell_position_marker[0]]-1
-       ##################################################
-       cell_number_in_mask=mask[clicked_cell_position_marker[1],clicked_cell_position_marker[0]]
-       print("CELL_NUMBER_IN_MASK=", cell_number_in_mask)
+       clicked_cell_position_marker=[int(round((event.x-image_origin_x)/resize_coeff)),int(round((event.y-image_origin_y)/resize_coeff))]# position marker in image of original size!!!       
+       mask=masks[internal_frame_number_p5]       
+       cell_number_in_mask=mask[clicked_cell_position_marker[1],clicked_cell_position_marker[0]]    
        if cell_number_in_mask==0:           
            cell_number_in_frame=-1
        else:
@@ -3009,46 +2993,29 @@ def right_click_one_cell(event):# extract info about clicked celland take action
            global cell_name_to_screen, cell_color_to_screen
            cell_color_to_screen=cells_in_current_frame_sorted[cell_number_in_frame][1][1]
            cell_name_to_screen=cells_in_current_frame_sorted[cell_number_in_frame][0]
-           
-       ###################################################
-       
     ##################################################    
        if cell_number_in_frame!=-1:# if you hit a cell body, not background (accidentally)
           if cell_number_in_frame!=previous_cell_number:# you clicked on a new cell, same frame, fast mode
-                     print("clicked on new cell, farme doesnt matter,fast mode")
-                     #cell_color=cells_in_current_frame_sorted[cell_number_in_frame][1][1]
-                     #cell_name=cells_in_current_frame_sorted[cell_number_in_frame][1][0]
+                     print("clicked on new cell, farme doesnt matter,fast mode")                
                      cell_monitor_label.config(text="Edit Cell "+ str(cell_name_to_screen)+" ( "+cell_color_to_screen+" )", fg="cyan")
                      mode_monitor_label.config(text="Fast mode", fg="cyan")
-                     update_cheatsheet(cheatsheets,"fast",bg_color,label_color)
-                     #global zoom_counter
-                     #zoom_counter=0
+                     update_cheatsheet(cheatsheets,"fast",bg_color,label_color)           
                      disable_frame()
-                     canvas_fluor_p5.bind("<Button-1>", edit_by_clicking)                                            
-                     #saving previous cell
-                     canvas_fluor_p5.delete(oval)# delete magenta oval on previous cell
-                     #print("cells_in_current_frame_sorted=",cells_in_current_frame_sorted)
+                     canvas_fluor_p5.bind("<Button-1>", edit_by_clicking)                                                              
+                     canvas_fluor_p5.delete(oval)# delete magenta oval on previous cell            
                      cell_color=cells_in_current_frame_sorted[cell_number_in_frame][1][0]
                      cell_ID=cells_in_current_frame_sorted[cell_number_in_frame][0]
-                     ########################################
-                     #global init_x,init_y# create magenta oval on clicked cell
+                     ########################################                   
                      oval_x_init,oval_y_init=event.x,event.y# coordinates in window
                      oval_x,oval_y=oval_x_init,oval_y_init
-                     #oval_x,oval_y =clicked_cell_position_marker[0],clicked_cell_position_marker[1]
-                     #print("oval_x-init, oval_y_init=",oval_x, oval_y)
-                     #oval=canvas_fluor_p5.create_oval(oval_x-5, oval_y-5, oval_x+5,
-                          #oval_y+5, outline="magenta",  width=1)
-                     global red_color,filled_fluor_copy,filled_bright_copy,filled_red_copy
-                     #global red_color
+                     
+                     global red_color,filled_fluor_copy,filled_bright_copy,filled_red_copy                  
                      red_color= [0,0,255,255]
                      filled_fluor_copy,filled_bright_copy,filled_red_copy=filled_fluor.copy(),filled_bright.copy(),filled_red.copy()                    
                      filled_fluor_copy=make_contour_red(filled_fluor_copy, empty_fluor,cell_color)
                      filled_bright_copy=make_contour_red(filled_bright_copy, empty_bright,cell_color)
                      filled_red_copy=make_contour_red(filled_red_copy, empty_red,cell_color)
-                     
-                     #global 
-                     #final_mask=remove_cell_from_mask(cell_number_in_frame, final_mask, intensity_dictionary_for_frame)
-                     #### display  current frame with modified cell    
+                          
                      global photo_fluor, photo_bright
                      canvas_bright_p5.delete("all")
                      canvas_fluor_p5.delete("all")
@@ -3188,11 +3155,9 @@ def draw_with_mouse(event):
     get_x_and_y(event)
     cell_contour_fl.append(line_fl)
     cell_contour_br.append(line_br)   
-    #lasx,lasy=event.x,event.y
-    #points.append([[int(round(lasx/window_p5_size*frame_p5_size)),int(round(lasy/window_p5_size*frame_p5_size))]])
+   
     points.append([[int(round(lasx/zoom_coeff-image_origin_x)),int(round(lasy/zoom_coeff-image_origin_y))]])
-    points_for_original.append([[int(round((lasx-image_origin_x)/resize_coeff)),int(round((lasy-image_origin_y)/resize_coeff))]])
-    #clicked_cell_position_marker=[int(round((event.x-image_origin_x)/resize_coeff)),int(round((event.y-image_origin_y)/resize_coeff))]
+    points_for_original.append([[int(round((lasx-image_origin_x)/resize_coeff)),int(round((lasy-image_origin_y)/resize_coeff))]])  
 ###################################   
 def erase_line():# in case you are not happy with your hand contour and want to delete it
     global cell_contour_fl, cell_contour_br, points,mask_hand, final_mask, points_for_original
@@ -3210,13 +3175,11 @@ def erase_line():# in case you are not happy with your hand contour and want to 
 def start_zoom():
     zoom_status.set("on")
     zoom_monitor_label.config(text="Zoom activated", fg="red")
-    activate_buttons(all_buttons_page5,[button_activate_fast_edit_mode,button_activate_slow_edit_mode])
-    #button_activate_fast_edit_mode.configure(background =button_color)
+    activate_buttons(all_buttons_page5,[button_activate_fast_edit_mode,button_activate_slow_edit_mode])   
     global my_image_fl, my_image_br, points, canvas_fluor_p5, canvas_bright_p5,photo_fluor, photo_bright, internal_frame_number,x0,y0
     points=[]
     frame_number=view_slider_p5.get()
     internal_frame_number_p5=frame_number-first_frame_number_p5
-    ##########
 
     canvas_fluor_p5.delete("all")
     canvas_bright_p5.delete("all")
@@ -3226,21 +3189,20 @@ def start_zoom():
     ####### place cell of interest in the center of window when start zooming
     x0, y0=clicked_cell_position_marker[0],clicked_cell_position_marker[1]#x0, y0 - for original photo  
     image_origin_x,image_origin_y= cell_center_visual_x-oval_x, cell_center_visual_y-oval_y
-    #x0, y0=(300-image_origin_x)/zoom_coeff,(300-image_origin_y)/zoom_coeff#x0, y0 - for original photo
+  
     global zoom_counter
     zoom_counter=0
-    #################################
     
-    print("x0, yo=", x0, y0)
-    print(" image_origin_x,image_origin_y=",  image_origin_x,image_origin_y)
-       
     oval_x,oval_y= cell_center_visual_x, cell_center_visual_y
     canvas_bright_p5,canvas_fluor_p5, photo_fluor, photo_bright=display_both_channels(filled_fluor_copy,filled_bright_copy,canvas_fluor_p5,canvas_bright_p5,window_p5_size,image_origin_x,image_origin_y)
-    #oval_x,oval_y= (oval_x+image_origin_x)/zoom_coeff,(oval_y+image_origin_y)/zoom_coeff
-       
+          
     oval=canvas_fluor_p5.create_oval(oval_x-5, oval_y-5, oval_x+5,
                        oval_y+5, outline="magenta", width=1)    
     canvas_fluor_p5.bind('<MouseWheel>', wheel)
+    init_zoom_factor =round(frame_p5_size/(4*cell_radius_p5),1) 
+    global factor_in, factor_out, factor
+    factor_in, factor_out, factor= init_zoom_factor , init_zoom_factor , init_zoom_factor 
+    apply_zoom(factor)
 ##############################################
 def start_pan():
     pan_monitor_label.config(text="Pan activated", fg="red")
@@ -3285,49 +3247,43 @@ def drag(event):
         # compute how much the mouse has moved
         global x,y,image_origin_x, image_origin_y, cell_center_visual_x, cell_center_visual_y, oval, oval_x,oval_y
         delta_x = event.x - x
-        delta_y = event.y - y
-        print("delta_x, delta_y=", delta_x, delta_y)
-       
+        delta_y = event.y - y       
         # record the new position
         x = event.x
         y= event.y
         # recalculater center of image_resized after dragging
-
         image_origin_x+=delta_x
         image_origin_y+=delta_y
         canvas_fluor_p5.delete("all")
-        print("image_origin_x, image_origin_y after drag=", image_origin_x, image_origin_y)
-        """
-        x0, y0=(300-image_origin_x)/zoom_coeff,(300-image_origin_y)/zoom_coeff#x0, y0 - for original photo
-        print("x0, y0=", x0, y0)
-        """
+        
         image_object=canvas_fluor_p5.create_image(image_origin_x,image_origin_y, anchor="nw", image=photo_fluor)
         canvas_bright_p5.delete("all")
         canvas_bright_p5.create_image(image_origin_x,image_origin_y, anchor="nw", image=photo_bright)
        
-        print("bbox after dragging=", canvas_fluor_p5.bbox(image_object))
         cell_center_visual_x+=delta_x
         cell_center_visual_y+=delta_y 
-        #global init_x,init_y# create magenta oval on clicked cell
+       
         oval_x+=delta_x
         oval_y+=delta_y
         oval=canvas_fluor_p5.create_oval(oval_x-5*factor, oval_y-5*factor, oval_x+5*factor,
                        oval_y+5*factor, outline="magenta", width=1)
 ##################################
-def apply_zoom(factor_A, factor_out):
+def apply_zoom(factor_input):
+    global  photo_fluor, my_image_fl,photo_bright, my_image_fl_resized, x0, y0,image_object,  zoom_coeff, image_origin_x, image_origin_y, resize_coeff, new_shape 
+    global oval_x_init, oval_y_init, oval_x,oval_y, factor 
     my_image_fl_resized=filled_fluor_copy.copy()
     my_image_fl_resized= cv2.resize(my_image_fl_resized,(window_p5_size,window_p5_size), cv2.INTER_LINEAR)      
-    my_image_fl_resized = cv2.resize(my_image_fl_resized,(int(my_image_fl_resized.shape[0] * factor_B ), int(my_image_fl_resized.shape[1] * factor_B)), cv2.INTER_LINEAR)      
+    my_image_fl_resized = cv2.resize(my_image_fl_resized,(int(my_image_fl_resized.shape[0] * factor_input), int(my_image_fl_resized.shape[1] * factor_input)), cv2.INTER_LINEAR)      
               
     my_image_br_resized=filled_bright_copy.copy()
     my_image_br_resized= cv2.resize(my_image_br_resized,(window_p5_size,window_p5_size), cv2.INTER_LINEAR)
-    my_image_br_resized = cv2.resize(my_image_br_resized,(int(my_image_br_resized.shape[0] * factor_B ), int(my_image_br_resized.shape[1] * factor_B)), cv2.INTER_LINEAR)   
+    my_image_br_resized = cv2.resize(my_image_br_resized,(int(my_image_br_resized.shape[0] * factor_input ), int(my_image_br_resized.shape[1] * factor_input)), cv2.INTER_LINEAR)   
     new_shape=my_image_fl_resized.shape[0]
    
-    x0_new_B, y0_new_B=oval_x_init*factor_B,oval_y_init*factor_B
+    x0_new_factor, y0_new_factor=oval_x_init*factor_input,oval_y_init*factor_input
     photo_fluor =  turn_image_into_tkinter(my_image_fl_resized,new_shape,[])
     photo_bright =  turn_image_into_tkinter(my_image_br_resized,new_shape,[])            
-    image_origin_x, image_origin_y= cell_center_visual_x-x0_new_B, cell_center_visual_y-y0_new_B
+    image_origin_x, image_origin_y= cell_center_visual_x-x0_new_factor, cell_center_visual_y-y0_new_factor
     canvas_fluor_p5.delete("all")
     canvas_bright_p5.delete("all")
     image_object=canvas_fluor_p5.create_image(image_origin_x, image_origin_y, anchor="nw", image=photo_fluor)
@@ -3335,10 +3291,9 @@ def apply_zoom(factor_A, factor_out):
     resize_coeff=new_shape/frame_p5_size
     zoom_coeff=new_shape/window_p5_size
     oval_x, oval_y= cell_center_visual_x, cell_center_visual_y
-         
-    factor=factor_out
-    oval=canvas_fluor_p5.create_oval(oval_x-5*factor_B, oval_y-5*factor_B, oval_x+5*factor_B,
-                       oval_y+5*factor_B, outline="magenta", width=1)
+    oval=canvas_fluor_p5.create_oval(oval_x-5*factor_input, oval_y-5*factor_input, oval_x+5*factor_input,
+                       oval_y+5*factor_input, outline="magenta", width=1)
+    factor=factor_input
 ################################
 def wheel(event):
         ''' Zoom with mouse wheel '''
@@ -3346,84 +3301,26 @@ def wheel(event):
         zoom_counter+=1
         if zoom_counter==1:
             activate_buttons(all_buttons_page5,[button_activate_fast_edit_mode,button_activate_slow_edit_mode,start_pan_button])
-        activate_buttons(all_buttons_page5,[button_activate_fast_edit_mode,button_activate_slow_edit_mode,start_pan_button])
-        print("ZOOM_COUNTER=", zoom_counter)
-        global  photo_fluor, my_image_fl,photo_bright, my_image_fl_resized, x0, y0,image_object, factor_in, factor_out, zoom_coeff, image_origin_x, image_origin_y, resize_coeff, new_shape 
-        global oval_x_init, oval_y_init, oval_x,oval_y, factor
-        if  event.delta == -120:  # scroll down
+        activate_buttons(all_buttons_page5,[button_activate_fast_edit_mode,button_activate_slow_edit_mode,start_pan_button])              
+        global factor_in, factor_out
+        if  event.delta == -120:
           factor_out*=0.8
-          factor_in*=0.8
-          ####################################        
-          my_image_fl_resized=filled_fluor_copy.copy()
-          my_image_fl_resized= cv2.resize(my_image_fl_resized,(window_p5_size,window_p5_size), cv2.INTER_LINEAR)      
-          my_image_fl_resized = cv2.resize(my_image_fl_resized,(int(my_image_fl_resized.shape[0] * factor_out ), int(my_image_fl_resized.shape[1] * factor_out)), cv2.INTER_LINEAR)      
-              
-          my_image_br_resized=filled_bright_copy.copy()
-          my_image_br_resized= cv2.resize(my_image_br_resized,(window_p5_size,window_p5_size), cv2.INTER_LINEAR)
-          my_image_br_resized = cv2.resize(my_image_br_resized,(int(my_image_br_resized.shape[0] * factor_out ), int(my_image_br_resized.shape[1] * factor_out)), cv2.INTER_LINEAR)   
-          new_shape=my_image_fl_resized.shape[0]
-   
-          #############################################################         
-          x0_new_out, y0_new_out=oval_x_init*factor_out,oval_y_init*factor_out
-          photo_fluor =  turn_image_into_tkinter(my_image_fl_resized,new_shape,[])
-          photo_bright =  turn_image_into_tkinter(my_image_br_resized,new_shape,[])            
-          image_origin_x, image_origin_y= cell_center_visual_x-x0_new_out, cell_center_visual_y-y0_new_out
-          canvas_fluor_p5.delete("all")
-          canvas_bright_p5.delete("all")
-          image_object=canvas_fluor_p5.create_image(image_origin_x, image_origin_y, anchor="nw", image=photo_fluor)
-          canvas_bright_p5.create_image(image_origin_x,image_origin_y, anchor="nw", image=photo_bright)
-          resize_coeff=new_shape/frame_p5_size
-          zoom_coeff=new_shape/window_p5_size
-          oval_x, oval_y= cell_center_visual_x, cell_center_visual_y
-         
-          factor=factor_out
-          oval=canvas_fluor_p5.create_oval(oval_x-5*factor_out, oval_y-5*factor_out, oval_x+5*factor_out,
-                       oval_y+5*factor_out, outline="magenta", width=1)
-          #####################################################
-        if   event.delta == 120:  # scroll up
+          factor_in*=0.8          
+          apply_zoom(factor_out)          
+        if   event.delta == 120:
           factor_in*=1.2
           factor_out*=1.2
-          ##############################################    
-          my_image_fl_resized=filled_fluor_copy.copy()
-          my_image_fl_resized= cv2.resize(my_image_fl_resized,(window_p5_size,window_p5_size), cv2.INTER_LINEAR)      
-          my_image_fl_resized = cv2.resize(my_image_fl_resized,(int(my_image_fl_resized.shape[0] * factor_out ), int(my_image_fl_resized.shape[1] * factor_out)), cv2.INTER_LINEAR)      
-         
-       
-          my_image_br_resized=filled_bright_copy.copy()
-          my_image_br_resized= cv2.resize(my_image_br_resized,(window_p5_size,window_p5_size), cv2.INTER_LINEAR)      
-          my_image_br_resized = cv2.resize(my_image_br_resized,(int(my_image_br_resized.shape[0] * factor_out ), int(my_image_br_resized.shape[1] * factor_out)), cv2.INTER_LINEAR)  
-          #################################################
-          new_shape=my_image_fl_resized.shape[0]
-          #x0_new_in, y0_new_in=x0*factor_in,y0*factor_in
-          x0_new_in, y0_new_in=oval_x_init*factor_in,oval_y_init*factor_in
-          photo_fluor =  turn_image_into_tkinter(my_image_fl_resized,new_shape,[])
-          photo_bright =  turn_image_into_tkinter(my_image_br_resized,new_shape,[])            
-          canvas_fluor_p5.delete("all")
-          canvas_bright_p5.delete("all")
-          image_origin_x, image_origin_y= cell_center_visual_x-x0_new_in, cell_center_visual_y-y0_new_in
-          image_object=canvas_fluor_p5.create_image(image_origin_x, image_origin_y, anchor="nw", image=photo_fluor)
-          canvas_bright_p5.create_image(image_origin_x,image_origin_y, anchor="nw", image=photo_bright)
-          zoom_coeff=new_shape/window_p5_size
-          resize_coeff=new_shape/frame_p5_size
-          
-          oval_x,oval_y= cell_center_visual_x, cell_center_visual_y
-          oval=canvas_fluor_p5.create_oval(oval_x-5*factor_in, oval_y-5*factor_in, oval_x+5*factor_in,
-                       oval_y+5*factor_in, outline="magenta", width=1)        
-          factor=factor_in
-        
+          apply_zoom(factor_in)                
 ###############################################
 def start_drawing():    
-    canvas_fluor_p5.unbind("all")
-    #canvas.bind("<Button-1>", savePosn)
+    canvas_fluor_p5.unbind("all")   
     canvas_fluor_p5.bind("<Button-1>",  get_x_and_y)
     canvas_fluor_p5.bind("<B1-Motion>", addLine)
     global points, points_for_original
     points=[]
     points_for_original=[]
-##################################
 #####################################################
-def stop_zoom():
-    #activate_slow_edit_mode()
+def stop_zoom():   
     print("inside stop_zoom")
     global my_image_resized, tk_image, my_image, points, canvas_fluor_p5,canvas_bright_p5,photo_fluor, photo_bright
     canvas_fluor_p5.delete("all")
@@ -3434,11 +3331,8 @@ def stop_zoom():
       cv2.drawContours(my_image_resized,[ctr],0,(255,255,255),2)
       ctr_origin = np.array(points_for_original).reshape((-1,1,2)).astype(np.int32)#
       cv2.drawContours(my_image,[ctr_origin],0,(255,255,255),2)
-    #cv2.imwrite(r"C:\Users\helina\Desktop\final_zoom_origin.tif", my_image)
-    #cv2.imwrite(r"C:\Users\helina\Desktop\final_zoom_resized.tif", my_image_resized)
-    canvas_bright_p5,canvas_fluor_p5,photo_fluor, photo_bright=display_both_channels(filled_fluor,filled_bright,canvas_fluor_p5,canvas_bright_p5,window_p5_size,0,0)
-    #tk_image =  turn_image_into_tkinter(my_image_resized,window_p5_size)
-    #canvas_fluor_p5.create_image(0,0, anchor="nw", image=tk_image)
+    
+    canvas_bright_p5,canvas_fluor_p5,photo_fluor, photo_bright=display_both_channels(filled_fluor,filled_bright,canvas_fluor_p5,canvas_bright_p5,window_p5_size,0,0)    
     canvas_fluor_p5.unbind("all")
     global resize_coeff, new_shape
     resize_coeff=window_p5_size /frame_p5_size
@@ -3452,6 +3346,7 @@ def stop_zoom():
     oval=canvas_fluor_p5.create_oval(oval_x_init-5*factor, oval_y_init-5*factor, oval_x_init+5*factor,
                        oval_y_init+5*factor, outline="magenta", width=1)
     zoom_status.set("off")
+    zoom_monitor_label.config(text=" ")
 
     global cell_center_visual_x,cell_center_visual_y
     print("cell_centre_visual_x,cell_center_visual_y BEFORE=",cell_center_visual_x,cell_center_visual_y)
@@ -3460,41 +3355,21 @@ def stop_zoom():
     canvas_fluor_p5.unbind("<MouseWheel>")
 ################################################
 def save_one_edited_cell():
-    activate_buttons(all_buttons_page5,[view_slider_p5, button_final_movie])
-    #cell_monitor_label.config(text="Saved cell", fg="cyan")
-    cell_monitor_label.config(text="Saved Cell  "+ str(cell_name_to_screen)+" ( "+cell_color_to_screen+" )", fg="cyan")
-    #button_activate_hand_drawing_mode_for_one_cell.configure(background = button_color)
-    #update_flash([view_slider_p5])
+    activate_buttons(all_buttons_page5,[view_slider_p5, button_final_movie])    
+    cell_monitor_label.config(text="Saved Cell  "+ str(cell_name_to_screen)+" ( "+cell_color_to_screen+" )", fg="cyan")    
     button_activate_slow_edit_mode.configure(background = button_color) 
     global photo_fluor, photo_bright, canvas_bright_p5,canvas_fluor_p5, points, filled_fluor, filled_bright, filled_red
     if len(points)!=0:# if it was hand drawing    
-       ctr = np.array(points_for_original).reshape((-1,1,2)).astype(np.int32)# turn drawn points into contour (ctr)
-       #ctr = np.array(points).reshape((-1,1,2)).astype(np.int8)# turn drawn points into contour (ctr)
+       ctr = np.array(points_for_original).reshape((-1,1,2)).astype(np.int32)# turn drawn points into contour (ctr)      
        cell_number_in_mask=2**cell_number_in_frame
-       #print("cell_number_in_frame in SAVE_ONE_CELL=", cell_number_in_frame)
-       #print("cell_number_in_mask in SAVE_ONE_CEWLL=", cell_number_in_mask)
-       #final_mask[final_mask==cell_number+1]=0
-       global final_mask
-       #final_mask=remove_cell_from_mask(cell_number_in_frame, final_mask, intensity_dictionary_for_frame)
-       #final_mask[final_mask==cell_number_scaled]=0
-       # mask_hand - here you hand-draw new contour
-       mask_hand=np.zeros((frame_p5_size,frame_p5_size),np.uint8)
-      
-       cv2.drawContours(mask_hand,[ctr],0,(255,255,255),-1)
-       #print("np.max(mask_hand)=",np.max(mask_hand))
        
-       #################################
-       mask_hand_uint64= mask_hand.astype(np.uint64)
-       #print("np.max(mask_hand) before=",np.max(mask_hand_uint64))
-       mask_hand_uint64[mask_hand_uint64==255]=cell_number_in_mask
-       #print("np.max(mask_hand) after=",np.max(mask_hand_uint64))
-       #final_mask[mask_hand==255]=cell_number+1
-       
-       #final_mask[mask_hand==255]=cell_number_scaled
+       global final_mask      
+       mask_hand=np.zeros((frame_p5_size,frame_p5_size),np.uint8)      
+       cv2.drawContours(mask_hand,[ctr],0,(255,255,255),-1)       
+       mask_hand_uint64= mask_hand.astype(np.uint64)      
+       mask_hand_uint64[mask_hand_uint64==255]=cell_number_in_mask     
        final_mask+=mask_hand_uint64
-       #print("np.max(final_mask)=",np.max(final_mask))
-       #final_mask[mask_hand==255]=cell_indicator+1
-       ######### need to get segmented_frame and segmented_patch here to pass to modified_cell_IDs                     
+       
        segmented_frame= np.zeros((frame_p5_size+2*bordersize,frame_p5_size+2*bordersize),dtype="uint8")
        cv2.drawContours(segmented_frame,[ctr] , 0, 255, -1)
        im2, contours, hierarchy = cv2.findContours(segmented_frame,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
@@ -3506,9 +3381,7 @@ def save_one_edited_cell():
        new_cY = np.round(M["m01"] / M["m00"],2)
        new_base=cv2.copyMakeBorder(segmented_frame , top=bordersize, bottom=bordersize, left=bordersize, right=bordersize, borderType= cv2.BORDER_CONSTANT, value=0. )
        a_new,b_new,c_new,d_new=int(round(new_cX))+bordersize-patch_size_p5,int(round(new_cX))+bordersize+ patch_size_p5,int(round(new_cY))+bordersize-patch_size_p5,int(round(new_cY))+bordersize+patch_size_p5           
-       segmented_patch = new_base[c_new:d_new, a_new:b_new]
-       #modified_cell_IDs[hand_cell_number]=[segmented_frame, final_mask, segmented_patch]
-       #modified_cell_IDs[cell_number]=[segmented_frame, final_mask, segmented_patch,[new_cX, new_cY], cell_color, cell_ID]
+       segmented_patch = new_base[c_new:d_new, a_new:b_new]      
        modified_cell_IDs[previous_cell_number]=[segmented_frame, final_mask, segmented_patch,[new_cX, new_cY], cell_color, cell_ID]  
        #########################################
        global oval
@@ -3530,9 +3403,7 @@ def save_one_edited_cell():
       filled_fluor=paste_patch(filled_fluor,patch_with_contours,a,b,c,d,cell_color,1.0, frame_p5_size,bordersize)      
       filled_bright=paste_patch(filled_bright,patch_with_contours,a,b,c,d,cell_color,1.0, frame_p5_size,bordersize)
       filled_red=paste_patch(filled_red,patch_with_contours,a,b,c,d,cell_color,1.0, frame_p5_size,bordersize)
-            
-      #### display  current frame with modified cell    
-      #global photo_fluor, photo_bright, canvas_bright_p5,canvas_fluor_p5, oval     
+                  
       canvas_bright_p5,canvas_fluor_p5,photo_fluor, photo_bright=display_both_channels(filled_fluor,filled_bright,canvas_fluor_p5,canvas_bright_p5,new_shape,image_origin_x,image_origin_y)
       canvas_fluor_p5.delete(oval)      
       oval=canvas_fluor_p5.create_oval(oval_x-5*factor, oval_y-5*factor, oval_x+5*factor,
@@ -3543,34 +3414,21 @@ def save_one_edited_cell():
 #################################################
 def edit_by_clicking(event):
       mode_monitor_label.config(text="Editing by clicking...", fg="red")
-      number_of_clicks=[]# this is for flashing only
-      #global segmentor, refiner     
-      global manually_clicked_centroid, final_mask, a,b,c,d 
-      #manually_clicked_centroid=[event.x/window_p5_size*frame_p5_size,event.y/window_p5_size*frame_p5_size]
-      #manually_clicked_centroid=[int(round((event.x/zoom_coeff-image_origin_x)/(resize_coeff))),int(round((event.y/zoom_coeff-image_origin_y)/(resize_coeff)))]
-      manually_clicked_centroid=[int(round((event.x-image_origin_x)/resize_coeff)),int(round((event.y-image_origin_y)/resize_coeff))]
-      #print("manually_clicked_centroid=", manually_clicked_centroid)
-      #print("clicked_cell_positon_marker=", clicked_cell_position_marker)
-      #print("centroid[0].dtype=",centroid[0].dtype)
+      number_of_clicks=[]# this is for flashing only        
+      global manually_clicked_centroid, final_mask, a,b,c,d       
+      manually_clicked_centroid=[int(round((event.x-image_origin_x)/resize_coeff)),int(round((event.y-image_origin_y)/resize_coeff))]      
       dialog_label_5.config(text=str(manually_clicked_centroid))
       number_of_clicks.append(manually_clicked_centroid)
-      if len(number_of_clicks)==1:# it is only for flashing
-          #update_flash([button_save_frame])
+      if len(number_of_clicks)==1:# it is only for flashing         
           print("update_flash")
       segmented_frame, segmented_patch,a,b,c,d, final_mask, new_centroid=segment_one_cell_at_a_time(segmentor, refiner,empty_fluor,empty_bright,manually_clicked_centroid, cell_radius_p5, frame_p5_size, patch_size_p5, clicked_cell_position_marker,final_mask,cell_number_in_frame, bordersize)
       ############## modify mask for frame
       new_cX, new_cY=new_centroid[0],new_centroid[1]
-      mask_with_current_cell=paste_benchmark_patch(segmented_patch,a,b,c,d,cell_number_in_frame, frame_p5_size, bordersize)
-      #print("cell_number_in_frame=", cell_number_in_frame)
-      #print("np.max(mask_with_current_cell)=",np.max(mask_with_current_cell))
-      cell_number_in_mask=2**cell_number_in_frame
-      #final_mask[final_mask==cell_number_in_mask]=0
-      final_mask=remove_cell_from_mask(cell_number_in_frame, final_mask, intensity_dictionary_for_frame)
-      #final_mask[final_mask==cell_number+1]=0# delete previous contour of cell
+      mask_with_current_cell=paste_benchmark_patch(segmented_patch,a,b,c,d,cell_number_in_frame, frame_p5_size, bordersize)      
+      cell_number_in_mask=2**cell_number_in_frame     
+      final_mask=remove_cell_from_mask(cell_number_in_frame, final_mask, intensity_dictionary_for_frame)     
       final_mask+=mask_with_current_cell# insert current contour of cell
-      cv2.imwrite(r"C:\Users\helina\Desktop\segmented_patch.tif",segmented_patch)
-      #final_mask_debug= final_mask.astype(np.uint8)
-      #cv2.imwrite(r"C:\Users\helina\Desktop\final_mask_inside_edit.tif",final_mask_debug*200)
+      cv2.imwrite(r"C:\Users\helina\Desktop\segmented_patch.tif",segmented_patch)      
       ################### modify fluor, bright and red current frame
       global patch_with_contours
       patch_with_contours=prepare_contours(segmented_patch)    
@@ -3593,23 +3451,17 @@ def edit_by_clicking(event):
       oval=canvas_fluor_p5.create_oval(oval_x-5*factor, oval_y-5*factor, oval_x+5*factor,
                        oval_y+5*factor, outline="magenta", width=1)                
 #################################################
-def get_frame_info(internal_frame_number_p5):# for manual segmentation correction    
-    print("frame_number inside get_frame_info=", frame_number)
-    #internal_frame_number=frame_number-first_frame_number_p5
-    print("internal_frame_number INSIDE GET_FRAME_INFO=", internal_frame_number_p5)
+def get_frame_info(internal_frame_number_p5):# for manual segmentation correction        
     global frame_dictionary
     frame_dictionary=lineage_per_frame_p5[internal_frame_number_p5]
     keys=list(frame_dictionary.keys())
     global intensity_dictionary_for_frame
-    intensity_dictionary_for_frame=create_intensity_dictionary(len(keys))
-    print("intensity_dictionary_for_frame inside get_frame_info=",  intensity_dictionary_for_frame)
-    debug_frame_number=frame_dictionary["cell_0"][12]
-    print("debug_frame_number=",debug_frame_number)
+    intensity_dictionary_for_frame=create_intensity_dictionary(len(keys))  
+    
     global cells_in_current_frame_sorted
     cells_in_current_frame=[(frame_dictionary[key][11],frame_dictionary[key][15],frame_dictionary[key][17]) for key in keys]    
     cells_in_current_frame_sorted=sorted(cells_in_current_frame,key=lambda student: student[2])
-    text_for_print=[cells_in_current_frame_sorted[i][0] for i in range(len(cells_in_current_frame_sorted))]
-    print("cells_in_current_frame_sorted=", cells_in_current_frame_sorted)
+    text_for_print=[cells_in_current_frame_sorted[i][0] for i in range(len(cells_in_current_frame_sorted))] 
     dialog_label_5.config(text="Cells detected in the current frame :  " +str(text_for_print)+
                           "\nThere are 2 manul segmentation techniques available: 1. Button 3 (fast correction) where correction is achieved just by clicking on the cell"
                           "   2.  Button 4 (hand drawing) where correction is done by drawing with the mouse."
@@ -3628,31 +3480,17 @@ def get_frame_info(internal_frame_number_p5):# for manual segmentation correctio
     filled_fluor=filled_fluors[internal_frame_number_p5]
     filled_bright=filled_brights[internal_frame_number_p5]
     filled_red=filled_reds[internal_frame_number_p5]
-    final_mask=copy.deepcopy(mask)
-      
-    update_flash([])
-    
-    #button_frame_info.configure(background = "red")
-    #global oval# create invisible magenta oval
-    #oval= canvas_fluor_p5.create_oval(5-3, 5-3, 5+3,
-                      # 5+3, outline="magenta", fill="magenta", width=2)  
+    final_mask=copy.deepcopy(mask)      
+    update_flash([])    
 ################################################################
 def save_edits_for_frame(): #saves all eduts in current frame and modifies linage for this frame
-    global   frame_dictionary
-    #number_of_slides_p5=[]    
-    #update_flash([view_slider_p5])
-    print("internal_frame_number inside save_edits_for_frame=", internal_frame_number_p5)
-    #button_frame_info.configure(background = button_color)     
-    #button_save_frame.configure(background = 'red')
-    ###################################
+    global   frame_dictionary    
     frame_dictionary= lineage_per_frame_p5[internal_frame_number_p5]
     debug_item=lineage_per_frame_p5[internal_frame_number_p5]["cell_0"][3]
-    #cv2.imwrite(r"C:\Users\helina\Desktop\patch_before.tif",debug_item)
+  
     modified_frame_dictionary=update_frame_dictionary_after_manual_segm_correction(final_mask, filled_fluor,filled_bright,modified_cell_IDs,frame_dictionary,frame_p5_size, patch_size_p5, bordersize)    
     lineage_per_frame_p5[internal_frame_number_p5]=modified_frame_dictionary
-    debug_item_after=lineage_per_frame_p5[internal_frame_number_p5]["cell_0"][3]
-    #cv2.imwrite(r"C:\Users\helina\Desktop\patch_after.tif",debug_item_after)
-    ##################################################    
+    debug_item_after=lineage_per_frame_p5[internal_frame_number_p5]["cell_0"][3]      
     modified_cells_keys=list(modified_cell_IDs.keys())
     
     cv2.imwrite(path_filled_bright, filled_bright )# rewrite BRIGHT_MOVIE_RESULTS
@@ -3661,7 +3499,6 @@ def save_edits_for_frame(): #saves all eduts in current frame and modifies linag
     destin_mask_for_plot=np.round(final_mask)
     destin_mask_for_plot = destin_mask_for_plot.astype(np.uint64)
     cv2.imwrite(path_mask, destin_mask_for_plot) # rewrite MASKS)
-    #cv2.imwrite(r"C:\Users\helina\Desktop\final_mask_inside_save_frame.tif",final_mask)
     ################### rewrite CLEANED_PATCHES
     cell_numbers=list(modified_cell_IDs.keys())
     for cell_number in cell_numbers:
@@ -3680,19 +3517,17 @@ def save_edits_for_frame(): #saves all eduts in current frame and modifies linag
     filled_reds[ internal_frame_number_p5]=filled_red
     masks[ internal_frame_number_p5]=final_mask
     
-    canvas_fluor_p5.delete(oval)
-    #button_save_frame.configure(background = button_color)
+    canvas_fluor_p5.delete(oval)   
     dialog_label_5.config(text="You have 3 oprions now:\n  - Go to the next frame ( by using the slide bar) \n - Finish editing the movie (by pushing Button 7)"
                             "\n - Leave it for some other time (by clicking  Exit or Next")
     global save_frame_edits_alert
     save_frame_edits_alert=False  
 #######################################
-def create_final_movie():# create final movie + pedigree_per_cell (simplified, i.e. only centroids and areas)
-  #update_cheatsheet(cheatsheets,"neutral",bg_color,label_color)
+def create_final_movie():# create final movie + pedigree_per_cell (simplified, i.e. only centroids and areas) 
   dialog_label_5.config(text="Creating lineage and final movie...")
   cell_monitor_label.config(text="Creating excel files...", fg="red")
   global output_dir_p5,frame_p5_size,save_frame_edits_alert 
-  print("output_dir_p5=", output_dir_p5) 
+ 
   if save_frame_edits_alert==True:
     mode=mode_variable.get()
     if mode=="slow":
@@ -3739,12 +3574,24 @@ global button_final_movie
 button_final_movie = Button(frame4c_page5, text="4. Create final movie\n and \nExcel files", command=lambda:[threading.Thread(target=create_final_movie).start(),update_cheatsheet(cheatsheets,"neutral",bg_color,label_color)],bg=button_color, font=all_font,activebackground="red")
 button_final_movie.pack(side=tk.BOTTOM, padx=100)    
 ##################################
+global active_channel_var
+active_channel_var=StringVar()
+active_channel_var.set("bright")
+def swap_active_channel():
+    print("active channel is ", active_channel_var.get())
+#########################################################
+channel_label = tk.Label(frame_radio_page5, text=" ACTIVE CHANNEL:",fg="black",bg=label_color, font='TkDefaultFont 10 bold').pack(side=tk.LEFT,padx=(100,10))
+R_bright = Radiobutton(frame_radio_page5, text="Brightfield", value="bright", font=all_font, variable=active_channel_var, command=lambda:swap_active_channel(), background=button_color, activebackground="red")
+R_bright.pack(side=tk.LEFT, padx=10)
+
+R_fluor = Radiobutton(frame_radio_page5, text="Fluorescent", value="fluor", font=all_font, variable=active_channel_var, command=lambda:swap_active_channel(), background=button_color, activebackground="red")
+R_fluor.pack(side=tk.LEFT, padx=10)
+
 global view_slider_p5
 view_slider_p5 = Scale(frame_slider_page5, from_=1, to=1,orient=HORIZONTAL, troughcolor="green", command=slide_frames_p5, length=window_p5_size)      
-view_slider_p5.pack(pady=10)    
+view_slider_p5.pack()    
 ############################################
 global all_buttons_page5
-#label_edit = tk.Label(frame3_page4, text=" ", font='TkDefaultFont 10 bold',  bg="black", fg="yellow", width=50, height=4)
 all_buttons_page5=[button_load_p5,button_activate_fast_edit_mode, button_activate_slow_edit_mode,\
                    start_zoom_button, start_pan_button,stop_pan_button,\
                    button_final_movie,view_slider_p5]
