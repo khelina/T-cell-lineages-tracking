@@ -65,10 +65,6 @@ def load_tracked_movie_p5(input_dir,output_dir):
     for filename in sorted_aphanumeric(os.listdir(dir_masks)):
            path_im_mask=os.path.join(dir_masks, filename)
            im_mask=cv2.imread(path_im_mask ,-1)
-           
-           #scaled_mask=scaled_mask.astype(np.float16)
-           #print("im_mask.dtype=",im_mask.dtype)
-           #print("np.max(im_mask)=",np.max(im_mask))
            path_masks.append(path_im_mask)
            masks.append(im_mask)
            del im_mask

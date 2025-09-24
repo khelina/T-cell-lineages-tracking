@@ -91,20 +91,26 @@ def turn_image_into_tkinter(image, window_size, lin_image_widths): # if image is
   return  photo_image 
 ###############################################
 ######### Page-5(Correct segmentaion); for sliding frames
-def show_2_canvases(canvas_bright,canvas_fluor,photo_filled_brights,photo_filled_fluors,internal_image_number, window_size):
+def show_2_canvases(canvas_bright,canvas_fluor,photo_filled_brights,photo_filled_fluors,internal_image_number, window_size, activated_channel):
     canvas_bright.delete('all')
     canvas_fluor.delete('all')
-   
-    canvas_bright.create_image(0, 0, anchor=NW, image=photo_filled_brights[internal_image_number])    
-    canvas_fluor.create_image(0, 0, anchor=NW, image=photo_filled_fluors[internal_image_number])
-    
+    if activated_channel=="fluor":   
+         canvas_bright.create_image(0, 0, anchor=NW, image=photo_filled_brights[internal_image_number])    
+         canvas_fluor.create_image(0, 0, anchor=NW, image=photo_filled_fluors[internal_image_number])
+    else:   
+         canvas_fluor.create_image(0, 0, anchor=NW, image=photo_filled_brights[internal_image_number])    
+         canvas_bright.create_image(0, 0, anchor=NW, image=photo_filled_fluors[internal_image_number])
 ########### Page-5(Correct segmentaion); for correcting one current frame
-def display_both_channels(filled_fluor,filled_bright,canvas_fluor,canvas_bright,target_size,image_origin_x,image_origin_y):      
+def display_both_channels(filled_fluor,filled_bright,canvas_fluor,canvas_bright,target_size,image_origin_x,image_origin_y, active_channel):
+ if active_channel=="fluor":      
       photo_fluor=turn_image_into_tkinter(filled_fluor, target_size,[]) 
-      photo_bright=turn_image_into_tkinter(filled_bright, target_size,[])
-      canvas_fluor.create_image(image_origin_x,image_origin_y, anchor=NW, image=photo_fluor)      
-      canvas_bright.create_image(image_origin_x,image_origin_y, anchor=NW, image=photo_bright)
-      return canvas_bright,canvas_fluor, photo_fluor, photo_bright
+      photo_bright=turn_image_into_tkinter(filled_bright, target_size,[])           
+ else:      
+      photo_bright=turn_image_into_tkinter(filled_fluor, target_size,[]) 
+      photo_fluor=turn_image_into_tkinter(filled_bright, target_size,[])     
+ canvas_fluor.create_image(image_origin_x,image_origin_y, anchor=NW, image=photo_fluor)      
+ canvas_bright.create_image(image_origin_x,image_origin_y, anchor=NW, image=photo_bright)
+ return canvas_bright,canvas_fluor, photo_fluor, photo_bright
 ###############################################################
 def extract_output_images(output_fluor_path,lineage_path, window_size, output_images, output_names, lin_image_widths):# extract fluor and linage images for display
     #it is very essential (it is not a mistake) that output_names and output_images are not empty lists!
