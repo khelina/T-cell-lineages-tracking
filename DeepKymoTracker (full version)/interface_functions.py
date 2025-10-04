@@ -90,7 +90,7 @@ def turn_image_into_tkinter(image, window_size, lin_image_widths): # if image is
   photo_image =ImageTk.PhotoImage(photo_image)
   return  photo_image 
 ###############################################
-######### Page-5(Correct segmentaion); for sliding frames
+######### Page-5(Correct segmentaion); for sliding frames, def slide_frames_p5
 def show_2_canvases(canvas_bright,canvas_fluor,photo_filled_brights,photo_filled_fluors,internal_image_number, window_size, activated_channel):
     canvas_bright.delete('all')
     canvas_fluor.delete('all')
