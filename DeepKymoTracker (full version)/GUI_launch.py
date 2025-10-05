@@ -2892,8 +2892,8 @@ def choose_and_load_tracked_movie():
     oval_x,oval_y=1,1
     oval=canvas_fluor_p5.create_oval(oval_x-1, oval_y-1, oval_x+1,
                           oval_y+1, outline="magenta",  width=1)
-    global points, contour_parameters
-    points,contour_parameters=[],[]
+    global points, contour_parameters, init_contour_parameters
+    points,contour_parameters,init_contour_parameters=[],[],[]
     enable_frame()
     global zoom_counter
     zoom_counter=0
@@ -2912,12 +2912,13 @@ def activate_fast_edit_mode():#enter fast segmentation mode
 def activate_hand_drawing_mode_for_one_cell():    
     dialog_label_5.config(text="Draw the contour of the cell with the left mouse. Warning:  Be careful not to draw on neughbouring close cells!\n If you want to undo right-click the mouse anywhere in the image.\nOnce you are finished, push Button 4b.")    
     
-    global cell_contour_fl, cell_contour_br,points, mask_hand, points_for_original,contour_parameters# for the clicked cel
+    global cell_contour_fl, cell_contour_br,points, mask_hand, points_for_original,contour_parameters, init_contour_parameters# for the clicked cel
     cell_contour_fl=[]
     cell_contour_br=[]
     points, points_for_original=[],[]
     mask_hand=np.zeros((frame_p5_size,frame_p5_size),np.uint8)
     contour_parameters=[]
+    init_contour_parameters=[]
 ###########################################  
 def activate_slow_edit_mode():
     print("SLOW MODE ACTIVATED")
@@ -3155,36 +3156,38 @@ def draw_with_mouse(event):
     mode_monitor_label.config(text="Hand drawing...", fg="red")
     global coeff
     global lasx,lasy, line_fl, line_br,xx,yy, last_draw_zoom_coeff
-    global contour_parameters, cell_contour_fl,cell_contour_br
+    global contour_parameters, cell_contour_fl,cell_contour_br, init_contour_parameters
     xx,yy=event.x,event.y
     line_fl=canvas_fluor_p5.create_line((lasx,lasy,xx,yy), fill="red", width=5)   
     line_br=canvas_bright_p5.create_line((lasx,lasy,xx,yy), fill="red", width=5)
     contour_parameters.append((lasx,lasy,xx,yy))
+    init_contour_parameters= contour_parameters
     get_x_and_y(event)
     cell_contour_fl.append(line_fl)
     cell_contour_br.append(line_br)   
     last_draw_zoom_coeff =zoom_coeff
-    print("last_draw_zoom_coeff INSIDE DRAW WITH MOUSE=",last_draw_zoom_coeff )
+    #print("last_draw_zoom_coeff INSIDE DRAW WITH MOUSE=",last_draw_zoom_coeff )
     points.append([[int(round(lasx/zoom_coeff-image_origin_x)),int(round(lasy/zoom_coeff-image_origin_y))]])
     points_for_original.append([[int(round((lasx-image_origin_x)/resize_coeff)),int(round((lasy-image_origin_y)/resize_coeff))]])  
 ###################################   
 def erase_line():# in case you are not happy with your hand contour and want to delete it
     global cell_contour_fl, cell_contour_br, points,mask_hand, final_mask, points_for_original, contour_parameters
-    print("len(points) inside ERASE BEFORE=",len(points))
-    print("len(points_for_original) inside ERASE BEFORE=",len(points_for_original))
-    print("len(cell_contour_fl) inside ERASE BEFORE=",len(cell_contour_fl))
+    #print("len(points) inside ERASE BEFORE=",len(points))
+    #print("len(points_for_original) inside ERASE BEFORE=",len(points_for_original))
+    #print("len(cell_contour_fl) inside ERASE BEFORE=",len(cell_contour_fl))
     for i in range(len(cell_contour_fl)):        
          canvas_fluor_p5.delete(cell_contour_fl[i])
          canvas_bright_p5.delete(cell_contour_br[i])
     contour_parameters=[]
+    init_contour_parameters=[]
     mask_hand=np.zeros((frame_p5_size,frame_p5_size),np.uint8)
     cell_number_in_mask=2**cell_number_in_frame
     final_mask[final_mask==cell_number_in_mask]=0
     points, points_for_original=[],[]
     cell_contour_fl, cell_contour_br=[],[]
-    print("len(points) inside ERASE AFTER=",len(points))
-    print("len(points_for_original) inside ERASE AFTER=",len(points_for_original))
-    print("len(cell_contour_fl) inside ERASE AFTER=",len(cell_contour_fl))
+    #print("len(points) inside ERASE AFTER=",len(points))
+    #print("len(points_for_original) inside ERASE AFTER=",len(points_for_original))
+    #print("len(cell_contour_fl) inside ERASE AFTER=",len(cell_contour_fl))
 ############  ZOOMING FUNCTIONS ##########
 ###############################################
 def start_zoom():
@@ -3283,6 +3286,28 @@ def drag(event):
         oval_y+=delta_y
         oval=canvas_fluor_p5.create_oval(oval_x-5*factor, oval_y-5*factor, oval_x+5*factor,
                        oval_y+5*factor, outline="magenta", width=1)
+        ################### re-draw contour(when in slow mode)       
+        global contour_parameters
+        if len(contour_parameters)!=0:       
+          new_contour_parameters=[]
+          for k in range(len(contour_parameters)):
+             item=contour_parameters[k]
+             #############################
+             new_las_x=int(round(cell_center_visual_x+item[0]))
+             new_las_y=int(round(cell_center_visual_y+item[1]))
+             new_xx=int(round(cell_center_visual_x+item[2]))
+             new_yy=int(round(cell_center_visual_y+item[3]))          
+             new_item=[new_las_x,new_las_y,new_xx,new_yy]           
+             new_contour_parameters.append(new_item)
+          contour_parameters=new_contour_parameters
+          #print("new_contour_parameters=", contour_parameters[-1])
+          for i in range(len(contour_parameters)):         
+            line_fl=canvas_fluor_p5.create_line(contour_parameters[i], fill="red", width=5)
+            line_br=canvas_bright_p5.create_line(contour_parameters[i], fill="red", width=5)    
+            cell_contour_fl.append(line_fl)
+            cell_contour_br.append(line_br)   
+        
+        ########################
 ##################################
 def apply_zoom(factor_input):
     global  photo_fluor, my_image_fl,photo_bright, my_image_fl_resized, x0, y0,image_object,  zoom_coeff, image_origin_x, image_origin_y, resize_coeff, new_shape,my_image_br_resized 
@@ -3320,37 +3345,26 @@ def apply_zoom(factor_input):
                        oval_y+5*factor_input, outline="magenta", width=1)
     ############### re-draw contour if any
     global last_draw_zoom_coeff
-    print("last_draw_zoom_coeff INSIDE APPLY ZOOM=",last_draw_zoom_coeff )
-    print("factor_input=", factor_input)
-    print("cell_center_visual_x=", cell_center_visual_x)
     fac=factor_input/last_draw_zoom_coeff
-    print("fac=", fac)
-    global contour_parameters
-    if len(contour_parameters)!=0:
-       old_params=contour_parameters
-       print("old_params=", old_params[-1])
+    global init_contour_parameters, contour_parameters
+    if len(init_contour_parameters)!=0:       
        contour_parameters=[]
-       for k in range(len(old_params)):
-           item=old_params[k]
-           
-           new_las_x=int(round(cell_center_visual_x-fac*item[0]))
-           new_las_y=int(round(cell_center_visual_y-fac*item[1]))
-           new_xx=int(round(cell_center_visual_x-fac*item[2]))
-           new_yy=int(round(cell_center_visual_y-fac*item[3]))
-           new_item=[new_las_x,new_las_y,new_xx,new_yy]
+       for k in range(len(init_contour_parameters)):
+           item=init_contour_parameters[k]
+           #############################
+           new_las_x=int(round(cell_center_visual_x-fac*(cell_center_visual_x-item[0])))
+           new_las_y=int(round(cell_center_visual_y-fac*(cell_center_visual_y-item[1])))
+           new_xx=int(round(cell_center_visual_x-fac*(cell_center_visual_x-item[2])))
+           new_yy=int(round(cell_center_visual_y-fac*(cell_center_visual_y-item[3])))          
+           new_item=[new_las_x,new_las_y,new_xx,new_yy]           
            contour_parameters.append(new_item)
-       print("contour_parameters=", contour_parameters[-1])
+       #print("new_contour_parameters=", contour_parameters[-1])
        for i in range(len(contour_parameters)):         
           line_fl=canvas_fluor_p5.create_line(contour_parameters[i], fill="red", width=5)
           line_br=canvas_bright_p5.create_line(contour_parameters[i], fill="red", width=5)    
           cell_contour_fl.append(line_fl)
-          cell_contour_br.append(line_br)   
-    
-    ##############################
-    factor=factor_input
-    ########### redraw unfinished contour
-    print("len(points) inside APPLY ZOOM=",len(points))
-    print("len(points_for_original) inside APPLY ZOOM=",len(points_for_original))
+          cell_contour_br.append(line_br)           
+    factor=factor_input    
 ################################
 def wheel(event):
         ''' Zoom with mouse wheel '''
@@ -3644,7 +3658,7 @@ active_channel_var=StringVar()
 active_channel_var.set("fluor")
 def swap_active_channel():
     global state_indicator, filled_fluor_copy, filled_bright_copy,photo_fluor, photo_bright,\
-        canvas_bright_p5,canvas_fluor_p5, zoom_status, factor_input,contour_parameters
+        canvas_bright_p5,canvas_fluor_p5, zoom_status, factor_input,contour_parameters, new_contour_parameters
     print("state_indicator=",state_indicator)
     zoom=zoom_status.get()
     print("zoom=", zoom)
