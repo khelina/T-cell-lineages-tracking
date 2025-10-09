@@ -190,6 +190,12 @@ def update_cheatsheet(cheatsheets,mode,bg_color,label_color):
     if mode=="neutral":
         for k in range(9):
             cheatsheets[k].config(text=" ", bg=bg_color)
+    elif mode=="pan":        
+        cheatsheets[0].config(text="CHEAT SHEET",bg="green", fg="black")
+        cheatsheets[1].config(text="Pan:",bg=label_color, fg="black")
+        cheatsheets[2].config(text="Drag with left mouse",bg=label_color, fg="red")
+        for k in range(3,9):
+            cheatsheets[k].config(text=" ", bg=bg_color)
     else:
         cheatsheets[0].config(text="CHEAT SHEET",bg="green", fg="black")
         cheatsheets[1].config(text="Choose cell:",bg=label_color, fg="black")
@@ -200,11 +206,11 @@ def update_cheatsheet(cheatsheets,mode,bg_color,label_color):
         cheatsheets[6].config(text="Right-click\ninside magenta circle",bg=label_color, fg="red")
         cheatsheets[7].config(text="DELETE contour:",bg=label_color, fg="black")
         cheatsheets[8].config(text="Right-click\nanywhere on background",bg=label_color, fg="red")
-        if mode=="fast":
+        if mode=="Fast":
             cheatsheets[4].config(text="Left-click",bg=label_color, fg="red")
             cheatsheets[7].config(text=" ",bg=bg_color, fg="black")
             cheatsheets[8].config(text=" ",bg=bg_color, fg="black")
         else:
-            cheatsheets[4].config(text="Draw with mouse",bg=label_color, fg="red")
+            cheatsheets[4].config(text="Draw with left mouse",bg=label_color, fg="red")
             cheatsheets[7].config(text="DELETE contour:",bg=label_color, fg="black")
             cheatsheets[8].config(text="Right-click\nanywhere on background",bg=label_color, fg="red")

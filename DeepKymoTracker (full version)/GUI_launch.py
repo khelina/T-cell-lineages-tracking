@@ -2722,9 +2722,12 @@ frame7_page5.grid(row=8, column=0, rowspan=1, columnspan=3,sticky=W+E+N+S)
 gap_frame_page5 = tk.Frame(master=page5, width=50, height=5, bg=bg_color)
 gap_frame_page5.grid(row=9, column=0, rowspan=1, columnspan=3,sticky=W+E+N+S)
 
-
+####################################
 frame8_page5 = tk.Frame(master=page5, width=50, height=50, bg=bg_color)
 frame8_page5.grid(row=10, column=0, rowspan=1, columnspan=3,sticky=W+E+N+S)
+overlay_exit = tk.Frame(master=page5, width=50, height=50, bg=bg_color, bd=0)
+#overlay_exit.grid(row=10, column=0, rowspan=1, columnspan=3,sticky=W+E+N+S)
+#overlay_exit.lift() 
 ######### POPULATE WITH LABELS
 l_title = tk.Label(frame1_page5, text="STEP 4: CORRECT SEGMENTATION",
               bg="yellow", fg="red", font=("Times", "24"))
@@ -2778,7 +2781,7 @@ l_instr_name_p5=tk.Label(frame6_page5,text="INSTRUCTIONS FOR USER :" ,bg="black"
 ###################################################
 dialog_label_5 = tk.Label(frame7_page5, text="Step-4 allows you to manually correct segmentation in tracked movie."
                           "\nTo load a tracked movie, click Button 1 and navigate to TRACKED_MOVIE_{your movie name}",
-                          fg="yellow",bg="black", font='TkDefaultFont 10 bold', width=200,height=2)
+                          fg="yellow",bg="black", font='TkDefaultFont 10 bold', width=200,height=3)
 dialog_label_5.grid(row=0, column=0, sticky="w")
 ###################################################
 global state_indicator
@@ -2793,6 +2796,13 @@ def enable_frame():
     state_indicator="slide_bar"
     overlay.grid_forget()    
 #################################################
+def disable_exit():#overlay exit button to foce user to save edits   
+    overlay_exit.grid(row=10, column=0, rowspan=1, columnspan=3,sticky=W+E+N+S)
+    overlay_exit.lift()# Ensure overlay is on top
+###################################################
+def enable_exit():    
+    overlay_exit.grid_forget()    
+#################################################
 def slide_frames_p5(value):
     cell_monitor_label.config(text="No cell chosen yet")
     global save_frame_edits_alert, previous_frame_number        
@@ -2800,7 +2810,7 @@ def slide_frames_p5(value):
           save_edits_for_frame()
           previous_frame_number=-2
     image_number = int(value)
-    print("image_number=", image_number)    
+    #print("image_number=", image_number)    
     internal_frame_number_for_slider=image_number-first_frame_number_p5
     ###########################################
     activated_channel=active_channel_var.get()
@@ -2810,7 +2820,9 @@ def slide_frames_p5(value):
     else:    
         label_fluor_name.config(text=os.path.basename(path_filled_brights[internal_frame_number_for_slider]))     
         label_bright_name.config(text=os.path.basename(path_filled_fluors[internal_frame_number_for_slider])) 
-    show_2_canvases(canvas_bright_p5,canvas_fluor_p5,photo_filled_brights,photo_filled_fluors,internal_frame_number_for_slider, window_p5_size, activated_channel) 
+    show_2_canvases(canvas_bright_p5,canvas_fluor_p5,photo_filled_brights,photo_filled_fluors,internal_frame_number_for_slider, window_p5_size, activated_channel)
+    dialog_label_5.config(text="To check segmentation in each frame, use the slide bar."
+                            "\nIf manual correction is needed in a certain frame, stop the slider and right-click the cell that needs correction.")          
 ############################# load all mecessary images
 def choose_and_load_tracked_movie():
     global edits_indicator
@@ -2897,18 +2909,21 @@ def choose_and_load_tracked_movie():
     enable_frame()
     global zoom_counter
     zoom_counter=0
-    dialog_label_5.config(text="To check segmentation in each frame, use the slide bar."
-                            "\nIf manual correction is needed in a certain frame, stop the slider and right-click the cell that needs correction.")          
+    active_channel_var.set("fluor")
+    swap_active_channel()
+    #dialog_label_5.config(text="To check segmentation in each frame, use the slide bar."
+                            #"\nIf manual correction is needed in a certain frame, stop the slider and right-click the cell that needs correction.")          
 ########################################
 def activate_fast_edit_mode():#enter fast segmentation mode
    print("FAST MODE ACTIVATED")
-   button_activate_fast_edit_mode.configure(background = 'red')
+   #button_activate_fast_edit_mode.configure(background = 'red')
+   active_fast_label.config(text="Activated", fg="red")
    button_activate_slow_edit_mode.configure(background = button_color)   
-   dialog_label_5.config(text="\nIn the right image, right-click on the cell you want to correct.")   
-   mode_variable.set("fast")   
+   #dialog_label_5.config(text="\nIn the right image, right-click on the cell you want to correct.")   
+   mode_variable.set("Fast")   
 #########################################################
 def activate_hand_drawing_mode_for_one_cell():    
-    dialog_label_5.config(text="Draw the contour of the cell with the left mouse. Warning:  Be careful not to draw on neughbouring close cells!\n If you want to undo right-click the mouse anywhere in the image.\nOnce you are finished, push Button 4b.")    
+    dialog_label_5.config(text="Draw the contour of the cell with the left mouse.\n If you want to erase the drawn contour, right-click the mouse anywhere in the background.\nOnce you are finished, right-click inside magenta circle to save your edits.")    
     
     global cell_contour_fl, cell_contour_br,points, mask_hand, points_for_original,contour_parameters, init_contour_parameters# for the clicked cel
     cell_contour_fl=[]
@@ -2923,11 +2938,12 @@ def activate_slow_edit_mode():
     global state_indicator
     state_indicator="drawing"
     mode_monitor_label.config(text="Slow mode", fg="red") 
-    update_cheatsheet(cheatsheets,"slow",bg_color,label_color)
-    mode_variable.set("slow")
+    update_cheatsheet(cheatsheets,"Slow",bg_color,label_color)
+    mode_variable.set("Slow")
     button_activate_slow_edit_mode.configure(background = 'red')
-    button_activate_fast_edit_mode.configure(background = button_color)
-    dialog_label_5.config(text="Right-click on the cell you want to correct. Its contours should disappear.")
+    #button_activate_fast_edit_mode.configure(background = button_color)
+    active_fast_label.config(text="Disabled", fg="cyan")
+    #dialog_label_5.config(text="Right-click on the cell you want to correct. Its contours should disappear.")
     activate_buttons(all_buttons_page5,[button_activate_slow_edit_mode,start_zoom_button])
     ########################## delete contour of the clicked ce;;
     global canvas_fluor_p5,canvas_bright_p5
@@ -2952,7 +2968,7 @@ def activate_slow_edit_mode():
     filled_bright=delete_contour_with_specific_colour(filled_bright, empty_bright,cell_color)
     filled_red=delete_contour_with_specific_colour(filled_red, empty_red,cell_color)   
     final_mask=remove_cell_from_mask(cell_number_in_frame, final_mask, intensity_dictionary_for_frame)
-    cv2.imwrite(r"C:\Users\helina\Desktop\final_mask_IN ACTIVATE SLOW AFTER.tif",final_mask*10) 
+    #cv2.imwrite(r"C:\Users\helina\Desktop\final_mask_IN ACTIVATE SLOW AFTER.tif",final_mask*10) 
     # display frames with erased cell     
     canvas_bright_p5,canvas_fluor_p5,photo_fluor, photo_bright=display_both_channels(filled_fluor_copy,filled_bright_copy,canvas_fluor_p5,canvas_bright_p5,new_shape,image_origin_x,image_origin_y, active_channel_var.get())
     global oval_x,oval_y, factor# create magenta oval on clicked cell
@@ -2976,7 +2992,7 @@ def right_click_one_cell(event):# extract info about clicked celland take action
     mask=masks[internal_frame_number_p5]      
     clicked_cell_position_marker=[int(round((event.x-image_origin_x)/resize_coeff)),int(round((event.y-image_origin_y)/resize_coeff))]# position marker in image of original size!!!  
     ###################################################      
-    if mode=="fast":# the fast editing (by clicking)   
+    if mode=="Fast":# the fast editing (by clicking)   
        if frame_number!=previous_frame_number:# if you are in a new frame         
           cell_number_in_mask=mask[clicked_cell_position_marker[1],clicked_cell_position_marker[0]]                         
           previous_frame_number=frame_number                 
@@ -3000,7 +3016,7 @@ def right_click_one_cell(event):# extract info about clicked celland take action
                          erase_line()
                      state_indicator="clicking"
                      cell_monitor_label.config(text="Edit Cell "+ str(cell_name_to_screen)+" ( "+cell_color_to_screen+" )", fg="cyan")
-                     mode_monitor_label.config(text="Fast mode", fg="cyan")
+                     mode_monitor_label.config(text="Fast mode", fg="red")
                      update_cheatsheet(cheatsheets,"fast",bg_color,label_color)           
                      disable_frame()
                      canvas_fluor_p5.bind("<Button-1>", edit_by_clicking)                                                              
@@ -3044,14 +3060,14 @@ def right_click_one_cell(event):# extract info about clicked celland take action
                     if zoom_counter!=0:
                          zoom_counter=0
                          zoom_monitor_label.config(text=" ")
-                   
+                    
        else:# you hit background accidentally, i.e. cell_number=-1
               print("clicked on  background, fast mode")         
               print("do nothing")
               cell_monitor_label.config(text="You clicked on background", fg="red")
       
     ######################################
-    if mode=="slow":# the slow editing (by hand-drawing)     
+    if mode=="Slow":# the slow editing (by hand-drawing)     
          print("entered slow mode in right click")
          #global frame_number, frame_indicator, cell_indicator,internal_frame_number
          #frame_number=view_slider_p5.get()
@@ -3105,7 +3121,7 @@ def right_click_one_cell(event):# extract info about clicked celland take action
                      oval_x,oval_y=event.x,event.y
                      oval=canvas_fluor_p5.create_oval(oval_x-5, oval_y-5, oval_x+5,
                        oval_y+5, outline="magenta", width=1)
-                     cv2.imwrite("C:\\Users\\kfedorchuk\\Desktop\\filled_fluor_after_click.tif", filled_fluor)
+                     #cv2.imwrite("C:\\Users\\kfedorchuk\\Desktop\\filled_fluor_after_click.tif", filled_fluor)
                      dialog_label_5.config(text="To be able to start hand drawing, push Button 4a.")   
                      ###########################################
                      activate_hand_drawing_mode_for_one_cell()
@@ -3128,7 +3144,8 @@ def right_click_one_cell(event):# extract info about clicked celland take action
                      if zoom_counter!=0:
                          zoom_counter=0
                          zoom_monitor_label.config(text=" ")                   
-                     activate_fast_edit_mode() 
+                     activate_fast_edit_mode()
+                     
                                                            
          previous_cell_number=cell_number_in_frame        
 ################################################
@@ -3173,7 +3190,8 @@ def erase_line():# in case you are not happy with your hand contour and want to 
 def start_zoom():
     zoom_status.set("on")
     zoom_monitor_label.config(text="Zoom activated", fg="red")
-    activate_buttons(all_buttons_page5,[button_activate_fast_edit_mode,button_activate_slow_edit_mode])   
+    
+    activate_buttons(all_buttons_page5,[button_activate_slow_edit_mode])   
     global my_image_fl, my_image_br, points, canvas_fluor_p5, canvas_bright_p5,photo_fluor, photo_bright, internal_frame_number,x0,y0, points_for_original
     points,points_for_original=[],[]
     frame_number=view_slider_p5.get()
@@ -3205,11 +3223,17 @@ def start_zoom():
 def start_pan():    
     pan_monitor_label.config(text="Pan activated", fg="red")
     canvas_fluor_p5.unbind("<Button-1>")
-    canvas_fluor_p5.unbind("<Button-3>")    
+    canvas_fluor_p5.unbind("<Button-3>")
+    canvas_fluor_p5.unbind("<MouseWheel>")    
     canvas_fluor_p5.bind( "<ButtonPress-1>", drag_start)
     canvas_fluor_p5.bind("token<ButtonRelease-1>", drag_stop)
     canvas_fluor_p5.bind("<B1-Motion>", drag)
-    activate_buttons(all_buttons_page5,[stop_pan_button])   
+    activate_buttons(all_buttons_page5,[stop_pan_button])
+    update_cheatsheet(cheatsheets,"pan",bg_color,label_color)                            
+    R_bright.config(state=DISABLED)
+    R_fluor.config(state=DISABLED)
+    zoom_monitor_label.config(text=" ", fg="red")
+    mode_monitor_label.config(text=" ", fg="red")
 #######################################
 def stop_pan():
     pan_monitor_label.config(text=" ")
@@ -3217,13 +3241,19 @@ def stop_pan():
     canvas_fluor_p5.unbind("token<ButtonRelease-1>")
     canvas_fluor_p5.unbind("<B1-Motion>")
     mode=mode_variable.get()
-    if mode=="fast":
+    if mode=="Fast":
        canvas_fluor_p5.bind("<Button-1>", edit_by_clicking)        
     else:
        canvas_fluor_p5.bind("<Button-1>", get_x_and_y)        
        canvas_fluor_p5.bind("<B1-Motion>",draw_with_mouse)  
-    canvas_fluor_p5.bind("<Button-3>", right_click_one_cell)      
-    activate_buttons(all_buttons_page5,[button_activate_fast_edit_mode,button_activate_slow_edit_mode])   
+    canvas_fluor_p5.bind("<Button-3>", right_click_one_cell)
+    canvas_fluor_p5.bind('<MouseWheel>', wheel)
+    update_cheatsheet(cheatsheets,mode,bg_color,label_color) 
+    activate_buttons(all_buttons_page5,[button_activate_slow_edit_mode])
+    R_fluor.config(state=NORMAL)
+    R_bright.config(state=NORMAL)
+    zoom_monitor_label.config(text="Zoom activated", fg="red")
+    mode_monitor_label.config(text=str(mode) +" mode", fg="red")
 ###############################################               
 def drag_start(event):
         # start drag of an object
@@ -3349,8 +3379,8 @@ def wheel(event):
         global zoom_counter
         zoom_counter+=1
         if zoom_counter==1:
-            activate_buttons(all_buttons_page5,[button_activate_fast_edit_mode,button_activate_slow_edit_mode,start_pan_button])
-        activate_buttons(all_buttons_page5,[button_activate_fast_edit_mode,button_activate_slow_edit_mode,start_pan_button])              
+            activate_buttons(all_buttons_page5,[button_activate_slow_edit_mode,start_pan_button])
+        activate_buttons(all_buttons_page5,[button_activate_slow_edit_mode,start_pan_button])              
         global factor_in, factor_out, factor_input
         if  event.delta == -120:
           factor_out*=0.8
@@ -3401,13 +3431,16 @@ def stop_zoom():
 ################################################
 def save_one_edited_cell():
     activate_buttons(all_buttons_page5,[view_slider_p5, button_final_movie])    
-    cell_monitor_label.config(text="Saved Cell  "+ str(cell_name_to_screen)+" ( "+cell_color_to_screen+" )", fg="cyan")    
+    cell_monitor_label.config(text="Saved Cell  "+ str(cell_name_to_screen)+" ( "+cell_color_to_screen+" )", fg="cyan")
+    dialog_label_5.config(text="You saved Cell " + str(cell_name_to_screen)+" ( "+cell_color_to_screen+" )"+
+                          ".\nNow, you can either continue editing other cells or finish by pushing Button 6."
+                          "\nNote: you cannot exit until you push Button 6.")
     button_activate_slow_edit_mode.configure(background = button_color) 
     global photo_fluor, photo_bright, canvas_bright_p5,canvas_fluor_p5, points, filled_fluor, filled_bright, filled_red, final_mask
     print("INSIDE SAVE ONE EDITED CELL")
     #print("len(points)=",len(points))
     #print("len(points_for_original)=",len(points_for_original))
-    cv2.imwrite(r"C:\Users\helina\Desktop\final_mask_BEFORE.tif",final_mask*10)      
+    #cv2.imwrite(r"C:\Users\helina\Desktop\final_mask_BEFORE.tif",final_mask*10)      
     if len(points)!=0:# if it was hand drawing 
        print("it was hand drawing")
        ctr = np.array(points_for_original).reshape((-1,1,2)).astype(np.int32)# turn drawn points into contour (ctr)      
@@ -3442,8 +3475,8 @@ def save_one_edited_cell():
        #oval=canvas_fluor_p5.create_oval(oval_x-5*factor, oval_y-5*factor,oval_x+5*factor,
                        #oval_y+5*factor, outline="magenta",  width=1)             
        #points=[]          
-       dialog_label_5.config(text="If you want to hand draw  another cell, push Button 4 once again.\n If you are finished with the current frame, press Button 6."
-                          "\nIf you are finished with the whole movie, press Button 7.")
+       #dialog_label_5.config(text="If you want to hand draw  another cell, push Button 4 once again.\n If you are finished with the current frame, press Button 6."
+                          #"\nIf you are finished with the whole movie, press Button 7.")
     else:# if it was fast editing
       print("it was fast editing")        
       filled_fluor=delete_contour_with_specific_colour(filled_fluor, empty_fluor,cell_color)     
@@ -3460,7 +3493,7 @@ def save_one_edited_cell():
     print("zoom_status=", zoom_status.get())
     if zoom_status.get()=="on":
           stop_zoom()
-    cv2.imwrite(r"C:\Users\helina\Desktop\final_mask_AFTER.tif",final_mask*10)      
+    #cv2.imwrite(r"C:\Users\helina\Desktop\final_mask_AFTER.tif",final_mask*10)      
                            
 #################################################
 def edit_by_clicking(event):      
@@ -3479,14 +3512,14 @@ def edit_by_clicking(event):
       cell_number_in_mask=2**cell_number_in_frame     
       final_mask=remove_cell_from_mask(cell_number_in_frame, final_mask, intensity_dictionary_for_frame)     
       final_mask+=mask_with_current_cell# insert current contour of cell
-      cv2.imwrite(r"C:\Users\helina\Desktop\segmented_patch.tif",segmented_patch)      
+      #cv2.imwrite(r"C:\Users\helina\Desktop\segmented_patch.tif",segmented_patch)      
       ################### modify fluor, bright and red current frame
       global patch_with_contours
       patch_with_contours=prepare_contours(segmented_patch)    
       global filled_fluor_copy, filled_bright_copy, filled_red_copy
       ### here a very important dictionary of modified cells is created multiple times
       modified_cell_IDs[cell_number_in_frame]=[segmented_frame, final_mask, segmented_patch,[new_cX, new_cY], cell_color, cell_ID]      
-      dialog_label_5.config(text="If you are unable to achieve good segmentation by just clicking, start hand drawing mode by pushing Button 4.")     
+      dialog_label_5.config(text="If you are unable to achieve good segmentation by just clicking, start hand drawing mode by pushing Button 2.")     
       
       filled_fluor_copy=delete_contour_with_specific_colour(filled_fluor_copy, empty_fluor,red_color)     
       filled_bright_copy=delete_contour_with_specific_colour(filled_bright_copy, empty_bright,red_color)
@@ -3514,9 +3547,9 @@ def get_frame_info(internal_frame_number_p5):# for manual segmentation correctio
     cells_in_current_frame_sorted=sorted(cells_in_current_frame,key=lambda student: student[2])
     text_for_print=[cells_in_current_frame_sorted[i][0] for i in range(len(cells_in_current_frame_sorted))] 
     dialog_label_5.config(text="Cells detected in the current frame :  " +str(text_for_print)+
-                          "\nThere are 2 manul segmentation techniques available: 1. Button 3 (fast correction) where correction is achieved just by clicking on the cell"
-                          "   2.  Button 4 (hand drawing) where correction is done by drawing with the mouse."
-                          "\nIt is recommended to start with Button 3.")
+                          "\nThere are 2 manul segmentation techniques available: 1. Fast,  where correction is achieved just by clicking on the cell"
+                          "   2.  Slow, where correction is done by drawing with the mouse."
+                          "\nIt is recommended to start with fast mode: start left-clicking on the cell and the surrounding area.")
     global modified_cell_IDs
     modified_cell_IDs={}
     global mask, empty_fluor, empty_bright, empty_red
@@ -3532,14 +3565,14 @@ def get_frame_info(internal_frame_number_p5):# for manual segmentation correctio
     filled_bright=filled_brights[internal_frame_number_p5]
     filled_red=filled_reds[internal_frame_number_p5]
     final_mask=copy.deepcopy(mask)
-    
+    disable_exit()
          
     update_flash([])    
 ################################################################
 def save_edits_for_frame(): #saves all eduts in current frame and modifies linage for this frame
     global   frame_dictionary
     print("INSIDE SAVE EDITS FOR FRAME")
-    cv2.imwrite(r"C:\Users\helina\Desktop\final_mask_INSIDE_SAVE_FRAME.tif",final_mask*10)          
+    #cv2.imwrite(r"C:\Users\helina\Desktop\final_mask_INSIDE_SAVE_FRAME.tif",final_mask*10)          
     frame_dictionary= lineage_per_frame_p5[internal_frame_number_p5]
     debug_item=lineage_per_frame_p5[internal_frame_number_p5]["cell_0"][3]
   
@@ -3578,11 +3611,12 @@ def save_edits_for_frame(): #saves all eduts in current frame and modifies linag
     masks[ internal_frame_number_p5]=final_mask
     
     canvas_fluor_p5.delete(oval)   
-    dialog_label_5.config(text="You have 3 oprions now:\n  - Go to the next frame ( by using the slide bar) \n - Finish editing the movie (by pushing Button 7)"
-                            "\n - Leave it for some other time (by clicking  Exit or Next")
+    #dialog_label_5.config(text="You have 3 oprions now:\n  - Go to the next frame ( by using the slide bar) \n - Finish editing the movie (by pushing Button 7)"
+                            #"\n - Leave it for some other time (by clicking  Exit or Next")
+    dialog_label_5.config(text=" ")
     global save_frame_edits_alert
-    save_frame_edits_alert=False 
-    
+    save_frame_edits_alert=False
+      
 #######################################
 def create_final_movie():# create final movie + pedigree_per_cell (simplified, i.e. only centroids and areas) 
   dialog_label_5.config(text="Creating lineage and final movie...")
@@ -3596,51 +3630,62 @@ def create_final_movie():# create final movie + pedigree_per_cell (simplified, i
         activate_fast_edit_mode()
     save_edits_for_frame()         
   update_lineage(lineage_per_frame_p5,helper_dir_p5, 'wb')
-  dialog_label_5.config(text="Lineage per cell is stored in" +str(helper_dir_p5))
+  dialog_label_5.config(text="Excel files are being created in    " +str(output_dir_p5)+"RESULTS_PER_CELL")
     
   lineage_per_cell=print_excel_files(output_dir_p5, frame_p5_size,lineage_per_frame_p5, bordersize,patch_size_p5)
-  dialog_label_5.config(text="Lineage per cell is stored in" +str(helper_dir_p5)+
-                          "Creating final movie...")
+  dialog_label_5.config(text="Excel files are stored in    " +str(output_dir_p5)+
+                          "RESULTS_PER_CELL")
   create_output_movie(output_dir_p5, frame_p5_size)       
-  dialog_label_5.config(text="Lineage per cell is stored in  " +str(os.path.join(helper_dir_p5,"lineage_per_cell.pkl"))+
-                          "\nFinal movie is in  " + str(os.path.join(output_dir_p5,"lineage_movie.avi")))
+  dialog_label_5.config(text="Excel files are stored in    " +str(os.path.join(output_dir_p5,"RESULTS_PER_CELL"))+
+                          "\nFinal movie is in    " + str(os.path.join(output_dir_p5,"lineage_movie.avi")))
   cell_monitor_label.config(text="Excel files created", fg="cyan")
+  enable_exit()  
 ############### POPUPLATE WUTH BUTTONS
 global button_load_p5,button_activate_fast_edit_mode, button_activate_slow_edit_mode,\
                    start_zoom_button, start_pan_button,stop_pan_button,\
                    button_final_movie,view_slider_p5
     
-button_load_p5 = Button(frame3_page5, text="1. Click to open file menu and choose TRACKED_MOVIE_{your movie name"" folder", command=lambda:threading.Thread(target=choose_and_load_tracked_movie).start(), bg=button_color, font=all_font,activebackground="red")
+button_load_p5 = Button(frame3_page5, text="1. Click to open file menu and choose TRACKED_MOVIE_{your movie name} folder", command=lambda:threading.Thread(target=choose_and_load_tracked_movie).start(), bg=button_color, font=all_font,activebackground="red")
 button_load_p5.pack(pady=5)
 
 edit_label_fast = tk.Label(frame3a_page5, text=" FAST edit mode: by clicking",fg="black",bg=label_color, font='TkDefaultFont 10 bold').pack(pady=5)
-   
-button_activate_fast_edit_mode = Button(frame3a_page5, text="2. Activate fast mode", command=activate_fast_edit_mode,bg=button_color, font=all_font,activebackground="red")
-button_activate_fast_edit_mode.pack(pady=5)
+##################################################   
+#button_activate_fast_edit_mode = Button(frame3a_page5, text="2. Activate fast mode", command=activate_fast_edit_mode,bg=button_color, font=all_font,activebackground="red")
+#button_activate_fast_edit_mode.pack(pady=5)
 #########################################################
+active_fast_label = tk.Label(frame3a_page5, text="Disabled",bg="black",fg="cyan", font=all_font)
+active_fast_label.pack(pady=5)
+##########################################################
 edit_label_slow = tk.Label(frame3b_page5, text=" SLOW edit mode: by hand drawing",fg="black",bg=label_color, font='TkDefaultFont 10 bold').pack(pady=5)
-button_activate_slow_edit_mode = Button(frame3b_page5, text="3. Activate slow mode",  command=activate_slow_edit_mode,bg=button_color, font=all_font,activebackground="red")
+button_activate_slow_edit_mode = Button(frame3b_page5, text="2. Activate slow mode",  command=activate_slow_edit_mode,bg=button_color, font=all_font,activebackground="red")
 button_activate_slow_edit_mode.pack(side=tk.LEFT, padx=10,pady=5)
 ###########################################
-start_zoom_button = tk.Button(frame3b_page5, text="Start zoom", command=start_zoom,bg=button_color, font=all_font,activebackground="red")
+start_zoom_button = tk.Button(frame3b_page5, text="3. Start zoom", command=start_zoom,bg=button_color, font=all_font,activebackground="red")
 start_zoom_button.pack(side=tk.LEFT,padx=10,pady=5)
 
-stop_pan_button = tk.Button(frame3b_page5, text="Stop pan", command=stop_pan,bg=button_color, font=all_font,activebackground="red")
+stop_pan_button = tk.Button(frame3b_page5, text="5. Stop pan", command=stop_pan,bg=button_color, font=all_font,activebackground="red")
 stop_pan_button.pack(side=tk.RIGHT,padx=10,pady=5)
 
-start_pan_button = tk.Button(frame3b_page5, text="Start pan", command=start_pan,bg=button_color, font=all_font,activebackground="red")
+start_pan_button = tk.Button(frame3b_page5, text="4. Start pan", command=start_pan,bg=button_color, font=all_font,activebackground="red")
 start_pan_button.pack(side=tk.RIGHT,padx=10,pady=5)
 #############################################
 global button_final_movie
-button_final_movie = Button(frame4c_page5, text="4. Create final movie\n and \nExcel files", command=lambda:[threading.Thread(target=create_final_movie).start(),update_cheatsheet(cheatsheets,"neutral",bg_color,label_color)],bg=button_color, font=all_font,activebackground="red")
+button_final_movie = Button(frame4c_page5, text="6. Create final movie\n and \nExcel files", command=lambda:[threading.Thread(target=create_final_movie).start(),update_cheatsheet(cheatsheets,"neutral",bg_color,label_color)],bg=button_color, font=all_font,activebackground="red")
 button_final_movie.pack(side=tk.BOTTOM, padx=100)    
 ##################################
 global active_channel_var
 active_channel_var=StringVar()
-active_channel_var.set("fluor")
+active_channel_var.set("None")
 def swap_active_channel():
     global state_indicator, filled_fluor_copy, filled_bright_copy,photo_fluor, photo_bright,\
         canvas_bright_p5,canvas_fluor_p5, zoom_status, factor_input,contour_parameters, new_contour_parameters
+    print("active channel is ", active_channel_var.get())
+    if active_channel_var.get()=="fluor":
+        R_fluor.config(background="red")
+        R_bright.config(background=button_color)
+    else:
+        R_fluor.config(background=button_color)
+        R_bright.config(background="red")
     print("state_indicator=",state_indicator)
     zoom=zoom_status.get()
     print("zoom=", zoom)
@@ -3648,7 +3693,7 @@ def swap_active_channel():
     
     if state_indicator=="slide_bar":       
        slide_frames_p5(frame_number)
-    print("active channel is ", active_channel_var.get())
+    #print("active channel is ", active_channel_var.get())
              
     if state_indicator=="clicking":
         global oval
@@ -3678,8 +3723,8 @@ def swap_active_channel():
         canvas_bright_p5,canvas_fluor_p5,photo_fluor, photo_bright=display_both_channels(filled_fluor,filled_bright,canvas_fluor_p5,canvas_bright_p5,window_p5_size,image_origin_x,image_origin_y,active_channel_var.get())
         oval=canvas_fluor_p5.create_oval(oval_x-5*factor, oval_y-5*factor, oval_x+5*factor,
                        oval_y+5*factor, outline="magenta", width=1)                
-      print("len(contour_parameters) inside SWAP=",len(contour_parameters))
-      print("len(cell_contour_fl) inside SWAP=",len(cell_contour_fl))
+      #print("len(contour_parameters) inside SWAP=",len(contour_parameters))
+      #print("len(cell_contour_fl) inside SWAP=",len(cell_contour_fl))
      
       for i in range(len(contour_parameters)):         
           line_fl=canvas_fluor_p5.create_line(contour_parameters[i], fill="red", width=5)
@@ -3701,7 +3746,7 @@ view_slider_p5 = Scale(frame_slider_page5, from_=1, to=1,orient=HORIZONTAL, trou
 view_slider_p5.pack()    
 ############################################
 global all_buttons_page5
-all_buttons_page5=[button_load_p5,button_activate_fast_edit_mode, button_activate_slow_edit_mode,\
+all_buttons_page5=[button_load_p5, button_activate_slow_edit_mode,\
                    start_zoom_button, start_pan_button,stop_pan_button,\
                    button_final_movie,view_slider_p5]
 ################################################################################
