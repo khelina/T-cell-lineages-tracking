@@ -2911,8 +2911,8 @@ def choose_and_load_tracked_movie():
     zoom_counter=0
     active_channel_var.set("fluor")
     swap_active_channel()
-    #dialog_label_5.config(text="To check segmentation in each frame, use the slide bar."
-                            #"\nIf manual correction is needed in a certain frame, stop the slider and right-click the cell that needs correction.")          
+    global current_cell_number
+    current_cell_number=None
 ########################################
 def activate_fast_edit_mode():#enter fast segmentation mode
    print("FAST MODE ACTIVATED")
@@ -2951,7 +2951,7 @@ def activate_slow_edit_mode():
     canvas_fluor_p5.unbind("<B1-Motion>")
     canvas_fluor_p5.unbind( "<ButtonPress-1>")
     canvas_fluor_p5.unbind("token<ButtonRelease-1>")
-    canvas_fluor_p5.bind("<B1-Motion>", drag)
+    #canvas_fluor_p5.bind("<B1-Motion>", drag)
     #canvas_fluor_p5.unbind("<MouseWheel>")
     
     canvas_fluor_p5.bind("<Button-1>", get_x_and_y)      
@@ -2967,7 +2967,7 @@ def activate_slow_edit_mode():
     filled_fluor=delete_contour_with_specific_colour(filled_fluor, empty_fluor,cell_color)
     filled_bright=delete_contour_with_specific_colour(filled_bright, empty_bright,cell_color)
     filled_red=delete_contour_with_specific_colour(filled_red, empty_red,cell_color)   
-    final_mask=remove_cell_from_mask(cell_number_in_frame, final_mask, intensity_dictionary_for_frame)
+    final_mask=remove_cell_from_mask(current_cell_number, final_mask, intensity_dictionary_for_frame)
     #cv2.imwrite(r"C:\Users\helina\Desktop\final_mask_IN ACTIVATE SLOW AFTER.tif",final_mask*10) 
     # display frames with erased cell     
     canvas_bright_p5,canvas_fluor_p5,photo_fluor, photo_bright=display_both_channels(filled_fluor_copy,filled_bright_copy,canvas_fluor_p5,canvas_bright_p5,new_shape,image_origin_x,image_origin_y, active_channel_var.get())
@@ -2976,6 +2976,138 @@ def activate_slow_edit_mode():
                        oval_y+5*factor, outline="magenta", width=1)   
 #############################################
 def right_click_one_cell(event):# extract info about clicked celland take action
+    mode=mode_variable.get()# after right-clicking cell, extract mode, frame_number and cell_number
+    print("INSIDE RIGHT CLICK")
+    global frame_number, previous_frame_number, previous_cell_number, canvas_fluor_p5, canvas_bright_p5, final_mask, current_cell_number
+    global clicked_cell_position_marker, current_cell_number, filled_fluor, filled_bright, filled_red
+    global oval, cell_color, cell_ID, zoom_counter, click_indicator,state_indicator
+    global oval_x_init,oval_y_init, oval_x,oval_y, contour_parameters  
+    ############################################
+    global  internal_frame_number_p5,save_frame_edits_alert
+    #############################################
+    global all_buttons_page5,button_activate_fast_edit_mode,button_activate_slow_edit_mode,start_zoom_button
+    activate_buttons(all_buttons_page5,[button_activate_slow_edit_mode,start_zoom_button])
+    ##############################################    
+    frame_number =view_slider_p5.get()
+    internal_frame_number_p5=frame_number-first_frame_number_p5        
+    mask=masks[internal_frame_number_p5]      
+    clicked_cell_position_marker=[int(round((event.x-image_origin_x)/resize_coeff)),int(round((event.y-image_origin_y)/resize_coeff))]# position marker in image of original size!!!  
+    print("previous_frame_number=", previous_frame_number)
+    ###################################################        
+    ####################################################
+    zero_or_not=mask[clicked_cell_position_marker[1],clicked_cell_position_marker[0]]
+    print("zero_or_not=",zero_or_not)
+    if zero_or_not==0:# you hit background accidentally
+        if mode=="Slow":
+             erase_line()
+             mode_monitor_label.config(text="You deleted contour", fg="cyan")
+        else:
+            cell_monitor_label.config(text="Error:You clicked on background", fg="red")
+    else:# you clicked on a cell body
+         print("I clicked on a cell body")
+        
+    ####################################################
+    ##########################################################                                 
+         if frame_number!=previous_frame_number:# if you are in a new frame 
+             print("I am in a new frame")
+             clicked_cell_number_in_mask=zero_or_not                                                      
+             get_frame_info(internal_frame_number_p5)
+             previous_frame_number=frame_number 
+         else:# if you are still the same frame
+             print(" I am in the same frame")
+             if mode=="Fast":
+                 clicked_cell_number_in_mask=final_mask[clicked_cell_position_marker[1],clicked_cell_position_marker[0]]
+             else:
+                 clicked_cell_number_in_mask=zero_or_not
+         ##################################### 
+         print(" clicked_cell_number_in_mask=", clicked_cell_number_in_mask)
+         clicked_cell_number_in_frame =int(math.log(round(clicked_cell_number_in_mask),2))
+         #############################################
+         ###################################################
+         if current_cell_number==None:      
+           print("Clicked on new cell,fast mode")
+           current_cell_number=clicked_cell_number_in_frame
+           global cell_name_to_screen, cell_color_to_screen
+           cell_color_to_screen=cells_in_current_frame_sorted[current_cell_number][1][1]
+           cell_name_to_screen=cells_in_current_frame_sorted[current_cell_number][0]
+           if len(contour_parameters)!=0:
+                         erase_line()
+           state_indicator="clicking"
+           cell_monitor_label.config(text="Edit Cell "+ str(cell_name_to_screen)+" ( "+cell_color_to_screen+" )", fg="cyan")
+           mode_monitor_label.config(text="Fast mode", fg="red")
+           update_cheatsheet(cheatsheets,"fast",bg_color,label_color)           
+           disable_frame()
+           canvas_fluor_p5.bind("<Button-1>", edit_by_clicking)
+           #canvas_fluor_p5.unbind("<Button-3>")   
+           # canvas_fluor_p5.bind("<Button-3>", right_click_one_cell)                                                              
+           canvas_fluor_p5.delete(oval)# delete magenta oval on previous cell            
+           cell_color=cells_in_current_frame_sorted[clicked_cell_number_in_frame][1][0]
+           cell_ID=cells_in_current_frame_sorted[clicked_cell_number_in_frame][0]
+           ########################################                   
+           oval_x_init,oval_y_init=event.x,event.y# coordinates in window
+           oval_x,oval_y=oval_x_init,oval_y_init
+                     
+           global red_color,filled_fluor_copy,filled_bright_copy,filled_red_copy                  
+           red_color= [0,0,255,255]
+           filled_fluor_copy,filled_bright_copy,filled_red_copy=filled_fluor.copy(),filled_bright.copy(),filled_red.copy()                    
+           filled_fluor_copy=make_contour_red(filled_fluor_copy, empty_fluor,cell_color)
+           filled_bright_copy=make_contour_red(filled_bright_copy, empty_bright,cell_color)
+           filled_red_copy=make_contour_red(filled_red_copy, empty_red,cell_color)
+                          
+           global photo_fluor, photo_bright
+           canvas_bright_p5.delete("all")
+           canvas_fluor_p5.delete("all")
+           #global photo_fluor_copy, photo_bright_copy
+           canvas_bright_p5,canvas_fluor_p5,photo_fluor, photo_bright=display_both_channels(filled_fluor_copy,filled_bright_copy,canvas_fluor_p5,canvas_bright_p5,new_shape,image_origin_x,image_origin_y,active_channel_var.get())
+           #canvas_fluor_p5.delete(oval)      
+           oval=canvas_fluor_p5.create_oval(oval_x-5*factor, oval_y-5*factor, oval_x+5*factor,
+           oval_y+5*factor, outline="magenta", width=1)                               
+         else:#if current_cell_number!=None, i.e.you are in the middle of editing  
+           if clicked_cell_number_in_frame!=current_cell_number:
+               cell_monitor_label.config(text="Error:You clicked on background", fg="red")
+           else:# clicked on the current cell to save it
+              print("I hit the cell with the same numvber to save edits")
+              if mode=="Fast":                    
+                   update_cheatsheet(cheatsheets,"neutral",bg_color,label_color)
+                   save_one_edited_cell()
+                    
+                   save_frame_edits_alert=True 
+                   enable_frame()
+                    
+                   canvas_fluor_p5.unbind("<Button-1>")
+                   mode_monitor_label.config(text=" ")
+                   state_indicator="slide_bar"
+                   #cell_monitor_label.config(text="Saved Cell "+ cell_name+" ( "+cell_color_to_screen+" )", fg="cyan")
+                   if zoom_counter!=0:
+                        zoom_counter=0
+                        zoom_monitor_label.config(text=" ")
+                   current_cell_number=None
+              if mode=="Slow":
+                  print(" SLOW MODE:clicked on  same cell to save it")
+                  mode_monitor_label.config(text=" ")
+                  update_cheatsheet(cheatsheets,"neutral",bg_color,label_color)
+                  save_one_edited_cell()
+                  
+                  save_frame_edits_alert=True 
+                    
+                  enable_frame()
+                  state_indicator="slide_bar"
+                     
+                  canvas_fluor_p5.unbind("<Button-1>")
+                  canvas_fluor_p5.unbind("<B1-Motion>")
+                  canvas_fluor_p5.unbind( "<ButtonPress-1>")
+                  canvas_fluor_p5.unbind("token<ButtonRelease-1>")
+                  if zoom_counter!=0:
+                         zoom_counter=0
+                         zoom_monitor_label.config(text=" ")
+                  current_cell_number=None
+                  activate_fast_edit_mode()
+                     
+                     
+        
+
+################################################
+def right_click_one_cell_old(event):# extract info about clicked celland take action
     mode=mode_variable.get()# after right-clicking cell, extract mode, frame_number and cell_number
     global frame_number, previous_frame_number, previous_cell_number, canvas_fluor_p5, canvas_bright_p5, final_mask
     global clicked_cell_position_marker, cell_number_in_frame, filled_fluor, filled_bright, filled_red
@@ -3011,6 +3143,7 @@ def right_click_one_cell(event):# extract info about clicked celland take action
     ##################################################    
        if cell_number_in_frame!=-1:# if you hit a cell body, not background (accidentally)
           if cell_number_in_frame!=previous_cell_number:# you clicked on a new cell, same frame, fast mode
+            if previous_cell_number==-2:
                      print("clicked on new cell,fast mode")
                      if len(contour_parameters)!=0:
                          erase_line()
@@ -3019,7 +3152,9 @@ def right_click_one_cell(event):# extract info about clicked celland take action
                      mode_monitor_label.config(text="Fast mode", fg="red")
                      update_cheatsheet(cheatsheets,"fast",bg_color,label_color)           
                      disable_frame()
-                     canvas_fluor_p5.bind("<Button-1>", edit_by_clicking)                                                              
+                     canvas_fluor_p5.bind("<Button-1>", edit_by_clicking)
+                     canvas_fluor_p5.unbind("<Button-3>")   
+                    # canvas_fluor_p5.bind("<Button-3>", right_click_one_cell)                                                              
                      canvas_fluor_p5.delete(oval)# delete magenta oval on previous cell            
                      cell_color=cells_in_current_frame_sorted[cell_number_in_frame][1][0]
                      cell_ID=cells_in_current_frame_sorted[cell_number_in_frame][0]
@@ -3041,9 +3176,11 @@ def right_click_one_cell(event):# extract info about clicked celland take action
                      canvas_bright_p5,canvas_fluor_p5,photo_fluor, photo_bright=display_both_channels(filled_fluor_copy,filled_bright_copy,canvas_fluor_p5,canvas_bright_p5,new_shape,image_origin_x,image_origin_y,active_channel_var.get())
                      #canvas_fluor_p5.delete(oval)      
                      oval=canvas_fluor_p5.create_oval(oval_x-5*factor, oval_y-5*factor, oval_x+5*factor,
-                       oval_y+5*factor, outline="magenta", width=1)
-                                     
+                       oval_y+5*factor, outline="magenta", width=1)                               
                      previous_cell_number=cell_number_in_frame
+            else:
+                    cell_monitor_label.config(text="You right-clicked on wrong location", fg="red")
+                
           else:# if you hit cell with the same number             
                     print("I hit the cell with the same numvber to save edits")
                      
@@ -3181,7 +3318,7 @@ def erase_line():# in case you are not happy with your hand contour and want to 
     contour_parameters=[]
     init_contour_parameters=[]
     mask_hand=np.zeros((frame_p5_size,frame_p5_size),np.uint8)
-    cell_number_in_mask=2**cell_number_in_frame
+    cell_number_in_mask=2**current_cell_number
     final_mask[final_mask==cell_number_in_mask]=0
     points, points_for_original=[],[]
     cell_contour_fl, cell_contour_br=[],[]    
@@ -3444,7 +3581,7 @@ def save_one_edited_cell():
     if len(points)!=0:# if it was hand drawing 
        print("it was hand drawing")
        ctr = np.array(points_for_original).reshape((-1,1,2)).astype(np.int32)# turn drawn points into contour (ctr)      
-       cell_number_in_mask=2**cell_number_in_frame
+       cell_number_in_mask=2**current_cell_number
                   
        mask_hand=np.zeros((frame_p5_size,frame_p5_size),np.uint8)      
        cv2.drawContours(mask_hand,[ctr],0,(255,255,255),-1)       
@@ -3464,7 +3601,7 @@ def save_one_edited_cell():
        new_base=cv2.copyMakeBorder(segmented_frame , top=bordersize, bottom=bordersize, left=bordersize, right=bordersize, borderType= cv2.BORDER_CONSTANT, value=0. )
        a_new,b_new,c_new,d_new=int(round(new_cX))+bordersize-patch_size_p5,int(round(new_cX))+bordersize+ patch_size_p5,int(round(new_cY))+bordersize-patch_size_p5,int(round(new_cY))+bordersize+patch_size_p5           
        segmented_patch = new_base[c_new:d_new, a_new:b_new]      
-       modified_cell_IDs[previous_cell_number]=[segmented_frame, final_mask, segmented_patch,[new_cX, new_cY], cell_color, cell_ID]  
+       modified_cell_IDs[current_cell_number]=[segmented_frame, final_mask, segmented_patch,[new_cX, new_cY], cell_color, cell_ID]  
        #########################################
        global oval
        canvas_fluor_p5.delete(oval)
@@ -3503,14 +3640,13 @@ def edit_by_clicking(event):
       manually_clicked_centroid=[int(round((event.x-image_origin_x)/resize_coeff)),int(round((event.y-image_origin_y)/resize_coeff))]      
       dialog_label_5.config(text=str(manually_clicked_centroid))
       number_of_clicks.append(manually_clicked_centroid)
-      if len(number_of_clicks)==1:# it is only for flashing         
-          print("update_flash")
-      segmented_frame, segmented_patch,a,b,c,d, final_mask, new_centroid=segment_one_cell_at_a_time(segmentor, refiner,empty_fluor,empty_bright,manually_clicked_centroid, cell_radius_p5, frame_p5_size, patch_size_p5, clicked_cell_position_marker,final_mask,cell_number_in_frame, bordersize)
+      
+      segmented_frame, segmented_patch,a,b,c,d, final_mask, new_centroid=segment_one_cell_at_a_time(segmentor, refiner,empty_fluor,empty_bright,manually_clicked_centroid, cell_radius_p5, frame_p5_size, patch_size_p5, clicked_cell_position_marker,final_mask,current_cell_number, bordersize)
       ############## modify mask for frame
       new_cX, new_cY=new_centroid[0],new_centroid[1]
-      mask_with_current_cell=paste_benchmark_patch(segmented_patch,a,b,c,d,cell_number_in_frame, frame_p5_size, bordersize)      
-      cell_number_in_mask=2**cell_number_in_frame     
-      final_mask=remove_cell_from_mask(cell_number_in_frame, final_mask, intensity_dictionary_for_frame)     
+      mask_with_current_cell=paste_benchmark_patch(segmented_patch,a,b,c,d,current_cell_number, frame_p5_size, bordersize)      
+      cell_number_in_mask=2**current_cell_number     
+      final_mask=remove_cell_from_mask(current_cell_number, final_mask, intensity_dictionary_for_frame)     
       final_mask+=mask_with_current_cell# insert current contour of cell
       #cv2.imwrite(r"C:\Users\helina\Desktop\segmented_patch.tif",segmented_patch)      
       ################### modify fluor, bright and red current frame
@@ -3518,7 +3654,7 @@ def edit_by_clicking(event):
       patch_with_contours=prepare_contours(segmented_patch)    
       global filled_fluor_copy, filled_bright_copy, filled_red_copy
       ### here a very important dictionary of modified cells is created multiple times
-      modified_cell_IDs[cell_number_in_frame]=[segmented_frame, final_mask, segmented_patch,[new_cX, new_cY], cell_color, cell_ID]      
+      modified_cell_IDs[current_cell_number]=[segmented_frame, final_mask, segmented_patch,[new_cX, new_cY], cell_color, cell_ID]      
       dialog_label_5.config(text="If you are unable to achieve good segmentation by just clicking, start hand drawing mode by pushing Button 2.")     
       
       filled_fluor_copy=delete_contour_with_specific_colour(filled_fluor_copy, empty_fluor,red_color)     
@@ -3531,7 +3667,10 @@ def edit_by_clicking(event):
       #### display  current frame with modified cell    
       global photo_fluor, photo_bright, canvas_bright_p5,canvas_fluor_p5, oval     
       canvas_bright_p5,canvas_fluor_p5,photo_fluor, photo_bright=display_both_channels(filled_fluor_copy,filled_bright_copy,canvas_fluor_p5,canvas_bright_p5,new_shape,image_origin_x,image_origin_y,active_channel_var.get())
-      canvas_fluor_p5.delete(oval)      
+      canvas_fluor_p5.delete(oval)
+      if len(number_of_clicks)==1:# it is for disabling right click temorarily        
+          #canvas_fluor_p5.unbind("<Button-3>")   
+          canvas_fluor_p5.bind("<Button-3>", right_click_one_cell)      
       oval=canvas_fluor_p5.create_oval(oval_x-5*factor, oval_y-5*factor, oval_x+5*factor,
                        oval_y+5*factor, outline="magenta", width=1)                
 #################################################
