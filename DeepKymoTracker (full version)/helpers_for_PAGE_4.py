@@ -18,10 +18,10 @@ def sorted_aphanumeric(data):
 #######################################################
 
 def load_tracked_movie_p5(input_dir,output_dir):    
-    path_filled_brights, path_filled_fluors, path_filled_reds,path_masks=[],[],[],[]
+    path_filled_brights, path_filled_fluors,path_masks=[],[],[]
     
 
-    empty_fluors, empty_brights, empty_reds,filled_fluors, filled_brights,filled_reds, masks=[],[],[],[],[],[],[]
+    empty_fluors, empty_brights,filled_fluors, filled_brights, masks=[],[],[],[],[]
     
     for filename in sorted_aphanumeric(os.listdir(input_dir)):
         if filename.endswith("ch02.tif"):
@@ -32,11 +32,12 @@ def load_tracked_movie_p5(input_dir,output_dir):
            im_fluor=cv2.imread(os.path.join(input_dir, filename),0)
            #image_fluor=cv2.cvtColor(im_fluor,cv2.COLOR_GRAY2BGRA)
            empty_fluors.append(im_fluor)
+        """
         if filename.endswith("ch01.tif"):
            im_red=cv2.imread(os.path.join(input_dir, filename),0)
            #image_fluor=cv2.cvtColor(im_fluor,cv2.COLOR_GRAY2BGRA)
            empty_reds.append(im_red)
-           
+        """  
     print("loaded empty images")       
     dir_bright=os.path.join(output_dir,"TRACKED_BRIGHTFIELD_CHANNEL")
     for filename in sorted_aphanumeric(os.listdir(dir_bright)):
@@ -52,14 +53,14 @@ def load_tracked_movie_p5(input_dir,output_dir):
            im_fluor_filled=cv2.imread(path_im_fluor ,-1)
            path_filled_fluors.append(path_im_fluor)
            filled_fluors.append(im_fluor_filled)
-           
+    """       
     dir_red=os.path.join(output_dir,"TRACKED_RED_FL_CHANNEL")
     for filename in sorted_aphanumeric(os.listdir(dir_red)):
            path_im_red=os.path.join(dir_red, filename)
            im_red_filled=cv2.imread(path_im_red ,-1)
            path_filled_reds.append(path_im_red)
            filled_reds.append(im_red_filled)
-          
+    """      
     print("loaded fluor filled  images")        
     dir_masks=os.path.join(output_dir, "HELPER_FOLDERS_(NOT FOR USER)","MASKS")
     for filename in sorted_aphanumeric(os.listdir(dir_masks)):
@@ -75,7 +76,7 @@ def load_tracked_movie_p5(input_dir,output_dir):
     lineage_per_frame=extract_lineage(helper_dir_p5)
     print("loaded lineage_per_frame") 
     
-    return path_filled_brights,path_filled_fluors,path_filled_reds,path_masks, empty_fluors, empty_brights,empty_reds, filled_fluors, filled_brights,filled_reds, masks, lineage_per_frame
+    return path_filled_brights,path_filled_fluors,path_masks, empty_fluors, empty_brights, filled_fluors, filled_brights, masks, lineage_per_frame
 ###############################################
 
 
@@ -128,7 +129,7 @@ def make_contour_red(filled_image, empty_image,color):
     cv2.imwrite("C:\\Users\\helina\\Desktop\\red_contor.tif", filled_image)
     return filled_image
 ################################################
-def update_frame_dictionary_after_manual_segm_correction(mask, filled_fluor,filled_bright,modified_cell_IDs,frame_dictionary,frame_size, patch_size, bordersize):    
+def update_frame_dictionary_after_manual_segm_correction(mask, filled_fluor,filled_bright,modified_cell_IDs,frame_dictionary,frame_size, patch_size, bordersize, last_arg):    
     keys=list(frame_dictionary.keys())
     modified_cells=list(modified_cell_IDs.keys())
     #print("keys=", keys)
@@ -166,7 +167,9 @@ def update_frame_dictionary_after_manual_segm_correction(mask, filled_fluor,fill
        colour=frame_dictionary[ "cell_%s" % cell_ID][15][0]
        cv2.putText(filled_fluor,cell_name,(int(new_cX)-10,int(new_cY)+5),cv2.FONT_HERSHEY_PLAIN,1,colour,1)
        cv2.putText(filled_bright,cell_name,(int(new_cX)-10,int(new_cY)+5),cv2.FONT_HERSHEY_PLAIN,1,colour,1)
-       
+       if last_arg[0]==1:
+           filled_red=last_arg[1]
+           cv2.putText(filled_red,cell_name,(int(new_cX)-10,int(new_cY)+5),cv2.FONT_HERSHEY_PLAIN,1,colour,1)
        #old_area=frame_dictionary[ "cell_%s" % cell_ID][18]
        #old_perimeter=frame_dictionary[ "cell_%s" % cell_ID][19]
        #old_circularity=frame_dictionary[ "cell_%s" % cell_ID][20]
@@ -183,7 +186,7 @@ def update_frame_dictionary_after_manual_segm_correction(mask, filled_fluor,fill
        frame_dictionary["cell_%s" % cell_ID][19]=new_perimeter
        frame_dictionary["cell_%s" % cell_ID][20]=new_circularity
        final_patch= frame_dictionary["cell_%s" % cell_ID][3]
-       cv2.imwrite(r"C:\Users\helina\Desktop\final_patch.tif",final_patch)
+       #cv2.imwrite(r"C:\Users\helina\Desktop\final_patch.tif",final_patch)
     return frame_dictionary  
 ###########################################
 def update_cheatsheet(cheatsheets,mode,bg_color,label_color):

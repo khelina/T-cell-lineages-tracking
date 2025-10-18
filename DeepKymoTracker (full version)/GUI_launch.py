@@ -531,7 +531,7 @@ def select_one_bright():# load all frames,display clicked bright frame
     ###################################################         
     global list_of_red_frame_numbers
     list_of_red_frame_numbers =extract_red_frame_numbers(red_names_sorted)
-    #print("list_of_red_frame_numbers=", list_of_red_frame_numbers) 
+    print("list_of_red_frame_numbers=", list_of_red_frame_numbers) 
     ##############################################    
    
     print("software_folder=", software_folder)
@@ -1004,8 +1004,8 @@ def cut_fluor_wells():#cut fluor and red wells
     canvas_mid.create_image(0,0, anchor=NW, image=final_fluor_tk)
     l_mid_canvas.config(text=os.path.basename(fluor_name))
     ###############################
-    if k+1 in list_of_red_frame_numbers:
-      index=list_of_red_frame_numbers.index(k+1) 
+    if k+first_frame_number_p3 in list_of_red_frame_numbers:
+      index=list_of_red_frame_numbers.index(k+first_frame_number_p3) 
       red_name=red_names_sorted[index]
       red_text=os.path.basename(red_name)
       red_image=cv2.imread(red_name,-1)
@@ -1137,7 +1137,7 @@ frame7_page4.grid(row=2, column=2, rowspan=1, columnspan=1)
 frame8_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=canvas_size_p4, bg=bg_color)
 frame8_page4.grid(row=3, column=0, rowspan=1, columnspan=1,sticky=W+E+N+S)
 
-frame9_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=1538, bg="green")
+frame9_page4 = tk.Frame(master=page4, width=canvas_size_p4, height=1538, bg=bg_color)
 frame9_page4.grid(row=3, column=1, rowspan=1, columnspan=1, sticky=W+E+N+S)
 ####### overlay is for disabling slide bar during execution
 overlay = tk.Frame(master=page4, bg='', bd=0)  # transparent
@@ -2867,17 +2867,21 @@ def choose_and_load_tracked_movie():
     input_dir_p5  =os.path.join(head,input_movie_name)# \ONE_WELL_MOVIE_{movie name}
     print(" input_dir_p5 =",  input_dir_p5 )    
     #######################################################
-    global path_filled_brights,path_filled_fluors,path_filled_reds,path_masks
-    global empty_fluors, empty_brights, empty_reds,filled_fluors, filled_brights,filled_reds, masks
+    global path_filled_brights,path_filled_fluors,path_masks
+    global empty_fluors, empty_brights,filled_fluors, filled_brights, masks
     global lineage_per_frame_p5
     dialog_label_5.config(text="loading tracked movie...")
-    path_filled_brights,path_filled_fluors,path_filled_reds,path_masks, empty_fluors, empty_brights, empty_reds,filled_fluors, filled_brights,filled_reds, masks, lineage_per_frame_p5=load_tracked_movie_p5(input_dir_p5,output_dir_p5)
-    global frame_p5_size,cell_radius_p5,patch_size_p5,full_core_red_name, first_frame_number_p5,red_dictionary, bordersize   
+    path_filled_brights,path_filled_fluors,path_masks, empty_fluors, empty_brights, filled_fluors, filled_brights, masks, lineage_per_frame_p5=load_tracked_movie_p5(input_dir_p5,output_dir_p5)
+    global frame_p5_size,cell_radius_p5,patch_size_p5,full_core_red_name, first_frame_number_p5,red_dictionary, bordersize, n_digits   
     #############
     frame_p5_size, cell_radius_p5, patch_size_p5,max_number_of_cells,\
            num_frames, full_core_fluor_name, n_digits, full_core_bright_name,  first_frame_number_p5,\
            base_colours,contrast_value,number_cells_in_first_frame,full_core_red_name,red_dictionary, bordersize, delta=extract_const_movie_parameters(helper_dir_p5)
     #################################
+    global red_keys
+    red_keys =list(red_dictionary.keys())
+    print("red_keys",red_keys)
+    print("full_core_red_name=",full_core_red_name)
     global resize_coeff, new_shape
     resize_coeff=window_p5_size /frame_p5_size
     global  image_origin_x,image_origin_y, factor_in, factor_out,factor,zoom_coeff,delta_x,delta_y, cell_center_visual_x, cell_center_visual_y# for zooming
@@ -2895,7 +2899,7 @@ def choose_and_load_tracked_movie():
     #active_channel_var.set("fluor")
     print("frame_p5_size=",frame_p5_size)
     feedback_label_5.configure(text="Movie : "+input_dir_p5+"\nFluorescent frames: "+str(num_frames)+\
-                               "   Bright frames: "+str(len(filled_brights))+"   Red frames:"+str(len(filled_reds))+\
+                               "   Bright frames: "+str(len(filled_brights))+"   Red frames:"+str(len(red_keys))+\
                                    "\nFrame size = "+ str(frame_p5_size)+" x "+str(frame_p5_size)+"   Cell diameter = "+str(cell_radius_p5*2))   
     global photo_filled_fluors, photo_filled_brights
     dialog_label_5.config(text="Preparing images for display...")
@@ -2988,7 +2992,8 @@ def activate_slow_edit_mode():
     
     filled_fluor=delete_contour_with_specific_colour(filled_fluor, empty_fluor,cell_color)
     filled_bright=delete_contour_with_specific_colour(filled_bright, empty_bright,cell_color)
-    filled_red=delete_contour_with_specific_colour(filled_red, empty_red,cell_color)   
+    if red_channel_indicator==1:
+       filled_red=delete_contour_with_specific_colour(filled_red, empty_red,cell_color)   
     final_mask=remove_cell_from_mask(current_cell_number, final_mask, intensity_dictionary_for_frame)   
     # display frames with erased cell     
     canvas_bright_p5,canvas_fluor_p5,photo_fluor, photo_bright=display_both_channels(filled_fluor_copy,filled_bright_copy,canvas_fluor_p5,canvas_bright_p5,new_shape,image_origin_x,image_origin_y, active_channel_var.get())
@@ -3010,6 +3015,9 @@ def right_click_one_cell(event):# extract info about clicked celland take action
     activate_buttons(all_buttons_page5,[button_activate_slow_edit_mode,start_zoom_button])
     ##############################################    
     frame_number =view_slider_p5.get()
+    print("frame_number=",frame_number)
+    print("first_frame_number_p5 =",first_frame_number_p5 )
+    print("red_dictioanry", red_dictionary)
     internal_frame_number_p5=frame_number-first_frame_number_p5        
     mask=masks[internal_frame_number_p5]      
     clicked_cell_position_marker=[int(round((event.x-image_origin_x)/resize_coeff)),int(round((event.y-image_origin_y)/resize_coeff))]# position marker in image of original size!!!  
@@ -3068,10 +3076,12 @@ def right_click_one_cell(event):# extract info about clicked celland take action
                      
            global red_color,filled_fluor_copy,filled_bright_copy,filled_red_copy                  
            red_color= [0,0,255,255]
-           filled_fluor_copy,filled_bright_copy,filled_red_copy=filled_fluor.copy(),filled_bright.copy(),filled_red.copy()                    
+           filled_fluor_copy,filled_bright_copy=filled_fluor.copy(),filled_bright.copy()                    
            filled_fluor_copy=make_contour_red(filled_fluor_copy, empty_fluor,cell_color)
            filled_bright_copy=make_contour_red(filled_bright_copy, empty_bright,cell_color)
-           filled_red_copy=make_contour_red(filled_red_copy, empty_red,cell_color)
+           if red_channel_indicator==1:
+                filled_red_copy=filled_red.copy() 
+                filled_red_copy=make_contour_red(filled_red_copy, empty_red,cell_color)
                           
            global photo_fluor, photo_bright
            canvas_bright_p5.delete("all")
@@ -3443,7 +3453,8 @@ def save_one_edited_cell():
        canvas_fluor_p5.delete(oval)
        cv2.drawContours(filled_fluor,[ctr] , 0, cell_color, 1)
        cv2.drawContours(filled_bright,[ctr] , 0, cell_color, 1)
-       cv2.drawContours(filled_red,[ctr] , 0, cell_color, 1)
+       if red_channel_indicator==1:
+            cv2.drawContours(filled_red,[ctr] , 0, cell_color, 1)
        canvas_bright_p5,canvas_fluor_p5,photo_fluor, photo_bright=display_both_channels(filled_fluor,filled_bright,canvas_fluor_p5,canvas_bright_p5,new_shape,image_origin_x,image_origin_y,active_channel_var.get())
        #oval=canvas_fluor_p5.create_oval(oval_x-5*factor, oval_y-5*factor,oval_x+5*factor,
                        #oval_y+5*factor, outline="magenta",  width=1)             
@@ -3454,10 +3465,12 @@ def save_one_edited_cell():
       print("it was fast editing")        
       filled_fluor=delete_contour_with_specific_colour(filled_fluor, empty_fluor,cell_color)     
       filled_bright=delete_contour_with_specific_colour(filled_bright, empty_bright,cell_color)
-      filled_red=delete_contour_with_specific_colour(filled_red, empty_red,cell_color)      
+          
       filled_fluor=paste_patch(filled_fluor,patch_with_contours,a,b,c,d,cell_color,1.0, frame_p5_size,bordersize)      
       filled_bright=paste_patch(filled_bright,patch_with_contours,a,b,c,d,cell_color,1.0, frame_p5_size,bordersize)
-      filled_red=paste_patch(filled_red,patch_with_contours,a,b,c,d,cell_color,1.0, frame_p5_size,bordersize)                  
+      if red_channel_indicator==1:
+          filled_red=delete_contour_with_specific_colour(filled_red, empty_red,cell_color)  
+          filled_red=paste_patch(filled_red,patch_with_contours,a,b,c,d,cell_color,1.0, frame_p5_size,bordersize)                  
       canvas_bright_p5,canvas_fluor_p5,photo_fluor, photo_bright=display_both_channels(filled_fluor,filled_bright,canvas_fluor_p5,canvas_bright_p5,new_shape,image_origin_x,image_origin_y,active_channel_var.get())
     
     canvas_fluor_p5.delete(oval)      
@@ -3495,10 +3508,12 @@ def edit_by_clicking(event):
       
       filled_fluor_copy=delete_contour_with_specific_colour(filled_fluor_copy, empty_fluor,red_color)     
       filled_bright_copy=delete_contour_with_specific_colour(filled_bright_copy, empty_bright,red_color)
-      filled_red_copy=delete_contour_with_specific_colour(filled_red_copy, empty_red,red_color)      
+     
       filled_fluor_copy=paste_patch(filled_fluor_copy,patch_with_contours,a,b,c,d,red_color,1.0, frame_p5_size, bordersize)      
       filled_bright_copy=paste_patch(filled_bright_copy,patch_with_contours,a,b,c,d,red_color,1.0, frame_p5_size, bordersize)
-      filled_red_copy=paste_patch(filled_red_copy,patch_with_contours,a,b,c,d,red_color,1.0, frame_p5_size, bordersize)
+      if red_channel_indicator==1:
+         filled_red_copy=delete_contour_with_specific_colour(filled_red_copy, empty_red,red_color)      
+         filled_red_copy=paste_patch(filled_red_copy,patch_with_contours,a,b,c,d,red_color,1.0, frame_p5_size, bordersize)
             
       #### display  current frame with modified cell    
       global photo_fluor, photo_bright, canvas_bright_p5,canvas_fluor_p5, oval     
@@ -3527,22 +3542,35 @@ def get_frame_info(internal_frame_number_p5):# for manual segmentation correctio
                           "\nIt is recommended to start with fast mode: start left-clicking on the cell and the surrounding area.")
     global modified_cell_IDs
     modified_cell_IDs={}
-    global mask, empty_fluor, empty_bright, empty_red
+    global mask, empty_fluor, empty_bright, empty_red, red_channel_indicator
+    red_channel_indicator=0
     mask=masks[internal_frame_number_p5]
     empty_fluor=empty_fluors[internal_frame_number_p5]
     empty_bright=empty_brights[internal_frame_number_p5]
-    empty_red=empty_reds[internal_frame_number_p5]
+    ############################################
+    
     ###################################    
     global path_filled_bright, path_filled_fluor,path_filled_red,path_mask
-    path_filled_bright, path_filled_fluor,path_filled_red,path_mask= path_filled_brights[internal_frame_number_p5],path_filled_fluors[internal_frame_number_p5],path_filled_reds[internal_frame_number_p5],path_masks[internal_frame_number_p5]
+    path_filled_bright, path_filled_fluor,path_mask= path_filled_brights[internal_frame_number_p5],path_filled_fluors[internal_frame_number_p5],path_masks[internal_frame_number_p5]
     global final_mask,filled_fluor,filled_bright, filled_red
     filled_fluor=filled_fluors[internal_frame_number_p5]
     filled_bright=filled_brights[internal_frame_number_p5]
-    filled_red=filled_reds[internal_frame_number_p5]
+    ############################################
+    current_frame_number_zfill=str(frame_number).zfill(n_digits)
+    print("current_frame_number_zfill=",current_frame_number_zfill)
+    #red_keys=list(red_dictionary.keys())
+    if current_frame_number_zfill in red_keys:
+         red_channel_indicator=1
+         empty_red_path =red_dictionary[current_frame_number_zfill]
+         print(" empty_red_path =", empty_red_path )
+         empty_red=cv2.imread(empty_red_path,0)
+         base_name=os.path.basename(empty_red_path)
+         path_filled_red =os.path.join(output_dir_p5,"TRACKED_RED_FL_CHANNEL",base_name)
+         print("path_filled_red =", path_filled_red )
+         filled_red=cv2.imread(path_filled_red,-1)       
     final_mask=copy.deepcopy(mask)
-    disable_exit()
-         
-    update_flash([])    
+    disable_exit()         
+    update_flash([]) 
 ################################################################
 def save_edits_for_frame(): #saves all eduts in current frame and modifies linage for this frame
     global   frame_dictionary
@@ -3550,15 +3578,19 @@ def save_edits_for_frame(): #saves all eduts in current frame and modifies linag
     #cv2.imwrite(r"C:\Users\helina\Desktop\final_mask_INSIDE_SAVE_FRAME.tif",final_mask*10)          
     frame_dictionary= lineage_per_frame_p5[internal_frame_number_p5]
     debug_item=lineage_per_frame_p5[internal_frame_number_p5]["cell_0"][3]
-  
-    modified_frame_dictionary=update_frame_dictionary_after_manual_segm_correction(final_mask, filled_fluor,filled_bright,modified_cell_IDs,frame_dictionary,frame_p5_size, patch_size_p5, bordersize)    
+    if red_channel_indicator==1:
+        last_arg=[1,filled_red]
+    else:
+        last_arg=[0, []]
+    modified_frame_dictionary=update_frame_dictionary_after_manual_segm_correction(final_mask, filled_fluor,filled_bright,modified_cell_IDs,frame_dictionary,frame_p5_size, patch_size_p5, bordersize, last_arg)    
     lineage_per_frame_p5[internal_frame_number_p5]=modified_frame_dictionary
     debug_item_after=lineage_per_frame_p5[internal_frame_number_p5]["cell_0"][3]      
     modified_cells_keys=list(modified_cell_IDs.keys())
     
     cv2.imwrite(path_filled_bright, filled_bright )# rewrite BRIGHT_MOVIE_RESULTS
     cv2.imwrite(path_filled_fluor, filled_fluor)# rewrite FLEORESCENT_MOVIE_RESULTS
-    cv2.imwrite(path_filled_red, filled_red )# rewrite RED_MOVIE_RESULTS
+    if red_channel_indicator==1:
+        cv2.imwrite(path_filled_red, filled_red )# rewrite RED_MOVIE_RESULTS
     destin_mask_for_plot=np.round(final_mask)
     destin_mask_for_plot = destin_mask_for_plot.astype(np.uint64)
     cv2.imwrite(path_mask, destin_mask_for_plot) # rewrite MASKS)
@@ -3582,7 +3614,7 @@ def save_edits_for_frame(): #saves all eduts in current frame and modifies linag
        photo_filled_brights[ internal_frame_number_p5]=photo_fluor
     filled_fluors[ internal_frame_number_p5]=filled_fluor
     filled_brights[ internal_frame_number_p5]=filled_bright
-    filled_reds[ internal_frame_number_p5]=filled_red
+    #filled_reds[ internal_frame_number_p5]=filled_red
     masks[ internal_frame_number_p5]=final_mask
     
     canvas_fluor_p5.delete(oval)   

@@ -6,9 +6,6 @@ from PIL import ImageTk, Image
 import time 
 import os
 import re
-#from tkinter import filedialog
-#from tkinter import ttk
-#from tkinter import *
 from tkinter import NW
 from threading import Thread
 #####################################
@@ -43,39 +40,23 @@ def turn_image_into_tkinter(image, window_size, lin_image_widths): # if image is
       image_copy=np.uint8(image_norm)      
   else:
      image_copy=np.uint8(image)
-  ###################################
-  #print("i am inside turn_image_into_tkinter")
-  #print("image_copy.shape=",image_copy.shape)
-  #print("windoe_size=", window_size)
   
-  #if image_copy.shape[0]!=image_copy.shape[1]:# for lineage_image
-  if len(lin_image_widths)!=0:# for lineage_image
-     print("DETECTED LINEAGE IMAGE!")
-     print("image_copy.shape=",image_copy.shape)
-     print("lin_image_widths=", lin_image_widths)
+  if len(lin_image_widths)!=0:# for lineage_image    
      num_frames=image_copy.shape[0]
      image_resized=np.zeros(image_copy.shape, np.uint8)
-     basic_part=image_copy[:,:num_frames]
-     print("basic_part.shape=",basic_part.shape)
+     basic_part=image_copy[:,:num_frames]    
      image_resized=cv2.resize(basic_part, (window_size,window_size), interpolation = cv2.INTER_AREA)
      start=num_frames
      if start<image_copy.shape[1]:
-       for i in range(1,len(lin_image_widths)):
-           print("i=", i)
-           print("start=", start)
+       for i in range(1,len(lin_image_widths)):           
            additional_width=lin_image_widths[i]
-           print("additional_width=",additional_width)
-       
-           added_part=image_copy[:, start:start+additional_width]
-           print("added_part.shape=",added_part.shape)
+           added_part=image_copy[:, start:start+additional_width]          
            added_resized=cv2.resize(added_part, (90,window_size), interpolation = cv2.INTER_AREA)    
            image_resized= np.concatenate((image_resized,added_resized), axis=1)
            start+=additional_width
            if start>=image_copy.shape[1]:
-               break
-         
-  else:
-  
+               break         
+  else:  
      image_resized=cv2.resize(image_copy, (window_size,window_size), interpolation = cv2.INTER_AREA)
   #####################################################
   if len(image.shape)==2:
@@ -173,8 +154,8 @@ def create_name_dictionary_p4(filenames):# available frame names (some might be 
   for i in range(len(filenames)):
      filename=filenames[i]    
      index_t=filename.find("_t")
-     internal_number=filename[index_t+2:-9]
-     name_dictionary[internal_number]=filename
+     frame_number=filename[index_t+2:-9]
+     name_dictionary[frame_number]=filename
   return  name_dictionary 
 #################### this function is used for displaying all 3 types of images
 ################### It tackles missing frames
