@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import copy
 import math
+from plot import update_color_dictionary
 #####################################
 #Bordersize=100
 ######################################
@@ -135,13 +136,12 @@ def debug(cells):
   print("cemtroid=", centroid)
   print("daughter=", daughter)
   print("int_number=", int_number)
-##################################################      
-    
-def update_dictionary_after_division(cut_patch,cells,text,count,indicator,coords, frame_size, colors,bordersize, patch_size):      
+##################################################          
+def update_dictionary_after_division(cut_patch,cells,curr_frame_cell_names,count,indicator,coords, frame_size, colour_dictionary,bordersize, patch_size,base_colours, colour_counter):      
     N_cells=len(cells)
-    print("colors=", colors)
+    print("colour_dictionary=", colour_dictionary)
     print("count=", count)
-    print("text=", text)
+    print("text=", curr_frame_cell_names)
     print("BEFORE UPDATING CELLS")
     #debug(cells)
     for kkk in range(N_cells):#correcting cells dictionary if division
@@ -160,10 +160,13 @@ def update_dictionary_after_division(cut_patch,cells,text,count,indicator,coords
               print("centois of daughter-1=",  cells["cell_%s" % kkk][6])
               print("separated-centroids=",parameters[0][0])
               print("frame_number=", cells["cell_%s" % kkk][12])
-              text[kkk]+="0"
-              print("text_daughter-1", text[kkk])
-              cells["cell_%s" % kkk][11]=text[kkk]           
-              cells["cell_%s" % kkk][15]=colors[text[kkk]]
+              curr_frame_cell_names[kkk]+="0"
+             
+              print("text_daughter-1", curr_frame_cell_names[kkk])
+              colour_dictionary, colour_counter=update_color_dictionary(colour_dictionary,[curr_frame_cell_names[kkk]],base_colours, colour_counter)
+              print("colour_dictionary after daughter-1=",colour_dictionary)
+              cells["cell_%s" % kkk][11]=curr_frame_cell_names[kkk]           
+              cells["cell_%s" % kkk][15]=colour_dictionary[curr_frame_cell_names[kkk]]
               cells["cell_%s" % kkk][16]= "daughter-1"
               
               cells["cell_%s" % kkk][18]=parameters[0][1]#area 
@@ -174,11 +177,8 @@ def update_dictionary_after_division(cut_patch,cells,text,count,indicator,coords
               cells["cell_%s" % kkk][8]=parameters[0][5]#b 
               cells["cell_%s" % kkk][9]=parameters[0][6]#c
               cells["cell_%s" % kkk][10]=parameters[0][7]#d
-              
-              
-              
-              
-              print("color-1", colors[text[kkk]])
+                        
+              print("color-1", colour_dictionary[curr_frame_cell_names[kkk]])
                        
               cellscopy=copy.deepcopy(cells)                               
               cells["cell_%s" % (N_cells)]=cellscopy["cell_%s" % kkk]
@@ -187,14 +187,18 @@ def update_dictionary_after_division(cut_patch,cells,text,count,indicator,coords
               cells["cell_%s" % (N_cells)][3]=separated_cells[1]
               cells["cell_%s" % N_cells][6]=parameters[1][0] 
               #cells["cell_%s" % (N_cells)][6]=centroids[1]                                         
-              text.append(text[kkk][:-1]+"1")
-              print("text after creating daughter-2=", text)
-              cells["cell_%s" % (N_cells)][11]=text[-1]             
-              cells["cell_%s" % N_cells][15]=colors[text[-1]]             
+              curr_frame_cell_names.append(curr_frame_cell_names[kkk][:-1]+"1")
+              print("text after creating daughter-2=", curr_frame_cell_names)
+              
+              cells["cell_%s" % (N_cells)][11]=curr_frame_cell_names[-1]
+              colour_dictionary, colour_counter=update_color_dictionary(colour_dictionary,[curr_frame_cell_names[-1]],base_colours, colour_counter)
+              cells["cell_%s" % N_cells][15]=colour_dictionary[curr_frame_cell_names[-1]]             
               cells["cell_%s" % N_cells][16]= "daughter-2"
               cells["cell_%s" % N_cells][17]= N_cells# was N_CELLS-1
-              print("text_daughter-2", text[-1])
-              print("color-2", colors[text[-1]])
+              print("text_daughter-2", curr_frame_cell_names[-1])
+              
+              print("colour_dictionary after daughter-2=",colour_dictionary)
+              print("color-2", colour_dictionary[curr_frame_cell_names[-1]])
               print("separated-2=",parameters[1][0])
               print("cwntroids-2=",  cells["cell_%s" % kkk][6])
               cells["cell_%s" % N_cells][18]=parameters[1][1]#area 
@@ -211,7 +215,7 @@ def update_dictionary_after_division(cut_patch,cells,text,count,indicator,coords
     N_cells=len(cells)
     print("AFTER UPDATING CELLS")
     #debug(cells)                                         
-    return cells,text,count,indicator,coords
+    return cells,curr_frame_cell_names,count,indicator,coords,colour_dictionary, colour_counter
 ###################checks if division happens too early
 def check_division_frame_number(count, cells, dict_of_divisions,cell_name,frame_number):   
     life_times={1:50,2:800,3:500, 4:500}# keys=lengths of cell names; numbers -min number of frames between divisions

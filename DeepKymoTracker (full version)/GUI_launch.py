@@ -2031,7 +2031,7 @@ def execute():
  activate_buttons(all_buttons_page4,[button_execute])
  button_execute.configure(background = 'red') 
  instruct_var_p4.set("Execution in progress...\nPress Button 2a if you need to pause the tracking.")
- global start_frame
+ global start_frame, xs
  print("START_FRAME inside execute=", start_frame)
  start_time=time.time()
  label_curr_frame_name.config(text=start_empty_file_name)
@@ -2053,7 +2053,7 @@ def execute():
         del lineage_per_frame_p4
     
     global variable_stop,  tracker, segmentor, refiner# this variable allows to stop the loop (controlled by Stop button)     
-    global coords, curr_frame_cell_names, count,  cells, old_number_of_cells, edit_id_indicator,kk, lin_image_widths
+    global coords, curr_frame_cell_names, count,  cells, old_number_of_cells, edit_id_indicator,kk, lin_image_widths, colour_dictionary, colour_counter
     #label_edit.configure(text="curr_frame_cell_names:\n " + str(curr_frame_cell_names), bg="black")
     print("lin_image_widths INSIDE EXECUTE=", lin_image_widths)     
     N_cells = coords.shape[0]
@@ -2106,7 +2106,7 @@ def execute():
           
             print("cell names after segmentation=", list(cells.keys()))
             print("curr_frame_cell_names after segmentation=",curr_frame_cell_names) 
-            ################## Division Detector,look for figure 8 shape          
+            ################## If manual division corrected took place          
             if manual_division_indicator.get()=="yes":
                 daughter_1_name=mother_name+"0"
                 daughter_2_name=mother_name+"1"
@@ -2115,27 +2115,28 @@ def execute():
                     if name==daughter_1_name:                     
                         cells[key][16]="daughter-1"
                     if name==daughter_2_name:
-                        cells[key][16]="daughter-2"                           
-            else:
+                        cells[key][16]="daughter-2" 
+               
+                                          
+            else:# Division detector in action
                division_indicator = 0  
                count, cut_patch, mother_8_name = detect_division(
                    cells, count, first_number_in_clip, kk)             
                if (np.any(count == 2) or np.any(count == 1)):                  
                    if mother_8_name != []:
                        count = check_division_frame_number(
-                           count, cells, dict_of_divisions, mother_8_name, first_number_in_clip+kk)                      
-               if np.any(count == 2):
-                 
-                   
-                   cells, curr_frame_cell_names, count, division_indicator, coords = update_dictionary_after_division(
-                       cut_patch, cells, curr_frame_cell_names, count, division_indicator, coords, frame_size, colour_dictionary,bordersize, patch_size)
-                   
+                           count, cells, dict_of_divisions, mother_8_name, first_number_in_clip+kk)
+               #######################################################
+               if np.any(count == 2):# confirmed automatic division detection
+                   cells, curr_frame_cell_names, count, division_indicator, coords,colour_dictionary, colour_counter = update_dictionary_after_division(
+                       cut_patch, cells, curr_frame_cell_names, count, division_indicator, coords, frame_size, colour_dictionary,bordersize, patch_size,base_colours, colour_counter)
+               ################################################################    
                if division_indicator == 1 and mother_8_name != []:                   
                    dict_of_divisions[mother_8_name] = first_number_in_clip+kk
+                   xs=update_xs_after_division(xs,mother_8_name+"0",mother_8_name+"1", mother_8_name,init_delta)
                    #print("mother_cell_name =", mother_8_name)                  
                    #print("8-figure division detected in frame ", first_number_in_clip+kk)                 
-            #################################################### 
-                      
+            ####################################################                    
             if manual_division_indicator.get()=="yes":
                  manual_division_indicator.set("no")
             #record_const_movie_parameters()
@@ -2197,7 +2198,7 @@ def execute():
                break                  
             if (division_indicator == 1):
                 print("division occured in frame ", first_number_in_clip+kk)              
-                dict_of_divisions[existing_cell_names[-1][:-1]] = first_number_in_clip+kk
+                #dict_of_divisions[existing_cell_names[-1][:-1]] = first_number_in_clip+kk
                 break 
                    
         print("BROKE OUT OF BIG LOOP")
