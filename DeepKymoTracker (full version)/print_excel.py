@@ -79,9 +79,9 @@ def load_red_names(source):
 def create_lineage_per_cell(lineage_per_frame,output_dir_p5, frame_size, bordersize,patch_size): 
   current_movie_folder=os.path.dirname(output_dir_p5)
   current_movie_name=os.path.basename( current_movie_folder)
-  print("current_movie_name INSIDE_PER_CELL=", current_movie_name)
+  #print("current_movie_name INSIDE_PER_CELL=", current_movie_name)
   origin= os.path.join(current_movie_folder,"ONE_WELL_MOVIE_"+current_movie_name)
-  print("origin=", origin)
+  #print("origin=", origin)
   #################################################
   red_names_sorted=load_red_names(origin)
   list_of_red_numbers =extract_red_frame_numbers(red_names_sorted)
@@ -93,7 +93,7 @@ def create_lineage_per_cell(lineage_per_frame,output_dir_p5, frame_size, borders
     names+=[item[key][11] for key in keys]
   cell_names =list(set(names))# all cell names encountered in movie
   general_per_cell_folder=os.path.join(output_dir_p5,"RESULTS_PER_CELL")
-  print("per_cell_folder=", general_per_cell_folder)
+  #print("per_cell_folder=", general_per_cell_folder)
   ############ delete contents of PER_CELL_RESULTS
   if  os.path.exists(general_per_cell_folder):
        shutil.rmtree(general_per_cell_folder)
@@ -120,7 +120,7 @@ def create_lineage_per_cell(lineage_per_frame,output_dir_p5, frame_size, borders
     os.mkdir( specific_cell_folder)
     subdirs=["Cell "+cell_name+" in segmented frames", "Cell "+cell_name+" in segmented patches","Cell "+cell_name+" in green fluor patches",
                "Cell "+cell_name+" in brightfield patches","Cell "+cell_name+" in red fluor patches"]
-    print("subdirs=", subdirs)
+    #print("subdirs=", subdirs)
     for sub in subdirs:
           subdir=os.path.join( specific_cell_folder,sub)        
           os.mkdir(subdir)
@@ -216,7 +216,7 @@ def print_excel_files(output_dir_p5, frame_size, lineage_per_frame_p5, bordersiz
     #print("outpath=", outpath)
     #lineage_per_frame=extract_lineage(outpath)
     #update_lineage(lineage_per_frame_p5,outpath, 'wb')
-    print("output_dir_p5 in print_Excel_files=", output_dir_p5)
+    #print("output_dir_p5 in print_Excel_files=", output_dir_p5)
     lineage_per_cell=create_lineage_per_cell(lineage_per_frame_p5,output_dir_p5, frame_size, bordersize,patch_size)
     ##############################################
     helper_dir_p5=os.path.join(output_dir_p5,"HELPER_FOLDERS_(NOT FOR USER)")
@@ -228,10 +228,10 @@ def print_excel_files(output_dir_p5, frame_size, lineage_per_frame_p5, bordersiz
    
     ################### empty folder "PER_CELL_RESULTS" and its subfolders
     general_per_cell_folder=os.path.join(output_dir_p5,"RESULTS_PER_CELL")
-    print("general_per_cell_folder in print_Excel_files=", general_per_cell_folder)
+    #print("general_per_cell_folder in print_Excel_files=", general_per_cell_folder)
     
     list_of_cell_names =list(lineage_per_cell.keys())
-    print(" list_of_cell_names inside create_lineage_for_LOrenzo=", list_of_cell_names)
+    #print(" list_of_cell_names inside create_lineage_for_LOrenzo=", list_of_cell_names)
     for cell_name in list_of_cell_names:#
        specific_cell_folder=os.path.join(general_per_cell_folder,cell_name)# create folders "1", "10", etc. for segmented images of each cell
        areas_plot_path=os.path.join( specific_cell_folder,"Cell "+cell_name +' areas diagram.png')

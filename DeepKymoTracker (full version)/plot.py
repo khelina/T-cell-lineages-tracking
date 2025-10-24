@@ -39,21 +39,21 @@ def update_naive_names_list(basic_naive_names, init_number_of_cells,naive_names_
 ################# when adding new cell
 def update_xs_after_new_cells(xs,new_names,previous_lineage_image, canvas_lineage_exec, canvas_size_p4, delta,lin_image_widths):
        #print("I am inside update_xs")
-       print("delta=", delta)
+       #print("delta=", delta)
        lineage_image_width=previous_lineage_image.shape[1]             
        xs_internal, width_additional= create_additional_dictionary_of_xs(new_names,delta)       
        lin_image_widths.append(width_additional)
        for ii in range(len(new_names)):
           new_name=new_names[ii]
-          print("new_name=", new_name)          
+          #print("new_name=", new_name)          
           xs[new_name]=lineage_image_width+xs_internal[new_name]
        previous_lineage_image=np.concatenate((previous_lineage_image,np.zeros((previous_lineage_image.shape[0],width_additional,3), dtype=previous_lineage_image.dtype)), axis=1)         
        lineage_image_width+=width_additional
-       print(" lineage_image_width AFTER=", lineage_image_width)
+       #print(" lineage_image_width AFTER=", lineage_image_width)
        canvas_lineage_width=canvas_size_p4+90*(len(lin_image_widths)-1)          
        canvas_lineage_exec.config(width=canvas_lineage_width)
-       print("xs AFTER=",xs)
-       print("lin_image_widths=",lin_image_widths)
+       #print("xs AFTER=",xs)
+       #print("lin_image_widths=",lin_image_widths)
        return xs, previous_lineage_image,lin_image_widths
 ###################################
 def create_first_color_dictionary(init_number_of_cells, num_frames): 
@@ -118,14 +118,14 @@ def create_first_color_dictionary_old(init_number_of_cells, num_frames):
   return colour_dictionary, new_naive_names, base_colours, colour_counter, basic_naive_names, xs, init_delta,naive_names_counter
 #######################################
 def create_first_dictionary_of_xs(initial_naive_names,num_frames):
-    print("INSIDE creat_first_xs")
+    #print("INSIDE creat_first_xs")
     m=len(initial_naive_names)
     init_delta=int(num_frames/(2*m))          
     xs={}  
     for i in range(len(initial_naive_names)):
         xs[initial_naive_names[i]]=init_delta*(2*i+1)
-    print("xs=", xs)
-    print("init_delta=", init_delta)
+    #print("xs=", xs)
+    #print("init_delta=", init_delta)
     return xs, init_delta
 #############################
 def update_xs_after_division(xs,daughter_1_name,daughter_2_name, mother_name,init_delta):       
@@ -136,15 +136,15 @@ def update_xs_after_division(xs,daughter_1_name,daughter_2_name, mother_name,ini
 ###################### when manually adding new cells
 def create_additional_dictionary_of_xs(new_names,init_delta):  
   m=len(new_names)
-  print("INSIDE CREATE ADDITIONAL")
-  print("m=",m)
+  #print("INSIDE CREATE ADDITIONAL")
+  #print("m=",m)
   total_number_of_deltas_for_additional=m*2   
   width_additional= total_number_of_deltas_for_additional*init_delta    
   xs_additional={}  
   for i in range(m):      
         xs_additional[new_names[i]]=init_delta*(2*i+1)        
-  print("xs_additional=",xs_additional)
-  print(" width_additional=", width_additional)        
+  #print("xs_additional=",xs_additional)
+  #print(" width_additional=", width_additional)        
   return xs_additional, width_additional
 #################################################### 
 def rename_file(destin,infile):# for bright or fluor images       

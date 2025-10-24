@@ -204,8 +204,8 @@ def create_per_cell_info(pedigree, outpath, still_lineage, progress_bar, first_f
    lapsed_times, rem_times=[],[]
    for cell in  list_of_cell_names:
             total_n_frames+=len(pedigree[cell])
-   print("total_n_frames=",total_n_frames)
-   print("total_n_cells=",total_n_cells)
+   #print("total_n_frames=",total_n_frames)
+   #print("total_n_cells=",total_n_cells)
    red_patches_path=os.path.join(outpath,"HELPER_FOLDERS_(NOT FOR USER)","VISUALISATION_HELPERS" ,"RED_LINEAGE_PATCHES")  
    plots_path= os.path.join(outpath,"HELPER_FOLDERS_(NOT FOR USER)","VISUALISATION_HELPERS" ,"PLOTS")  
    one_cell_patches_path=os.path.join(outpath,"HELPER_FOLDERS_(NOT FOR USER)","VISUALISATION_HELPERS" ,"PATCHES_FOR_RESULTS")   
@@ -240,7 +240,7 @@ def create_per_cell_info(pedigree, outpath, still_lineage, progress_bar, first_f
      x=[frames[kk] for kk in range (len(frames))]
      if counter==1:
             preparation_time=time.clock() - start_time
-            print("preparation_time=", preparation_time)
+            #print("preparation_time=", preparation_time)
             time_lapsed+=preparation_time
             lapsed_times.append(time_lapsed)
             time_remaining= estimated_whole_time-time_lapsed

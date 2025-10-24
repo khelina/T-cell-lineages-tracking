@@ -100,7 +100,7 @@ def predict_tracking_general(coords,fluor_images,fluor_images_compressed,fluor_n
 ######################################################
 def predict_tracking(coords,fluor_images,fluor_images_compressed,fluor_names, first_number_in_clip,tracker,last_frame_number, cell_radius, frame_size):
    VIDEO=np.zeros((100,100,5))
-   print("frame_size=", frame_size)
+   #print("frame_size=", frame_size)
    seed_empty=np.zeros((frame_size,frame_size), np.uint8)    
    coords_norm=np.zeros(coords.shape)  
    coords_norm[0,0]=coords[0][0]
@@ -220,7 +220,7 @@ def segment_manual_patch(segmentor, refiner,empty_fluor,empty_bright,centroid,co
          #empty_fluor_base=cv2.copyMakeBorder(empty_fluor, top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize, borderType= cv2.BORDER_CONSTANT, value = float(0))
          #empty_bright_base=cv2.copyMakeBorder(empty_bright, top=Bordersize, bottom=Bordersize, left=Bordersize, right=Bordersize, borderType= cv2.BORDER_CONSTANT, value = float(0))
          value = float(np.mean(empty_fluor))
-         print("value=", value)
+         #print("value=", value)
          empty_fluor_base=cv2.copyMakeBorder(empty_fluor, top=bordersize, bottom=bordersize, left=bordersize, right=bordersize, borderType= cv2.BORDER_CONSTANT, value = float(np.mean(empty_fluor)))
          empty_bright_base=cv2.copyMakeBorder(empty_bright, top=bordersize, bottom=bordersize, left=bordersize, right=bordersize, borderType= cv2.BORDER_CONSTANT, value = float(np.mean(empty_bright)))
          ss=0
@@ -400,8 +400,8 @@ def segment_patch(segmentor, refiner,empty_fluor,empty_bright,centroid,coord, ce
           base=np.stack((empty_fluor_border,empty_bright_border,seed_patch_border),axis=2)       
           patch = base[c:d, a:b,:]          
           shape=(patch.shape[0],patch.shape[1])
-          print("PATCH SHAPE INSIDE segment_patch=", shape)
-          print("bordersize=", bordersize)
+          #print("PATCH SHAPE INSIDE segment_patch=", shape)
+          #print("bordersize=", bordersize)
           patch_input=cv2.resize(patch, (96,96), interpolation = cv2.INTER_AREA)
           seed_patch=patch_input[:,:,2]
           seed_patch = seed_patch.astype('uint8')
@@ -495,7 +495,7 @@ def segment_and_clean(dict_of_divisions,cells,count,coords,text,segmentor, refin
       parallel_image+=cell_parallel
    init_seg=init_seg[bordersize:bordersize+frame_size,bordersize:bordersize+frame_size]
    parallel_image=parallel_image[bordersize:bordersize+frame_size,bordersize:bordersize+frame_size]   
-   cv2.imwrite(r"C:\Users\helina\Desktop\parallel_images\frame_%s.tif" % (frame_number), parallel_image*10000000)
+   #cv2.imwrite(r"C:\Users\helina\Desktop\parallel_images\frame_%s.tif" % (frame_number), parallel_image*10000000)
    #cv2.imwrite("C:\\Users\\helina\\Desktop\\init_segs\\frame_%s.tif" % (frame_number), init_seg)             
  
    init_seg = init_seg.astype(np.uint8)  
@@ -577,7 +577,7 @@ def segment_and_clean(dict_of_divisions,cells,count,coords,text,segmentor, refin
    return count,cells, coords, text, olds
 #######################################################
 def check_if_cell_stuck_to_edge(frame_with_one_cell):
-    print("  big_patch.shape=", frame_with_one_cell.shape)    
+    #print("  big_patch.shape=", frame_with_one_cell.shape)    
     frame_with_one_cell[frame_with_one_cell==255]=100
     check_frame_base=np.zeros((frame_with_one_cell.shape[0]-2,frame_with_one_cell.shape[1]-2),dtype="uint8")
     check_frame=cv2.copyMakeBorder(check_frame_base, top=1, bottom=1, left=1, right=1, borderType= cv2.BORDER_CONSTANT, value=100 )    
@@ -589,7 +589,7 @@ def determine_which_edge(frame_with_one_cell,test_image):
     edges=[]    
     coordinates = np.where(test_image == 200)
     rows, cols = coordinates[0],coordinates[1]
-    print("rows, cols=", rows, cols )
+    #print("rows, cols=", rows, cols )
     ##############################################
     if 0 in rows:
         edges.append(["top",[0,1]])
@@ -599,7 +599,7 @@ def determine_which_edge(frame_with_one_cell,test_image):
         edges.append(["left",[1,0]])
     if  frame_with_one_cell.shape[1]-1 in cols:
         edges.append(["right",[-1,0]])
-    print("edges=", edges)
+    #print("edges=", edges)
     ##############################    
     if len(edges)==1:
            delta=edges[0][1]
@@ -608,7 +608,7 @@ def determine_which_edge(frame_with_one_cell,test_image):
     else:
            print("Error:len(edges)>2 or =0")
            delta=0
-    print("delta=", delta)
+    #print("delta=", delta)
     return delta
 ##########################################
 def unstick_cell_from_edge(segmentor, refiner,empty_fluor,empty_bright,step_size, cell_radius_p5, frame_p5_size, patch_size_p5, centroid,final_mask,cell_number_in_frame, bordersize):
@@ -629,9 +629,9 @@ def unstick_cell_from_edge(segmentor, refiner,empty_fluor,empty_bright,step_size
   return segmented_patch,final_mask,a,b,c,d, test_image
 ############################## clean mask_final from a certain cell
 def remove_stuck_cell_from_mask(bad_cell_number_in_frame, init_image):
-    print("INSIDE REMOVE_CELL_FROM_MASK:")
+    #print("INSIDE REMOVE_CELL_FROM_MASK:")
     
-    cv2.imwrite(r"C:\Users\helina\Desktop\init_image_before.tif",init_image*20)
+    #cv2.imwrite(r"C:\Users\helina\Desktop\init_image_before.tif",init_image*20)
     
     if init_image.dtype!="uint64":
         init_image=init_image.astype("uint64")
@@ -641,7 +641,7 @@ def remove_stuck_cell_from_mask(bad_cell_number_in_frame, init_image):
 #######################
 ##################################################
 def remove_cell_from_mask(bad_cell_number_in_frame, init_image, intensity_dictionary_for_frame):
-    print("INSIDE REMOVE_CELL_FROM_MASK:")
+    #print("INSIDE REMOVE_CELL_FROM_MASK:")
     keys=list(intensity_dictionary_for_frame.keys())
     #cv2.imwrite(r"C:\Users\helina\Desktop\init_image_before.tif",init_image*20)
     #print("keys=", keys)
@@ -705,7 +705,7 @@ def create_mask(final_list, frame_number):# create mask for a whole frame from f
       #cell_number_scaled=cell_number_for_mask/1000000
       base[one_cell_image==255]=cell_number_for_mask                             
       mask+=base
-    cv2.imwrite(r"C:\Users\helina\Desktop\masks\mask_%s.tif" % (frame_number), mask*50)
+    #cv2.imwrite(r"C:\Users\helina\Desktop\masks\mask_%s.tif" % (frame_number), mask*50)
     return mask
 #############################################
 ## split contours with 2 or more intensities   

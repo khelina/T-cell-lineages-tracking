@@ -53,7 +53,7 @@ def extract_file_name(full_image_name):# for STEP-2
 ###################################################
 def load_clip(first_number_in_clip,full_core_fluor_name,full_core_bright_name,n_digits, num_frames, first_frame_number,full_core_red_name, red_dictionary):
   red_numbers=list(red_dictionary.keys())
-  print("red_numbers=", red_numbers)
+  #print("red_numbers=", red_numbers)
   fluor_names, bright_names, red_names =[],[],[]   
   fluor_images,fluor_images_compressed,bright_images, red_images=[],[],[],[]  
   last_frame_number=num_frames+first_frame_number-1  
@@ -87,7 +87,7 @@ def load_clip(first_number_in_clip,full_core_fluor_name,full_core_bright_name,n_
     else:
       red_names.append("0")
       red_images.append("0")
-  print("red_names=", red_names)
+  #print("red_names=", red_names)
     #############################################
   return  fluor_images,fluor_images_compressed,bright_images,fluor_names,bright_names, red_names, red_images    
 ############################################
@@ -172,8 +172,8 @@ def load_image_names(source):# fpr STEP-2: cut well
  bright_names_sorted=sorted(bright_names,key=characters) 
  fluor_names_sorted=sorted(fluor_names,key=characters)
  red_names_sorted =sorted(red_names,key=characters)
- print("len(bright_names_sorted INSIDE)=",len(bright_names_sorted))
- print("len(red_names_sorted INSIDE)=",len(red_names_sorted))
+ #print("len(bright_names_sorted INSIDE)=",len(bright_names_sorted))
+ #print("len(red_names_sorted INSIDE)=",len(red_names_sorted))
  return bright_names_sorted,fluor_names_sorted, red_names_sorted
 ##################################################
 #this is the teatx for feedback window (execytion step)
@@ -207,7 +207,7 @@ def sorted_aphanumeric(data):
     return sorted(data, key=alphanum_key)
 ####################################
 def load_full_raw_movie(my_dir):# load raw movie for preview
-    print("inside load_full_raw_movie")
+    #print("inside load_full_raw_movie")
     all_names_fluor,all_names_bright,all_names_red=[],[],[]     
     for filename in sorted_aphanumeric(os.listdir(my_dir)):   
         if filename.endswith("ch00.tif"):

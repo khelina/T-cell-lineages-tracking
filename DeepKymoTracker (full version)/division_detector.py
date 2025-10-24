@@ -14,7 +14,9 @@ def detect_division(cells, count, k,kk):# detects divisions in the whole frame
            verdict,segmented_patch,im1=detect_figure_8(segm_patch)
            if verdict=="division":
              count[kkk]+=1
-             mother_name=cells["cell_%s" % kkk][11]# was [-2]
+             mother_8_name=cells["cell_%s" % kkk][11]# was [-2]
+             mother_8_number=cells["cell_%s" % kkk][17]
+             mother_8_centroid =cells["cell_%s" % kkk][6]
              cut_patch=im1
              if (count[kkk]==1):# ignoring the 1st division detection               
                  for_print.append("maybe")
@@ -24,13 +26,13 @@ def detect_division(cells, count, k,kk):# detects divisions in the whole frame
            else:        
                count[kkk]=0
                for_print.append("no")
-               mother_name=[]
-               
-                  
+               mother_8_name=[]
+               mother_8_number=[]
+               mother_8_centroid =[]
        #immmg, cnts, hier = cv2.findContours(cut_patch,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
        
        #print("len(contours) inside detect_division=", len(cnts))
-       return count,cut_patch, mother_name
+       return count,cut_patch, mother_8_name, mother_8_number,mother_8_centroid 
 ####################################
 def detect_figure_8(segmented_patch):# detects division in patch
   verdict="no division"
@@ -57,7 +59,7 @@ def detect_figure_8(segmented_patch):# detects division in patch
        delta_dist=distances_sorted[1]/distances_sorted[2]
        if (distances_sorted[1]/distances_sorted[2]>=2.5):# was 3.77 before
         im1 = cv2.cvtColor(im1,cv2.COLOR_GRAY2BGR)
-        cv2.line(im1,fars_sorted[0],fars_sorted[1],(0,255,0),2)
+        cv2.line(im1,fars_sorted[0],fars_sorted[1],(0,255,0),2)# cut into 2 cells
         im1 = cv2.cvtColor(im1,cv2.COLOR_BGR2GRAY)
         im1[im1==150]=0
         image, contours, hierarchy = cv2.findContours(im1,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
@@ -106,7 +108,7 @@ def recalculate_centre(segmented_image,old_coords, frame_size, bordersize, patch
      new_patch=black_border_copy[new_c:new_d,new_a:new_b]     
      return cX,cY, area,perimeter,circularity, new_a,new_b,new_c,new_d, new_patch 
 #################################################
-def process_figure_8(im1,centre, frame_size, bordersize, patch_size):#separates figure into 2 cells and patches
+def process_figure_8(im1, mother_8_centroid,frame_size, bordersize, patch_size):#separates figure into 2 cells and patches
     #if im1.shape==(96,96,3):
     if im1.shape==(2*patch_size,2*patch_size,3):    
              im1 = cv2.cvtColor(im1,cv2.COLOR_BGR2GRAY) 
@@ -120,7 +122,7 @@ def process_figure_8(im1,centre, frame_size, bordersize, patch_size):#separates 
         cv2.drawContours(img, contours, kkk, 255, -1)
                 
              
-        cX,cY, area,perimeter,circularity, new_a,new_b,new_c,new_d, new_patch =recalculate_centre(img,(centre[0],centre[1]),frame_size, bordersize, patch_size)
+        cX,cY, area,perimeter,circularity, new_a,new_b,new_c,new_d, new_patch =recalculate_centre(img,mother_8_centroid,frame_size, bordersize, patch_size)
         separated_cells.append(new_patch) 
         parameters.append(([cX,cY], area,perimeter,circularity, new_a,new_b,new_c,new_d ))    
     return separated_cells,parameters
@@ -132,12 +134,12 @@ def debug(cells):
   centroid=item[6]
   daughter=item[16]
   int_number=item[17]
-  print("name=", name)
-  print("cemtroid=", centroid)
-  print("daughter=", daughter)
-  print("int_number=", int_number)
+  #print("name=", name)
+  #print("cemtroid=", centroid)
+  #print("daughter=", daughter)
+  #print("int_number=", int_number)
 ##################################################          
-def update_dictionary_after_division(cut_patch,cells,curr_frame_cell_names,count,indicator,coords, frame_size, colour_dictionary,bordersize, patch_size,base_colours, colour_counter):      
+def update_dictionary_after_division(cut_patch,cells,curr_frame_cell_names,count,coords, frame_size, colour_dictionary,bordersize, patch_size,base_colours, colour_counter):      
     N_cells=len(cells)
     print("colour_dictionary=", colour_dictionary)
     print("count=", count)
@@ -153,7 +155,7 @@ def update_dictionary_after_division(cut_patch,cells,curr_frame_cell_names,count
               print("len(contours) before process_figure_8=", len(cnts))           
               separated_cells,parameters=process_figure_8(im1,cells["cell_%s" % kkk][6], frame_size,bordersize, patch_size)
               print("len(separated_cells) after process figure_8=", len(separated_cells))                                         
-              indicator+=1                                         
+              #indicator+=1                                         
               cells["cell_%s" % kkk][3]=separated_cells[0]
               cells["cell_%s" % kkk][6]=parameters[0][0] 
               cv2.imwrite("C:\\Users\\kfedorchuk\\Desktop\separated_1.tif", cells["cell_%s" % kkk][3])
@@ -161,7 +163,7 @@ def update_dictionary_after_division(cut_patch,cells,curr_frame_cell_names,count
               print("separated-centroids=",parameters[0][0])
               print("frame_number=", cells["cell_%s" % kkk][12])
               curr_frame_cell_names[kkk]+="0"
-             
+              #daughter_1_name=curr_frame_cell_names[kkk]
               print("text_daughter-1", curr_frame_cell_names[kkk])
               colour_dictionary, colour_counter=update_color_dictionary(colour_dictionary,[curr_frame_cell_names[kkk]],base_colours, colour_counter)
               print("colour_dictionary after daughter-1=",colour_dictionary)
@@ -214,8 +216,16 @@ def update_dictionary_after_division(cut_patch,cells,curr_frame_cell_names,count
               count[kkk]=0 
     N_cells=len(cells)
     print("AFTER UPDATING CELLS")
+    """
+    for key in cells.keys():
+                      name=cells[key][11]
+                      if name==daughter_1_name:                     
+                           cells[key][16]="daughter-1"
+                      if name==daughter_2_name:
+                           cells[key][16]="daughter-2" 
+    """
     #debug(cells)                                         
-    return cells,curr_frame_cell_names,count,indicator,coords,colour_dictionary, colour_counter
+    return cells,curr_frame_cell_names,count,coords,colour_dictionary, colour_counter
 ###################checks if division happens too early
 def check_division_frame_number(count, cells, dict_of_divisions,cell_name,frame_number):   
     life_times={1:50,2:800,3:500, 4:500}# keys=lengths of cell names; numbers -min number of frames between divisions
