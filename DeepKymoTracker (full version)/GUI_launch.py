@@ -2087,6 +2087,7 @@ def execute():
                 dict_of_divisions, cells, count, coords,curr_frame_cell_names, segmentor, refiner, empty_fluor, empty_bright, tracked_centroids, first_number_in_clip+kk, edit_id_indicator, mother_number, out_folders, cell_radius, frame_size, colour_dictionary, patch_size, "first cleaning", bordersize)
             ################## If manual division corrected took place          
             if manual_division_indicator.get()=="yes":
+                print("INSIDE MANUAL_DIVISION")
                 daughter_1_name=mother_name+"0"
                 daughter_2_name=mother_name+"1"
                 for key in cells.keys():
@@ -2096,6 +2097,7 @@ def execute():
                     if name==daughter_2_name:
                         cells[key][16]="daughter-2"                                                          
             else:# Division detector in action
+               print("INSIDE AUTOMATIC_DIVISION")
                division_indicator = 0  
                count, cut_patch, mother_8_name,mother_8_number,mother_8_centroid = detect_division(
                    cells, count, first_number_in_clip, kk)             
@@ -2117,13 +2119,15 @@ def execute():
                    edit_id_indicator.set("no")
                    manual_division_indicator.set("no")
                    #########################################
+                   print("xs BEFORE=", xs)
                    xs=update_xs_after_division(xs,daughter_1_name,daughter_2_name, mother_8_name,init_delta)                   
+                   print("xs AFTER=", xs)
                    ######################### change coords(they are
                    dict_of_divisions[mother_8_name] = first_number_in_clip+kk
                    print("dict_of_divisions=",dict_of_divisions)
                    ##############################################
                    cells,curr_frame_cell_names,count,coords,colour_dictionary, colour_counter=update_dictionary_after_division(cut_patch,\
-                          cells,curr_frame_cell_names,count,coords, frame_size, colour_dictionary,bordersize, patch_size,base_colours, colour_counter)
+                          cells,curr_frame_cell_names,count,coords, frame_size, colour_dictionary,bordersize, patch_size,base_colours, colour_counter)                  
                    #############################################################            
                if division_indicator == 1 and mother_8_name != []:
                    ########################################             
@@ -2133,7 +2137,12 @@ def execute():
             if manual_division_indicator.get()=="yes":
                  manual_division_indicator.set("no")                 
             update_changeable_params_history([[xs,curr_frame_cell_names,flag,edit_id_indicator.get(),colour_counter,colour_dictionary,dict_of_divisions,naive_names_counter, lin_image_widths]], helper_dir_p4, 'ab')
-            update_lineage([cells], helper_dir_p4,'ab')# concatenates {cells}  to pickle             
+            update_lineage([cells], helper_dir_p4,'ab')# concatenates {cells}  to pickle
+            keys=list(cells.keys())
+            ####################
+            debug_list=[cells[key][16] for key in keys]
+            print("debug_list=",debug_list)
+            ##############################            
             N_cells = len(cells)            
             current_lineage_image=create_lineage_image_one_frame(cells, previous_lineage_image, xs, first_number_in_clip+kk, first_frame_number)            
             coords, destin_fluor = plot_frame(cells, clip_centr, first_number_in_clip, kk,
@@ -2174,7 +2183,7 @@ def execute():
             break
         else:            
             if (division_indicator == 1):
-              first_number_in_clip = first_number_in_clip+kk
+              first_number_in_clip = first_number_in_clip+kk+1
               N_cells = coords.shape[0]            
             else:
               first_number_in_clip += 4                
@@ -2392,8 +2401,16 @@ def stop_editing_division():
     manual_division_indicator.set("yes")
     ###########################################
     keys=list(lineage_per_frame_p4[start_frame_internal].keys())# from previous frame was -2    
-    global manual_IDs, mother_number, mother_name    
-    
+    global manual_IDs, mother_number, mother_name 
+    ##########################################
+    global coords
+    coords_old=lineage_per_frame_p4[start_frame_internal][keys[0]][14] 
+    coords_daughter_1=manual_centroids[0]
+    coords_daughter_2=manual_centroids[1]  
+    coords_old[mother_number]=coords_daughter_1    
+    coords_old=np.concatenate((coords_old,np.array(coords_daughter_2).reshape((1,2))))    
+    coords=coords_old 
+    #########################################    
     mother_number=manual_IDs[0]   
     mother_name_internal="cell_"+ str(mother_number)   
     mother_name=lineage_per_frame_p4[start_frame_internal-1][mother_name_internal][11]
@@ -2410,13 +2427,7 @@ def stop_editing_division():
     curr_frame_cell_names[mother_number]=daughter_1_name
     curr_frame_cell_names.append(daughter_2_name)  
     ######################### change coords(they are manual)
-    global coords
-    coords_old=lineage_per_frame_p4[start_frame_internal][keys[0]][14] 
-    coords_daughter_1=manual_centroids[0]
-    coords_daughter_2=manual_centroids[1]  
-    coords_old[mother_number]=coords_daughter_1    
-    coords_old=np.concatenate((coords_old,np.array(coords_daughter_2).reshape((1,2))))    
-    coords=coords_old 
+    
     ##################### change dict_of_divisions   
     dict_of_divisions[mother_name] = start_frame 
     ###################################################
@@ -3839,7 +3850,7 @@ def create_display_images_p6():# plot images necessary for display
         load_display_images_p6()        
 #######################################
 def retrieve_display_images_p6():# If display iamges were created before, upload them
-        print("INSIDE RETRIEVE")       
+        #print("INSIDE RETRIEVE")       
         label_instruct_p6.config(text="\n\n\n\n")          
         load_display_images_p6()
  ######################################################
@@ -3936,9 +3947,9 @@ def upload_input_movie():# look if display images exist. If so, load them, if no
 ############################################
 def slide_patch(value):  # value=frame number from patch_slider
     global clicks_count
-    print("clicks_count entering slide_patch =",clicks_count)
+    #print("clicks_count entering slide_patch =",clicks_count)
     clicks_count+=1
-    print("clicks_count after slide_patch =",clicks_count)
+    #print("clicks_count after slide_patch =",clicks_count)
     if clicks_count>=3:
        update_flash([])         
     canvas_bright.delete('all')
@@ -4021,7 +4032,7 @@ def load_cell_info(value):
 def load_cell_property(value):
     global clicks_count
     clicks_count=0
-    print("clicks_count inside load_cell_property 1=",clicks_count)
+    #print("clicks_count inside load_cell_property 1=",clicks_count)
     update_flash([])
     global all_buttons_page6
     cell_property.set(str(value))    
@@ -4030,7 +4041,7 @@ def load_cell_property(value):
     slide_patch(ffrom_1)
     patch_slider.set(ffrom_1)
     #clicks_count=0
-    print("clicks_count inside load_cell_property 2=",clicks_count)      
+    #print("clicks_count inside load_cell_property 2=",clicks_count)      
     update_flash([patch_slider])
     activate_buttons(all_buttons_page6,[menu_cell_property, menu_cell_ID,patch_slider])
     label_instruct_p6.config(text="Use slider to move between frames.\nIf you want to switch to a different cell or a different property, use the dropdown menus again.")

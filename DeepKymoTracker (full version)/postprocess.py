@@ -48,9 +48,10 @@ def create_lineage_image_one_frame(cells, previous_lineage_image, xs, frame, fir
           points+=more_points        
  ######### create lineage image at last                    
  for p in range(len(points)):
-      cv2.circle(previous_lineage_image, points[p][0], point_radius, points[p][1], -1)
+      #cv2.circle(previous_lineage_image, points[p][0], point_radius, points[p][1], -1)
+      cv2.rectangle(previous_lineage_image,points[p][0], (points[p][0][0]+point_radius,points[p][0][1]),points[p][1], -1)
  current_lineage_image= previous_lineage_image
-
+ 
  return current_lineage_image    
 ##########################################
 def sorted_aphanumeric(data):
@@ -177,8 +178,7 @@ def convert_time_to_format(sec):
    sec %= 60   
    return "%02d:%02d:%02d" % (hour, minn, sec) 
 ###########################################
-def create_per_cell_info(pedigree, outpath, still_lineage, progress_bar, first_frame_number_p6,label_create_p6,container ):
-   
+def create_per_cell_info(pedigree, outpath, still_lineage, progress_bar, first_frame_number_p6,label_create_p6,container ):   
    counter=0
    time_lapsed=0
    time_per_cell_per_frame=0
@@ -186,12 +186,7 @@ def create_per_cell_info(pedigree, outpath, still_lineage, progress_bar, first_f
    time_remaining=0
    list_of_cell_names =list(pedigree.keys())
    label_create_p6.config(bg="black")
-   ##################### create packed labels for different colors
-   #zero_label=tk.Label(container , text="Progress :   ", bg="black", fg="cyan")
-   #zero_label.pack(side=tk.LEFT)
-   #list_of_cell_names=["1","10","11","100", "101", "110","111",
-                       #"1000","1001","1010","1011","1100","1101","1110","1111",
-                       #"10000","10001","10010","10011"]       
+       
    list_of_labels=[]
    for k in range(len(list_of_cell_names)):
       new_label=tk.Label(container , text=list_of_cell_names[k], bg="black", fg="red", font='TkDefaultFont 10 bold')
@@ -214,9 +209,7 @@ def create_per_cell_info(pedigree, outpath, still_lineage, progress_bar, first_f
    start_time = time.clock()
    for cell_name in list_of_cell_names:# creatse folder for each cell in OUTPUT folder         
      counter+=1
-              
-     #label_feedback.config(text="Cells discovered:  " +str(list_of_cell_names)+"\nCreating r for:  " +str(cell_name))
-     
+                   
      specific_cell_dirr=os.path.join(outpath,'RESULTS_PER_CELL',cell_name)    
      one_cell_images,red_patches,area_plots,perimeter_plots,circ_plots=[],[],[],[],[]
      
@@ -277,7 +270,8 @@ def create_per_cell_info(pedigree, outpath, still_lineage, progress_bar, first_f
        init=still_lineage.copy()# plot red points in lineage              
        for k in range(len(points)):
           if points[k][0]==frame_number-first_frame_number_p6:        
-              cv2.circle(init,(points[k][1], points[k][0]), 1,[0,0,255],-1)
+              #cv2.circle(init,(points[k][1], points[k][0]), 1,[0,0,255],-1)
+              cv2.rectangle(init,(points[k][1],points[k][0]),(points[k][1],points[k][0]),[0,0,255], -1)
        name =os.path.join(red_patches_path,cell_name +"_red_frame_%s" % frame_number)
        cv2.imwrite(name +".tif",init)
        red_patches.append(init) 

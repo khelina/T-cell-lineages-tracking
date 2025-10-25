@@ -213,10 +213,7 @@ def create_lineage_per_cell(lineage_per_frame,output_dir_p5, frame_size, borders
   return pedigree_per_cell
 #############################################
 def print_excel_files(output_dir_p5, frame_size, lineage_per_frame_p5, bordersize,patch_size):
-    #print("outpath=", outpath)
-    #lineage_per_frame=extract_lineage(outpath)
-    #update_lineage(lineage_per_frame_p5,outpath, 'wb')
-    #print("output_dir_p5 in print_Excel_files=", output_dir_p5)
+    
     lineage_per_cell=create_lineage_per_cell(lineage_per_frame_p5,output_dir_p5, frame_size, bordersize,patch_size)
     ##############################################
     helper_dir_p5=os.path.join(output_dir_p5,"HELPER_FOLDERS_(NOT FOR USER)")
