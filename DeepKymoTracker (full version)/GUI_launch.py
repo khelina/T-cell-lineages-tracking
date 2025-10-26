@@ -2061,15 +2061,13 @@ def execute():
     update_flash([button_pause])
     activate_buttons(all_buttons_page4,[button_pause])        
     last_frame_number=num_frames+first_frame_number-1  
-    while  first_number_in_clip <= last_frame_number:                       
+    while  first_number_in_clip <= last_frame_number:                            
         global fluor_images, fluor_images_compressed,bright_images, fluor_names, br_names,red_names, red_images 
         clear_memory_of_previous_clip(fluor_images, fluor_images_compressed,bright_images, fluor_names, br_names,red_images, red_names)
         fluor_images,fluor_images_compressed,bright_images,fluor_names,br_names,red_names, red_images  =load_clip( first_number_in_clip,full_core_fluor_name,full_core_bright_name,n_digits, num_frames, first_frame_number, full_core_red_name,red_dictionary)
         
         clip_centr = predict_tracking_general(
                 coords, fluor_images, fluor_images_compressed, fluor_names,  first_number_in_clip,  tracker,last_frame_number, cell_radius, frame_size)
-        print("TRACKING PREDICTED FOR CLIP BEGINNING WITH FRAME  ", first_number_in_clip)
-        print("curr_frame_cell_names=",curr_frame_cell_names)        
         for kk in range(len(clip_centr)):# it is actually 4 (number of frames in clip)
             current_frame_number=first_number_in_clip+kk            
             print("FRAME NUMBER = ",  current_frame_number)# segmenting all the 4 frames in the clip                       
@@ -2083,8 +2081,8 @@ def execute():
             tracked_centroids=clip_centr[kk]              
             empty_fluor = fluor_images[kk]         
             empty_bright = bright_images[kk]                        
-            count, cells, coords,  curr_frame_cell_names, olds = segment_and_clean(
-                dict_of_divisions, cells, count, coords,curr_frame_cell_names, segmentor, refiner, empty_fluor, empty_bright, tracked_centroids, first_number_in_clip+kk, edit_id_indicator, mother_number, out_folders, cell_radius, frame_size, colour_dictionary, patch_size, "first cleaning", bordersize)
+            cells, coords,  curr_frame_cell_names = segment_and_clean(
+                dict_of_divisions, cells, coords,curr_frame_cell_names, segmentor, refiner, empty_fluor, empty_bright, tracked_centroids, first_number_in_clip+kk, edit_id_indicator, mother_number, out_folders, cell_radius, frame_size, colour_dictionary, patch_size, "first cleaning", bordersize)            
             ################## If manual division corrected took place          
             if manual_division_indicator.get()=="yes":
                 print("INSIDE MANUAL_DIVISION")
@@ -2100,48 +2098,35 @@ def execute():
                print("INSIDE AUTOMATIC_DIVISION")
                division_indicator = 0  
                count, cut_patch, mother_8_name,mother_8_number,mother_8_centroid = detect_division(
-                   cells, count, first_number_in_clip, kk)             
+                   cells, count, first_number_in_clip, kk)
                if (np.any(count == 2) or np.any(count == 1)):                  
                    if mother_8_name != []:
                        count = check_division_frame_number(
-                           count, cells, dict_of_divisions, mother_8_name, first_number_in_clip+kk)
+                           count, cells, dict_of_divisions, mother_8_name, first_number_in_clip+kk)              
                #######################################################
                if np.any(count == 2):# confirmed automatic division detection
+                   print("AUTOMATIC DIVISION !!!!")  
                    division_indicator=1
-                   start_frame_internal=current_frame_number-first_frame_number
-                   ######################################
-                   print("AUTOMATIC DIVISION !!!!")                   
+                   start_frame_internal=current_frame_number-first_frame_number                                                   
                    daughter_1_name =mother_8_name+"0"
-                   daughter_2_name=mother_8_name+"1"                                   
-                   #####################################
-                   previous_lineage_image=lineage_images_cv2[start_frame_internal-1]
-                   ##############################################                  
+                   daughter_2_name=mother_8_name+"1"                                                      
+                   previous_lineage_image=lineage_images_cv2[start_frame_internal-1]                                     
                    edit_id_indicator.set("no")
-                   manual_division_indicator.set("no")
-                   #########################################
-                   print("xs BEFORE=", xs)
-                   xs=update_xs_after_division(xs,daughter_1_name,daughter_2_name, mother_8_name,init_delta)                   
-                   print("xs AFTER=", xs)
-                   ######################### change coords(they are
-                   dict_of_divisions[mother_8_name] = first_number_in_clip+kk
-                   print("dict_of_divisions=",dict_of_divisions)
-                   ##############################################
+                   manual_division_indicator.set("no")                                   
+                   xs=update_xs_after_division(xs,daughter_1_name,daughter_2_name, mother_8_name,init_delta)                                                        
+                   dict_of_divisions[mother_8_name] = first_number_in_clip+kk                      
                    cells,curr_frame_cell_names,count,coords,colour_dictionary, colour_counter=update_dictionary_after_division(cut_patch,\
                           cells,curr_frame_cell_names,count,coords, frame_size, colour_dictionary,bordersize, patch_size,base_colours, colour_counter)                  
                    #############################################################            
                if division_indicator == 1 and mother_8_name != []:
-                   ########################################             
                    print("mother_8_cell_name =", mother_8_name)                  
                    print("8-figure division detected in frame ", first_number_in_clip+kk)                 
-            # End of Division Detector                    
+            # End of Division Detector            
             if manual_division_indicator.get()=="yes":
                  manual_division_indicator.set("no")                 
             update_changeable_params_history([[xs,curr_frame_cell_names,flag,edit_id_indicator.get(),colour_counter,colour_dictionary,dict_of_divisions,naive_names_counter, lin_image_widths]], helper_dir_p4, 'ab')
             update_lineage([cells], helper_dir_p4,'ab')# concatenates {cells}  to pickle
-            keys=list(cells.keys())
-            ####################
-            debug_list=[cells[key][16] for key in keys]
-            print("debug_list=",debug_list)
+            keys=list(cells.keys())           
             ##############################            
             N_cells = len(cells)            
             current_lineage_image=create_lineage_image_one_frame(cells, previous_lineage_image, xs, first_number_in_clip+kk, first_frame_number)            
@@ -2175,9 +2160,10 @@ def execute():
                start_frame=current_frame_number+1                                                                              
                break                  
             if (division_indicator == 1):
-                print("division occured in frame ", first_number_in_clip+kk)                              
+                print("division occured in frame ", first_number_in_clip+kk)
+                print("breaking out of small loop due to detected division")                              
                 break                    
-        print("BROKE OUT OF BIG LOOP")
+        print("END OF BIG LOOP")
         if variable_stop=="Stop":          
             N_cells = coords.shape[0]
             break
@@ -2194,7 +2180,7 @@ def execute():
        tk.messagebox.showerror('Error',traceback.format_exc())
        update_flash([])     
  if variable_stop=="Stop":
-     print("MANAGED TO BREAK OUT OF CLIP LOOP")
+     print("EXECUTION STOPPED MANUALLY")
      feedback_label_p4.config(text="You stopped execution manually. \nPress Button 3 to check results." )
      variable_stop="Do not stop"
  else:

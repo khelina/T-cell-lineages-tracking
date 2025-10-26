@@ -463,9 +463,7 @@ def segment_patch(segmentor, refiner,empty_fluor,empty_bright,centroid,coord, ce
          #cv2.imwrite("C:\\Users\\asacco\\OneDrive - Swinburne University\\Desktop\\segmented_output_clean.tif", cleaned_output)
          return cleaned_output,a,b,c,d  
 ################ Segment all cells in current frame  
-def segment_and_clean(dict_of_divisions,cells,count,coords,text,segmentor, refiner,empty_fluor,empty_bright,centroids,frame_number, edit_id_indicator,mother_number, out_folders, cell_radius, frame_size, colours, patch_size, flag, bordersize):
-   #kernel= np.ones((3,3),np.uint8)
-   #bordersize=int(round(patch_size/2)) 
+def segment_and_clean(dict_of_divisions,cells,coords,text,segmentor, refiner,empty_fluor,empty_bright,centroids,frame_number, edit_id_indicator,mother_number, out_folders, cell_radius, frame_size, colours, patch_size, flag, bordersize):  
    segmented_outputs=[]# list of all segmented patches (with 1 or2 contours) in frame     
    for p in range(len(centroids)):# Step-1: segment based on tracking results
       centroid=centroids[p]
@@ -474,7 +472,6 @@ def segment_and_clean(dict_of_divisions,cells,count,coords,text,segmentor, refin
       ensemble_output,a,b,c,d= segment_patch(segmentor, refiner,empty_fluor,empty_bright,centroid,coord, cell_radius, frame_size, patch_size, flag, frame_number,p,bordersize)
       #print("centroid,coord inside segment_and_clean=", centroids,coord)
       segmented_outputs.append([ensemble_output,a,b,c,d,p])
-      #r"C:\Users\helina\Desktop\segmented_outputs\output_%s_frame_%s.tif"
                    
    # put all segmented patches in one (382,382) frame  init_seg
    # parallel_image is needed to get contours separated
@@ -528,24 +525,18 @@ def segment_and_clean(dict_of_divisions,cells,count,coords,text,segmentor, refin
        a_old,b_old,c_old,d_old=item[1], item[2],item[3], item[4]
        number=item[5][0]#internal cell number
        big_patch=item[0]
-       ###########################
-       
-       ###############################################
+       ###########################      
        big_patch_border=cv2.copyMakeBorder(big_patch, top=bordersize, bottom=bordersize, left=bordersize, right=bordersize, borderType= cv2.BORDER_CONSTANT, value = 0)
        ensemble_output_old= big_patch_border[c_old:d_old,a_old:b_old]  
-       #########################################
-      
-       #dilation = cv2.dilate(big_patch,kernel,iterations = 2)
-       x0,y0=final_centroids[number][0], final_centroids[number][1]       
-       
+       #########################################     
+       x0,y0=final_centroids[number][0], final_centroids[number][1]              
        centroid=[x0,y0]
        ###################################################
        olds.append([a_old,b_old,c_old,d_old])
        
        segmented_frame, refined_output,a,b,c,d, mask=refine_segmentation(segmentor, refiner,empty_fluor,empty_bright,centroid,cell_radius, frame_size, patch_size, centroid,mask_old,number,bordersize)
        #cv2.imwrite("C:\\Users\\helina\\Desktop\\masks_refined\\frame_%s.tif" % (frame_number), mask*50)              
-       if not np.any(refined_output)==True:
-          
+       if not np.any(refined_output)==True:      
          ensemble_output=ensemble_output_old
          a,b,c,d= a_old,b_old,c_old,d_old
          mask=mask_old
@@ -558,7 +549,7 @@ def segment_and_clean(dict_of_divisions,cells,count,coords,text,segmentor, refin
        #cv2.imwrite(r"C:\Users\helina\Desktop\test_images\test_image_before_%s_cell_%s.tif" % (frame_number,number), test_image)
        if result==True:
            step_size=determine_which_edge(big_patch,test_image)
-           ensenble_output,mask,a,b,c,d, test_image=unstick_cell_from_edge(segmentor, refiner,empty_fluor,empty_bright,step_size, cell_radius, frame_size, patch_size, centroid,mask,number, bordersize)
+           ensemble_output,mask,a,b,c,d, test_image=unstick_cell_from_edge(segmentor, refiner,empty_fluor,empty_bright,step_size, cell_radius, frame_size, patch_size, centroid,mask,number, bordersize)
            #cv2.imwrite(r"C:\Users\helina\Desktop\test_images\test_image_after_%s_cell_%s.tif" % (frame_number,number), test_image)
        
        ###########################################################
@@ -574,7 +565,7 @@ def segment_and_clean(dict_of_divisions,cells,count,coords,text,segmentor, refin
        sum_clean=ensemble_output 
        cells["cell_%s" % number]=[[],[],bounding_box,sum_clean,empty_fluor_base,empty_bright_base,[cX,cY],a,b,c,d,ext_cell_name, frame_number, mask, coords, colour, division_indicator, number, area,perimeter,circularity]                                                                                    
    coords=final_centroids       
-   return count,cells, coords, text, olds
+   return cells, coords, text
 #######################################################
 def check_if_cell_stuck_to_edge(frame_with_one_cell):
     #print("  big_patch.shape=", frame_with_one_cell.shape)    
