@@ -65,7 +65,8 @@ def load_tracked_movie_p5(input_dir,output_dir):
     dir_masks=os.path.join(output_dir, "HELPER_FOLDERS_(NOT FOR USER)","MASKS")
     for filename in sorted_aphanumeric(os.listdir(dir_masks)):
            path_im_mask=os.path.join(dir_masks, filename)
-           im_mask=cv2.imread(path_im_mask ,-1)
+           #im_mask=cv2.imread(path_im_mask ,-1)
+           im_mask=np.load(path_im_mask)
            path_masks.append(path_im_mask)
            masks.append(im_mask)
            del im_mask
@@ -113,7 +114,7 @@ def delete_contour_with_specific_colour(filled_image, empty_image,color):
     lower_thresh = np.array(color, dtype = "uint8")
     upper_thresh= np.array(color, dtype = "uint8")
     color_mask = cv2.inRange(filled_image, lower_thresh, upper_thresh)
-    cv2.imwrite("C:\\Users\\kfedorchuk\\Desktop\\mask.tif", color_mask)
+    #cv2.imwrite("C:\\Users\\kfedorchuk\\Desktop\\mask.tif", color_mask)
     empty_image = cv2.cvtColor(empty_image,cv2.COLOR_GRAY2BGRA)
     filled_image[color_mask==255]=empty_image[color_mask==255]
     return filled_image
@@ -129,6 +130,8 @@ def make_contour_red(filled_image, empty_image,color):
     cv2.imwrite("C:\\Users\\helina\\Desktop\\red_contor.tif", filled_image)
     return filled_image
 ################################################
+
+##############################################
 def update_frame_dictionary_after_manual_segm_correction(mask, filled_fluor,filled_bright,modified_cell_IDs,frame_dictionary,frame_size, patch_size, bordersize, last_arg):    
     keys=list(frame_dictionary.keys())
     modified_cells=list(modified_cell_IDs.keys())
@@ -165,8 +168,8 @@ def update_frame_dictionary_after_manual_segm_correction(mask, filled_fluor,fill
        #cv2.imwrite(old_path,old_patch)
        #cv2.imwrite(new_path, new_patch )
        colour=frame_dictionary[ "cell_%s" % cell_ID][15][0]
-       cv2.putText(filled_fluor,cell_name,(int(new_cX)-10,int(new_cY)+5),cv2.FONT_HERSHEY_PLAIN,1,colour,1)
-       cv2.putText(filled_bright,cell_name,(int(new_cX)-10,int(new_cY)+5),cv2.FONT_HERSHEY_PLAIN,1,colour,1)
+       cv2.putText(filled_fluor,cell_name,(int(new_cX)-10,int(new_cY)+5),cv2.FONT_HERSHEY_PLAIN,0.5,colour,1)
+       cv2.putText(filled_bright,cell_name,(int(new_cX)-10,int(new_cY)+5),cv2.FONT_HERSHEY_PLAIN,0.5,colour,1)
        if last_arg[0]==1:
            filled_red=last_arg[1]
            cv2.putText(filled_red,cell_name,(int(new_cX)-10,int(new_cY)+5),cv2.FONT_HERSHEY_PLAIN,1,colour,1)

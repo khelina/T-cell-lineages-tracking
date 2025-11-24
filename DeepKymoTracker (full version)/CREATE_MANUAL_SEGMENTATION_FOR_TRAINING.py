@@ -48,7 +48,7 @@ print("software_folder=",software_folder)
 
 
 
-page5.title("CREATE_MANUAK_SEGMENTATION_FOR_TRAINING")
+page5.title("CREATE_MANUAL_SEGMENTATION_FOR_TRAINING")
 page5.config(bg=bg_color)
 from helpers_for_PAGE_4 import delete_contour_with_specific_colour,update_frame_dictionary_after_manual_segm_correction,\
  load_models_p5, make_contour_red,update_cheatsheet, load_tracked_movie_p5
@@ -128,7 +128,7 @@ overlay_exit = tk.Frame(master=page5, width=50, height=50, bg=bg_color, bd=0)
 #overlay_exit.grid(row=10, column=0, rowspan=1, columnspan=3,sticky=W+E+N+S)
 #overlay_exit.lift() 
 ######### POPULATE WITH LABELS
-l_title = tk.Label(frame1_page5, text="STEP 4: CORRECT SEGMENTATION",
+l_title = tk.Label(frame1_page5, text="CREATE MANUAL SEGMENTATION FOR TRAINING",
               bg="yellow", fg="red", font=("Times", "24"))
 l_title.pack()
 
@@ -235,35 +235,41 @@ def sorted_aphanumeric(data):
     alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
     return sorted(data, key=alphanum_key)
 ######################################
-def create_and_fill_folders(input_dir_p5,masks_dir, fluor_filled_dir, bright_filled_dir):
+
+
+#######################################
+def create_and_fill_folders(input_dir_p5,masks_dir, fluor_filled_dir, bright_filled_dir, segmented_dir):
     global mock_lineage_per_frame
-    mock_lineage_per_frame=[]
-    print("INSIDE CREAYTE")
-            
+    mock_lineage_per_frame=[]            
     for filename in sorted_aphanumeric(os.listdir(input_dir_p5)):
         #print("filename=", filename)
         if filename.endswith("ch00.tif"):
            im_fluor=cv2.imread(os.path.join(input_dir_p5, filename),-1)
-           new_fl_name=os.path.join(fluor_filled_dir, filename)
-           #print("new_fl_name=", new_fl_name)
+           new_fl_name=os.path.join(fluor_filled_dir, filename)           
            cv2.imwrite(new_fl_name,im_fluor)
            #####################
            frame_shape=im_fluor.shape
            mask=np.zeros(frame_shape,dtype="uint64")
-           mask_name=filename[:-8]+"mask.tif"
+           mask_name=filename[:-8]+"mask.npy"
            full_mask_name=os.path.join(masks_dir, mask_name)
-           cv2.imwrite(full_mask_name,mask)
+           #cv2.imwrite(full_mask_name,mask)
+           np.save(full_mask_name, mask)
+           ######################################
+           black_and_white_segmentation = np.zeros(frame_shape,dtype="uint8")           
+           segm_name=filename[:-8]+"segm.tif"
+           full_segm_name =os.path.join(segmented_dir, segm_name)          
+           cv2.imwrite(full_segm_name ,black_and_white_segmentation) 
+           ########################################
         if filename.endswith("ch02.tif"):
            mock_lineage_per_frame.append({})
            im_bright=cv2.imread(os.path.join(input_dir_p5, filename),-1)
            new_br_name=os.path.join(bright_filled_dir, filename)
-           cv2.imwrite(new_br_name,im_bright)
-    
+           cv2.imwrite(new_br_name,im_bright)    
     update_lineage(mock_lineage_per_frame, general_folder_path,'wb')
 ###############################
-def load_images_for_segm(input_dir_p5,masks_dir, fluor_filled_dir, bright_filled_dir):    
-    path_filled_brights, path_filled_fluors,path_masks=[],[],[]
-    empty_fluors, empty_brights,filled_fluors, filled_brights, masks=[],[],[],[],[]
+def load_images_for_segm(input_dir_p5,masks_dir, fluor_filled_dir, bright_filled_dir, segmented_dir):    
+    path_filled_brights, path_filled_fluors,path_masks,path_segms=[],[],[],[]
+    empty_fluors, empty_brights,filled_fluors, filled_brights, masks, segms=[],[],[],[],[],[]
     
     for filename in sorted_aphanumeric(os.listdir(input_dir_p5)):
         if filename.endswith("ch02.tif"):
@@ -283,17 +289,22 @@ def load_images_for_segm(input_dir_p5,masks_dir, fluor_filled_dir, bright_filled
            path_im_bright=os.path.join(bright_filled_dir, filename)
            im_bright_filled=cv2.imread(path_im_bright ,1)
            path_filled_brights.append(path_im_bright)
-           filled_brights.append(im_bright_filled)   
-     
+           filled_brights.append(im_bright_filled)        
     for filename in sorted_aphanumeric(os.listdir(masks_dir)):
            path_im_mask=os.path.join(masks_dir, filename)
-           im_mask=cv2.imread(path_im_mask ,-1)
+           #im_mask=cv2.imread(path_im_mask ,-1)
+           im_mask = np.load(path_im_mask)
+           #print("im_mask.dtype=",im_mask.dtype)
            path_masks.append(path_im_mask)
-           masks.append(im_mask)                                 
-    print("len(masks)=",len(masks))
-    
+           masks.append(im_mask)
+    for filename in sorted_aphanumeric(os.listdir(segmented_dir)):
+           path_im_segm=os.path.join(segmented_dir, filename)
+           im_segm=cv2.imread(path_im_segm ,-1)           
+           #print("im_segm.dtype=",im_segm.dtype)
+           path_segms.append(path_im_segm)
+           segms.append(im_segm)                                     
     mock_lineage_per_frame=extract_lineage(general_folder_path)               
-    return path_filled_brights,path_filled_fluors,path_masks, empty_fluors, empty_brights, filled_fluors, filled_brights, masks, mock_lineage_per_frame
+    return path_filled_brights,path_filled_fluors,path_masks, empty_fluors, empty_brights, filled_fluors, filled_brights, masks, mock_lineage_per_frame, path_segms,segms
 ############################# load all mecessary images
 def load_raw_movie():
     global edits_indicator
@@ -301,15 +312,15 @@ def load_raw_movie():
     global button_load_p5
     #update_flash([])
     button_load_p5.configure(background = 'red')
-    global output_dir_p5, input_dir_p5,software_folder, helper_dir_p5, general_folder_path
+    global output_dir_p5, input_dir_p5,software_folder, helper_dir_p5, general_folder_path, segmented_dir
     input_dir_p5 = filedialog.askdirectory()# \TRACKED_MOVIE_{movie name}
-    print("input_dir_p5 =", input_dir_p5)
+    #print("input_dir_p5 =", input_dir_p5)
     dialog_label_5.config(text="Choose your movie and click on it once (not twice!)")  
     ##################################
     general_folder_path=os.path.dirname(input_dir_p5)
-    print("general_folder_path=",general_folder_path)
+    #print("general_folder_path=",general_folder_path)
     general_folder_name=os.path.basename(  general_folder_path)
-    print("general_folder_name=",  general_folder_name)
+    #print("general_folder_name=",  general_folder_name)
     masks_dir=os.path.join(general_folder_path,"MASKS")
     fluor_filled_dir=os.path.join(general_folder_path,"TRACKED_GREEN_FL_CHANNEL")
     bright_filled_dir=os.path.join(general_folder_path,"TRACKED_BRIGHTFIELD_CHANNEL")
@@ -320,28 +331,22 @@ def load_raw_movie():
            os.mkdir(fluor_filled_dir)   
            os.mkdir(bright_filled_dir)
            os.mkdir(segmented_dir)
-           create_and_fill_folders(input_dir_p5,masks_dir, fluor_filled_dir, bright_filled_dir)        
+           create_and_fill_folders(input_dir_p5,masks_dir, fluor_filled_dir, bright_filled_dir, segmented_dir)        
     ########################################
-    global path_filled_brights,path_filled_fluors,path_masks,mock_lineage_per_frame
-    global empty_fluors, empty_brights,filled_fluors, filled_brights, masks
+    global path_filled_brights,path_filled_fluors,path_masks,mock_lineage_per_frame,path_segms
+    global empty_fluors, empty_brights,filled_fluors, filled_brights, masks,segms
     
     dialog_label_5.config(text="loading tracked movie...")
-    path_filled_brights,path_filled_fluors,path_masks, empty_fluors, empty_brights, filled_fluors, filled_brights, masks, mock_lineage_per_frame=load_images_for_segm(input_dir_p5,masks_dir, fluor_filled_dir, bright_filled_dir)
-    print("len(filled_fluors)=", len(filled_fluors))
+    path_filled_brights,path_filled_fluors,path_masks, empty_fluors, empty_brights, filled_fluors, filled_brights, masks, mock_lineage_per_frame,path_segms,segms=load_images_for_segm(input_dir_p5,masks_dir, fluor_filled_dir, bright_filled_dir, segmented_dir)
+    #print("len(filled_fluors)=", len(filled_fluors))
     test_image=filled_fluors[0]
-    #print("test_image.shape=",test_image.shape)
-    #print("test_image.dtype=",test_image.dtype)
+    
     global frame_p5_size,cell_radius_p5,patch_size_p5, first_frame_number_p5, bordersize, n_digits   
     #############
     frame_p5_size=empty_fluors[0].shape[0]
     cell_radius_p5,patch_size_p5=20,96
-    global full_core_fluor_name, n_digits, first_frame_number_p5, num_frames
-    #print("path_filled_fluors[0]=", path_filled_fluors[0])
-    debug_name=os.path.basename(path_filled_fluors[0])
-    #print("debug_name=", debug_name)
-    full_core_fluor_name, n_digits, first_frame_number_p5= extract_file_name(os.path.basename(path_filled_fluors[0]))
-    #first_frame_number_p5=1
-    #print('full_core_fluor_name, n_digits, first_frame_number_p5 = ', full_core_fluor_name, n_digits, first_frame_number_p5)
+    global full_core_fluor_name, n_digits, first_frame_number_p5, num_frames       
+    full_core_fluor_name, n_digits, first_frame_number_p5= extract_file_name(os.path.basename(path_filled_fluors[0]))    
     bordersize, n_digits=100,4
     num_frames=len(empty_fluors)
     #################################    
@@ -378,7 +383,7 @@ def load_raw_movie():
     view_slider_p5.configure(from_=first_frame_number_p5,to=first_frame_number_p5+len(masks)-1)
     ################################################
     button_load_p5.configure(background = button_color)  
-    activate_buttons(all_buttons_page5,[view_slider_p5, button_final_movie])
+    activate_buttons(all_buttons_page5,[view_slider_p5,button_start_cell ])
     ######################### new addtion for click_one_cell
     global mode_variable,zoom_status# used in radio buttons for editing,indicates which canvas is used for IDs extraction, value = "Current" or "Previous"
     mode_variable,zoom_status = StringVar(),StringVar()
@@ -409,33 +414,38 @@ def click_cell_to_add(event):
     global cell_number
     cell_number+=1
     print("cell_number=", cell_number)
+    
     global helper_mask_one_cell
     helper_mask_one_cell=np.zeros((frame_p5_size,frame_p5_size),dtype="uint8")
         
-    rad =10
+    rad =2
     center=(event.x,event.y)
-    #################################
+    #################################    
     number_of_now_added_cells=1
-    global colour_dictionary, new_naive_names, colour_counter, base_colours, basic_naive_names, naive_names_counter,curr_frame_cell_names          
-    new_naive_names,naive_names_counter=update_naive_names_list(basic_naive_names, number_of_now_added_cells,naive_names_counter)    
+    global colour_dictionary, new_naive_names, colour_counter, base_colours, basic_naive_names, naive_names_counter,curr_frame_cell_names
+    print("colour_counter_BEFORE=", colour_counter)
+    print("colour_dictionary BEFORE=", colour_dictionary)          
+    new_naive_names,naive_names_counter=update_naive_names_list(basic_naive_names, number_of_now_added_cells,naive_names_counter)
+    print("new_naive_names=", new_naive_names)
+    print("naive_names_counter=", naive_names_counter)
     colour_dictionary, colour_counter=update_color_dictionary(colour_dictionary,new_naive_names,base_colours, colour_counter)    
     curr_frame_cell_names+=new_naive_names 
     cell_name=new_naive_names[0]
+    print("cell_name=",  cell_name)
     #number_of_added_new_cells+=number_of_now_added_cells 
     #colour_dictionary, new_naive_names, base_colours, colour_counter, basic_naive_names,  naive_names_counter= create_first_color_dictionary_for_train(0)
-    print("colour_dictionary=", colour_dictionary)
-    print("new_naive_names=", new_naive_names)
-    print("base_colours=", base_colours)
-    print("colour_counter=", colour_counter)
-    print("basic_naive_names=", basic_naive_names)
-    print("naive_names_counter=", naive_names_counter)
+    print("colour_dictionary AFTER=", colour_dictionary)
+    #print("new_naive_names=", new_naive_names)
+    #print("base_colours=", base_colours)
+    print("colour_counter AFTER=", colour_counter)
+    #print("basic_naive_names=", basic_naive_names)
+    
     print("curr_frame_cell_names=",  curr_frame_cell_names)
-    print("cell_name=",  cell_name)
-    ###############################################
-    cell_colour=base_colours[colour_counter-1]
-    print("cell_colour=",  cell_colour)
-    cell_colour_for_plot =cell_colour[0]
-    print("cell_colour_for_plot=",  cell_colour_for_plot)
+   
+    #print("colour_counter_AFTER=", colour_counter)
+    ###############################################    
+    cell_colour=base_colours[colour_counter-1]    
+    cell_colour_for_plot =cell_colour[0]   
     thickness=2
     true_center=(int(center[0]/resize_coeff) ,int(center[1]/resize_coeff ))    
     circle_fl=canvas_fluor_p5.create_oval(event.x-rad,event.y-rad,event.x+rad,event.y+rad,outline =cell_colour[1],width = 2)    
@@ -443,18 +453,22 @@ def click_cell_to_add(event):
     cv2.circle(current_fluor_image, true_center, rad,cell_colour_for_plot , thickness)
     cv2.circle(current_bright_image, true_center, rad, cell_colour_for_plot, thickness)
     ######################################################
-    cv2.circle(helper_mask_one_cell, true_center, rad, 255, -1)   
+    cv2.circle(helper_mask_one_cell, true_center, rad, 255, -1)
+    
     current_mask[helper_mask_one_cell==255]=2**cell_number
+    current_segm[helper_mask_one_cell==255]=255
     #################################################
     cv2.imwrite(current_fluor_path,current_fluor_image)
     cv2.imwrite(current_bright_path,current_bright_image)
-    cv2.imwrite(current_mask_path,current_mask)
-    ###################################################
-    
-    frame_cells["cell_%s" % cell_number]=[cell_name, cell_colour, cell_number]
-    print(" frame_cells=",  frame_cells)                                                   
+    cv2.imwrite(current_segm_path,current_segm)
+    np.save(current_mask_path,current_mask)   
+    ###################################################    
+    current_frame_dictionary["cell_%s" % cell_number]=[cell_name, cell_colour, cell_number]
+    #print(" frame_cells=",  frame_cells)                                                   
    
 def start_adding_cells():
+    button_start_cell.config(bg="red")
+    activate_buttons(all_buttons_page5,[view_slider_p5,button_stop_cell ])
     global canvas_fluor_p5,canvas_bright_p5
     canvas_fluor_p5.unbind("<Button-1>")
     canvas_fluor_p5.unbind("<B1-Motion>")
@@ -468,17 +482,20 @@ def start_adding_cells():
     print("first_frame_number_p5 =",first_frame_number_p5 )   
     internal_frame_number_p5=frame_number_from_slider-first_frame_number_p5
     ###################################################
-    global current_fluor_path,current_bright_path,current_mask_path 
+    global current_fluor_path,current_bright_path,current_mask_path, current_segm_path 
     current_fluor_path=path_filled_fluors[internal_frame_number_p5]
     current_bright_path=path_filled_brights[internal_frame_number_p5] 
     current_mask_path=path_masks[internal_frame_number_p5]
+    current_segm_path=path_segms[internal_frame_number_p5]
     ###################################################
-    global current_fluor_image,current_bright_image, current_mask
+    global current_fluor_image,current_bright_image, current_mask, current_segm
     current_fluor_image=filled_fluors[internal_frame_number_p5]
     current_fluor_image = cv2.cvtColor(current_fluor_image,cv2.COLOR_BGR2BGRA) 
     current_bright_image=filled_brights[internal_frame_number_p5]
     current_bright_image = cv2.cvtColor(current_bright_image,cv2.COLOR_BGR2BGRA)
     current_mask=masks[internal_frame_number_p5]
+    current_segm=segms[internal_frame_number_p5]
+    
     #########################################################
     canvas_bright_p5,canvas_fluor_p5,photo_fluor, photo_bright=display_both_channels(current_fluor_image,current_bright_image,canvas_fluor_p5,canvas_bright_p5,new_shape,image_origin_x,image_origin_y, active_channel_var.get())
     global circles_fl
@@ -486,28 +503,54 @@ def start_adding_cells():
     
     global cell_number
     cell_number=-1
-    global frame_cells
-    frame_cells={}
+    global added_frame_cells
+    added_frame_cells={}
     
     global colour_dictionary, new_naive_names, colour_counter, base_colours, basic_naive_names, naive_names_counter, curr_frame_cell_names          
     colour_dictionary, new_naive_names, base_colours, colour_counter, basic_naive_names,  naive_names_counter= create_first_color_dictionary_for_train(0)
+    print("colour_dictionary BEFORE=", colour_dictionary)
     curr_frame_cell_names=[]
-    print("colour_dictionary=", colour_dictionary)
+    global current_frame_dictionary
+    #print("mock_lineage_per_frame=",mock_lineage_per_frame)
+    current_frame_dictionary =mock_lineage_per_frame[internal_frame_number_p5]
+    print("current_frame_dictionary=",current_frame_dictionary)
+    if len(current_frame_dictionary)!=0:
+        keys=list(current_frame_dictionary.keys())
+        print("keys=", keys)
+        colour_counter=len(keys)
+        naive_names_counter=len(keys)
+        curr_frame_cell_names=[current_frame_dictionary[key][0] for key in keys]
+        cell_number=len( curr_frame_cell_names)-1
+        for key in keys:
+            cell_name=current_frame_dictionary[key][0]
+            cell_colour =current_frame_dictionary[key][1]
+            colour_dictionary[cell_name]=cell_colour
+        
+    
+    print("colour_dictionary AFTER=", colour_dictionary)
     print("new_naive_names=", new_naive_names)
-    print("base_colours=", base_colours)
+    #print("base_colours=", base_colours)
     print("colour_counter=", colour_counter)
-    print("basic_naive_names=", basic_naive_names)
+    #print("basic_naive_names=", basic_naive_names)
     print("naive_names_counter=", naive_names_counter)
     print(" curr_frame_cell_names=",  curr_frame_cell_names)
 #########################################
-def stop_adding_cells():    
+def stop_adding_cells():
+    button_start_cell.config(bg=button_color)    
+    activate_buttons(all_buttons_page5,[view_slider_p5,button_start_cell, button_final_movie ])    
     filled_fluors[internal_frame_number_p5]=current_fluor_image
     filled_brights[internal_frame_number_p5]=current_bright_image
     masks[internal_frame_number_p5]=current_mask
-    print("frame_cells=",frame_cells)
-    mock_lineage_per_frame[ internal_frame_number_p5]=frame_cells
+    segms[internal_frame_number_p5]=current_segm
+    print("added_frame_cells=",added_frame_cells)
+    mock_lineage_per_frame[ internal_frame_number_p5]=  current_frame_dictionary
     update_lineage(mock_lineage_per_frame, general_folder_path,'wb')
-    print("mock_lineage_per_frame=",mock_lineage_per_frame)
+    #print("mock_lineage_per_frame=",mock_lineage_per_frame)
+    current_photo_fluor=turn_image_into_tkinter(current_fluor_image, window_p5_size,[])
+    current_photo_bright=turn_image_into_tkinter(current_bright_image, window_p5_size,[])
+    photo_filled_fluors[internal_frame_number_p5]=current_photo_fluor
+    photo_filled_brights[internal_frame_number_p5]=current_photo_bright
+    show_2_canvases(canvas_bright_p5,canvas_fluor_p5,photo_filled_brights,photo_filled_fluors,internal_frame_number_p5, window_p5_size, active_channel_var.get())
     canvas_fluor_p5.unbind("<Button-1>")
     canvas_fluor_p5.unbind("<Button-3>")   
     canvas_fluor_p5.bind("<Button-3>", right_click_one_cell)
@@ -981,7 +1024,7 @@ def stop_zoom():
     canvas_fluor_p5.unbind("<MouseWheel>")
 ################################################
 def save_one_edited_cell():
-    activate_buttons(all_buttons_page5,[view_slider_p5, button_final_movie])    
+    activate_buttons(all_buttons_page5,[view_slider_p5, button_final_movie,button_start_cell ])    
     cell_monitor_label.config(text="Saved Cell  "+ str(cell_name_to_screen)+" ( "+cell_color_to_screen+" )", fg="cyan")
     dialog_label_5.config(text="You saved Cell " + str(cell_name_to_screen)+" ( "+cell_color_to_screen+" )"+
                           ".\nNow, you can either continue editing other cells or finish by pushing Button 6."
@@ -1094,11 +1137,17 @@ def edit_by_clicking(event):
                        oval_y+5*factor, outline="magenta", width=1)                
 #################################################
 def get_frame_info(internal_frame_number_p5):# for manual segmentation correction        
-    global frame_dictionary
-    print("INSIDE get_frame_info")
-    print("mock_lineage_per_frame=",mock_lineage_per_frame)
-    frame_dictionary=mock_lineage_per_frame[internal_frame_number_p5]
+  global frame_dictionary, colour_counter
+  print("INSIDE get_frame_info")
+  print("mock_lineage_per_frame=",mock_lineage_per_frame)
+  frame_dictionary=mock_lineage_per_frame[internal_frame_number_p5]
+  if len(frame_dictionary)!=0:
     keys=list(frame_dictionary.keys())
+    colours_present_in_frame=[frame_dictionary[key][1] for key in keys]
+    print("colours_present_in_frame=",colours_present_in_frame)
+    colour_counter =len(colours_present_in_frame)
+    print(" colour_counter=", colour_counter)
+    
     global intensity_dictionary_for_frame
     intensity_dictionary_for_frame=create_intensity_dictionary(len(keys))  
     
@@ -1133,6 +1182,8 @@ def get_frame_info(internal_frame_number_p5):# for manual segmentation correctio
     final_mask=copy.deepcopy(mask)
     disable_exit()         
     #update_flash([]) 
+
+      
 ################################################################
 def save_edits_for_frame(): #saves all eduts in current frame and modifies linage for this frame
     global   frame_dictionary
@@ -1156,7 +1207,16 @@ def save_edits_for_frame(): #saves all eduts in current frame and modifies linag
         cv2.imwrite(path_filled_red, filled_red )# rewrite RED_MOVIE_RESULTS
     destin_mask_for_plot=np.round(final_mask)
     destin_mask_for_plot = destin_mask_for_plot.astype(np.uint64)
-    cv2.imwrite(path_mask, destin_mask_for_plot) # rewrite MASKS)
+    #cv2.imwrite(path_mask, destin_mask_for_plot) # rewrite MASKS)
+    np.save(path_mask,destin_mask_for_plot)
+    ############ create and write black_and_white segmentation
+    black_and_white_segmentation =np.zeros((frame_p5_size,frame_p5_size),dtype="uint8")
+    black_and_white_segmentation[destin_mask_for_plot!=0]=255
+    print("path_mask=", path_mask)
+    segm_name=os.path.basename(path_mask)[:-8]+"segm.tif"
+    path_segm=os.path.join(segmented_dir, segm_name)
+    print("path_segm=", path_segm)
+    cv2.imwrite(path_segm, black_and_white_segmentation) 
     ################### rewrite CLEANED_PATCHES
     cell_numbers=list(modified_cell_IDs.keys())
     for cell_number in cell_numbers:
@@ -1188,28 +1248,19 @@ def save_edits_for_frame(): #saves all eduts in current frame and modifies linag
     save_frame_edits_alert=False
       
 #######################################
-def create_final_movie():# create final movie + pedigree_per_cell (simplified, i.e. only centroids and areas) 
+
+def finish():# create final movie + pedigree_per_cell (simplified, i.e. only centroids and areas)   
   dialog_label_5.config(text="Creating lineage and final movie...")
   cell_monitor_label.config(text="Creating excel files...", fg="red")
-  global output_dir_p5,frame_p5_size,save_frame_edits_alert 
- 
+  global frame_p5_size,save_frame_edits_alert  
   if save_frame_edits_alert==True:
     mode=mode_variable.get()
     if mode=="slow":
         save_hand_drawing_for_one_cell()
         activate_fast_edit_mode()
-    save_edits_for_frame()         
-  update_lineage(lineage_per_frame_p5,helper_dir_p5, 'wb')
-  dialog_label_5.config(text="Excel files are being created in    " +str(output_dir_p5)+"RESULTS_PER_CELL")
-    
-  lineage_per_cell=print_excel_files(output_dir_p5, frame_p5_size,lineage_per_frame_p5, bordersize,patch_size_p5)
-  dialog_label_5.config(text="Excel files are stored in    " +str(output_dir_p5)+
-                          "RESULTS_PER_CELL")
-  create_output_movie(output_dir_p5, frame_p5_size)       
-  dialog_label_5.config(text="Excel files are stored in    " +str(os.path.join(output_dir_p5,"RESULTS_PER_CELL"))+
-                          "\nFinal movie is in    " + str(os.path.join(output_dir_p5,"lineage_movie.avi")))
-  cell_monitor_label.config(text="Excel files created", fg="cyan")
-  enable_exit()  
+    save_edits_for_frame()           
+  enable_exit()
+  page5.destroy()
 ############### POPUPLATE WUTH BUTTONS
 global button_load_p5,button_activate_fast_edit_mode, button_activate_slow_edit_mode,\
                    start_zoom_button, start_pan_button,stop_pan_button,\
@@ -1241,11 +1292,11 @@ start_pan_button.pack(side=tk.RIGHT,padx=10,pady=5)
 #############################################
  
 global button_final_movie
-button_final_movie = Button(frame4c_page5, text="6. Create final movie\n and \nExcel files", command=lambda:[threading.Thread(target=create_final_movie).start(),update_cheatsheet(cheatsheets,"neutral",bg_color,label_color)],bg=button_color, font=all_font,activebackground="red")
+button_final_movie = Button(frame4c_page5, text="6. Finish", command=lambda:[threading.Thread(target=finish).start(),update_cheatsheet(cheatsheets,"neutral",bg_color,label_color)],bg=button_color, font=all_font,activebackground="red")
 button_final_movie.pack(side=tk.BOTTOM, padx=100)
-button_start_cell = Button(frame4c_page5, text="Start cell", command=start_adding_cells)
+button_start_cell = Button(frame4c_page5, text="Start cell", command=start_adding_cells,bg=button_color, font=all_font,activebackground="red")
 button_start_cell.pack(side=tk.BOTTOM, padx=100)
-button_stop_cell = Button(frame4c_page5, text="Stop cell", command=stop_adding_cells)
+button_stop_cell = Button(frame4c_page5, text="Stop cell", command=stop_adding_cells,bg=button_color, font=all_font,activebackground="red")
 button_stop_cell.pack(side=tk.BOTTOM, padx=100)      
 ##################################
 global active_channel_var
@@ -1320,12 +1371,15 @@ global view_slider_p5
 view_slider_p5 = Scale(frame_slider_page5, from_=1, to=1,orient=HORIZONTAL, troughcolor="green", command=slide_frames_p5, length=window_p5_size)      
 view_slider_p5.pack()    
 ############################################
-button_exit=Button(frame8_page5, text="Exit",bg="orange",font=all_font, command=page5.destroy).pack(side=tk.LEFT, padx=(700,2))
+button_exit=Button(frame8_page5, text="Exit",bg="orange",font=all_font, command=page5.destroy)
+button_exit.pack(side=tk.LEFT, padx=(700,2))
 ###################################
 global all_buttons_page5
 all_buttons_page5=[button_load_p5, button_activate_slow_edit_mode,\
                    start_zoom_button, start_pan_button,stop_pan_button,\
-                   button_final_movie,view_slider_p5]
+                   button_final_movie,view_slider_p5, button_exit,button_start_cell,\
+                       button_stop_cell]
+activate_buttons(all_buttons_page5,[ button_load_p5, button_exit]) 
 ################################################################################
 global models, models_directory,segmentor,refiner
 from helpers_for_PAGE_4 import load_models_p5

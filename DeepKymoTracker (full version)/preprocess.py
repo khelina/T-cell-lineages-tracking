@@ -98,7 +98,7 @@ def create_output_folders(outpath):# creates only names if folders already exost
                     "TRACKED_GREEN_FL_CHANNEL",
                     "TRACKED_RED_FL_CHANNEL",
                     "RESULTS_PER_CELL",
-                    "HELPER_FOLDERS_(NOT FOR USER)"]
+                    "HELPER_FOLDERS_(NOT FOR USER)","SEGMENTED_COLOUR", "SEGMENTED_BINARY"]
    ##########################################################                 
    for i in range(len(subfolder_names)):
        destination=os.path.join(outpath,subfolder_names[i])

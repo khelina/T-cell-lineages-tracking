@@ -1218,17 +1218,12 @@ global manual_IDs,manual_centroids,mother_name,  daughter_indicators
 manual_IDs,  manual_centroids, mother_name, daughter_indicators=[], [], None, []
 #################
 def activate_buttons(all_buttons_list,active_buttons_list):
-    for button in all_buttons_list:
-        #print("all_buttons_list,active_buttons_list,",all_buttons_list,active_buttons_list)
-        if button in active_buttons_list:
-            #print("ACTIVE button=", button)
+    for button in all_buttons_list:       
+        if button in active_buttons_list:           
             button.config(state=NORMAL)                        
         else:
-            button.config(state=DISABLED)
-            #print("DISABLED button=", button)
+            button.config(state=DISABLED)          
 #######################
-
-##############################
 def load_helper_functions():
     os.chdir(source_code_folder)
     global predict_first_frame, create_output_folders,\
@@ -2023,8 +2018,6 @@ def record_const_movie_parameters():# record cell_size and other parameters in p
            pickle.dump(list_of_const_movie_params[i], f,protocol=pickle.HIGHEST_PROTOCOL)
 
 ###########################################
-
-
 import time
 ########################################################
 def execute(): 
@@ -2133,7 +2126,7 @@ def execute():
             coords, destin_fluor = plot_frame(cells, clip_centr, first_number_in_clip, kk,
                                 fluor_images, fluor_names, out_folders, coords, coords, bright_images, br_names, frame_size , n_digits, first_frame_number, contrast_value, current_lineage_image,patch_size, red_images, red_names, bordersize)          
                                  
-            image_seg=destin_fluor# for displaying dynamically on unterface
+            image_seg=destin_fluor# for displaying dynamically on screen
             photo_image_seg=turn_image_into_tkinter(image_seg, canvas_size_p4,[])
             output_images.append(photo_image_seg)
             output_name=rename_file(out_folders[1],fluor_names[kk])
@@ -2232,7 +2225,8 @@ def display_first_frame():# display all frames after pushing button "Display res
 def get_cell_IDs_manually(event):# gets cell ID from previous frame during editing
     if popup_monitor!=None:
           popup_monitor.deiconify()
-    canvas_indicator=clicked.get()  
+    canvas_indicator=clicked.get()
+    print("canvas_indicator=",canvas_indicator)
     if canvas_indicator=="Previous":
         canvas_IDs=canvas_previous# click on previos frame to get IDs
         shift=1
@@ -2245,8 +2239,12 @@ def get_cell_IDs_manually(event):# gets cell ID from previous frame during editi
     internal_frame_number=frame-first_frame_number    
     keys=list(lineage_per_frame_p4[internal_frame_number-shift].keys())
     
-    mask_image=lineage_per_frame_p4[internal_frame_number-shift][keys[0]][13]   
+    mask_image=lineage_per_frame_p4[internal_frame_number-shift][keys[0]][13]
+    debug_frame_number =internal_frame_number-shift
+    print("len(lineage_per_frame_p4)=",len(lineage_per_frame_p4))
+    print(" debug_frame_number =", debug_frame_number )
     cell_number_in_mask=int(mask_image[int(event.y/canvas_size_p4*frame_size),int(event.x/canvas_size_p4*frame_size)])
+    print("cell_number_in_mask=",cell_number_in_mask)
     cell_number=int(math.log(round(cell_number_in_mask),2))     
     manual_IDs.append(cell_number)
       
@@ -2589,23 +2587,17 @@ instruct_label_p4.pack(fill=BOTH)
  
 button_save_id = Button(frame3c_page4, text="Save ID edits", activebackground="red",font=all_font, 
               bg=button_color, command=lambda:stop_editing_IDs())
-#button_save_id.pack(side=tk.LEFT, padx=5)
-#button_save_id.pack_forget()
+
 
 button_save_division = Button(frame3c_page4, text="Save division edits",activebackground="red", font=all_font, 
               bg=button_color, command=lambda:stop_editing_division())
-#button_save_division.pack(side=tk.LEFT, padx=5)
-#button_save_division.pack_forget()
 
 button_save_added_cell = Button(frame3c_page4, text="Save added cell",activebackground="red", font=all_font, 
               bg=button_color, command=lambda:save_added_cell())
-#button_save_added_cell.pack(side=tk.LEFT, padx=5)
-#button_save_added_cell.pack_forget()
 
 button_save_removed_cell = Button(frame3c_page4, text="Save removed cell",activebackground="red", font=all_font, 
               bg=button_color, command=lambda:save_removed_cell())
-#button_save_removed_cell.pack(side=tk.LEFT, padx=5)
-#button_save_removed_cell.pack_forget()
+
 ################################################################
 global R_edit_ID, R_edit_division, R_add_new_cell,R_remove_dead_cell
 
@@ -3469,7 +3461,7 @@ def edit_by_clicking(event):
       #cv2.imwrite(r"C:\Users\helina\Desktop\segmented_patch.tif",segmented_patch)      
       ################### modify fluor, bright and red current frame
       global patch_with_contours
-      patch_with_contours=prepare_contours(segmented_patch)    
+      patch_with_contours=prepare_contours(segmented_patch,1)    
       global filled_fluor_copy, filled_bright_copy, filled_red_copy
       ### here a very important dictionary of modified cells is created multiple times
       modified_cell_IDs[current_cell_number]=[segmented_frame, final_mask, segmented_patch,[new_cX, new_cY], cell_color, cell_ID]      
@@ -3562,7 +3554,8 @@ def save_edits_for_frame(): #saves all eduts in current frame and modifies linag
         cv2.imwrite(path_filled_red, filled_red )# rewrite RED_MOVIE_RESULTS
     destin_mask_for_plot=np.round(final_mask)
     destin_mask_for_plot = destin_mask_for_plot.astype(np.uint64)
-    cv2.imwrite(path_mask, destin_mask_for_plot) # rewrite MASKS)
+    #cv2.imwrite(path_mask, destin_mask_for_plot) # rewrite MASKS)
+    np.save(path_mask, destin_mask_for_plot)
     ################### rewrite CLEANED_PATCHES
     cell_numbers=list(modified_cell_IDs.keys())
     for cell_number in cell_numbers:
