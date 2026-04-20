@@ -74,54 +74,53 @@ For detailed instructions see the
 
 ## Installation
 
-### Option 1 — Docker (Recommended)
+### Option 1 — Docker (Linux only)
 
-Docker eliminates all installation complexity. The entire environment —
-Python, TensorFlow, all dependencies — is pre-configured inside the
-container.
+Docker eliminates all installation complexity on Linux systems.
+The entire environment — Python, TensorFlow, all dependencies —
+is pre-configured inside the container.
+
+> **Note:** Docker support is currently available for Linux only.
+> Mac and Windows Docker support is under development.
+> Mac and Windows users please use Option 2 (manual installation).
 
 **Prerequisites:**
-1. Install [Docker Desktop](https://www.docker.com/products/docker-desktop)
+1. Install [Docker](https://docs.docker.com/engine/install/)
 2. Download trained model files from
    [Zenodo](https://doi.org/10.5281/zenodo.11540886) (1.7 GB)
    and place them in a folder on your computer
-3. Create an empty folder for your cell movies
+3. Have your raw microscope movies accessible in a folder
+4. Create an empty folder for processed output movies
 
 **Pull the container (one time only):**
 ```bash
 docker pull khelinafedorchuk/deepkymotracker:latest
 ```
 
-**Run using the launcher scripts (recommended):**
+**Run using the launcher script:**
 
-Download the appropriate launcher script from the `launchers/` folder
-in this repository:
+Download `launchers/run_deepkymotracker.sh` from this repository.
 
-| Your system | Script to use |
-|---|---|
-| Linux | `launchers/run_deepkymotracker.sh` |
-| Mac | `launchers/run_deepkymotracker_mac.sh` |
-| Windows | `launchers/run_deepkymotracker.bat` |
-
-On Linux and Mac, make the script executable first:
+Make it executable:
 ```bash
 chmod +x run_deepkymotracker.sh
 ```
 
-Then run it — it will ask you for the paths to your models and movies
-folders and launch DeepKymoTracker automatically.
+Run it:
+```bash
+./run_deepkymotracker.sh
+```
 
-**Mac users:** Install [XQuartz](https://www.xquartz.org) and open it
-before running the launcher. XQuartz is required to display the
-graphical interface.
+The script will ask you for three folder paths:
+- **Raw movies folder** — your large folder of raw microscope acquisitions
+- **Trained models folder** — where you placed the Zenodo model files
+- **Working movies folder** — where processed output will be saved
 
-**Windows users:** Install
-[VcXsrv](https://sourceforge.net/projects/vcxsrv/) and start it
-before running the launcher.
+DeepKymoTracker will then launch automatically.
 
 ---
 
-### Option 2 — Manual Installation
+### Option 2 — Manual Installation (All platforms)
 
 **Minimum requirements:**
 Python = 3.6.13
@@ -137,19 +136,30 @@ imagecodecs
 A complete list of conda installation commands is provided in
 `Instructions_for_anaconda_packages.txt` inside each folder.
 
+After installation:
+1. Download trained model files from
+   [Zenodo](https://doi.org/10.5281/zenodo.11540886) (1.7 GB)
+2. Place model files in the `TRAINED MODELS` folder
+3. Run `GUI_launch.py`
+
 ---
 
-## Quick Start
+## Quick Start (Docker — Linux)
 
-1. Install via Docker (recommended) or manually as above
-2. Download pre-trained model weights from
-   [Zenodo](https://doi.org/10.5281/zenodo.11540886) (1.7 GB)
-3. Download example movie from
-   [Zenodo](https://doi.org/10.5281/zenodo.10720117) (426 MB)
-4. Place model files in your TRAINED MODELS folder
-5. Place example movie in your MOVIES folder
-6. Run the launcher script for your operating system
-7. Follow the on-screen prompts
+1. Install Docker
+2. Pull the container: `docker pull khelinafedorchuk/deepkymotracker:latest`
+3. Download model files from [Zenodo](https://doi.org/10.5281/zenodo.11540886)
+4. Download the launcher script from `launchers/run_deepkymotracker.sh`
+5. Make it executable: `chmod +x run_deepkymotracker.sh`
+6. Run it: `./run_deepkymotracker.sh`
+7. Follow the prompts
+
+## Quick Start (Manual — All platforms)
+
+1. Install dependencies (see Option 2 above)
+2. Download model files from [Zenodo](https://doi.org/10.5281/zenodo.11540886)
+3. Place model files in the `TRAINED MODELS` folder
+4. Run `GUI_launch.py`
 
 ---
 
@@ -190,6 +200,11 @@ Three options are available:
 - In the interface: reload the movie in Step 3 to scroll through
   tracked frames
 
+**Where are my results saved?**
+All output folders, Excel files, and movies are saved inside your
+Working Movies Folder — the folder you specified when launching
+the script. They remain on your computer after Docker closes.
+
 ---
 
 ## Known Limitations & Data Requirements
@@ -207,37 +222,23 @@ Performance is best on data with similar characteristics:
   segmentation requires manual correction in Step 4.
 - **Cell death and new cell emergence:** Currently require manual
   correction using the REMOVE CELL and ADD CELL buttons in Step 3.
-
-These limitations are the subject of active research. See the
-[PLOS ONE paper](https://doi.org/10.1371/journal.pone.0315947)
-for full technical details.
+- **Docker:** Currently supported on Linux only. Mac and Windows
+  Docker support is under development.
 
 ---
 
 ## Repository Structure
 DeepKymoTracker/
 │
-├── Dockerfile                   Container definition
-├── DeepKymoTracker_full/        Main source code for your own data
-├── DeepKymoTracker_paper/       Paper-specific version
-├── MODELS/                      Training code and data samples
-├── User_Guide/                  PDF user guide
+├── Dockerfile                      Container definition (Linux)
+├── DeepKymoTracker_full/           Main source code for your own data
+├── DeepKymoTracker_paper/          Paper-specific version
+├── MODELS/                         Training code and data samples
+├── User_Guide/                     PDF user guide
 └── launchers/
-├── run_deepkymotracker.sh   Linux launcher
-├── run_deepkymotracker_mac.sh  Mac launcher
-└── run_deepkymotracker.bat  Windows launcher
----
-
-## How To Cite
-
-If you use DeepKymoTracker in your research, please cite:
----
-
-Fedorchuk K, Russell SM, Zibaei K, Yassin M, Hicks DG.
-DeepKymoTracker: A tool for accurate construction of cell lineage trees
-for highly motile cells.
-PLOS ONE 20(2): e0315947. 2025.
-https://doi.org/10.1371/journal.pone.0315947
+├── run_deepkymotracker.sh      Linux launcher (Docker)
+├── run_deepkymotracker_mac.sh  Mac — Docker coming soon
+└── run_deepkymotracker.bat     Windows — Docker coming soon
 ---
 
 ## Algorithm Overview
@@ -268,9 +269,6 @@ khelina.fedorchuk@gmail.com
 [LinkedIn](YOUR LINKEDIN URL)
 
 Found a bug or need help? Open a GitHub Issue or email directly.
-
-
-
 
  
 
