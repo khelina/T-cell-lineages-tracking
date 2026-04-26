@@ -12,7 +12,7 @@ https://doi.org/10.1371/journal.pone.0315947
 
 - [Output demo video](https://youtu.be/9nSulQDEles)
 - [5-minute conference presentation](https://www.youtube.com/watch?v=NebOgh1q0kc)
-- [Video tutorial series](YOUR PLAYLIST LINK)
+- [Video tutorial series](https://youtube.com/playlist?list=PLF7yuSFLLabDfAgING0tK6rLZitfkkXcJ&si=KFzx-8Sb8rjMEmVg)
 - [PLOS ONE paper](https://doi.org/10.1371/journal.pone.0315947)
 - [User Guide PDF](User_Guide/YOUR_GUIDE_FILENAME.pdf)
 - [Docker Hub](https://hub.docker.com/r/khelinafedorchuk/deepkymotracker)
@@ -68,7 +68,7 @@ Back/Next buttons, to avoid out-of-memory errors.
 
 For detailed instructions see the
 [User Guide PDF](User_Guide/YOUR_GUIDE_FILENAME.pdf) or the
-[video tutorial series](YOUR PLAYLIST LINK).
+[video tutorial series](https://youtube.com/playlist?list=PLF7yuSFLLabDfAgING0tK6rLZitfkkXcJ&si=KFzx-8Sb8rjMEmVg).
 
 ---
 
@@ -226,9 +226,10 @@ Performance is best on data with similar characteristics:
   Docker support is under development.
 
 ---
-
 ## Repository Structure
-DeepKymoTracker/
+
+```
+T-cell-lineages-tracking/
 │
 ├── Dockerfile                      Container definition (Linux)
 ├── DeepKymoTracker_full/           Main source code for your own data
@@ -236,10 +237,11 @@ DeepKymoTracker/
 ├── MODELS/                         Training code and data samples
 ├── User_Guide/                     PDF user guide
 └── launchers/
-├── run_deepkymotracker.sh      Linux launcher (Docker)
-├── run_deepkymotracker_mac.sh  Mac — Docker coming soon
-└── run_deepkymotracker.bat     Windows — Docker coming soon
----
+    ├── run_deepkymotracker.sh      Linux launcher (Docker)
+    ├── run_deepkymotracker_mac.sh  Mac — Docker coming soon
+    └── run_deepkymotracker.bat     Windows — Docker coming soon
+```
+
 
 ## Algorithm Overview
 
@@ -266,7 +268,7 @@ For full technical details see the
 
 Khelina Fedorchuk, PhD
 khelina.fedorchuk@gmail.com
-[LinkedIn](YOUR LINKEDIN URL)
+[LinkedIn](https://www.linkedin.com/in/khelina-fedorchuk-phd-57b761175/)
 
 Found a bug or need help? Open a GitHub Issue or email directly.
 
