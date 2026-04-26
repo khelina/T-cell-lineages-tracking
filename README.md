@@ -12,7 +12,7 @@ https://doi.org/10.1371/journal.pone.0315947
 
 - [Output demo video](https://youtu.be/9nSulQDEles)
 - [5-minute conference presentation](https://www.youtube.com/watch?v=NebOgh1q0kc)
-- [Video tutorial series](YOUR PLAYLIST LINK)
+- [Video tutorial series](https://youtube.com/playlist?list=PLF7yuSFLLabDfAgING0tK6rLZitfkkXcJ&si=KFzx-8Sb8rjMEmVg)
 - [PLOS ONE paper](https://doi.org/10.1371/journal.pone.0315947)
 - [User Guide PDF](User_Guide/YOUR_GUIDE_FILENAME.pdf)
 - [Docker Hub](https://hub.docker.com/r/khelinafedorchuk/deepkymotracker)
