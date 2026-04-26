@@ -68,7 +68,7 @@ Back/Next buttons, to avoid out-of-memory errors.
 
 For detailed instructions see the
 [User Guide PDF](User_Guide/YOUR_GUIDE_FILENAME.pdf) or the
-[video tutorial series](YOUR PLAYLIST LINK).
+[video tutorial series](https://youtube.com/playlist?list=PLF7yuSFLLabDfAgING0tK6rLZitfkkXcJ&si=KFzx-8Sb8rjMEmVg).
 
 ---
 
