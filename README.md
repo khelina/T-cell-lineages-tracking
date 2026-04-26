@@ -266,7 +266,7 @@ For full technical details see the
 
 Khelina Fedorchuk, PhD
 khelina.fedorchuk@gmail.com
-[LinkedIn](YOUR LINKEDIN URL)
+[LinkedIn](https://www.linkedin.com/in/khelina-fedorchuk-phd-57b761175/)
 
 Found a bug or need help? Open a GitHub Issue or email directly.
 
