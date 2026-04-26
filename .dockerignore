@@ -1,0 +1,6 @@
+TRAINED MODELS/
+MOVIES/
+__pycache__/
+*.pyc
+*.DS_Store
+.git/
