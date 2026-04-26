@@ -226,9 +226,10 @@ Performance is best on data with similar characteristics:
   Docker support is under development.
 
 ---
-
 ## Repository Structure
-DeepKymoTracker/
+
+```
+T-cell-lineages-tracking/
 │
 ├── Dockerfile                      Container definition (Linux)
 ├── DeepKymoTracker_full/           Main source code for your own data
@@ -236,10 +237,11 @@ DeepKymoTracker/
 ├── MODELS/                         Training code and data samples
 ├── User_Guide/                     PDF user guide
 └── launchers/
-├── run_deepkymotracker.sh      Linux launcher (Docker)
-├── run_deepkymotracker_mac.sh  Mac — Docker coming soon
-└── run_deepkymotracker.bat     Windows — Docker coming soon
----
+    ├── run_deepkymotracker.sh      Linux launcher (Docker)
+    ├── run_deepkymotracker_mac.sh  Mac — Docker coming soon
+    └── run_deepkymotracker.bat     Windows — Docker coming soon
+```
+
 
 ## Algorithm Overview
 
