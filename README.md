@@ -216,8 +216,7 @@ Performance is best on data with similar characteristics:
 - **Image quality:** Performance degrades on lower resolution or
   higher background noise images. Retraining the segmentation network
   on representative images is recommended for new microscope data.
-- **Cell density:** Currently validated on movies with up to 5 cells
-  per frame. Higher density environments are under active development.
+- **Cell density:** The tracker processes cells sequentially and has no fixed architectural limit on cell count. Testing has reached movies with up to ~25 cells per frame; this surfaced some unresolved bugs at higher densities that have not yet been fixed. Processing time increases with cell count due to the sequential design.
 - **Occlusions:** Occlusion detection is automated but occlusion
   segmentation requires manual correction in Step 4.
 - **Cell death and new cell emergence:** Currently require manual
